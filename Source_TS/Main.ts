@@ -13,7 +13,7 @@ export const getQuery = (query: string) => document.querySelector(query) as HTML
 export const reLoad = (firstLoad = false) => {
     if (firstLoad) {
         preventImageUnload(); //Must be done before prepareVacuum
-        const save = localStorage.getItem('save');
+        const save = localStorage.getItem('testing_save');
         if (save !== null) {
             const load = JSON.parse(atob(save));
             const versionCheck = updatePlayer(load);
@@ -259,7 +259,7 @@ reLoad(true); //Start everything
     });
     getId('autoSaveInterval').addEventListener('blur', () => {
         const autoSaveInput = getId('autoSaveInterval') as HTMLInputElement;
-        player.intervals.autoSave = Math.min(Math.max(Math.trunc(Number(autoSaveInput.value)), 10), 1800);
+        player.intervals.autoSave = Math.max(Math.trunc(Number(autoSaveInput.value)), 10);
         autoSaveInput.value = `${player.intervals.autoSave}`;
         changeIntervals();
     });
@@ -323,6 +323,60 @@ function changeIntervals(pause = false) {
     intervalsId.autoSave = pause ? undefined : setInterval(saveLoad, intervals.autoSave * 1000, 'save');
 }
 
+const prepareFake = () => {
+    const fake = deepClone(player);
+
+    const renameThese = [
+        'stage',
+        'discharge',
+        'vaporization',
+        'accretion',
+        'collapse',
+        'inflation',
+        'time',
+        'buildings',
+        'strange',
+        'upgrades',
+        'researches',
+        'researchesExtra',
+        'researchesAuto',
+        'ASR',
+        'elements',
+        'strangeness',
+        'milestones',
+        'challenges'
+    ];
+    const newName = [
+        't1',
+        'testing1',
+        't2',
+        't3',
+        't4',
+        't5',
+        't6',
+        't7',
+        't8',
+        't9',
+        't10',
+        't11',
+        't12',
+        't13',
+        't14',
+        't15',
+        't16',
+        't17'
+    ];
+    for (const key in fake) {
+        if (renameThese.includes(key)) {
+            const replaced = newName[renameThese.indexOf(key)];
+            fake[replaced as keyof unknown] = fake[key as keyof unknown];
+            delete fake[key as keyof unknown];
+        }
+    }
+
+    return fake;
+};
+
 async function saveLoad(type: string) {
     switch (type) {
         case 'load': {
@@ -354,8 +408,8 @@ async function saveLoad(type: string) {
             try {
                 player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
-                const save = btoa(JSON.stringify(player));
-                localStorage.setItem('save', save);
+                const save = btoa(JSON.stringify(prepareFake()));
+                localStorage.setItem('testing_save', save);
                 clearInterval(global.intervalsId.autoSave);
                 global.intervalsId.autoSave = setInterval(saveLoad, player.intervals.autoSave * 1000, 'save');
                 getId('isSaved').textContent = 'Saved';
@@ -384,7 +438,7 @@ async function saveLoad(type: string) {
                 player.strange[rewardType].total += strangeGain;
             }
 
-            const save = btoa(JSON.stringify(player));
+            const save = btoa(JSON.stringify(prepareFake()));
             const a = document.createElement('a');
             a.href = `data:text/plain;charset=utf-8,${save}`;
             a.download = replaceSaveFileSpecials();
@@ -396,7 +450,7 @@ async function saveLoad(type: string) {
             if (ok === null || ok === '') { return; }
             if (ok.toLowerCase() === 'delete') {
                 changeIntervals(true);
-                localStorage.clear();
+                localStorage.removeItem('testing_save');
                 Alert('Game will auto refresh. If not then do it manually');
                 window.location.reload();
             } else { Alert(`You wrote '${ok}', so save file wasn't deleted`); }

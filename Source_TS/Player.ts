@@ -1398,6 +1398,54 @@ Object.assign(player.toggles, { //Done separately to keep 'shop'
 export const playerStart = deepClone(player);
 
 export const updatePlayer = (load: playerType): string => {
+    const oldNames = [
+        'stage',
+        'discharge',
+        'vaporization',
+        'accretion',
+        'collapse',
+        'inflation',
+        'time',
+        'buildings',
+        'strange',
+        'upgrades',
+        'researches',
+        'researchesExtra',
+        'researchesAuto',
+        'ASR',
+        'elements',
+        'strangeness',
+        'milestones',
+        'challenges'
+    ];
+    const newNames = [
+        't1',
+        'testing1',
+        't2',
+        't3',
+        't4',
+        't5',
+        't6',
+        't7',
+        't8',
+        't9',
+        't10',
+        't11',
+        't12',
+        't13',
+        't14',
+        't15',
+        't16',
+        't17'
+    ];
+    for (const key in load) {
+        if (newNames.includes(key)) {
+            const replaced = oldNames[newNames.indexOf(key)];
+            load[replaced as keyof unknown] = load[key as keyof unknown];
+            delete load[key as keyof unknown];
+        }
+    }
+
     if (Object.hasOwn(load, 'player')) { load = load['player' as keyof unknown]; } //Old save had it
 
     for (const key in playerStart) {
