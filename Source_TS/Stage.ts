@@ -198,7 +198,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
             if (elements[5] === 1) { capGain += 0.0375 * buildings[4][1].true; }
             if (elements[10] === 1) { capGain *= 2; }
             if (elements[14] === 1) { capGain *= 1.4; }
-            capGain *= 1 + (elements[15] === 1 ? buildings[4][1].true : global.collapseInfo.trueStars);
+            capGain *= 1 + (elements[15] === 1 ? global.collapseInfo.trueStars : buildings[4][1].true);
             inflationInfo.dustCap = Limit(5e45 * (maxShift() / inflationInfo.massCap)).multiply(capGain).toArray();
 
             producing[3][1] = Limit(producing[3][1]).plus('1').toArray();
@@ -1457,7 +1457,7 @@ export const assignCollapseInformation = () => {
         if (elements[5] === 1) { massGain += 0.00015 * building[1].true; }
         if (elements[10] === 1) { massGain *= 2; }
         if (elements[14] === 1) { massGain *= 1.4; }
-        global.collapseInfo.newMass = (elements[15] === 1 ? building[1].true : global.collapseInfo.trueStars) * massGain * global.collapseInfo.starEffect[2]();
+        global.collapseInfo.newMass = (elements[15] === 1 ? global.collapseInfo.trueStars : building[1].true) * massGain * global.collapseInfo.starEffect[2]();
     } else { global.collapseInfo.newMass = Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).min(player.buildings[1][0].current).multiply('8.96499278339628e-67').toNumber(); } //1.78266192e-33 / 1.98847e33
 
     const { starCheck } = global.collapseInfo;
