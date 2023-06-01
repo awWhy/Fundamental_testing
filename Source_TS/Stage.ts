@@ -683,7 +683,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
     }
 
     if (type === 'strangeness') {
-        //player.strange[0].current = currency as number;
+        player.strange[0].current = currency as number;
     } else if (stageIndex === 1) {
         if (player.strangeness[1][11] < 1) {
             player.discharge.energy = Limit(currency).toNumber();

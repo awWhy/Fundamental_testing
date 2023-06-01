@@ -320,7 +320,7 @@ function changeIntervals(pause = false) {
     intervalsId.main = pause ? undefined : setInterval(timeUpdate, intervals.main);
     intervalsId.numbers = pause ? undefined : setInterval(numbersUpdate, intervals.numbers);
     intervalsId.visual = pause ? undefined : setInterval(visualUpdate, intervals.visual * 1000);
-    //intervalsId.autoSave = pause ? undefined : setInterval(saveLoad, intervals.autoSave * 1000, 'save');
+    intervalsId.autoSave = pause ? undefined : setInterval(saveLoad, intervals.autoSave * 1000, 'save');
 }
 
 async function saveLoad(type: string) {

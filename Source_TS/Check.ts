@@ -47,6 +47,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 3) { return player.inflation.vacuum || player.upgrades[4][2] === 1; }
         if (index === 5) { return player.strangeness[4][10] >= 1; }
     } else if (stageIndex === 5) {
+        if (player.challenges.active === 0) { return false; } //Remove when added balance
         if (player.collapse.mass < global.collapseInfo.unlockG[index]) { return false; }
         if (index === 1) { return player.inflation.vacuum || player.milestones[2][0] >= 3; }
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 3; }

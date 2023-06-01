@@ -3,7 +3,6 @@ import { checkTab } from './Check';
 import { switchTab } from './Update';
 import { buyBuilding, collapseAsyncReset, dischargeAsyncReset, rankAsyncReset, stageAsyncReset, switchStage, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { timeWarp } from './Main';
-import { Prompt } from './Special';
 
 export const detectHotkey = (check: KeyboardEvent) => {
     if (check.code === 'Tab') {
@@ -47,9 +46,6 @@ export const detectHotkey = (check: KeyboardEvent) => {
                 if (global.stageInfo.activeAll.includes(3)) { void rankAsyncReset(); }
             } else if (stringKey === 'c') {
                 if (global.stageInfo.activeAll.includes(4)) { void collapseAsyncReset(); }
-            } else {
-                check.preventDefault();
-                void (async() => (player.strange[0].current = Number(await Prompt('Number'))))()
             }
         }
         return;

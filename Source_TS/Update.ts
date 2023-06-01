@@ -98,7 +98,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
         player.stage.export = Math.min(player.stage.export + passedSeconds, maxExportTime());
         if (time.offline > 0 && (toggles.normal[0] || player.researchesAuto[0] < 3)) {
             const extraTime = Math.min(Math.max(time.offline / 3600, 1) * passedSeconds, time.offline);
-            //time.offline -= Math.min(extraTime * (6 - (player.stage.true >= 6 ? player.strangeness[2][7] : 0)), time.offline);
+            time.offline -= Math.min(extraTime * (6 - (player.stage.true >= 6 ? player.strangeness[2][7] : 0)), time.offline);
             passedSeconds += extraTime;
         }
     }
@@ -154,14 +154,20 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
             }
         }
         if (test !== player.discharge.energy) {
-            if (!alerted) { Alert(`Should be ${test}, but instead ${player.discharge.energy}`); alerted = true; }
+            if (!alerted) {
+                Alert('If you seeing this Alert, then report it on Discord, error code is 1 (also check console for numbers)');
+                alerted = true;
+            }
             console.log(test, player.discharge.energy);
         }
     }
-    { //Delete
+    {
         const check = player.buildings[4][1].true + player.buildings[4][2].true + player.buildings[4][3].true + player.buildings[4][4].true + player.buildings[4][5].true;
         if (check !== global.collapseInfo.trueStars) {
-            if (!alerted) { Alert(`Stars incorect, slould be ${check}, but instead is ${global.collapseInfo.trueStars}`); alerted = true; }
+            if (!alerted) {
+                Alert('If you seeing this Alert, then report it on Discord, error code is 2 (also check console for numbers)');
+                alerted = true;
+            }
             console.log(check, global.collapseInfo.trueStars);
         }
     }
