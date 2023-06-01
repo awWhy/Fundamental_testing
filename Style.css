@@ -1,0 +1,1242 @@
+body *, body {
+    font-family: Inter, serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+
+    /* No text color, because it's really awkwardly behind... */
+    transition: background-color var(--transition-all),
+        border-color var(--transition-all),
+        background-image var(--transition-all);
+}
+
+body {
+    color: var(--main-text-color);
+    background-color: var(--background-color);
+    font-size: var(--font-size);
+    overscroll-behavior: none;
+    overflow-anchor: none;
+
+    /* Default color variables */
+    --background-color: #030012;
+    --window-color: #12121c;
+    --window-border: cornflowerblue;
+    --footer-color: darkblue;
+    --button-main-color: mediumblue;
+    --button-main-border: darkcyan;
+    --button-main-hover: #2626ff;
+    --building-can-buy: #a90000;
+    --button-tab-border: darkcyan;
+    --button-tab-active: #8b00c5;
+    --button-extra-hover: #170089;
+    --button-delete-color: firebrick;
+    --button-delete-hover: #ce0000;
+    --input-border-color: #831aa5;
+    --input-text-color: #cf71ff;
+    --button-text-color: #e3e3e3;
+    --main-text-color: var(--cyan-text-color);
+    --white-text-color: white;
+    --cyan-text-color: #03d3d3;
+    --blue-text-color: dodgerblue;
+    --orange-text-color: darkorange;
+    --gray-text-color: #8f8f8f;
+    --orchid-text-color: #e14bdb;
+    --darkorchid-text-color: #bd24ef;
+    --darkviolet-text-color: #8635eb;
+    --red-text-color: #eb0000;
+    --green-text-color: #00e900;
+    --yellow-text-color: #fafa00;
+
+    /* These colors need to be changed in multiple places:
+        --window-color > ".stage1windowBackground";
+        --button-main-color > ".stage1backgroundButton" and "--stage-button-color", and "global.stageInfo.buttonBackgroundColor[1]";
+        --button-main-border > ".stage1borderButton" and "--stage-button-border", and "global.stageInfo.buttonBackgroundColor[1]"; */
+    --transition-all: 0s;
+    --transition-buttons: 100ms;
+    --stage-text-color: var(--cyan-text-color);
+    --stage-button-color: mediumblue;
+    --stage-button-border: darkcyan;
+    --image-border-main: url(Used_art/Stage1%20border.png);
+    --image-stage-outer: #008b8b; /* Same color as image outer border */
+    --font-size: 1rem;
+}
+
+.stageText { color: var(--stage-text-color); }
+.mainText { color: var(--main-text-color); }
+.whiteText { color: var(--white-text-color); }
+.cyanText { color: var(--cyan-text-color); }
+.blueText { color: var(--blue-text-color); }
+.orangeText { color: var(--orange-text-color); }
+.grayText { color: var(--gray-text-color); }
+.orchidText { color: var(--orchid-text-color); }
+.darkorchidText { color: var(--darkorchid-text-color); }
+.darkvioletText { color: var(--darkviolet-text-color); }
+.redText { color: var(--red-text-color); }
+.greenText { color: var(--green-text-color); }
+.yellowText { color: var(--yellow-text-color); }
+
+/* These colors are same as Image border outer layer */
+.stage0borderImage { border-color: #006400 !important; }
+.stage1borderImage { border-color: #008b8b !important; }
+.stage2borderImage { border-color: #1460a8 !important; }
+.stage3borderImage { border-color: #5b5b75 !important; }
+.stage4borderImage { border-color: #e87400 !important; }
+.stage5borderImage { border-color: #b324e2 !important; }
+.stage6borderImage { border-color: #5300c1 !important; }
+.stage7borderImage { border-color: #b21111 !important; }
+.stageAllborderImage { border-color: var(--image-stage-outer) !important; }
+
+/* These colors are shared with --button-main-border */
+.stage1borderButton { border-color: darkcyan !important; }
+.stage2borderButton { border-color: #427be1 !important; }
+.stage3borderButton { border-color: #404040 !important; }
+.stage4borderButton { border-color: #9f6700 !important; }
+.stage5borderButton { border-color: #8a0049 !important; }
+.stage6borderButton { border-color: #711bda !important; }
+
+/* These colors are shared with --button-main-color */
+.stage1backgroundButton { background-color: mediumblue !important; }
+.stage2backgroundButton { background-color: blue !important; }
+.stage3backgroundButton { background-color: #291344 !important; }
+.stage4backgroundButton { background-color: #6a3700 !important; }
+.stage5backgroundButton { background-color: #4a008f !important; }
+.stage6backgroundButton { background-color: #2b0095 !important; }
+
+/* These colors are shared with --window-color */
+.stage1windowBackground { background-color: #12121c !important; }
+.stage2windowBackground { background-color: #000052 !important; }
+.stage3windowBackground { background-color: #2e1200 !important; }
+.stage4windowBackground { background-color: #4e0000 !important; }
+.stage5windowBackground { background-color: #001d42 !important; }
+.stage6windowBackground { background-color: #01003c !important; }
+
+/* Right now it works only with keyboard tab button */
+body:not(.outlineOnFocus) button:focus-visible,
+body:not(.outlineOnFocus) input:not(input[type = "text"], input[type = "number"]):focus-visible { outline: none; }
+
+::-webkit-scrollbar {
+    width: 1.4vh;
+    height: 1.4vh;
+    background-color: var(--input-border-color);
+}
+
+::-webkit-scrollbar-track {
+    background-color: black;
+    box-shadow: inset 0 0 0.5vh var(--input-border-color);
+    border: 0.2vh solid var(--input-border-color);
+    border-radius: 0.6vh;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--input-border-color);
+    box-shadow: inset 0 0 0.2vh black;
+    border: 0.4vh solid #00000000;
+    border-radius: 0.6vh;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-button {
+    height: min(1.4vh, 9%);
+    width: min(1.4vh, 9%);
+}
+
+::-webkit-scrollbar-corner { background-color: var(--input-border-color); }
+::-webkit-resizer { background-image: url(Used_art/Elsewhere/resize-area.svg); }
+
+input[type = "image"],
+img {
+    background-color: var(--background-color);
+    object-fit: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 2px;
+    /* box-sizing: content-box; */ /* If need to change padding */
+    image-rendering: pixelated;
+
+    /* For alt text */
+    color: white;
+    font-size: 0.66em;
+}
+
+ul, ol { padding-left: 1.6em; }
+
+.statFoot img,
+#strangenessResearch input[type = "image"],
+.researchSection input[type = "image"] {
+    border-radius: 3px;
+    z-index: 2;
+}
+
+.interactiveImage { cursor: pointer; }
+
+.stageBorderImage {
+    background-image: var(--image-border-main);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.reader { /* For screen readers */
+    position: absolute;
+    clip-path: circle(0);
+    pointer-events: none;
+}
+
+.noMoveSpan {
+    display: inline-block;
+    text-align: center;
+    width: 2.4em;
+}
+
+a { color: red; }
+.center { text-align: center; }
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    cursor: default;
+}
+
+#loading > p { padding: 0.6em 2vw; }
+
+#loading, #blocker, #versionInfo {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#blocker, #versionInfo {
+    z-index: 10;
+    background-color: #00000050;
+}
+
+#alertPopUp {
+    display: flex;
+    flex-direction: column;
+    width: clamp(24vw, 23.8em, 80vw);
+    height: clamp(18vh, 20em, 90vh);
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+    border-radius: 10px;
+    white-space: pre-line;
+    padding: 0.7em 0.8em 0.9em;
+    row-gap: 0.7em;
+}
+
+#alertText { overflow: clip auto; }
+
+#alertPopUp > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: auto;
+    gap: 0.8em 10%;
+}
+
+#alertPopUp button {
+    width: 7em;
+    border-radius: 7px;
+}
+
+#inputArea {
+    width: 100%;
+    margin: 0 1em;
+    padding: 0.26em;
+    background-color: black;
+}
+
+#notifications {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    max-height: 33vh;
+    overflow: hidden;
+    right: 0;
+    top: 1vh;
+    z-index: 10;
+}
+
+#notifications > p {
+    color: var(--white-text-color);
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+    border-left-width: 1px;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    padding: 0.2em 0.4em;
+    text-align: center;
+    white-space: pre-line;
+    width: 33vw;
+}
+
+#notifications > p:not(:first-of-type) { margin-top: -1px; }
+
+button, input { appearance: none; }
+
+#load, button {
+    height: 2.08em;
+    cursor: pointer;
+    transition: border-color var(--transition-buttons), background-color var(--transition-buttons);
+    background-color: var(--button-main-color);
+    border: 2px solid var(--button-main-border);
+    color: var(--button-text-color);
+    font-size: 0.84em;
+    padding: 0;
+}
+
+.bigButton {
+    width: 10.8em;
+    height: 2.2em;
+    font-size: 1.05em;
+}
+
+.mediumButton {
+    width: 15.3em;
+    height: 2.2em;
+    font-size: 0.86em;
+}
+
+.miniButton {
+    width: 1.5em;
+    height: 1.63em;
+}
+
+.toggle, .toggleBuilding, .toggleAuto, .specialToggle {
+    color: var(--green-text-color);
+    border-color: forestgreen;
+    background-color: var(--background-color);
+    width: 2.8em;
+    height: 1.63em;
+}
+
+.toggleBuilding {
+    width: 5.8em;
+    height: 1.95em;
+}
+
+.toggleAuto {
+    width: 5.4em;
+    height: 1.75em;
+}
+
+.extraHover { background-color: var(--background-color); }
+
+/* I could add :hover:not(:active), to make it visible that you are clicking, but that or other 10+ animations looked really awkward... */
+.footerArea button:hover { background-color: #181818; }
+button:hover, #load:hover { background-color: var(--button-main-hover); }
+#delete:hover { background-color: var(--button-delete-hover); }
+.toggle:hover, .toggleBuilding:hover, .toggleAuto:hover,
+.specialToggle:hover, .interactiveImage:hover, .extraHover:hover { background-color: var(--button-extra-hover); }
+
+input[type = "number"] {
+    width: 5.4em;
+    height: 1.85em;
+    appearance: textfield;
+    text-align: center;
+}
+
+input[type = "number"]::-webkit-inner-spin-button, input[type = "number"]::-webkit-outer-spin-button { appearance: none; }
+input:invalid { border-color: crimson; }
+
+input[type = "number"], input[type = "text"] {
+    border: 2px solid var(--input-border-color);
+    border-radius: 2px;
+    color: var(--input-text-color);
+    background-color: var(--background-color);
+    font-size: 0.84em;
+    padding: 0.1em 0.2em;
+}
+
+input:-webkit-autofill { /* You can't find worse pain that this */
+    -webkit-box-shadow: inset 0 0 0 20px var(--background-color);
+    -webkit-text-fill-color: var(--input-text-color);
+}
+
+.insideTab {
+    margin-top: min(2vh, 1.2em);
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    margin-bottom: 6em;
+    gap: 1.6em;
+}
+
+#resets {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: min-content;
+    gap: 1.2em;
+}
+
+#resets > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 18em;
+    padding: 0.95em 1.05em 1.05em;
+    row-gap: 1.05em;
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+}
+
+#resets > div .mediumButton { margin-top: 0.4em; }
+
+p > img {
+    float: left;
+    margin-right: 0.4em;
+    margin-top: 0.35em;
+}
+
+.bigWord { font-size: 1.1em; }
+.biggerWord { font-size: 1.2em; }
+
+#buildings {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.44em;
+}
+
+.buyBuilding {
+    display: flex;
+    align-items: center;
+    column-gap: 0.6em;
+}
+
+.buyBuilding > div:first-of-type {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.3em;
+}
+
+.buyBuilding > div:last-of-type {
+    display: grid;
+    grid-template-areas: "buy button toggle";
+    align-items: center;
+}
+
+.buyBuilding p { color: inherit; }
+.buyBuilding > div > p:first-of-type { width: 19.8em; }
+.buyBuilding > div > p:last-of-type { width: 10.7em; }
+.buyBuilding > div > p:last-of-type > span:last-of-type { margin-left: 0.12em; }
+
+.buyBuilding > div > div {
+    grid-area: buy;
+    display: flex;
+    align-items: center;
+}
+
+.buyBuilding > div > div > p {
+    width: 6em;
+    font-size: 0.92em;
+    text-align: end;
+}
+
+.buyBuilding > div > div > div {
+    width: 1em;
+    height: 1.4em;
+    clip-path: polygon(100% 100%, 90% 100%, 90% 75%, 0% 50%, 90% 25%, 60% 50%, 90% 75%, 90% 0%, 100% 0%);
+    background-color: var(--button-main-border);
+    margin: 0 0.3em;
+}
+
+.buyBuilding button:first-of-type {
+    grid-area: button;
+    width: 16em;
+}
+
+.buyBuilding .toggleBuilding {
+    grid-area: toggle;
+    margin-left: 0.4em;
+}
+
+.availableBuilding button:first-of-type { border-color: var(--building-can-buy); }
+.availableBuilding > div > div > div { background-color: var(--building-can-buy); }
+
+#toggleBuy {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    column-gap: 0.3em;
+}
+
+#toggleBuy > img { height: 22px; }
+#buyAnyInput { margin: 0 0.3em; }
+
+#buyStrict {
+    border-color: forestgreen;
+    color: var(--green-text-color);
+    background-color: var(--background-color);
+    padding: 0 0.5em;
+    height: 1.92em;
+    font-size: 0.85em;
+}
+
+#buyStrict:hover { background-color: var(--button-extra-hover); }
+
+#starsSpecial {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: space-around;
+}
+
+.specialStar {
+    display: flex;
+    align-items: center;
+    column-gap: 0.6em;
+}
+
+.specialStar p {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.3em;
+    font-size: 0.92em;
+}
+
+#upgrades {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    row-gap: 0.5em;
+}
+
+#upgrades > div:first-of-type {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3em;
+}
+
+#upgrades > h3 { margin-bottom: 0.05em; }
+
+#offlineBoost {
+    text-align: center;
+    width: 100%;
+}
+
+#challengesMain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 0.6em;
+}
+
+#challengesMain input[type = "image"] {
+    width: 48px;
+    height: 48px;
+    border-radius: 0;
+}
+
+#challengesMain > div:first-of-type {
+    display: flex;
+    gap: 0.44em;
+}
+
+#challengesMain input[type = "image"]:hover { background-color: var(--button-extra-hover); }
+
+#challengeMultiline { text-align: center; }
+#challengeMultiline p { white-space: pre-line; }
+#challengeMultiline > div { margin-top: 1.2em; }
+
+#universeInfo {
+    text-align: center;
+    width: 100%;
+}
+
+.researchSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.researchSection > div {
+    display: flex;
+    flex-wrap: wrap;
+    border: 2px solid var(--image-stage-outer);
+    border-left-width: 1px;
+    border-radius: 4px;
+    padding: 0.25em;
+    margin-left: -1px;
+    gap: 0.5em;
+    background-color: var(--window-color);
+}
+
+.researchSection > div > div > p {
+    border: 2px solid;
+    border-color: inherit;
+    border-left: none;
+    line-height: 28px;
+    text-align: center;
+    padding: 0 0.25em 0 calc(0.25em + 2px);
+    background-color: var(--background-color);
+    margin-left: -2px;
+}
+
+.researchSection > div > div { display: flex; }
+#researchTab .descriptionText { margin-top: -0.5em; }
+
+.descriptionText {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    row-gap: 0.3em;
+    white-space: pre-line;
+}
+
+.descriptionText > h3,
+.descriptionText > p { max-width: 80%; }
+
+#elementsGrid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(18, 1fr);
+    gap: 0.25em;
+    padding: 0.4em;
+    border: 2px solid darkgreen;
+    background-color: var(--window-color);
+}
+
+#elementsGrid[class = "Elements10App"] { grid-template-columns: repeat(8, 1fr); }
+
+#elementsGrid > .interactiveImage {
+    width: 38px;
+    height: 38px;
+    border-radius: 0;
+}
+
+#element2 { grid-column: 18; }
+.Elements10App #element2 { grid-column: 8; }
+#elementsGrid:not([class = "Elements10App"]) #element5, #element13 { grid-column: 13; }
+
+#element0 {
+    position: absolute;
+    top: 0.65em;
+    right: calc(-38px - 0.65em);
+    opacity: 0;
+    cursor: help;
+    transition: opacity 1s 3s;
+}
+
+#element0:hover { opacity: 100; }
+
+.strangeWelcome { width: 100%; }
+.strangeWelcome > p { margin-top: 0.3em; }
+
+#strangeStructures {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 0.6em;
+}
+
+#strangeStructures > div {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    row-gap: 0.2em;
+}
+
+#strangeStructures > div > div { display: flex; }
+#strangeStructures > div > div > img { border-radius: 0; }
+
+#strangeStructures > div > div > p {
+    border: 2px solid #006400;
+    border-left: none;
+    line-height: 28px;
+    padding: 0 0.25em;
+    background-color: black;
+    width: 6em;
+}
+
+#strangenessResearch {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid darkgreen;
+    border-radius: 4px;
+    background-color: var(--window-color);
+    padding: 0.5em 0.25em;
+    margin-top: -0.5em;
+    margin-bottom: -0.2em;
+}
+
+#strangenessResearch > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-bottom: 2px solid;
+    width: 100%;
+    padding: 0.5em;
+    gap: 0.5em;
+}
+
+#strangenessResearch > div > div {
+    display: flex;
+    align-items: center;
+}
+
+#strangenessResearch > div > div > p {
+    border: 2px solid;
+    border-left: none;
+    line-height: 28px;
+    text-align: center;
+    padding: 0 0.25em 0 calc(2px + 0.25em);
+    background-color: var(--background-color);
+    margin-left: -2px;
+}
+
+#milestones {
+    display: flex;
+    flex-wrap: wrap;
+    border-right: 3px solid darkgreen;
+    border-left: 3px solid darkgreen;
+    padding: 0.5em 0;
+    row-gap: 0.5em;
+}
+
+#milestones > div {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid;
+    border-top: 2px solid;
+    padding: 0.5em 0.4em;
+    flex-grow: 1;
+}
+
+#milestones > div > img {
+    cursor: help;
+    border-radius: 3px;
+}
+
+#resetToggles > h3 { text-align: center; }
+
+#resetToggles > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    height: min-content;
+    margin-top: 0.4em;
+    gap: 0.6em;
+}
+
+#resetToggles > div > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 0.3em;
+}
+
+#resetToggles .miniButton { background-color: var(--background-color); }
+#resetToggles .miniButton:hover { background-color: var(--button-extra-hover); }
+
+#resetToggles .toggleAuto {
+    width: 5.1275em;
+    height: 1.85em;
+    font-size: 0.77em;
+    margin-top: 0.1em;
+}
+
+#toggleAuto0Mark { border-color: var(--stage-button-border); }
+
+#logoLinks {
+    display: flex;
+    align-items: end;
+    column-gap: 0.6em;
+}
+
+#logoLinks > button {
+    height: unset;
+    font-size: unset;
+    transition: background-color var(--transition-all),
+        border-color var(--transition-all),
+        background-image var(--transition-all);
+}
+
+#logoLinks > button,
+#logoLinks > a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 0.18em;
+    border: 2px solid var(--button-main-border);
+    border-radius: 10px;
+    background-color: var(--window-color);
+    padding: 0.4em 0.3em 0.2em;
+    color: var(--main-text-color);
+    text-decoration: none;
+}
+
+#logoLinks img {
+    background-color: inherit;
+    object-fit: scale-down;
+    height: 25px;
+    width: unset;
+}
+
+.saveButtonGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    row-gap: 0.3em;
+}
+
+.saveButtonGroup > div {
+    display: flex;
+    flex-direction: column;
+    width: min-content;
+    row-gap: 0.2em;
+}
+
+.saveButtonGroup > div > div {
+    display: flex;
+    column-gap: 0.2em;
+}
+
+.saveButtonGroup button, #load { font-size: 1em; }
+
+#save, #load {
+    width: 5.65em;
+    height: 2em;
+}
+
+#load {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#export {
+    height: 2.1em;
+    font-size: 1.2em;
+}
+
+#delete {
+    background-color: var(--button-delete-color);
+    height: 1.74em;
+    font-size: 0.9em;
+}
+
+.options > ul {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.2em;
+    margin-left: -1em;
+}
+
+.options li {
+    font-size: 0.92em;
+    line-height: 1.63em;
+    list-style-type: ">  ";
+}
+
+li > input[type = "number"] {
+    height: 1.7em;
+    width: 3.15em;
+}
+
+.options button.extraHover,
+.options .windowPopUp > button {
+    height: 1.77em;
+    padding: 0 0.45em;
+}
+
+li button {
+    font-size: 0.92em;
+    margin-left: 0.4em;
+}
+
+.windowPopUp { display: inline-block; }
+
+.windowPopUp > div {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 50%;
+    transform: translateX(50%);
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+    width: min(23em, 80vw);
+    padding: 0.6em 0.7em 0.7em;
+    margin-top: 0.38em;
+    row-gap: 0.3em;
+    line-height: 1.26em;
+}
+
+.windowPopUp > div > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3em;
+}
+
+.windowPopUp > .focusButton:hover ~ div, .windowPopUp > div:hover,
+.windowPopUp:focus-within > div { display: flex; }
+.windowPopUp > button { margin-left: 0.4em; }
+
+.miniInput {
+    width: 1.3em;
+    height: 1.6em;
+    text-align: center;
+}
+
+#saveFileNameInput {
+    width: 17.2em;
+    font-size: 0.88em;
+}
+
+#allStructuresHotkey { grid-column: 1 / 3; }
+
+#noMovement,
+#pauseGame {
+    cursor: pointer;
+    width: max-content;
+}
+
+.options > div:not(:first-of-type) { margin-top: 1.2em; }
+
+#autoTogglesUpgrades {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 0.45em;
+}
+
+#autoTogglesUpgrades > div {
+    display: flex;
+    align-items: center;
+    column-gap: 0.4em;
+}
+
+#autoTogglesUpgrades label { font-size: 0.92em; }
+#autoTogglesUpgrades button { font-size: 0.8em; }
+
+#autoTogglesUpgrades button.toggle {
+    width: 2.9em;
+    height: 1.68em;
+}
+
+#autoTogglesUpgrades button.extraHover { height: 1.82em; }
+
+#themeArea > h3 {
+    text-align: center;
+    margin-bottom: 0.3em;
+}
+
+#themeArea > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#themeArea > div > div {
+    position: absolute;
+    display: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 25em;
+    gap: 0.25em;
+}
+
+#themeArea button { width: 7em; }
+#themeArea > div:focus-within > div { display: flex; }
+#themeArea > div:focus-within > button { clip-path: circle(0); }
+
+#switchTheme0 {
+    background-color: var(--stage-button-color);
+    border-color: var(--stage-button-border);
+}
+
+#historyMainDiv > div { text-align: center; }
+
+#historyMainDiv > div > ol {
+    list-style-type: none;
+    overflow-y: overlay;
+    margin: 0.5em 0;
+    padding: 0;
+    height: 3.82em;
+    max-height: 70vh;
+    resize: vertical;
+}
+
+#historyMainDiv > div > p > input {
+    height: 1.7em;
+    width: 2.6em;
+}
+
+#stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    row-gap: 0.4em;
+}
+
+.statsWindows {
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+    gap: 0.5em 1em;
+}
+
+.statsWindows > div {
+    min-width: 6.3em;
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+    border-radius: 0.5em;
+    margin-top: 0.4em;
+    padding: 0.4em 0.6em 0.5em;
+}
+
+.statsWindows > div > div > p { margin-bottom: 0.08em; }
+
+#strangeAllStats > div { border-color: darkgreen; }
+
+.imageList {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45em;
+    margin-top: 0.1em;
+}
+
+#footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    z-index: 8;
+}
+
+#footerColor {
+    background-color: var(--footer-color);
+    padding: min(1.3vh, 0.8em) 2vw;
+    overflow-x: overlay;
+}
+
+.footerArea > nav > button {
+    border-radius: 10px;
+    border-color: var(--button-tab-border);
+    padding: 0 0.7em;
+    min-width: 5em;
+    height: 2em;
+    font-size: 1.01em;
+    background-color: black;
+}
+
+.tabActive { border-color: var(--button-tab-active) !important; }
+/* #ElementsTabBtn.tabActive { border-color: #9f6700 !important; } */
+#strangenessTabBtn.tabActive { border-color: #00b100 !important; }
+
+.footerArea, .footerArea > nav, #subtabs {
+    display: flex;
+    column-gap: 1em;
+}
+
+#footerStats, #subtabs { justify-content: center; }
+.footerArea > nav { margin: 0 auto; }
+#subtabs { flex-direction: row; }
+
+#footerColor > div:not(:last-of-type) { margin-bottom: min(1.3vh, 0.8em); }
+
+.statFoot > p {
+    line-height: 28px;
+    text-align: center;
+    border: 2px solid;
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    background-color: black;
+    margin-left: -2px;
+    padding-left: calc(2px + 0.5em);
+    padding-right: 0.25em;
+    white-space: nowrap;
+    z-index: 1; /* Text color issue */
+}
+
+.statFoot > p > span:last-of-type {
+    display: inline-block;
+    width: 5.2em;
+}
+
+#footer img { background-color: black; }
+.statFoot { display: flex; }
+
+#footer > div:first-child {
+    display: flex;
+    align-items: end;
+    height: 0; /* To click behind it (pointer-events won't work here) */
+}
+
+#subtabs {
+    display: flex;
+    flex-direction: row;
+    margin-left: 3.5%;
+    margin-bottom: min(0.6vh, 0.8em);
+    gap: min(0.3vh, 0.4em) min(0.6vh, 0.8em);
+}
+
+#subtabs button {
+    min-width: 5.5em;
+    background-color: var(--background-color);
+    border-radius: 2px;
+    padding: 0 0.6em;
+}
+
+#stageSelect {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    margin-bottom: min(0.6vh, 0.8em);
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+}
+
+#stageSelect button {
+    background-color: var(--background-color);
+    border-radius: 10px;
+    padding: 0 0.45em;
+    font-size: 0.92em;
+    pointer-events: auto;
+}
+
+#stageSelect > div {
+    display: none;
+    position: absolute;
+    flex-direction: row;
+    gap: min(0.5vh, 0.4em);
+}
+
+#currentSwitch { border-color: var(--stage-button-border); }
+#subtabs button:hover, #stageSelect button:hover { background-color: var(--button-extra-hover); }
+#stageSelect.active > #currentSwitch { clip-path: circle(0); }
+#stageSelect.active > div { display: flex; }
+
+#hideToggle {
+    margin-left: auto;
+    margin-right: 2.5%;
+    height: min-content;
+    width: min-content;
+    display: flex;
+    align-items: center;
+    column-gap: 0.25em;
+    background-color: var(--footer-color);
+    border: min(0.5vh, 0.3em) solid var(--footer-color);
+    border-right-width: min(3vw, 0.6em);
+    border-left-width: min(3vw, 0.6em);
+    border-bottom: none;
+    border-radius: 15px 15px 0 0;
+    cursor: pointer;
+}
+
+#hideArrow {
+    background-color: var(--main-text-color);
+    width: 0.8em;
+    height: 0.8em;
+    clip-path: polygon(0 0, 50% 100%, 100% 0, 50% 25%);
+}
+
+@keyframes hideX {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+@keyframes hideY {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0); }
+    to { transform: rotate(180deg); }
+}
+
+/* Biggest pain: Only Firefox supports it, all other browsers only pretend they do */
+@supports (justify-content: safe center) { /* Useless check ^ */
+    #footerStats { justify-content: safe center; }
+}
+
+/* Firefox related pain */
+@supports not (overflow-y: overlay) {
+    #historyMainDiv > div > ol {
+        scrollbar-gutter: stable;
+        overflow-y: auto;
+    }
+    /* scrollbar-gutter, doesn't work for horizontal scrolls... */
+    #footerColor { overflow-x: auto; }
+}
+@supports not selector(::-webkit-scrollbar) {
+    /* There is no way to make themed color with main (html) scrollbar, custom variables are ignored */
+    html { scrollbar-color: gray black; }
+    body { scrollbar-color: var(--input-border-color) black; }
+}
+
+@media screen and (max-width: 55em) {
+    #notifications > p { width: 95vw; }
+
+    .insideTab {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2em;
+        margin-top: min(1vh, 0.6em);
+    }
+
+    #buildings { row-gap: 0.2em; }
+    .buyBuilding, .specialStar { column-gap: 0.45em; }
+    .buyBuilding > div:first-of-type, .specialStar p { flex-direction: column; }
+    .buyBuilding > div > p:first-of-type { width: 14.2em; }
+    .buyBuilding > div > p:first-of-type > span:last-of-type { display: block; }
+    .buyBuilding > div > p:last-of-type > span:last-of-type { margin-left: 0; }
+    .buyBuilding > div > p > span.noMoveSpan { text-align: start; }
+
+    .buyBuilding > div:last-of-type {
+        row-gap: 0.16em;
+        margin-left: -0.45em;
+        grid-template-areas: "button button" "buy toggle";
+    }
+
+    .buyBuilding > div > div > p {
+        line-height: calc(1.78em - 4px);
+        text-align: center;
+        border: 2px solid var(--button-main-border);
+        border-radius: 3px;
+        margin-right: 0;
+    }
+
+    .buyBuilding .toggleBuilding { margin-left: auto; }
+    .buyBuilding > div > div > div { display: none; }
+    .availableBuilding > div > div > p { border-color: var(--building-can-buy); }
+
+    #starsSpecial { max-width: 30em; }
+
+    #researchTab .descriptionText { margin-top: -0.25em; }
+
+    #elementsGrid {
+        gap: 0.15em;
+        padding: 0.25em;
+    }
+
+    #elementsGrid > .interactiveImage {
+        width: 32px;
+        height: 32px;
+        object-fit: scale-down;
+    }
+
+    #element0 { display: none; }
+
+    #strangenessResearch {
+        margin-top: -0.2em;
+        margin-bottom: 0;
+    }
+
+    #themeArea > div > div { width: 80vw; }
+
+    #stageSelect > div { flex-direction: column; }
+    #subtabs { flex-direction: column-reverse; }
+}
