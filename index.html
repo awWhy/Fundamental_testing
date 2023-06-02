@@ -720,27 +720,24 @@
                                         <p class="whiteText center">Any of these can be added for extra information of a save file</p>
                                         <p class="stageText">[true] - <span class="whiteText">for current true Stage</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current active Stage</span></p>
+                                        <p class="greenText stage5Unlock">[strange] - <span class="whiteText">for current Strange reward</span></p>
+                                        <p class="darkvioletText stage6Unlock">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
                                         <p class="cyanText">[date] - <span class="whiteText">for current day, month, year</span></p>
                                         <p class="cyanText">[time] - <span class="whiteText">for current hour, minute, second</span></p>
                                         <p class="redText bigWord center">Case sentitive</p>
                                     </div>
                                 </div>
                             </li>
-                            <li><label for="toggle6">Language type hotkeys (English only)</label><button id="toggle6" class="toggle">ON</button><!--
+                            <li><label for="toggle6" title="Turn OFF, if using non QWERTY layout keyboard">Any language hotkeys</label><button id="toggle6" class="toggle">ON</button><!--
                                 --><div class="windowPopUp">
                                     <button class="focusButton extraHover" aria-label="Check hotkey list">Hotkeys</button>
                                     <div>
-                                        <p class="mainText">Arrow left and Arrow right: (None/Shift)</p>
-                                        <div class="center">
-                                            <p class="whiteText">Change tab</p>
-                                            <p class="whiteText stage5Unlock">Change Active Stage</p>
-                                        </div>
-                                        <p class="mainText">Arrow down and Arrow up - <span class="whiteText">change subtab</span></p>
+                                        <p class="mainText">Arrows left and right - <span class="whiteText">change tab</span></p>
+                                        <p class="mainText">Arrows up and down - <span class="whiteText">change subtab</span></p>
                                         <p class="mainText">Numbers - <span class="whiteText">make a new Structure</span></p>
                                         <p class="mainText">Enter - <span class="whiteText">confirm close Alert</span></p>
                                         <p class="mainText">Escape - <span class="whiteText">cancel close Alert</span></p>
-                                        <div class="center">
-                                            <p id="allStructuresHotkey" class="redText">A - <span class="whiteText">Toggle all auto Structures</span></p>
+                                        <div class="hotkeysGrid">
                                             <p class="darkvioletText">W - <span class="whiteText">Warp</span></p>
                                             <p id="offlineHotkey" class="blueText">O - <span class="whiteText">Toggle Offline</span></p>
                                             <p id="stageSwitchHotkey" class="stageText stage1Unlock">S - <span class="whiteText">Stage</span></p>
@@ -749,19 +746,25 @@
                                             <p class="darkorchidText stage3Include">R - <span class="whiteText">Rank</span></p>
                                             <p class="orchidText stage4Include">C - <span class="whiteText">Collapse</span></p>
                                         </div>
+                                        <p class="center bigWord mainText">When holding Shift:</p>
+                                        <p class="mainText stage5Unlock">Arrows left and right - <span class="whiteText">change Active Stage</span></p>
+                                        <p class="mainText">Numbers - <span class="whiteText">toggle auto Structure</span></p>
+                                        <div class="hotkeysGrid">
+                                            <p id="allStructuresHotkey" class="redText">A - <span class="whiteText">Toggle all auto Structures</span></p>
+                                        </div>
                                     </div>
                                 </div>
                             </li>
-                            <li><label for="mainInterval">Recalculation and auto speed interval</label> <input type="number" id="mainInterval" min="20" max="100" value="50"> ms</li>
-                            <li><label for="numbersInterval">Visual numbers update interval</label> <input type="number" id="numbersInterval" min="50" max="200" value="100"> ms</li>
-                            <li><label for="visualInterval">Visual game update interval</label> <input type="number" id="visualInterval" min="0.2" max="4" value="1" step="0.1"> s</li>
+                            <li title="Set as low as device can handle"><label for="mainInterval">Automatization speed interval</label> <input type="number" id="mainInterval" min="20" max="100" value="50"> ms</li>
+                            <li title="Visual effect only"><label for="numbersInterval">Numbers update interval</label> <input type="number" id="numbersInterval" min="50" max="200" value="100"> ms</li>
+                            <li title="Most of times unlocking new content will already force visual update"><label for="visualInterval">Visual update interval</label> <input type="number" id="visualInterval" min="0.2" max="4" value="1" step="0.1"> s</li>
                             <li><label for="autoSaveInterval">Game autosave interval</label> <input type="number" id="autoSaveInterval" min="10" max="1800" value="60"> s</li>
                             <li>Format type: <label for="thousandSeparator">separator</label> <input type="text" id="thousandSeparator" class="miniInput" value="" maxlength="1">, <label for="decimalPoint">point</label> <input type="text" id="decimalPoint" class="miniInput" value="." maxlength="1"></li>
                             <li aria-hidden="true"><label for="mobileDeviceToggle">Mobile device support</label><button id="mobileDeviceToggle" class="specialToggle" tabindex="-1">OFF</button></li>
                             <li><label for="screenReaderToggle">Screen reader support</label><button id="screenReaderToggle" class="specialToggle">OFF</button></li>
-                            <li aria-hidden="true"><label for="customFontSize">Custom font size (art won't scale)</label>: <input type="number" id="customFontSize" min="10" max="32" step="0.1" value="16" tabindex="-1"> px<button id="fontSizeToggle" class="specialToggle" tabindex="-1">ON</button></li>
-                            <li id="elementsAsSubtab"><label for="toggle7">Elements as subtab (requires reload)</label><button id="toggle7" class="toggle">ON</button></li>
+                            <li id="elementsAsSubtab" title="Requires page reload"><label for="toggle7">Elements as subtab</label><button id="toggle7" class="toggle">ON</button></li>
                             <li><span id="pauseGame" aria-hidden="true">Pause game</span><button id="reviewEvents" class="extraHover" aria-label="Replay event">Events</button></li>
+                            <li aria-hidden="true" title="Default: 16px. Art wont scale"><label for="customFontSize">Font size</label>: <input type="number" id="customFontSize" min="10" max="32" step="0.1" value="16" tabindex="-1"> px</li>
                         </ul>
                     </div>
                     <div class="options">
