@@ -49,6 +49,7 @@ export interface playerType {
         updated: number
         started: number
         offline: number
+        disabled: number
     }
     buildings: Array<[
         {

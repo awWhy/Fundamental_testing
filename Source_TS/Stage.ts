@@ -83,7 +83,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
             if (Limit(producing[1][1]).moreOrEqual(inflationInfo.preonCap)) { producing[1][1] = inflationInfo.preonCap; }
         }
     }
-    const dischargeBoost = (researchesExtra[1][4] >= 1 ? (researchesExtraInfo[1].effect[4] as number) ** (player.discharge.current + dischargeInfo.bonus) : 1) * 1.05 ** strangeness[1][10];
+    const dischargeBoost = (researchesExtra[1][4] >= 1 ? (researchesExtraInfo[1].effect[4] as number) ** (player.discharge.current + dischargeInfo.bonus) : 1) * (1.05 ** strangeness[1][10]);
 
     if (activeAll.includes(2)) {
         let current5 = buildings[2][5].true;
@@ -258,13 +258,13 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
 
         const listForMult2 = [buildings[5][2].current, producing[5][3]];
         let prod2Number = 1.5 * (3 ** researches[5][1]);
-        upgradesInfo[5].effect[1] = 6 * (4 ** strangeness[5][4]);
+        upgradesInfo[5].effect[1] = 6 * ((vacuum ? 2 : 4) ** strangeness[5][4]);
         if (upgrades[5][1] === 1) { prod2Number *= upgradesInfo[5].effect[1]; }
         producing[5][2] = Limit(prod2Number).multiply(...listForMult2).toArray();
 
         const listForMult1 = [buildings[5][1].current, producing[5][3]];
         let prod1Number = 4 ** researches[5][0];
-        upgradesInfo[5].effect[0] = 4 * (3 ** strangeness[5][3]);
+        upgradesInfo[5].effect[0] = 4 * ((vacuum ? 1.5 : 3) ** strangeness[5][3]);
         if (upgrades[5][0] === 1) { prod1Number *= upgradesInfo[5].effect[0]; }
         producing[5][1] = Limit(prod1Number).multiply(...listForMult1).toArray();
 

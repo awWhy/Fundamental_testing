@@ -88,10 +88,12 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
     } else {
         const { time } = player;
 
-        passedSeconds = (Date.now() - time.updated) / 1000;
-        time.updated = Date.now();
+        const currentTime = Date.now();
+        passedSeconds = (currentTime - time.updated) / 1000;
+        time.updated = currentTime;
         if (passedSeconds < 0) {
             time.offline += passedSeconds;
+            if (time.offline < -28800) { time.disabled = currentTime - (28800 + time.offline) * 1000; }
             return;
         }
         global.lastSave += passedSeconds;

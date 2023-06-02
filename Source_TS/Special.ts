@@ -652,7 +652,7 @@ export const hideFooter = () => {
 };
 
 export const mobileDeviceSupport = (change = false) => {
-    let enabled = Boolean(localStorage.getItem('mobile device'));
+    let enabled = localStorage.getItem('support') === 'MD';
     const toggle = getId('mobileDeviceToggle');
 
     if (change) { enabled = !enabled; }
@@ -661,20 +661,20 @@ export const mobileDeviceSupport = (change = false) => {
         toggle.textContent = 'ON';
         toggle.style.color = 'var(--red-text-color)';
         toggle.style.borderColor = 'crimson';
-        localStorage.setItem('mobile device', 'true');
+        localStorage.setItem('support', 'MD');
         global.mobileDevice = true;
         if (change) { Alert('To enable touchStart events (as example: touching an upgrade to view description), will need to refresh'); }
     } else {
         toggle.textContent = 'OFF';
         toggle.style.color = '';
         toggle.style.borderColor = '';
-        localStorage.removeItem('mobile device');
+        localStorage.removeItem('support');
         global.mobileDevice = false;
     }
 };
 
 export const screenReaderSupport = (change = false) => {
-    let enabled = Boolean(localStorage.getItem('screen reader'));
+    let enabled = localStorage.getItem('support') === 'SR';
     const toggle = getId('screenReaderToggle');
 
     if (change) { enabled = !enabled; }
@@ -683,7 +683,7 @@ export const screenReaderSupport = (change = false) => {
         toggle.textContent = 'ON';
         toggle.style.color = 'var(--red-text-color)';
         toggle.style.borderColor = 'crimson';
-        localStorage.setItem('screen reader', 'true');
+        localStorage.setItem('support', 'SR');
         global.screenReader = true;
         if (change) { Alert("To enable focus events (as example: view description of an upgrade by pressing 'tab'), will need to refresh.\nDue to no confirmation that anyone is playing this with Screen reader, support is limited"); }
         if (global.mobileDevice) { mobileDeviceSupport(); }
@@ -691,37 +691,25 @@ export const screenReaderSupport = (change = false) => {
         toggle.textContent = 'OFF';
         toggle.style.color = '';
         toggle.style.borderColor = '';
-        localStorage.removeItem('screen reader');
+        localStorage.removeItem('support');
         global.screenReader = false;
     }
 };
 
-export const changeFontSize = (change = false, inputChange = false) => {
-    const toggle = getId('fontSizeToggle');
-    let enabled = Boolean(localStorage.getItem('fontSize'));
+export const changeFontSize = () => {
+    const input = getId('customFontSize') as HTMLInputElement;
+    let size = Number(localStorage.getItem('fontSize'));
+    if (size === 0) { size = 16; }
 
-    if (change) { enabled = !enabled; }
-
-    if (!enabled) {
+    if (size === 16) {
         document.body.style.removeProperty('--font-size');
         localStorage.removeItem('fontSize');
-        toggle.textContent = 'OFF';
-        toggle.style.color = 'var(--red-text-color)';
-        toggle.style.borderColor = 'crimson';
     } else {
-        const input = getId('customFontSize') as HTMLInputElement;
-        let size = Number(localStorage.getItem('fontSize'));
-        if (size < 10 || size > 32 || inputChange) {
-            size = Math.min(Math.max(Math.floor(Number(input.value) * 10) / 10, 10), 32);
-        }
-
+        size = Math.floor(Math.min(Math.max(Number(input.value), 10), 32) * 10) / 10;
         document.body.style.setProperty('--font-size', `${size}px`);
         localStorage.setItem('fontSize', `${size}`);
-        toggle.textContent = 'ON';
-        toggle.style.color = '';
-        toggle.style.borderColor = '';
-        input.value = `${size}`;
     }
+    input.value = `${size}`;
 };
 
 export const changeFormat = (point: boolean) => {

@@ -27,15 +27,13 @@
         "no-unused-private-class-members": "warn",
         "no-unsafe-negation": ["error", { "enforceForOrderingRelations": true }], //Use (!key) or !(a < b), instead
         "no-empty": "warn", //When testing add comment inside
-        "no-void": "error",
+        "no-void": "off", //Bugs, doesn't allow to void promises
         "no-useless-concat": "warn",
         "no-extra-label": "warn",
         "switch-colon-spacing": "error",
         "generator-star-spacing": "error",
         "no-var": "warn",
         "multiline-ternary": "off",
-        //"no-case-declarations": "off", //Can be turned off
-        //"no-class-assign": "off", //Can be turned off
         "no-sparse-arrays": "off",
         "operator-assignment": "warn",
         "operator-linebreak": ["error", "after"],

@@ -56,7 +56,8 @@ export const player: playerType = { //Only for information that need to be saved
     time: {
         updated: Date.now(),
         started: Date.now(),
-        offline: 0
+        offline: 0,
+        disabled: 0
     },
     buildings: [
         [] as unknown as playerType['buildings'][0], [ //Stage 1
@@ -522,7 +523,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Bigger electrons',
                 'Stronger protons',
                 'More neutrons',
-                'Superposition. Unlock a new reset tier',
+                'Superposition',
                 'Protium. Basic',
                 'Deuterium. Heavy',
                 'Tritium. Radioactive',
@@ -546,7 +547,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         }, { //Stage 2
             name: [
                 'Molecules to Moles',
-                'Vaporization. Unlock a new reset tier',
+                'Vaporization',
                 'Surface tension',
                 'Surface stress',
                 'Stream',
@@ -580,10 +581,10 @@ export const global: globalType = { //For information that doesn't need to be sa
         }, { //Stage 3
             name: [
                 'Brownian motion',
-                'Gas. New substance for Accretion',
-                'Micrometeoroid. Unlock a new Structure',
+                'Gas',
+                'Micrometeoroid',
                 'Streaming instability',
-                'Gravitational field. Unlock a new Structure',
+                'Gravitational field',
                 'Rubble pile',
                 'Satellite system',
                 'Magma ocean',
@@ -595,10 +596,10 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             effectText: [
                 () => `Through random collisions every self-made Dust speeds up Accretion speed. (By ${format(global.upgradesInfo[3].effect[0] as number)})`,
-                () => `Accretion speed is now quicker based on current Dust amount. (${Limit(global.upgradesInfo[3].effect[1] as overlimit).format()} boost)`,
-                () => 'Just a small meteoroid, but it will be a good base for what to come. (Also 2x boost to Dust)',
+                () => `New substance for Accretion, will provide boost to Accretion speed based on current Dust amount. (${Limit(global.upgradesInfo[3].effect[1] as overlimit).format()} boost)`,
+                () => 'Just a small meteoroid, but it will be a good base for what to come. (Unlock a new Structure and get 2x boost to Dust)',
                 () => `Small bodies spontaneously concentrate into clumps. (Self-made Planetesimals boost each other by ${format(1.02)})`,
-                () => 'Bodies are now massive enough to affect each other with gravity. (4x boost to Planetesimals)',
+                () => 'Bodies are now massive enough to affect each other with gravity. (Unlock a new Structure and get 4x boost to Planetesimals)',
                 () => 'Shattered pieces fall back together. Mass production is now even bigger. (By 3x)',
                 () => 'Unlock yet another Structure.',
                 () => `Core melted, Accretion speed increased. (Mass production increased by ${format(global.upgradesInfo[3].effect[7] as number)})`,
@@ -646,10 +647,10 @@ export const global: globalType = { //For information that doesn't need to be sa
     researchesInfo: [
         {} as globalType['researchesInfo'][0], { //Stage 1
             name: [
-                "Stronger 'Protium'",
-                "Better 'Deuterium'",
-                "Bigger 'Tritium'",
-                'Discharge requirement decreased',
+                'Stronger Protium',
+                'Better Deuterium',
+                'Improved Tritium',
+                'Requirement decrease',
                 'Discharge improved',
                 'Radioactive Discharge'
             ],
@@ -860,7 +861,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             () => !player.inflation.vacuum && player.strange[0].total === 0 ? 'Unlock ability to make multiple Structures at same time.' :
             /**/'First level is for making multiple Structures at same time.\nSecond level is to turn OFF/ON all auto toggles at once.\nThird level improves control for auto/Warp consumption of Offline storage.',
             () => `Research this to increase capacity of Offline storage by +${player.stage.true >= 6 ? 8 : 4} hours.`,
-            () => 'This is going to create all upgrades automatically. Each level increases highest type of upgrades to create.\n(Upgrades > Researches > Special researches)'
+            () => 'This is going to create all upgrades automatically. Each level increases highest type of upgrades to create.\n(Enable in settings, order of unlocks is upgrades > researches > special researches)'
         ],
         cost: [],
         startCost: [2000, 1e9, 1],
@@ -962,7 +963,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Free Discharge',
                 'Automatic Discarge',
                 'Increased Energy',
-                "Improved 'Tritium'",
+                'Better improvement',
                 'Keep auto Structures',
                 'More toggles',
                 'Strange boost',
@@ -976,7 +977,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Obtain +1 bonus Discharge goal.',
                 () => `Automatically Discharge upon creating an upgrade or reaching next goal.${player.strangeness[1][11] >= 1 ? "\nSecond level - auto Discharge for reaching new goal doesn't cause an reset." : ''}`,
                 () => `Gain more Energy from creating ${player.inflation.vacuum ? 'Preons, +2' : 'Particles, +1'}.`,
-                () => `Research for improved 'Tritium' upgrade is now better. (+${format(player.inflation.vacuum ? 0.4 : 0.3)})`,
+                () => `Research 'Improved Tritium' is now better. (+${format(player.inflation.vacuum ? 0.4 : 0.3)})`,
                 () => `Always have auto for ${global.buildingsInfo.name[1][Math.min(player.strangeness[1][6] + 1, global.ASRInfo.max[1])]}.`,
                 () => `Increase max level of 'New toggles'.${player.inflation.vacuum ? '' : ' Also keep them on Stage reset.'}`,
                 () => `Unspend Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Bonus goals' : 'Stronger radiation'})`,
@@ -1106,8 +1107,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => player.inflation.vacuum ? 'Unlock the Void. (Advanced subtab)' : `Gain ability to be inside multiple Stages at once. (Next one to always be inside is ${global.stageInfo.word[player.strangeness[5][0] + 1]})`,
                 () => `Gain 2 times more ${global.strangeInfo.strangeName[player.strangeness[5][9]]} from Stage resets.`,
                 () => 'Allows to auto reset Stage, has some special settings.',
-                () => "Bigger Nebulas, more matter for Accretion. 'Jeans instability' upgrade is 3 times stronger.",
-                () => "'Super star cluster' is now even bigger. Effect increased by 4.",
+                () => `Bigger Nebulas, more matter for Accretion. 'Jeans instability' upgrade is ${player.inflation.vacuum ? 1.5 : 3} times stronger.`,
+                () => `'Super star cluster' is now even bigger. Effect increased by ${player.inflation.vacuum ? 2 : 4}.`,
                 () => player.inflation.vacuum ? 'Unlock Intergalactic Stage.' : 'Intergalactic is no longer affected by Collapse reset.',
                 () => 'With this, a new Structure, can be created. Second level unlocks auto for it.',
                 () => "Increase permanent level of auto Structures. It's the only way to do it.",
@@ -1594,6 +1595,7 @@ export const updatePlayer = (load: playerType): string => {
                 load.strangeness[5][2] = 0;
                 load.strange[0].current += 50;
             }
+            load.time.disabled = 0;
             //load.collapse.marks = [0]; //Maybe, new input for when to Collapse, for now will be only 1
             //delete load.toggles.shop['strict' as keyof unknown]; //Maybe
         }
@@ -1821,7 +1823,7 @@ export const buildVersionInfo = () => {
                 text = '- Warps now waste offline (half of normal); Max offline from upgrades decreased, cost adjusted\n- Custom scrolls\n- Notifications\n- Fixed and updated special supports\n- Auto Collapse settings reset';
                 break;
             case 'v0.1.5':
-                text = '- New content (Void)\n- Stage 6 minor balance changes\n-Images should no longer unload on Stage change\n- Many small changes to improve quality of life\n- Small visual update';
+                text = '- New content (Void)\n- Stage 6 minor balance changes\n-Images should no longer unload on Stage change\n- Many small changes to improve quality of life\n- More information for save files\n- New hotkeys\n- Small visual update';
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;

@@ -222,7 +222,7 @@ reLoad(true); //Start everything
         getId('versionInfo').style.display = '';
     });
     getId('save').addEventListener('click', () => { void saveLoad('save'); });
-    getId('file').addEventListener('change', () => { void saveLoad('load'); });
+    getId('file').addEventListener('change', () => { void saveLoad('import'); });
     getId('export').addEventListener('click', () => { void saveLoad('export'); });
     getId('delete').addEventListener('click', () => { void saveLoad('delete'); });
     getId('switchTheme0').addEventListener('click', () => setTheme(0, true));
@@ -270,8 +270,7 @@ reLoad(true); //Start everything
     getId('pauseGame').addEventListener('click', () => { void pauseGame(); });
     getId('reviewEvents').addEventListener('click', () => { void replayEvent(); });
     getId('offlineWarp').addEventListener('click', () => { void timeWarp(); });
-    getId('fontSizeToggle').addEventListener('click', () => changeFontSize(true));
-    getId('customFontSize').addEventListener('blur', () => changeFontSize(false, true));
+    getId('customFontSize').addEventListener('blur', () => changeFontSize());
 
     getId('stageResetsSave').addEventListener('blur', () => {
         const inputID = getId('stageResetsSave') as HTMLInputElement;
@@ -377,14 +376,15 @@ const prepareFake = () => {
     return fake;
 };
 
-async function saveLoad(type: string) {
+async function saveLoad(type: 'import' | 'save' | 'export' | 'delete'): Promise<void> {
     switch (type) {
-        case 'load': {
+        case 'import': {
             const id = getId('file') as HTMLInputElement;
             changeIntervals(true);
 
             try {
-                const load = JSON.parse(atob(await (id.files as FileList)[0].text()));
+                const save = await (id.files as FileList)[0].text();
+                const load = JSON.parse(atob(save));
                 const versionCheck = updatePlayer(load);
 
                 const { time } = player;
@@ -405,6 +405,14 @@ async function saveLoad(type: string) {
             return;
         }
         case 'save': {
+            if (player.time.disabled !== 0) {
+                if (Date.now() < player.time.disabled) {
+                    Alert(`Not allowed to save until ${new Date(player.time.disabled).toLocaleString()}\nReason: time manipulations`);
+                    clearInterval(global.intervalsId.autoSave);
+                    global.intervalsId.autoSave = setInterval(saveLoad, 3600000, 'save');
+                    return;
+                } else { player.time.disabled = 0; }
+            }
             try {
                 player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
@@ -438,6 +446,7 @@ async function saveLoad(type: string) {
                 player.strange[rewardType].total += strangeGain;
             }
 
+            if (player.time.disabled !== 0) { return void saveLoad('save'); }
             const save = btoa(JSON.stringify(prepareFake()));
             const a = document.createElement('a');
             a.href = `data:text/plain;charset=utf-8,${save}`;
@@ -476,12 +485,16 @@ const replaceSaveFileSpecials = (): string => {
     const special = [
         '[stage]',
         '[true]',
+        '[strange]',
+        '[vacuum]',
         '[date]',
         '[time]'
     ];
     const replaceWith = [
         global.stageInfo.word[player.stage.active],
         global.stageInfo.word[player.stage.true],
+        `${global.strangeInfo.gain(player.stage.active)}`,
+        `${player.inflation.vacuum}`,
         getDate('dateDMY'),
         getDate('timeHMS')
     ];
@@ -513,7 +526,7 @@ export const timeWarp = async() => {
     if (time.offline < 1200 * waste) { return Alert(`Need at least ${format(1200 * waste, { type: 'time' })} (20 minutes effective) of Storaged Offline time to Warp`); }
 
     const warpTime = Math.min(player.researchesAuto[0] < 3 ? (await Confirm(`Do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })}, will be consumed up to 1 hour (uses ${format(waste)} seconds per added second)\nCalculates a minute per tick`) ? 3600 : 0) :
-        Number(await Prompt(`How many seconds do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second, minimum value is 10 minutes)\nBigger number will result in more lag (calculates a minute per tick)`, '1200')), time.offline / waste);
+        Number(await Prompt(`How many seconds do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second, minimum value is 20 minutes)\nBigger number will result in more lag (calculates a minute per tick)`, '1200')), time.offline / waste);
     if (warpTime < 1200 || !isFinite(warpTime)) { return warpTime === 0 ? undefined : Alert('Warp failed, possible reason: not enough offline time or incorrect value'); }
 
     time.offline -= warpTime * waste;
