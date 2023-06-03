@@ -88,7 +88,6 @@ export interface playerType {
         shop: {
             howMany: number
             input: number
-            strict: boolean
         }
     }
     history: {

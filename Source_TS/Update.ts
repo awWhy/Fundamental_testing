@@ -248,7 +248,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
                     const alreadyBought = buildings[i as 1].true;
                     const totalBefore = Limit(increase).power(alreadyBought).minus('1').divide(increase - 1).multiply(firstCost).toArray();
 
-                    if (howMany === -1 || !player.toggles.shop.strict) {
+                    if (howMany === -1) {
                         const maxAfford = Math.floor(Limit(totalBefore).plus(currency).multiply(increase - 1).divide(firstCost).plus('1').log(10).divide(Math.log10(increase)).toNumber()) - alreadyBought;
                         if (maxAfford > 1) { totalBuy = howMany === -1 ? maxAfford : Math.min(maxAfford, howMany); }
                     } else { totalBuy = howMany; }
@@ -284,6 +284,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
                 }
             }
 
+            getId('stageTime').textContent = format(player.stage.time, { type: 'time' });
             if (player.time.offline > 0 && (player.toggles.normal[0] || player.researchesAuto[0] < 3)) {
                 const time = Math.max(player.time.offline / 3600, 1);
                 getId('offlineBoostEffect').textContent = `+${format(time * 1, { digits: 0 })} seconds`;
@@ -302,7 +303,11 @@ export const numbersUpdate = () => { //This is for relevant visual info
         }
     } else if (tab === 'strangeness') {
         if (subtab.strangenessCurrent === 'Matter') {
-            if (player.challenges.active === -1) { getId('strangeGain').textContent = format(global.strangeInfo.gain(active) / 100 ** player.strangeness[5][9]); }
+            if (player.challenges.active === -1) {
+                const stageGain = global.strangeInfo.gain(active) / 100 ** player.strangeness[5][9];
+                getId('strangeGain').textContent = `${format(stageGain)} ${global.strangeInfo.strangeName[player.strangeness[5][9]]}`;
+                getId('strangeTime').textContent = `${format(stageGain / player.stage.time, { padding: true })} per second`;
+            }
             getId('strangeBoost').textContent = global.strangeInfo.stageBoost[active] !== null ? format(global.strangeInfo.stageBoost[active] as number) : 'none';
             getId('strange0Cur').textContent = format(player.strange[0].current);
             getId('strange1Cur').textContent = format(player.strange[1].current);
@@ -311,8 +316,6 @@ export const numbersUpdate = () => { //This is for relevant visual info
         if (subtab.settingsCurrent === 'Settings') {
             assignWithNoMove(getId('exportGain'), format(player.stage.export * exportMultiplier() / 86400 / 100 ** player.strangeness[5][9], { padding: true }));
             if (global.lastSave >= 1) { getId('isSaved').textContent = `${format(global.lastSave, { type: 'time' })} ago`; }
-        } else if (subtab.settingsCurrent === 'History') {
-            getId('stageTime').textContent = format(player.stage.time, { type: 'time' });
         } else if (subtab.settingsCurrent === 'Stats') {
             getId('firstPlay').textContent = global.timeMode ? `${format((Date.now() - player.time.started) / 1000, { type: 'time' })} ago` : new Date(player.time.started).toLocaleString();
             getId('stageResetsCount').textContent = format(player.stage.resets);
@@ -566,15 +569,8 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             const vacuum = player.inflation.vacuum;
             const bound = player.strangeness[5][5] >= 1;
 
+            getId('strangeStageReset').style.display = player.challenges.active === -1 ? '' : 'none';
             getId('strange1').style.display = player.strangeness[5][9] >= 1 ? '' : 'none';
-            const strangeGainId = getId('strangeGainType');
-            if (player.challenges.active === -1) {
-                strangeGainId.style.display = '';
-                strangeGainId.textContent = global.strangeInfo.strangeName[player.strangeness[5][9]];
-            } else {
-                strangeGainId.style.display = 'none';
-                getId('strangeGain').textContent = 'disabled';
-            }
             getId('strange4Stage5').style.display = (vacuum ? bound : player.milestones[2][0] >= 3) ? '' : 'none';
             getId('strange5Stage5').style.display = (vacuum ? bound : player.milestones[3][0] >= 3) ? '' : 'none';
             getId('strange8Stage5').style.display = (vacuum ? bound : player.milestones[2][0] >= 3 || player.milestones[3][0] >= 3) ? '' : 'none';

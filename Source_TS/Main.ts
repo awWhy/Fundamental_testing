@@ -130,7 +130,6 @@ reLoad(true); //Start everything
     getId('buyAny').addEventListener('click', () => toggleBuy('any'));
     getId('buyAnyInput').addEventListener('blur', () => toggleBuy('any'));
     getId('buyMax').addEventListener('click', () => toggleBuy('max'));
-    getId('buyStrict').addEventListener('click', () => toggleBuy('strict'));
 
     for (let i = -1; i < global.challengesInfo.name.length; i++) {
         const image = getId(`challenge${i + 1}`);
@@ -270,7 +269,7 @@ reLoad(true); //Start everything
     getId('pauseGame').addEventListener('click', () => { void pauseGame(); });
     getId('reviewEvents').addEventListener('click', () => { void replayEvent(); });
     getId('offlineWarp').addEventListener('click', () => { void timeWarp(); });
-    getId('customFontSize').addEventListener('blur', () => changeFontSize());
+    getId('customFontSize').addEventListener('blur', () => changeFontSize(true));
 
     getId('stageResetsSave').addEventListener('blur', () => {
         const inputID = getId('stageResetsSave') as HTMLInputElement;

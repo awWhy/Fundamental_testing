@@ -279,8 +279,7 @@ export const player: playerType = { //Only for information that need to be saved
            Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8] */
         shop: {
             howMany: 1,
-            input: 10,
-            strict: true //Remove
+            input: 10
         }
     },
     history: {
@@ -651,7 +650,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Better Deuterium',
                 'Improved Tritium',
                 'Requirement decrease',
-                'Discharge improved',
+                'Discharge improvement',
                 'Radioactive Discharge'
             ],
             effectText: [
@@ -1107,8 +1106,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => player.inflation.vacuum ? 'Unlock the Void. (Advanced subtab)' : `Gain ability to be inside multiple Stages at once. (Next one to always be inside is ${global.stageInfo.word[player.strangeness[5][0] + 1]})`,
                 () => `Gain 2 times more ${global.strangeInfo.strangeName[player.strangeness[5][9]]} from Stage resets.`,
                 () => 'Allows to auto reset Stage, has some special settings.',
-                () => `Bigger Nebulas, more matter for Accretion. 'Jeans instability' upgrade is ${player.inflation.vacuum ? 1.5 : 3} times stronger.`,
-                () => `'Super star cluster' is now even bigger. Effect increased by ${player.inflation.vacuum ? 2 : 4}.`,
+                () => `Bigger Nebulas, more matter for Accretion. 'Jeans instability' upgrade is ${player.inflation.vacuum ? 2 : 3} times stronger.`,
+                () => `'Super star cluster' is now even bigger. Effect increased by ${player.inflation.vacuum ? 2.5 : 4}.`,
                 () => player.inflation.vacuum ? 'Unlock Intergalactic Stage.' : 'Intergalactic is no longer affected by Collapse reset.',
                 () => 'With this, a new Structure, can be created. Second level unlocks auto for it.',
                 () => "Increase permanent level of auto Structures. It's the only way to do it.",
@@ -1597,7 +1596,7 @@ export const updatePlayer = (load: playerType): string => {
             }
             load.time.disabled = 0;
             //load.collapse.marks = [0]; //Maybe, new input for when to Collapse, for now will be only 1
-            //delete load.toggles.shop['strict' as keyof unknown]; //Maybe
+            delete load.toggles.shop['strict' as keyof unknown];
         }
 
         if (load.version !== playerStart.version) {
@@ -1823,7 +1822,7 @@ export const buildVersionInfo = () => {
                 text = '- Warps now waste offline (half of normal); Max offline from upgrades decreased, cost adjusted\n- Custom scrolls\n- Notifications\n- Fixed and updated special supports\n- Auto Collapse settings reset';
                 break;
             case 'v0.1.5':
-                text = '- New content (Void)\n- Stage 6 minor balance changes\n-Images should no longer unload on Stage change\n- Many small changes to improve quality of life\n- More information for save files\n- New hotkeys\n- Small visual update';
+                text = "- New content (Void)\n- Stage 6 minor balance changes\n-Images should no longer unload on Stage change\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Small visual update";
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;

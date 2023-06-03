@@ -150,7 +150,6 @@
                             <img src="Used_art/Buy%20any.png" alt="" id="buyAny" class="interactiveImage" aria-hidden="true" loading="lazy">
                             <img src="Used_art/Buy%20max.png" alt="" id="buyMax" class="interactiveImage" aria-hidden="true" loading="lazy">
                             <input type="number" id="buyAnyInput" min="-1" aria-label="How many Structures to make at same time (type -1 for max)">
-                            <button id="buyStrict" aria-label="Make Structures only when can afford all at once, ON">Strict</button>
                             <button id="toggleBuilding0" class="toggleBuilding">All ON</button>
                         </div>
                     </div>
@@ -177,7 +176,10 @@
                             <p>Cost: <span id="upgradeCost" class="orangeText">Resource.</span></p>
                         </div>
                     </div>
-                    <p id="offlineBoost" class="blueText">Consuming <span id="offlineBoostWaste" class="cyanText">9.00</span> from Offline storage to add <span id="offlineBoostEffect" class="cyanText">+1.00</span> to passed time</p>
+                    <div id="stageTimeDiv" class="blueText">
+                        <p class="stage2Unlock">Current Stage time: <span id="stageTime" class="cyanText">1 seconds</span></p>
+                        <p id="offlineBoost">Consuming <span id="offlineBoostWaste" class="cyanText">9.00</span> from Offline storage to add <span id="offlineBoostEffect" class="cyanText">+1.00</span> to passed time</p>
+                    </div>
                     <p class="reader">Use Arrow keys to navigate, if using Screen reader, then please enable support in settings tab</p>
                 </section>
                 <section id="stageSubtabAdvanced" class="insideTab" style="display: none;">
@@ -328,7 +330,7 @@
                     <div class="strangeWelcome center greenText">
                         <h2 class="biggerWord">Strange matter</h2>
                         <p id="strangeBoostMain">Strange boost effect: <span id="strangeBoost" class="whiteText">none</span></p>
-                        <p>Stage reset reward: <span id="strangeGain" class="whiteText">1</span> <span id="strangeGainType" class="whiteText">Strange quarks</span></p>
+                        <p id="strangeStageReset">Stage reset reward: <span id="strangeGain" class="whiteText">1 Strange quarks</span> -&gt <span id="strangeTime" class="whiteText">1 seconds</span></p>
                     </div>
                     <div id="strangeStructures">
                         <div id="strange0" class="greenText">
@@ -812,12 +814,11 @@
                 <section id="settingsSubtabHistory" class="insideTab" style="display: none;">
                     <div id="historyMainDiv">
                         <div class="stageText">
-                            <p>Stage resets:</p>
+                            <p class="bigWord">Stage resets:</p>
+                            <p><label for="stageResetsSave">Save</label> <input id="stageResetsSave" type="number" min="0" max="20" value="5">, <label for="stageResetsKeep">keep</label> <input id="stageResetsKeep" type="number" min="3" max="100" value="10"></p>
                             <ol id="stageResetsList">
                                 <li class="redText">Reference list is empty</li>
                             </ol>
-                            <p><label for="stageResetsSave">Save</label> <input id="stageResetsSave" type="number" min="0" max="20" value="5">, <label for="stageResetsKeep">keep</label> <input id="stageResetsKeep" type="number" min="3" max="100" value="10"></p>
-                            <p>Current time: <span id="stageTime" class="whiteText">0 seconds</span></p>
                             <p>Best reset: <span class="whiteText"><span id="stageBestReset1" class="greenText">0 Strange quarks</span>, <span id="stageBestReset2" class="blueText">1 seconds</span>, <span id="stageBestReset3" class="darkorchidText">0.0000 per second</span></span></p>
                         </div>
                     </div>

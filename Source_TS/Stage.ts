@@ -258,13 +258,13 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
 
         const listForMult2 = [buildings[5][2].current, producing[5][3]];
         let prod2Number = 1.5 * (3 ** researches[5][1]);
-        upgradesInfo[5].effect[1] = 6 * ((vacuum ? 2 : 4) ** strangeness[5][4]);
+        upgradesInfo[5].effect[1] = 6 * ((vacuum ? 2.5 : 4) ** strangeness[5][4]);
         if (upgrades[5][1] === 1) { prod2Number *= upgradesInfo[5].effect[1]; }
         producing[5][2] = Limit(prod2Number).multiply(...listForMult2).toArray();
 
         const listForMult1 = [buildings[5][1].current, producing[5][3]];
         let prod1Number = 4 ** researches[5][0];
-        upgradesInfo[5].effect[0] = 4 * ((vacuum ? 1.5 : 3) ** strangeness[5][3]);
+        upgradesInfo[5].effect[0] = 4 * ((vacuum ? 2 : 3) ** strangeness[5][3]);
         if (upgrades[5][0] === 1) { prod1Number *= upgradesInfo[5].effect[0]; }
         producing[5][1] = Limit(prod1Number).multiply(...listForMult1).toArray();
 
@@ -328,7 +328,7 @@ export const buyBuilding = (index: number, stageIndex = player.stage.active, aut
         const totalBefore = Limit(increase).power(alreadyBought).minus('1').divide(increase - 1).multiply(firstCost).toArray();
         const maxAfford = Math.floor(Limit(budget).plus(totalBefore).multiply(increase - 1).divide(firstCost).plus('1').log(10).divide(Math.log10(increase)).toNumber()) - alreadyBought;
 
-        if (howMany !== -1 && maxAfford < howMany && player.toggles.shop.strict) { return; }
+        if (howMany !== -1 && maxAfford < howMany) { return; }
         canAfford = howMany !== -1 ? Math.min(maxAfford, howMany) : maxAfford;
         total = Limit(increase).power(canAfford + alreadyBought).minus('1').divide(increase - 1).multiply(firstCost).minus(totalBefore).toArray();
     } else {
@@ -1076,7 +1076,7 @@ export const toggleSwap = (number: number, type: 'normal' | 'buildings' | 'auto'
     }
 };
 
-export const toggleBuy = (type = null as string | null) => {
+export const toggleBuy = (type = '' as '1' | 'max' | 'any') => {
     const { shop } = player.toggles;
     const input = getId('buyAnyInput') as HTMLInputElement;
 
@@ -1091,21 +1091,11 @@ export const toggleBuy = (type = null as string | null) => {
             shop.input = Math.max(Math.trunc(Number(input.value)), -1);
             if (shop.input === 0) { shop.input = 1; }
             shop.howMany = shop.input;
-            input.value = format(shop.input, { digits: 0, type: 'input' });
-            break;
-        case 'strict':
-            shop.strict = !shop.strict;
-            break;
-        default:
-            input.value = format(shop.input, { digits: 0, type: 'input' });
     }
-    const strict = getId('buyStrict');
-    strict.style.borderColor = shop.strict ? '' : 'crimson';
-    strict.style.color = shop.strict ? '' : 'var(--red-text-color)';
     getId('buy1x').style.backgroundColor = shop.howMany === 1 ? 'green' : '';
     getId('buyAny').style.backgroundColor = Math.abs(shop.howMany) !== 1 ? 'green' : '';
     getId('buyMax').style.backgroundColor = shop.howMany === -1 ? 'green' : '';
-    if (global.screenReader) { strict.ariaLabel = `Make Structures only when can afford all at once, ${shop.strict ? 'ON' : 'OFF'}`; }
+    if (type !== '1' && type !== 'max') { input.value = format(shop.input, { digits: 0, type: 'input' }); }
     numbersUpdate();
 };
 

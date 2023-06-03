@@ -657,19 +657,20 @@ export const mobileDeviceSupport = (change = false) => {
 
     if (change) { enabled = !enabled; }
 
-    if (enabled && !global.screenReader) {
+    if (enabled) {
         toggle.textContent = 'ON';
         toggle.style.color = 'var(--red-text-color)';
         toggle.style.borderColor = 'crimson';
         localStorage.setItem('support', 'MD');
         global.mobileDevice = true;
         if (change) { Alert('To enable touchStart events (as example: touching an upgrade to view description), will need to refresh'); }
+        if (global.screenReader) { screenReaderSupport(); }
     } else {
         toggle.textContent = 'OFF';
         toggle.style.color = '';
         toggle.style.borderColor = '';
-        localStorage.removeItem('support');
         global.mobileDevice = false;
+        if (change) { localStorage.removeItem('support'); }
     }
 };
 
@@ -685,27 +686,27 @@ export const screenReaderSupport = (change = false) => {
         toggle.style.borderColor = 'crimson';
         localStorage.setItem('support', 'SR');
         global.screenReader = true;
-        if (change) { Alert("To enable focus events (as example: view description of an upgrade by pressing 'tab'), will need to refresh.\nDue to no confirmation that anyone is playing this with Screen reader, support is limited"); }
+        if (change) { Alert("To enable focus events (as example: view description of an upgrade by pressing 'tab'), will need to refresh"); }
         if (global.mobileDevice) { mobileDeviceSupport(); }
     } else {
         toggle.textContent = 'OFF';
         toggle.style.color = '';
         toggle.style.borderColor = '';
-        localStorage.removeItem('support');
         global.screenReader = false;
+        if (change) { localStorage.removeItem('support'); }
     }
 };
 
-export const changeFontSize = () => {
+export const changeFontSize = (change = false) => {
     const input = getId('customFontSize') as HTMLInputElement;
-    let size = Number(localStorage.getItem('fontSize'));
+    let size = Number(change ? input.value : localStorage.getItem('fontSize'));
     if (size === 0) { size = 16; }
 
     if (size === 16) {
         document.body.style.removeProperty('--font-size');
         localStorage.removeItem('fontSize');
     } else {
-        size = Math.floor(Math.min(Math.max(Number(input.value), 10), 32) * 10) / 10;
+        size = Math.floor(Math.min(Math.max(size, 10), 32) * 10) / 10;
         document.body.style.setProperty('--font-size', `${size}px`);
         localStorage.setItem('fontSize', `${size}`);
     }
