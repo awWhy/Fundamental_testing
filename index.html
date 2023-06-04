@@ -191,6 +191,19 @@
                         <div id="challengeMultiline">
                             <h3 class="orchidText">Vacuum state: <span class="redText">false</span></h3>
                         </div>
+                        <div id="voidRewards">
+                            <h3 class="darkvioletText bigWord">Rewards:</h3>
+                            <div>
+                                <button id="voidRewardMicroworld" class="stage1borderButton cyanText">Microworld</button>
+                                <button id="voidRewardSubmerged" class="stage2borderButton blueText">Submerged</button>
+                                <button id="voidRewardAccretion" class="stage3borderButton grayText">Accretion</button>
+                                <button id="voidRewardInterstellar" class="stage4borderButton orangeText">Interstellar</button>
+                            </div>
+                            <div>
+                                <p class="greenText center">All rewards are connected to Strangeness</p>
+                                <div id="voidRewardsDivText" class="whiteText"></div>
+                            </div>
+                        </div>
                     </div>
                     <p id="universeInfo" class="grayText">This Universe is <span id="universeAge" class="orangeText">0 seconds</span> old</p>
                 </section>
@@ -330,7 +343,7 @@
                     <div class="strangeWelcome center greenText">
                         <h2 class="biggerWord">Strange matter</h2>
                         <p id="strangeBoostMain">Strange boost effect: <span id="strangeBoost" class="whiteText">none</span></p>
-                        <p id="strangeStageReset">Stage reset reward: <span id="strangeGain" class="whiteText">1 Strange quarks</span> -&gt <span id="strangeTime" class="whiteText">1 seconds</span></p>
+                        <p id="strangeStageReset">Stage reset reward: <span id="strangeGain" class="whiteText">1 Strange quarks</span> -&gt; <span id="strangeTime" class="whiteText">1 seconds</span></p>
                     </div>
                     <div id="strangeStructures">
                         <div id="strange0" class="greenText">
@@ -723,6 +736,7 @@
                                         <p class="stageText">[true] - <span class="whiteText">for current true Stage</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current active Stage</span></p>
                                         <p class="greenText stage5Unlock">[strange] - <span class="whiteText">for current Strange reward</span></p>
+                                        <p id="saveNameMatter" class="greenText">[matter] - <span class="whiteText">for current Strange type</span></p>
                                         <p class="darkvioletText stage6Unlock">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
                                         <p class="cyanText">[date] - <span class="whiteText">for current day, month, year</span></p>
                                         <p class="cyanText">[time] - <span class="whiteText">for current hour, minute, second</span></p>
@@ -805,7 +819,7 @@
                                     <button id="switchTheme3" class="stage3backgroundButton stage3borderButton stage3Unlock">Accretion</button>
                                     <button id="switchTheme4" class="stage4backgroundButton stage4borderButton stage4Unlock">Interstellar</button>
                                     <button id="switchTheme5" class="stage5backgroundButton stage5borderButton stage5Unlock">Intergalactic</button>
-                                    <button id="switchTheme6" class="stage6backgroundButton stage6borderButton stage6Unlock">Void</button>
+                                    <button id="switchTheme6" class="stage6backgroundButton stage6borderButton stage7Unlock">Void</button>
                                 </div>
                             </div>
                         </div>
@@ -945,12 +959,20 @@
                                     <p>Total:</p>
                                     <span id="strange0StatTotal" class="whiteText">0</span>
                                 </div>
+                                <div id="strange0StatProdDiv">
+                                    <p>Cap:</p>
+                                    <span id="strange0StatProd" class="whiteText">0</span>
+                                </div>
                             </div>
                             <div id="strange1Stats">
                                 <h4 class="greenText bigWord">Strangelets</h4>
                                 <div>
                                     <p>Total:</p>
                                     <span id="strange1StatTotal" class="whiteText">0</span>
+                                </div>
+                                <div>
+                                    <p>Speed:</p>
+                                    <span id="strange1StatProd" class="whiteText">0</span>
                                 </div>
                             </div>
                         </div>
@@ -987,6 +1009,7 @@
             </section>
             <h5 id="SRTab" class="reader" aria-live="polite">Current tab is 'Stage'</h5>
             <h6 id="SRMain" class="reader" aria-live="assertive"></h6>
+            <div id="fakeFooter"></div>
             <footer id="footer">
                 <div>
                     <nav id="subtabs" style="display: none;" aria-hidden="true">
