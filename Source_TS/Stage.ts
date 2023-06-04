@@ -505,11 +505,14 @@ export const calculateGainedStrangeness = (get: number, time: number) => {
     const max = Math.floor(player.strange[get + 1].current * 111);
     if (strange.current >= max) { return; }
 
-    strange.current += time;
+    const add = Math.max(time, (max - strange.current) * time / 500);
+    strange.current += add;
+    strange.total += add;
     if (strange.current > max) {
-        strange.total += time - (strange.current - max);
+        const old = strange.current;
         strange.current = max;
-    } else { strange.total += time; }
+        strange.total = Math.round(strange.total - (old - strange.current));
+    }
 };
 
 export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'strangeness', auto = false): boolean => {
@@ -1140,7 +1143,7 @@ export const stageAsyncReset = async() => {
     } else {
         let ok = true;
         if (player.toggles.normal[1]) {
-            ok = await Confirm(active === 6 ? `Ready to restart progress for ${format(global.strangeInfo.gain(active) / 100 ** player.strangeness[5][9])} ${global.strangeInfo.strangeName[player.strangeness[5][9]]}?` :
+            ok = await Confirm(active === 6 ? `Ready to restart progress for ${format(global.strangeInfo.gain(active) / 100 ** player.strangeness[5][9])} ${global.strangeInfo.name[player.strangeness[5][9]]}?` :
                 active === 5 ? `Return to Microworld? ${player.strange[0].total === 0 ? 'Maybe something will be obtained' : `Will obtain ${format(global.strangeInfo.gain(active))} Strange quarks`}` :
                 active === stage.current ? 'Ready to enter next Stage? Next one will be harder than current' : `Reset this Stage for ${format(global.strangeInfo.gain(active))} Strange quarks?`);
         }

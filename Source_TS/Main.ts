@@ -1,5 +1,5 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
-import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, stageCheck, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription } from './Update';
+import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, stageCheck, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward } from './Update';
 import { assignNewMassCap, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, enterChallenge, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, screenReaderSupport, mobileDeviceSupport, changeFormat, specialHTML, AlertWait, replayEvent, Confirm, preventImageUnload } from './Special';
 import { detectHotkey } from './Hotkeys';
@@ -137,6 +137,10 @@ reLoad(true); //Start everything
         image.addEventListener(hover, () => getChallengeDescription(i));
         image.addEventListener('click', i === -1 ? switchVacuum : () => { void enterChallenge(i); });
     }
+    for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
+        if (i === 5) { continue; } //Missing for now
+        getId(`voidReward${global.stageInfo.word[i]}`).addEventListener('click', () => getChallengeReward(i/*, 'void'*/));
+    }
 
     /* Research tab */
     for (let i = 0; i < specialHTML.longestResearch; i++) {
@@ -213,7 +217,7 @@ reLoad(true); //Start everything
     });
     getId('stageInput').addEventListener('blur', () => {
         const input = getId('stageInput') as HTMLInputElement;
-        player.stage.input = Math.max(Math.floor(Number(input.value)), 1);
+        player.stage.input = Math.max(Number(input.value), 0);
         input.value = format(player.stage.input, { type: 'input' });
     });
     getId('versionButton').addEventListener('click', () => {
@@ -485,6 +489,7 @@ const replaceSaveFileSpecials = (): string => {
         '[stage]',
         '[true]',
         '[strange]',
+        '[matter]',
         '[vacuum]',
         '[date]',
         '[time]'
@@ -493,6 +498,7 @@ const replaceSaveFileSpecials = (): string => {
         global.stageInfo.word[player.stage.active],
         global.stageInfo.word[player.stage.true],
         `${global.strangeInfo.gain(player.stage.active)}`,
+        `${global.strangeInfo.name[player.strangeness[5][9]]}`,
         `${player.inflation.vacuum}`,
         getDate('dateDMY'),
         getDate('timeHMS')
@@ -522,11 +528,11 @@ const getDate = (type: 'dateDMY' | 'timeHMS'): string => {
 export const timeWarp = async() => {
     const { time } = player;
     const waste = (6 - (player.stage.true >= 6 ? player.strangeness[2][7] : 0)) / 2;
-    if (time.offline < 1200 * waste) { return Alert(`Need at least ${format(1200 * waste, { type: 'time' })} (20 minutes effective) of Storaged Offline time to Warp`); }
+    if (time.offline < 900 * waste) { return Alert(`Need at least ${format(900 * waste, { type: 'time' })} (15 minutes effective) of Storaged Offline time to Warp`); }
 
     const warpTime = Math.min(player.researchesAuto[0] < 3 ? (await Confirm(`Do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })}, will be consumed up to 1 hour (uses ${format(waste)} seconds per added second)\nCalculates a minute per tick`) ? 3600 : 0) :
-        Number(await Prompt(`How many seconds do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second, minimum value is 20 minutes)\nBigger number will result in more lag (calculates a minute per tick)`, '1200')), time.offline / waste);
-    if (warpTime < 1200 || !isFinite(warpTime)) { return warpTime === 0 ? undefined : Alert('Warp failed, possible reason: not enough offline time or incorrect value'); }
+        Number(await Prompt(`How many seconds do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second, minimum value is 15 minutes)\nBigger number will result in more lag (calculates a minute per tick)`, '900')), time.offline / waste);
+    if (warpTime < 900 || !isFinite(warpTime)) { return warpTime === 0 ? undefined : Alert('Warp failed, possible reason: not enough offline time or incorrect value'); }
 
     time.offline -= warpTime * waste;
     timeUpdate(warpTime);

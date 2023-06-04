@@ -40,7 +40,7 @@ export const player: playerType = { //Only for information that need to be saved
         massMax: 0.01235,
         elementsMax: [1, 0],
         stars: [0, 0, 0],
-        show: [], //What Elements have been bought
+        show: [],
         input: [4, 2]
     },
     inflation: { //Stage 6
@@ -67,11 +67,11 @@ export const player: playerType = { //Only for information that need to be saved
                 trueTotal: [3, 0],
                 highest: [3, 0]
             }, {
-                true: 0, //How many were bought
+                true: 0, //Bought
                 current: [0, 0], //On hands
-                total: [0, 0], //How many were gained this reset
-                trueTotal: [0, 0], //How many were gained this stage
-                highest: [0, 0] //Highest 'current' that was reached in any stage
+                total: [0, 0], //This reset
+                trueTotal: [0, 0], //This stage
+                highest: [0, 0] //Highest 'current' in any stage
             }, {
                 true: 0,
                 current: [0, 0],
@@ -511,8 +511,8 @@ export const global: globalType = { //For information that doesn't need to be sa
             if (player.strangeness[5][1] >= 1) { gain *= 2; }
             return Math.floor(gain);
         },
-        stageBoost: [null, null, null, null, null, null],
-        strangeName: ['Strange quarks', 'Strangelets']
+        name: ['Strange quarks', 'Strangelets'],
+        stageBoost: [null, null, null, null, null, null]
     },
     upgradesInfo: [ //Effect is null if it can't change
         {} as globalType['upgradesInfo'][0], { //Stage 1
@@ -1103,11 +1103,11 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Strange growth'
             ],
             effectText: [
-                () => player.inflation.vacuum ? 'Unlock the Void. (Advanced subtab)' : `Gain ability to be inside multiple Stages at once. (Next one to always be inside is ${global.stageInfo.word[player.strangeness[5][0] + 1]})`,
-                () => `Gain 2 times more ${global.strangeInfo.strangeName[player.strangeness[5][9]]} from Stage resets.`,
+                () => player.inflation.vacuum ? 'Unlock the Void. (Advanced subtab)\nAlso a new color theme.' : `Gain ability to be inside multiple Stages at once. (Next one to always be inside is ${global.stageInfo.word[player.strangeness[5][0] + 1]})`,
+                () => `Gain 2 times more ${global.strangeInfo.name[player.strangeness[5][9]]} from Stage resets.`,
                 () => 'Allows to auto reset Stage, has some special settings.',
                 () => `Bigger Nebulas, more matter for Accretion. 'Jeans instability' upgrade is ${player.inflation.vacuum ? 2 : 3} times stronger.`,
-                () => `'Super star cluster' is now even bigger. Effect increased by ${player.inflation.vacuum ? 2.5 : 4}.`,
+                () => `'Super star cluster' is now even bigger. Effect increased by ${player.inflation.vacuum ? format(2.5) : 4}.`,
                 () => player.inflation.vacuum ? 'Unlock Intergalactic Stage.' : 'Intergalactic is no longer affected by Collapse reset.',
                 () => 'With this, a new Structure, can be created. Second level unlocks auto for it.',
                 () => "Increase permanent level of auto Structures. It's the only way to do it.",
@@ -1242,37 +1242,18 @@ export const global: globalType = { //For information that doesn't need to be sa
                 if (progress[1] >= 3) { text += `<span class="blueText">\n\n- ${progress[2] > 0 ? `Mole softcap no longer delayed by self-made amount and is much stronger (^${format(0.5)} > ^${format(0.1)})\n- Excessive Puddles are now softcapped ^${format(0.5)} (delayed by self-made amount)\n- Clouds gain is a little weaker (-${format(0.02)})\n- Puddles are 10 times weaker` : 'Unknown, but maybe if deeper'}</span>`; }
                 if (progress[1] >= 2) { text += `<span class="grayText">\n\n- ${progress[3] > 0 ? `Cosmic dust production softcapped ^${format(Math.floor(100 - 3.3 * (player.accretion.rank - 1)) / 100)}\n- Increasing Rank doesn't increase effective Rank` : 'Unknown, but maybe if more Mass'}</span>`; }
                 if (progress[3] >= 5) { text += `<span class="darkorchidText">\n\n- ${progress[4] > 0 ? "'Star system' effective level softcapped instanly\n- 'Nova' cost increased\n- Intergalactic unlocked later" : 'Unknown, but maybe if far enough'}</span>`; }
-                //Iron cost increased
-                //Black holes boost maxMass shift value instead
-                //Intergalactic should be unlocked instanly but until Iron be softcapped ^0.01
-                if (progress[4] >= 5) { text += '<span class="cyanText">\n\n- </span>'; }
-                //(Think more later, something like no X increase on research weaker upgrades?)
                 return text;
             }
-
-            //Reach Rank 7 ('New rank'?) (Rank itself is Universe or Protogalaxy; Could be multiple extras)
-            //Reach Rank 8 ('Void', 'Inflation', 'Universe Structure'?)
-
-            //Get "Iron" ('New Upgrade 2'?)
-
-            //Get a Galaxy (Galaxy doesn't cause reset or Intergalactic 'Strange boost' or Galaxy related strangeness?)
-            //Get x Galaxies (Galaxy merger'?)
-            //Get a filament (Filament doesn't cause an reset)
-
-            /* unassign rewards:
-                'New Upgrade 2' - () => 'Unlock a new Upgrade yet again.\nLast one is extra good.' //1 - Alpha chain (upgrade); 2 - Brown dwarfs (extra research); 3 - Black dwarfs (extra research)
-                'Strange boost' - () => 'Unspend Strange quarks will boost this Stage. (Reward from Stage reset)' //Or really slowly scaling stronger Galaxy
-                'Galaxy merger' - () => "Unlock a new Structure. (Obtainable only through 'Merge')\nSecond level is automatic 'Merge'."
-                //Maybe add more levels into 'Isolation' to not affect Galaxy reset?
-
-                Staff that new elements can unlock:
-                Type frequency and Higher density max level increased by 1 (Affects Quasi stars)
-                Impulse now affects Intergalactic (not galaxies)
-
-                New ideas for Elements to unlock:
-                Boost per galaxy is now +0.1
-                Strange reward is now boosted by ^1.1
-            */
+        ],
+        needText: [
+            [
+                [],
+                ['Perform Discharge', "Get first level of 'Accretion'", "Get second level of 'Accretion'", "Make an 'Impulse'"],
+                ['Have more than 1 Cloud', 'Have more than 1e4 Clouds', 'Have more than 1e8 Clouds'],
+                ["Reach 'Meteoroid' Rank", "Reach 'Asteroid' Rank", "Reach 'Planet' Rank", "Reach 'Jovian planet' Rank", "Reach 'Protostar' Rank"],
+                ['Cause the Collapse', 'Get first Red giant', 'Get first Neutron star', 'Get first Black hole'],
+                []
+            ]
         ],
         rewardText: [
             [
@@ -1285,7 +1266,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ]
         ],
         color: [
-            'darkvioletText'
+            'darkviolet'
         ]
     },
     historyStorage: {
@@ -1595,7 +1576,6 @@ export const updatePlayer = (load: playerType): string => {
                 load.strange[0].current += 50;
             }
             load.time.disabled = 0;
-            //load.collapse.marks = [0]; //Maybe, new input for when to Collapse, for now will be only 1
             delete load.toggles.shop['strict' as keyof unknown];
         }
 
@@ -1822,7 +1802,7 @@ export const buildVersionInfo = () => {
                 text = '- Warps now waste offline (half of normal); Max offline from upgrades decreased, cost adjusted\n- Custom scrolls\n- Notifications\n- Fixed and updated special supports\n- Auto Collapse settings reset';
                 break;
             case 'v0.1.5':
-                text = "- New content (Void)\n- Stage 6 minor balance changes\n-Images should no longer unload on Stage change\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Small visual update";
+                text = "- New content (Void)\n- Stage 6 minor balance changes\n-Images should no longer unload on Stage change\n- Footer now affects page height\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Small visual update";
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;

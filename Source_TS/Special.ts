@@ -241,6 +241,7 @@ export const preventImageUnload = () => {
 
 export const setTheme = (themeNumber: number, initial = false) => {
     if (!initial) {
+        if (themeNumber === 6 && player.stage.true < 7 && player.strangeness[5][0] < 0) { initial = true; }
         if (player.stage.true < themeNumber) { initial = true; }
     }
 
@@ -618,6 +619,7 @@ export const notify = (text: string) => {
 
 export const hideFooter = () => {
     const footer = getId('footer');
+    const footerArea = getId('footerColor');
     const toggle = getId('hideToggle');
     const arrow = getId('hideArrow');
 
@@ -630,7 +632,8 @@ export const hideFooter = () => {
     global.footer = !global.footer;
     toggle.removeEventListener('click', hideFooter);
     if (global.footer) {
-        getId('footerColor').style.display = '';
+        footerArea.classList.remove('hidden');
+        footerArea.style.display = '';
         arrow.style.transform = '';
         footer.style.animation = 'hideY 1s reverse';
         arrow.style.animation = 'rotate 1s reverse';
@@ -644,7 +647,8 @@ export const hideFooter = () => {
         arrow.style.animation = 'rotate 1s backwards';
         getId('hideText').textContent = 'Show';
         setTimeout(() => {
-            getId('footerColor').style.display = 'none';
+            footerArea.classList.add('hidden');
+            footerArea.style.display = 'none';
             arrow.style.transform = 'rotate(180deg)';
             animationReset();
         }, 1000);

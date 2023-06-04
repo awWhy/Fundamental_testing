@@ -98,7 +98,10 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
         }
         global.lastSave += passedSeconds;
         player.stage.export = Math.min(player.stage.export + passedSeconds, maxExportTime());
-        if (time.offline > 0 && (toggles.normal[0] || player.researchesAuto[0] < 3)) {
+        if (passedSeconds > 60) {
+            timeWarp = passedSeconds - 60;
+            passedSeconds = 60;
+        } else if (time.offline > 0 && (toggles.normal[0] || player.researchesAuto[0] < 3)) {
             const extraTime = Math.min(Math.max(time.offline / 3600, 1) * passedSeconds, time.offline);
             time.offline -= Math.min(extraTime * (6 - (player.stage.true >= 6 ? player.strangeness[2][7] : 0)), time.offline);
             passedSeconds += extraTime;
@@ -305,10 +308,10 @@ export const numbersUpdate = () => { //This is for relevant visual info
         if (subtab.strangenessCurrent === 'Matter') {
             if (player.challenges.active === -1) {
                 const stageGain = global.strangeInfo.gain(active) / 100 ** player.strangeness[5][9];
-                getId('strangeGain').textContent = `${format(stageGain)} ${global.strangeInfo.strangeName[player.strangeness[5][9]]}`;
+                getId('strangeGain').textContent = `${format(stageGain)} ${global.strangeInfo.name[player.strangeness[5][9]]}`;
                 getId('strangeTime').textContent = `${format(stageGain / player.stage.time, { padding: true })} per second`;
             }
-            getId('strangeBoost').textContent = global.strangeInfo.stageBoost[active] !== null ? format(global.strangeInfo.stageBoost[active] as number) : 'none';
+            getId('strangeBoost').textContent = global.strangeInfo.stageBoost[active] !== null ? format(global.strangeInfo.stageBoost[active] as number, { padding: true }) : 'none';
             getId('strange0Cur').textContent = format(player.strange[0].current);
             getId('strange1Cur').textContent = format(player.strange[1].current);
         }
@@ -384,9 +387,14 @@ export const numbersUpdate = () => { //This is for relevant visual info
                 getId(`building${i}StatTrueTotal`).textContent = Limit(buildings[i].trueTotal).format();
                 getId(`building${i}StatHighest`).textContent = Limit(buildings[i].highest).format();
             }
-            for (let i = 0; i < player.strange.length; i++) {
-                getId(`strange${i}StatTotal`).textContent = format(player.strange[i].total);
+
+            const { strange } = player;
+            const strangeMax = Math.floor(strange[1].current * 111);
+            for (let i = 0; i < strange.length; i++) {
+                getId(`strange${i}StatTotal`).textContent = format(strange[i].total);
             }
+            getId('strange0StatProd').textContent = format(strangeMax);
+            getId('strange1StatProd').textContent = format(Math.max(1, (strangeMax - strange[0].current) / 500), { padding: true });
         }
     }
 };
@@ -615,7 +623,8 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             getId('toggleAuto0').style.display = strangeness[5][2] >= 1 ? '' : 'none';
             getId('toggleAuto0Mark').style.display = strangeness[5][2] >= 1 ? '' : 'none';
             getId('exportSpecial').style.display = strangeness[4][7] >= 1 ? '' : 'none';
-            getId('exportType').textContent = global.strangeInfo.strangeName[strangeness[5][9]];
+            getId('exportType').textContent = global.strangeInfo.name[strangeness[5][9]];
+            getId('saveNameMatter').style.display = strangeness[5][9] >= 1 ? '' : 'none';
             if (player.inflation.vacuum) {
                 if (stage.resets < 1 && stage.current < 5) {
                     getId('stageToggleReset').style.display = 'none';
@@ -639,9 +648,10 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             if (stage.true < 2) { getId('resetToggles').style.display = player.discharge.current >= 1 ? '' : 'none'; }
             if (stage.true < 3) { getId('vaporizationToggleReset').style.display = Limit(player.vaporization.clouds).moreThan('1') ? '' : 'none'; }
             if (stage.true < 5) { getId('collapseToggleReset').style.display = player.collapse.mass > 0.01235 ? '' : 'none'; }
+            if (stage.true < 7) { getId('switchTheme6').style.display = stage.true >= 6 && strangeness[5][0] >= 1 ? '' : 'none'; }
         } else if (subtab.settingsCurrent === 'History') {
             const stageBest = player.history.stage.best;
-            getId('stageBestReset1').textContent = `${format(stageBest[0])} ${global.strangeInfo.strangeName[stageBest[2]]}`;
+            getId('stageBestReset1').textContent = `${format(stageBest[0])} ${global.strangeInfo.name[stageBest[2]]}`;
             getId('stageBestReset2').textContent = format(stageBest[1], { type: 'time' });
             getId('stageBestReset3').textContent = `${format(stageBest[0] / stageBest[1], { padding: true })} per second`;
             updateHistory(/*'stage'*/);
@@ -649,7 +659,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             const buildings = player.buildings[active];
 
             getId('maxExportStats').style.display = player.strangeness[4][7] >= 1 ? '' : 'none';
-            getId('maxExportType').textContent = global.strangeInfo.strangeName[player.strangeness[5][9]];
+            getId('maxExportType').textContent = global.strangeInfo.name[player.strangeness[5][9]];
             getId('stageBestType').textContent = player.strangeness[5][9] >= 1 ? 'True value' : 'Strange quarks';
             getId('stageResets').style.display = player.stage.resets > 0 ? '' : 'none';
             for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
@@ -658,6 +668,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             for (let i = 1; i < player.strange.length; i++) {
                 getId(`strange${i}Stats`).style.display = player.strange[i].total > 0 ? '' : 'none';
             }
+            getId('strange0StatProdDiv').style.display = player.strangeness[5][9] >= 1 ? '' : 'none';
 
             if (!player.inflation.vacuum) { updateUnknown(); }
             if (active === 1) {
@@ -752,22 +763,35 @@ export const getUpgradeDescription = (index: number, stageIndex: number, type: '
 };
 
 export const getChallengeDescription = (index: number) => {
+    const multi = getId('challengeMultiline');
+
     let text;
     if (index === -1) {
         text = `<h3 class="orchidText">Vacuum state: <span ${player.inflation.vacuum ? 'class="greenText">true' : 'class="redText">false'}</span></h3>`;
     } else {
         const { challengesInfo: info } = global;
-        const color = info.color[index];
-
+        const color = `${info.color[index]}Text`;
         text = `<h3 class="${color} bigWord">${info.name[index]}${player.challenges.active === index ? ', <span class="greenText">active</span>' : ''}</h3>
         <p class="whiteText">${info.description[index]}</p>
         <div><h4 class="${color} bigWord">Effect:</h4>
         <p>${info.effectText[index]()}</p></div>`;
-
-        //Add some way to see progress
-        /* <div><p>Void progress</p></div> */
     }
-    getId('challengeMultiline').innerHTML = text;
+    getId('voidRewards').style.display = index === 0 ? '' : 'none';
+    if (multi.innerHTML !== text) { multi.innerHTML = text; }
+};
+
+export const getChallengeReward = (stageIndex: number/*, type: 'void'*/) => {
+    const need = global.challengesInfo.needText[0][stageIndex];
+    const reward = global.challengesInfo.rewardText[0][stageIndex];
+    const level = player.challenges.void[stageIndex];
+    let text = '';
+    for (let i = 0; i < need.length; i++) {
+        text += `<div><p><span class="${level > i ? 'greenText' : 'redText'}">-&gt;</span> ${need[i]}</p>
+        <p><span class="${level > i ? 'greenText' : 'redText'}">Reward:</span> ${level > i ? reward[i] : 'Not yet unlocked'}</p></div>`;
+    }
+
+    const multi = getId('voidRewardsDivText');
+    if (multi.innerHTML !== text) { multi.innerHTML = text; }
 };
 
 export const visualUpdateUpgrades = (index: number, stageIndex: number, type: 'upgrades' | 'elements') => {
@@ -847,7 +871,7 @@ export const updateHistory = (/*type: 'stage'*/) => {
     let text = '';
     if (list.length > 0) {
         for (let i = 0; i < list.length; i++) {
-            text += `<li class="whiteText"><span class="greenText">${format(list[i][0])} ${global.strangeInfo.strangeName[list[i][2]]}</span>, <span class="blueText">${format(list[i][1], { type: 'time' })}</span>, <span class="darkorchidText">${format(list[i][0] / list[i][1], { padding: true })} per second</span></li>`;
+            text += `<li class="whiteText"><span class="greenText">${format(list[i][0])} ${global.strangeInfo.name[list[i][2]]}</span>, <span class="blueText">${format(list[i][1], { type: 'time' })}</span>, <span class="darkorchidText">${format(list[i][0] / list[i][1], { padding: true })} per second</span></li>`;
         }
     } else { text = '<li class="redText">Reference list is empty</li>'; }
 
@@ -885,10 +909,10 @@ export const format = (input: number | overlimit, settings = {} as { digits?: 0,
             }
         }
         case 'time':
-            if (input >= 86400000) { return `${Math.round(input / 31556952)} years`; }
-            if (input >= 3600000) { return `${Math.round(input / 86400)} days`; }
-            if (input >= 60000) { return `${Math.round(input / 3600)} hours`; }
-            if (input >= 1000) { return `${Math.round(input / 60)} minutes`; }
+            if (input > 86399999) { return `${Math.round(input / 31556952)} years`; }
+            if (input > 3599999) { return `${Math.round(input / 86400)} days`; }
+            if (input > 59999) { return `${Math.round(input / 3600)} hours`; }
+            if (input > 999) { return `${Math.round(input / 60)} minutes`; }
             return `${Math.round(input)} seconds`;
     }
 };

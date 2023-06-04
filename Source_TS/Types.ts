@@ -195,8 +195,8 @@ export interface globalType {
     strangeInfo: {
         Element28: () => number
         gain: (stage: number) => number
+        name: string[]
         stageBoost: Array<number | null>
-        strangeName: string[]
     }
     upgradesInfo: Array<{
         name: string[]
@@ -266,10 +266,11 @@ export interface globalType {
         rewardText: Array<() => string>
         unlock: number[]
     }>
-    challengesInfo: {
+    challengesInfo: { //Each challenge is allowed to have individual types
         name: string[]
         description: string[]
         effectText: Array<() => string>
+        needText: string[][][]
         rewardText: string[][][]
         color: string[]
     }
@@ -278,4 +279,4 @@ export interface globalType {
     }
 }
 
-export type overlimit = [number, number]; //Also possible as string (~21% slower) and number
+export type overlimit = [number, number]; //Also possible as String or Number
