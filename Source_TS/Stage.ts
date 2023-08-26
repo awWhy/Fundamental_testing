@@ -5,7 +5,7 @@ import { cloneArray, global, logAny, player } from './Player';
 import { reset, resetStage } from './Reset';
 import { Alert, Confirm, Notify, playEvent } from './Special';
 import { overlimit } from './Types';
-import { format, getChallengeDescription, getStrangenessDescription, numbersUpdate, stageUpdate, switchTab, updateRankInfo, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { format, getStrangenessDescription, numbersUpdate, stageUpdate, switchTab, updateRankInfo, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
 export const assignBuildingInformation = () => { //Sets buildingInfo.producing for all active buildings, also most of effects
     const { upgradesInfo, researchesInfo, researchesExtraInfo, dischargeInfo, vaporizationInfo, milestonesInfo } = global;
@@ -1721,7 +1721,7 @@ const awardVoidReward = (index: number) => {
     }
 };
 
-export const enterChallenge = async(index: number) => {
+/*export const enterChallenge = async(index: number) => {
     if (player.challenges.active === index) {
         if (await Confirm(`Leave the '${global.challengesInfo.name[index]}'?`)) { exitChallenge(); }
         getChallengeDescription(index);
@@ -1752,4 +1752,4 @@ const exitChallenge = () => {
     resetStage([1, 2, 3, 4, 5]);
 
     if (global.screenReader[0]) { getId('SRStage').textContent = 'Challenge is no longer active'; }
-};
+};*/

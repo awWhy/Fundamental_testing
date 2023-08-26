@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription } from './Update';
-import { assignNewMassCap, assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, enterChallenge, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
+import { assignNewMassCap, assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, screenReaderSupport, mobileDeviceSupport, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify } from './Special';
 import { detectHotkey } from './Hotkeys';
 import { prepareVacuum, switchVacuum } from './Vacuum';
@@ -79,7 +79,7 @@ const changeIntervals = (pause = false) => {
 try { //Start everything
     preventImageUnload();
 
-    const save = localStorage.getItem('save');
+    const save = localStorage.getItem('testing_save');
     if (save !== null) {
         const load = JSON.parse(atob(save));
         const versionCheck = updatePlayer(load);
@@ -164,7 +164,8 @@ try { //Start everything
         const image = getId(`challenge${i + 1}`);
         if (SR) { image.addEventListener('focus', () => getChallengeDescription(i)); }
         image.addEventListener(hover, () => getChallengeDescription(i));
-        image.addEventListener('click', i === -1 ? switchVacuum : () => { void enterChallenge(i); });
+        if (i === -1) { image.addEventListener('click', switchVacuum); }
+        //image.addEventListener('click', i === -1 ? switchVacuum : () => { void enterChallenge(i); });
     }
     for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
         if (i === 5) { continue; } //Missing for now
@@ -338,7 +339,7 @@ try { //Start everything
     buttonDiv.style.cssText = 'display: flex; column-gap: 0.6em; margin-top: 0.4em;';
     getId('loading').append(buttonDiv);
     getId('exportError').addEventListener('click', () => {
-        const save = localStorage.getItem('save');
+        const save = localStorage.getItem('testing_save');
         if (save === null) { return void Alert('No save file detected'); }
         const a = document.createElement('a');
         a.href = `data:text/plain,${save}`;
@@ -348,7 +349,7 @@ try { //Start everything
     getId('deleteError').addEventListener('click', async() => {
         if (!(await Confirm("Press 'Confirm' to delete your save file\nThis will not be possible to undo, so export save file first"))) { return; }
         if (!(await Confirm("Last warning, press 'Confirm' to delete your save file"))) { return; }
-        localStorage.removeItem('save');
+        localStorage.removeItem('testing_save');
         window.location.reload();
         void Alert('Game will auto refresh. If not then do it manually');
     });
@@ -382,7 +383,7 @@ const saveLoad = async(type: 'import' | 'save' | 'export' | 'delete'): Promise<v
                 player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
                 const save = btoa(JSON.stringify(player));
-                localStorage.setItem('save', save);
+                localStorage.setItem('testing_save', save);
                 clearInterval(global.intervalsId.autoSave);
                 global.intervalsId.autoSave = setInterval(saveLoad, player.intervals.autoSave * 1000, 'save');
                 getId('isSaved').textContent = 'Saved';
@@ -427,7 +428,7 @@ const saveLoad = async(type: 'import' | 'save' | 'export' | 'delete'): Promise<v
 
             changeIntervals(true);
             if (lower === 'delete') {
-                localStorage.removeItem('save');
+                localStorage.removeItem('testing_save');
             } else { localStorage.clear(); }
             window.location.reload();
             void Alert('Game will auto refresh. If not then do it manually');
