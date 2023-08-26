@@ -13,7 +13,6 @@ export interface playerType {
         input: number
     }
     discharge: {
-        unlock: boolean
         energy: number
         energyMax: number
         current: number
@@ -32,8 +31,8 @@ export interface playerType {
         massMax: number
         elementsMax: overlimit
         stars: [number, number, number]
-        show: number[]
-        input: [number, number]
+        show: number
+        input: number
     }
     inflation: {
         vacuum: boolean
@@ -49,7 +48,6 @@ export interface playerType {
         updated: number
         started: number
         offline: number
-        disabled: number
     }
     buildings: Array<[
         {
@@ -72,7 +70,6 @@ export interface playerType {
     upgrades: number[][]
     researches: number[][]
     researchesExtra: number[][]
-    researchesAuto: number[]
     ASR: number[]
     elements: number[]
     strangeness: number[][]
@@ -83,11 +80,13 @@ export interface playerType {
     }
     toggles: {
         normal: boolean[]
+        confirm: Array<'All' | 'Safe' | 'None'>
         buildings: boolean[][]
         auto: boolean[]
         shop: {
             howMany: number
             input: number
+            wait: number[]
         }
     }
     history: {
@@ -115,32 +114,37 @@ export interface globalType {
         researchSubtabs: string[]
         strangenessSubtabs: string[]
     }
+    debug: {
+        versionBuild: boolean
+        errorID: boolean
+        errorQuery: boolean
+        errorGain: boolean
+    }
     lastActive: null | number
-    versionBuild: boolean
     lastSave: number
-    timeMode: boolean
     footer: boolean
     mobileDevice: boolean
-    screenReader: boolean
+    screenReader: boolean[]
     automatization: {
         autoU: number[][]
         autoR: number[][]
         autoE: number[][]
         elements: number[]
     }
-    theme: {
-        stage: number
-        default: boolean
-    }
+    theme: number | null
     dischargeInfo: {
         getEnergy: (index: number, stageIndex: number) => number
         energyType: number[][]
+        energyTrue: number
         bonus: number
         next: number
     }
     vaporizationInfo: {
-        effect2U1: () => number
-        effect2RE3: () => number
+        effect2U2: () => number
+        oceanWorld: () => number
+        cloudEffect: (post?: boolean) => overlimit
+        tension: number
+        stress: number
         get: overlimit
     }
     accretionInfo: {
@@ -153,6 +157,7 @@ export interface globalType {
         rankImage: string[]
     }
     collapseInfo: {
+        effect4RE1: () => number
         unlockB: number[]
         unlockG: number[]
         unlockU: number[]
@@ -167,6 +172,8 @@ export interface globalType {
         preonCap: overlimit
         dustCap: overlimit
         massCap: number
+        preonTrue: overlimit
+        dustTrue: overlimit
     }
     intervalsId: {
         main: number | undefined
@@ -186,17 +193,19 @@ export interface globalType {
     buildingsInfo: {
         maxActive: number[]
         name: string[][]
-        type: Array<['', ...Array<'producing' | 'improves'>]>
+        hoverText: string[][]
+        type: Array<['', ...Array<'producing' | 'improving' | 'delaying'>]>
         firstCost: number[][]
         startCost: number[][]
         increase: number[][]
         producing: overlimit[][]
     }
     strangeInfo: {
-        Element28: () => number
+        Element27: () => number
         gain: (stage: number) => number
         name: string[]
         stageBoost: Array<number | null>
+        instability: number
     }
     upgradesInfo: Array<{
         name: string[]
@@ -225,15 +234,6 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
-    researchesAutoInfo: {
-        name: string[]
-        effectText: Array<() => string>
-        cost: number[]
-        startCost: number[]
-        scaling: number[]
-        max: number[]
-        autoStage: number[]
-    }
     ASRInfo: {
         cost: number[]
         costRange: number[][]
@@ -254,17 +254,16 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
-    lastUpgrade: [boolean, number]
-    lastResearch: [boolean, number, 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']
-    lastElement: [boolean, number]
+    lastUpgrade: number[]
+    lastResearch: Array<[number, 'researches' | 'researchesExtra' | 'ASR']>
+    lastElement: number
     milestonesInfo: Array<{
         name: string[]
         need: overlimit[]
         reward: number[]
-        scalingOld: Array<[number[], number[]]>
+        scalingOld: number[][]
         needText: Array<() => string>
         rewardText: Array<() => string>
-        unlock: number[]
     }>
     challengesInfo: { //Each challenge is allowed to have individual types
         name: string[]
