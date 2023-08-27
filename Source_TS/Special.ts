@@ -635,10 +635,12 @@ export const hideFooter = () => {
 export const mobileDeviceSupport = (change = false) => {
     let enabled = localStorage.getItem('support') === 'MD';
     const toggle = getId('MDMainToggle');
+    const inputTest = getId('file') as HTMLInputElement;
 
     if (change) { enabled = !enabled; }
 
     if (enabled) {
+        inputTest.accept = '';
         toggle.textContent = 'ON';
         toggle.style.color = 'var(--red-text-color)';
         toggle.style.borderColor = 'crimson';
@@ -647,6 +649,7 @@ export const mobileDeviceSupport = (change = false) => {
         if (change) { void Alert('To enable touchStart events (as example: touching an upgrade to view description), will need to reload'); }
         if (global.screenReader[0]) { screenReaderSupport(); }
     } else {
+        inputTest.accept = '.txt';
         toggle.textContent = 'OFF';
         toggle.style.color = '';
         toggle.style.borderColor = '';
