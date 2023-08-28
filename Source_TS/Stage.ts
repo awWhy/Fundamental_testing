@@ -1181,7 +1181,7 @@ export const toggleBuy = (type = '' as '1' | 'max' | 'any') => {
     getId('buy1x').style.backgroundColor = shop.howMany === 1 ? 'green' : '';
     getId('buyAny').style.backgroundColor = Math.abs(shop.howMany) !== 1 ? 'green' : '';
     getId('buyMax').style.backgroundColor = shop.howMany === -1 ? 'green' : '';
-    if (type !== '1' && type !== 'max') { input.value = format(shop.input, { digits: 0, type: 'input' }); }
+    if (type !== '1' && type !== 'max') { input.value = format(shop.input, { type: 'input' }); }
     numbersUpdate();
 };
 
@@ -1497,22 +1497,23 @@ export const collapseResetCheck = (auto = false): boolean => {
     assignCollapseInformation();
 
     if (auto) {
-        let enoughBoost;
+        if (player.strangeness[4][5] < 1) { return false; }
+        if (player.toggles.buildings[5][3] && player.strangeness[5][6] >= 2) {
+            const galaxyCost = calculateBuildingsCost(3, 5);
+            if (Limit(galaxyCost).lessOrEqual(info.newMass) && Limit(galaxyCost).moreThan(player.collapse.mass)) {
+                collapseReset();
+                return true;
+            }
+        }
+
         let toReset = true;
         if (player.strangeness[4][5] >= 2) {
             toReset = info.massEffect(true) / info.massEffect() >= player.collapse.input;
-            enoughBoost = toReset || info.starCheck[0] > 0 || info.starCheck[1] > 0 || info.starCheck[2] > 0;
+            if (!toReset && info.starCheck[0] <= 0 && info.starCheck[1] <= 0 && info.starCheck[2] <= 0) { return false; }
         } else {
-            if (player.strangeness[4][5] < 1) { return false; }
             const { starEffect } = info;
-            enoughBoost = (info.massEffect(true) / info.massEffect()) * (starEffect[0](true) / starEffect[0]()) * (starEffect[1](true) / starEffect[1]()) * (starEffect[2](true) / starEffect[2]()) >= player.collapse.input;
+            if ((info.massEffect(true) / info.massEffect()) * (starEffect[0](true) / starEffect[0]()) * (starEffect[1](true) / starEffect[1]()) * (starEffect[2](true) / starEffect[2]()) < player.collapse.input) { return false; }
         }
-        let galaxyAfford = player.toggles.buildings[5][3] && player.strangeness[5][6] >= 2;
-        if (galaxyAfford) {
-            const galaxyCost = calculateBuildingsCost(3, 5);
-            galaxyAfford = Limit(galaxyCost).moreThan(player.collapse.mass) && Limit(galaxyCost).lessOrEqual(info.newMass);
-        }
-        if (!galaxyAfford && !enoughBoost) { return false; }
         collapseReset(toReset);
         return true;
     }
@@ -1526,26 +1527,28 @@ export const collapseAsyncReset = async() => {
 
     if (player.toggles.confirm[4] !== 'None') {
         const active = player.stage.active;
-        const unlockedG = info.newMass > player.collapse.mass && player.collapse.mass >= 1e5 && player.buildings[5][3].true > 0;
-        const cantAfford = unlockedG ? Limit(calculateBuildingsCost(3, 5)).lessOrEqual(info.newMass) : true;
-        if (player.toggles.confirm[4] !== 'Safe' || active !== 4 || (unlockedG && cantAfford)) {
+        const unlockedG = (info.newMass >= 1e5 || player.collapse.mass >= 1e5) && player.strangeness[5][6] >= 1;
+        const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).lessOrEqual(info.newMass);
+        const notMaxed = player.inflation.vacuum && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
+        if (player.toggles.confirm[4] !== 'Safe' || active !== 4 || (cantAfford && (notMaxed || unlockedG))) {
             let message = active === 4 ? 'This will reset all researches and upgrades' : `Collapse attempt while inside '${global.stageInfo.word[active]}'`;
             if (info.newMass > player.collapse.mass) {
                 message += `\nSolar mass will increase to ${format(info.newMass)}`;
+                if (notMaxed) { message += '\n(Hardcap is not reached)'; }
                 if (unlockedG) { message += `\n(${cantAfford ? 'Not enough for' : 'Will be able to make'} a new Galaxy)`; }
             } else { message += "\nTotal Solar mass won't change"; }
+            if (info.starCheck[0] > 0 || info.starCheck[1] > 0 || info.starCheck[2] > 0) {
+                message += '\nAlso will gain new Star remnants:';
+                if (info.starCheck[0] > 0) { message += `\n'Red giants' - ${format(info.starCheck[0])}`; }
+                if (info.starCheck[1] > 0) { message += `\n'Neutron stars' - ${format(info.starCheck[1])}`; }
+                if (info.starCheck[2] > 0) { message += `\n'Black holes' - ${format(info.starCheck[2])}`; }
+            }
             if (player.elements.includes(0.5)) {
                 let count = 0;
                 for (let i = 1; i < player.elements.length; i++) {
                     if (player.elements[i] === 0.5) { count++; }
                 }
                 message += `\n${format(count)} new Elements will become active`;
-            }
-            if (info.starCheck[0] > 0 || info.starCheck[1] > 0 || info.starCheck[2] > 0) {
-                message += '\nAlso will gain new Star remnants:';
-                if (info.starCheck[0] > 0) { message += `\n'Red giants' - ${format(info.starCheck[0])}`; }
-                if (info.starCheck[1] > 0) { message += `\n'Neutron stars' - ${format(info.starCheck[1])}`; }
-                if (info.starCheck[2] > 0) { message += `\n'Black holes' - ${format(info.starCheck[2])}`; }
             }
             if (active !== 4) { message += '\nContinue?'; }
 

@@ -195,8 +195,8 @@ export const preventImageUnload = () => {
     for (let s = 1; s <= 5; s++) {
         for (let i = 0; i < footer[s].length; i++) {
             if (s === 2) {
-                if (i === 2) { continue; }
-            } else if (s === 5 && i < 2) { continue; }
+                if (i === 2) { continue; } //Drops
+            } else if (s === 5 && i < 2) { continue; } //Solar mass and Elements
             images += `<img src="Used_art/${footer[s][i][0]}" loading="lazy">`;
         }
         for (let i = 0; i < build[s].length; i++) {
@@ -209,7 +209,6 @@ export const preventImageUnload = () => {
             images += `<img src="Used_art/${research[s][i][0]}" loading="lazy">`;
         }
         for (let i = 0; i < extra[s].length; i++) {
-            if (s === 2 && i === 3) { continue; }
             images += `<img src="Used_art/${extra[s][i][0]}" loading="lazy">`;
         }
         if (extraDiv[s].length > 0) { images += `<img src="Used_art/${extraDiv[s][0]}" loading="lazy">`; }
@@ -635,12 +634,10 @@ export const hideFooter = () => {
 export const mobileDeviceSupport = (change = false) => {
     let enabled = localStorage.getItem('support') === 'MD';
     const toggle = getId('MDMainToggle');
-    const inputTest = getId('file') as HTMLInputElement;
 
     if (change) { enabled = !enabled; }
 
     if (enabled) {
-        inputTest.accept = '';
         toggle.textContent = 'ON';
         toggle.style.color = 'var(--red-text-color)';
         toggle.style.borderColor = 'crimson';
@@ -648,13 +645,14 @@ export const mobileDeviceSupport = (change = false) => {
         global.mobileDevice = true;
         if (change) { void Alert('To enable touchStart events (as example: touching an upgrade to view description), will need to reload'); }
         if (global.screenReader[0]) { screenReaderSupport(); }
+        (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
     } else {
-        inputTest.accept = '.txt';
         toggle.textContent = 'OFF';
         toggle.style.color = '';
         toggle.style.borderColor = '';
         global.mobileDevice = false;
         if (change) { localStorage.removeItem('support'); }
+        (getId('file') as HTMLInputElement).accept = '.txt';
     }
 };
 
@@ -800,18 +798,18 @@ export const playEvent = (event: number, index: number) => {
 
     switch (event) {
         case 0: //[0] Discharge explanation
-            return void Alert("Energy that had been spent, can't be obtained again. But doing Discharge will reset spent Energy\nHow much Energy is missing can be seen in stats");
+            return void Alert("Energy that had been spent, can't be obtained again. But doing Discharge will reset spent Energy\n(How much Energy should be if none was used can be seen in stats)");
         case 1: //[0] Clouds softcap
             return void Alert('Cloud density is too high... Strength of new Clouds will be weaker (strength can be seen in stats)');
         case 2: //[0] Accretion new Rank unlocked
             if (index !== -1) { global.accretionInfo.rankCost[4] = 5e29; }
-            return void Alert('Getting more Mass, seems impossible. We need to change our approach, next Rank is going to be Softcapped');
+            return void Alert('Getting more Mass, seems impossible. We need to change our approach, next Rank is going to be softcapped');
         case 3: //[0] Element activation
-            return void Alert("Elements require Collapse to be activated. Soon even more Star remnants will be obtained through from Collapse (Solar mass doesn't decrease), effects from remnants can be seen in stats and will be known with proper Elements (Like Solar mass effect and '[1] Hydrogen')");
+            return void Alert("Elements require Collapse to be activated. Soon even more Star remnants will be obtained from Collapse (Solar mass won't decrease from Collapse), remnants strength can be seen in stats, effects will be known with proper Elements (Like Solar mass effect and '[1] Hydrogen')");
         case 4: //[1] Entering Intergalactic
             return void Alert("There doesn't seem to be anything here. Let's try going back to start and find what is missing");
         case 5: //[2] Creating Galaxy
             if (index !== -1) { calculateMaxLevel(4, 4, 'strangeness', true); }
-            return void Alert('Galaxy will boost production of Nebulas and Star clusters, but for the cost of every other structure/upgrade and even Elements.');
+            return void Alert('Galaxy will boost production of Nebulas and Star clusters, but for the cost of every other structure/upgrade and even Elements');
     }
 };

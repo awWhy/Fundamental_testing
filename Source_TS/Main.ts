@@ -356,7 +356,7 @@ try { //Start everything
     void Alert(`Error detected during game loading:\n${error}`);
 }
 
-const saveLoad = async(type: 'import' | 'save' | 'export' | 'delete'): Promise<void> => {
+async function saveLoad(type: 'import' | 'save' | 'export' | 'delete'): Promise<void> {
     switch (type) {
         case 'import': {
             const id = getId('file') as HTMLInputElement;
@@ -379,6 +379,7 @@ const saveLoad = async(type: 'import' | 'save' | 'export' | 'delete'): Promise<v
             return;
         }
         case 'save': {
+            if (player.time.offline < 0) { return Notify(`Saving is disabled until ${new Date(Date.now() - player.time.offline * 1000).toLocaleString()}\nReason: possible time manipulation`); }
             try {
                 player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
@@ -394,6 +395,7 @@ const saveLoad = async(type: 'import' | 'save' | 'export' | 'delete'): Promise<v
             return;
         }
         case 'export': {
+            if (player.time.offline < 0) { return; }
             player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
             if (player.strange[0].total > 0 && player.stage.export > 0) {
@@ -434,7 +436,7 @@ const saveLoad = async(type: 'import' | 'save' | 'export' | 'delete'): Promise<v
             void Alert('Game will auto refresh. If not then do it manually');
         }
     }
-};
+}
 
 const changeSaveFileName = () => {
     const input = getId('saveFileNameInput') as HTMLInputElement;

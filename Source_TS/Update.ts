@@ -91,10 +91,11 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
         time.updated = currentTime;
         global.lastSave += passedSeconds;
         player.stage.export = Math.min(player.stage.export + passedSeconds, maxExportTime());
-        if (time.offline < -28800 || passedSeconds < 0) {
+        if (passedSeconds < 0) {
             time.offline += passedSeconds;
-            if (passedSeconds > 0 && time.offline > -28800) { time.offline = -28800; }
             return;
+        } else if (time.offline < 0) {
+            time.offline = Math.min(time.offline + passedSeconds, 0);
         } else if (passedSeconds > 60) {
             timeWarp = passedSeconds - 60;
             passedSeconds = 60;
@@ -419,7 +420,6 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
         if (subtab.stageCurrent === 'Structures') {
             const buildings = player.buildings[active];
             const multiMake = player.stage.resets >= 1 || player.discharge.current >= 1;
-            const offline = player.time.offline;
             const ASR = player.ASR[active];
 
             if (!player.inflation.vacuum) {
@@ -431,12 +431,8 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             getId('toggleBuy').style.display = multiMake ? '' : 'none';
             getId('autoWaitInput').style.display = player.strangeness[1][7] >= 1 ? '' : 'none';
             getId('toggleBuilding0').style.display = player.strangeness[1][7] >= 1 ? '' : 'none';
-            getId('offlineBoost').style.display = offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2 ? '' : 'none';
-            if ((offline > 0 && offline >= maxOfflineTime()) || offline < -28800) {
-                getId('offlineWarning').textContent = offline < 0 ? `Due to time manipulation game is disabled until ${new Date(Date.now() - (offline + 28800) * 1000).toLocaleString()}` : 'Offline storage is full';
-                getId('offlineWarning').className = offline < 0 ? 'redText' : 'orangeText';
-                getId('offlineWarning').style.display = '';
-            } else { getId('offlineWarning').style.display = 'none'; }
+            getId('offlineBoost').style.display = player.time.offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2 ? '' : 'none';
+            getId('offlineWarning').style.display = player.time.offline > 0 && player.time.offline >= maxOfflineTime() ? '' : 'none';
             for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
                 getId(`building${i}True`).style.display = Limit(buildings[i].current).notEqual(buildings[i as 1].true) ? '' : 'none';
                 getId(`toggleBuilding${i}`).style.display = ASR >= i ? '' : 'none';
@@ -497,7 +493,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                 getId('building2').style.display = nova >= 1 ? '' : 'none';
                 getId('building3').style.display = nova >= 2 ? '' : 'none';
                 getId('building4').style.display = nova >= 3 ? '' : 'none';
-                if (player.inflation.vacuum) { getId('building5').style.display = player.strangeness[4][10] >= 1 && (player.collapse.stars[2] > 0 || player.collapse.mass >= 1000) ? '' : 'none'; }
+                if (player.inflation.vacuum) { getId('building5').style.display = player.strangeness[4][10] >= 1 && player.collapse.stars[2] > 0 ? '' : 'none'; }
                 getId('upgrade4').style.display = player.strangeness[4][2] >= 1 ? '' : 'none';
             } else if (active === 5) {
                 if (!player.inflation.vacuum) {
@@ -617,7 +613,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
     } else if (tab === 'settings') {
         if (subtab.settingsCurrent === 'Settings') {
             const { strangeness } = player;
-            const { true: trueStage } = player.stage;
+            const trueStage = player.stage.true;
 
             getId('toggleAuto0').style.display = strangeness[5][2] >= 1 ? '' : 'none';
             getId('toggleAuto0Main').style.display = strangeness[5][2] >= 1 ? '' : 'none';
@@ -1105,7 +1101,7 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         }
     }
 
-    (getId('autoWaitInput') as HTMLInputElement).value = format(player.toggles.shop.wait[active]);
+    (getId('autoWaitInput') as HTMLInputElement).value = format(player.toggles.shop.wait[active], { type: 'input' });
     getId('reset1Text').innerHTML = specialHTML.resetHTML[active]; //New ID's inside
     if (active === 3) { updateRankInfo(); }
 

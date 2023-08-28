@@ -625,7 +625,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             effectText: [
                 () => `Through random collisions every self-made Dust speeds up Accretion speed. (By ${format(global.upgradesInfo[3].effect[0] as number)})`,
-                () => `New substance for Accretion, will provide boost to Accretion speed based on current Dust quantity. (${format(global.upgradesInfo[3].effect[1] as number, { padding: true })} boost)`,
+                () => `New substance for Accretion, will provide boost to Accretion speed based on current Dust quantity.\n(${format(global.upgradesInfo[3].effect[1] as number, { padding: true })}x boost)`,
                 () => 'Just a small meteoroid, but it will be a good base for what to come. (Unlock a new Structure and get 2x boost to Dust)',
                 () => `Small bodies spontaneously concentrate into clumps. (Self-made Planetesimals boost each other by ${format(global.upgradesInfo[3].effect[3] as number, { digits: 3 })})`,
                 () => 'Bodies are now massive enough to affect each other with gravity. (Unlock a new Structure and get 3x boost to Planetesimals)',
@@ -635,7 +635,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'After reaching equilibrium, Protoplanets will boost themselfs, more with each self-made one.',
                 () => 'Accretion speed increased again (because of drag and escape velocity), by 2.',
                 () => `Accretion speed greatly increased by ${format(global.upgradesInfo[3].effect[10] as number)}.`,
-                () => `Satellites scaling cost is now 2 times smaller.${player.strangeness[3][8] >= 1 ? '\nAlso unlock a new Structure.' : ''}`,
+                () => `Satellites cost scaling is now 2 times smaller.${player.strangeness[3][8] >= 1 ? '\nAlso unlock a new Structure.' : ''}`,
                 () => 'Satellites effect scales better.'
             ],
             effect: [],
@@ -685,7 +685,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             effectText: [
                 () => `Cost scaling is ${format(0.03)} smaller with each level.`,
-                () => `Each self-made Structure, boost each other by additional ${format(0.01)}.`,
+                () => `Self-made Structures boost each other by additional ${format(0.01)}.`,
                 () => `Molecules now produce themselves ${format(global.researchesInfo[1].effect[2] as number)} times quicker.`,
                 () => 'Next goal for Discharge bonus scales by -2 less.',
                 () => 'Discharge production boost from reached goals is now +1.',
@@ -707,8 +707,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Distributary channel'
             ],
             effectText: [
-                () => `Drops produce 3 times more Moles.${global.researchesInfo[2].effect[0] !== player.researches[2][0] ? `\nWeakened by recent ${player.inflation.vacuum ? 'reset' : 'Vaporization'}, effective level is ${format(global.researchesInfo[2].effect[0] as number)} (will be restored with more Drops)` : ''}`,
-                () => `Puddles produce 2 times more Drops.${global.researchesInfo[2].effect[1] !== player.researches[2][1] ? `\nWeakened by recent ${player.inflation.vacuum ? 'reset' : 'Vaporization'}, effective level is ${format(global.researchesInfo[2].effect[1] as number)} (will be restored with more Drops)` : ''}`,
+                () => `Drops produce 3 times more Moles.${global.researchesInfo[2].effect[0] !== player.researches[2][0] ? `\nWeakened by recent ${player.inflation.vacuum ? 'reset' : 'Vaporization'}, effective level is ${format(global.researchesInfo[2].effect[0] as number)} (will be restored with more Drops).` : ''}`,
+                () => `Puddles produce 2 times more Drops.${global.researchesInfo[2].effect[1] !== player.researches[2][1] ? `\nWeakened by recent ${player.inflation.vacuum ? 'reset' : 'Vaporization'}, effective level is ${format(global.researchesInfo[2].effect[1] as number)} (will be restored with more Drops).` : ''}`,
                 () => `Surface tension upgrade is now +${format(0.005)} stronger.`,
                 () => `Surface stress upgrade is now +${format(0.005)} stronger.`,
                 () => 'With more streams, can have even more extra Puddles. (+1 extra Puddles per Pond)',
@@ -736,7 +736,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Dust production is increased by 3.',
                 () => `Dust particles cling to each other. (+${format(0.01)} to 'Brownian motion')`,
                 () => 'Planetesimals produce more Dust. (3 times more)',
-                () => 'Slow encounter velocities will result in a more efficient growth, so this research will make bodies lose more energy with each deflection. Mass production increased by 2.',
+                () => 'Slow encounter velocities will result in a more efficient growth, so this research will make bodies lose more Energy from each deflection. Mass production increased by 2.',
                 () => `Planetesimals when shatter replenish small grains quantity. 'Streaming instability' effect increased by +${format(0.005)}.`,
                 () => 'Some Planetesimals instead of shattering form a contact binary or even trinary. Mass production increased by 3.',
                 () => `Planetesimals attract other bodies with own gravity. Planetesimals get boost to production based on unspent Mass.\n(Total boost: ${Limit(global.researchesInfo[3].effect[6] as overlimit).format({ padding: true })})`,
@@ -803,7 +803,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Impulse'
             ],
             effectText: [
-                () => "Mesons now binds Particles to form Atoms as well. Atoms are now affected by 'Strong force'.",
+                () => "Mesons now binds Particles to form Atoms, which makes Atoms to be affected by 'Strong force'.\n(Atoms are 10 times cheaper)",
                 () => `Improve scaling for 'Tritium' formula, current formula is log${format(global.researchesExtraInfo[1].effect[1] as number)}.`,
                 () => 'First level is to begin the Accretion, second level is to Submerge it.\nAll Structures produce Energy on creation, as well Mass from all Stages is connected.',
                 () => `Delay Preons hardcap by current Energy ^${format(global.researchesExtraInfo[1].effect[3] as number)}.\n(Effect is equal to ${format(player.discharge.energy ** (global.researchesExtraInfo[1].effect[3] as number), { padding: true })})`,
@@ -1049,6 +1049,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'New Structure',
                 'Mass shift',
                 'Massive Ranks'
+                //'Rank raise'
             ],
             effectText: [
                 () => `Accretion speed is ${format(1.5)} times faster.`,
@@ -1554,6 +1555,14 @@ export const updatePlayer = (load: playerType): string => {
             }
             load.accretion.input = 0;
         }
+        /*if (load.version === 'v0.1.6') {
+            load.version = 'v0.1.7';
+
+            //Maybe
+            load.intervals.visual = playerStart.intervals.visual;
+            load.intervals.autoSave = playerStart.intervals.autoSave;
+            delete load.accretion['input' as keyof unknown];
+        }*/
 
         if (load.version !== playerStart.version) {
             throw new ReferenceError('Save file version is higher than game version');
@@ -1645,6 +1654,7 @@ export const updatePlayer = (load: playerType): string => {
         load.toggles.auto[i] = false;
     }
 
+    if (load.intervals.main < 20) { load.intervals.main = 20; }
     for (let i = load.events.length; i < playerStart.events.length; i++) {
         load.events[i] = false;
     }
@@ -1803,7 +1813,7 @@ export const buildVersionInfo = () => {
                 text = "- Stage 6 minor balance changes\n- Images should no longer unload on Stage change\n- Footer now affects page height\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Screen reader support rework (also removed special tab)";
                 break;
             case 'v0.1.6':
-                text = '- New content (Void)\n- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches (effects are unlocked in more direct ways now)\n- Export reward unlocked automatically for free\n- More quality of life improvements\n- Descriptions no longer reset when changing active Stage\n- More work on Mobile device and Screen reader supports\n- Some toggles were reset due to confirmation toggles rework';
+                text = '- New content (Void)\n- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches, effects are obtained in more direct ways now and also reward from export unlocked for free\n- More quality of life improvements\n- Descriptions no longer reset when changing active Stage\n- More work on Mobile device and Screen reader supports\n- Fixed import not working on Mobile devices\n- Some toggles were reset due to confirmation toggles rework';
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;

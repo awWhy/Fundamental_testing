@@ -44,7 +44,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.researchesExtra[4][0] >= 1; }
         if (index === 3) { return player.researchesExtra[4][0] >= 2; }
         if (index === 4) { return player.researchesExtra[4][0] >= 3; }
-        if (index === 5) { return player.strangeness[4][10] >= 1; }
+        if (index === 5) { return player.strangeness[4][10] >= 1 && player.collapse.stars[2] > 0; }
     } else if (stageIndex === 5) {
         if (index < 3 && player.collapse.mass < global.collapseInfo.unlockG[index]) { return false; }
         if (index === 1) { return player.inflation.vacuum || player.milestones[2][0] >= 6; }
