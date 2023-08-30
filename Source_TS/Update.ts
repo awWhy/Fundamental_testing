@@ -475,25 +475,37 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                     //getId('upgrade9').style.display = buildings[6].trueTotal[0] > 0 && player.strangeness[2][9] >= 2 ? '' : 'none';
                 }
             } else if (active === 3) {
+                const rank = player.accretion.rank;
                 const upgrades = player.upgrades[3];
+
+                getId('buildings').style.display = rank >= 1 ? '' : 'none';
                 getId('building2').style.display = upgrades[2] === 1 ? '' : 'none';
                 getId('building3').style.display = upgrades[4] === 1 ? '' : 'none';
                 getId('building4').style.display = upgrades[6] === 1 ? '' : 'none';
-                if (player.inflation.vacuum) { getId('building5').style.display = upgrades[11] === 1 && player.strangeness[3][8] >= 1 && player.accretion.rank >= 5 ? '' : 'none'; }
+                if (player.inflation.vacuum) { getId('building5').style.display = rank >= 5 && upgrades[11] === 1 && player.strangeness[3][8] >= 1 ? '' : 'none'; }
+                getId('upgrades').style.display = rank >= 1 ? '' : 'none';
+                getId('upgrade3').style.display = rank >= 2 ? '' : 'none';
                 getId('upgrade4').style.display = buildings[2].trueTotal[0] > 0 ? '' : 'none';
-                if (upgrades[4] === 1) { getId('upgrade6').style.display = ''; }
-                getId('upgrade9').style.display = player.accretion.rank >= 4 && player.strangeness[3][2] >= 3 ? '' : 'none';
+                getId('upgrade5').style.display = rank >= 3 ? '' : 'none';
+                getId('upgrade6').style.display = rank >= 4 || upgrades[4] === 1 ? '' : 'none';
+                getId('upgrade7').style.display = rank >= 4 ? '' : 'none';
+                getId('upgrade8').style.display = rank >= 4 ? '' : 'none';
+                getId('upgrade9').style.display = rank >= 4 && player.strangeness[3][2] >= 3 ? '' : 'none';
+                getId('upgrade10').style.display = rank >= 4 ? '' : 'none';
+                getId('upgrade11').style.display = rank >= 5 ? '' : 'none';
+                getId('upgrade12').style.display = rank >= 5 ? '' : 'none';
+                getId('upgrade13').style.display = rank >= 5 ? '' : 'none';
             } else if (active === 4) {
                 const nova = player.researchesExtra[4][0];
 
-                getId('starsSpecial').style.display = nova >= 1 ? '' : 'none';
-                getId('starSpecial2').style.display = nova >= 2 ? '' : 'none';
-                getId('starSpecial3').style.display = nova >= 3 ? '' : 'none';
+                getId('starsSpecial').style.display = buildings[2].trueTotal[0] > 0 ? '' : 'none';
+                getId('starSpecial2').style.display = buildings[3].trueTotal[0] > 0 ? '' : 'none';
+                getId('starSpecial3').style.display = buildings[4].trueTotal[0] > 0 ? '' : 'none';
                 getId('reset1Main').style.display = player.upgrades[4][0] === 1 ? '' : 'none';
                 getId('building2').style.display = nova >= 1 ? '' : 'none';
                 getId('building3').style.display = nova >= 2 ? '' : 'none';
                 getId('building4').style.display = nova >= 3 ? '' : 'none';
-                if (player.inflation.vacuum) { getId('building5').style.display = player.strangeness[4][10] >= 1 && player.collapse.stars[2] > 0 ? '' : 'none'; }
+                if (player.inflation.vacuum) { getId('building5').style.display = player.strangeness[4][10] >= 1 && (player.collapse.stars[2] > 0 || player.buildings[5][3].true > 0) ? '' : 'none'; }
                 getId('upgrade4').style.display = player.strangeness[4][2] >= 1 ? '' : 'none';
             } else if (active === 5) {
                 if (!player.inflation.vacuum) {
@@ -506,7 +518,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                     getId('upgrades').style.display = nebula || cluster ? '' : 'none';
                     getId('upgrade1').style.display = nebula ? '' : 'none';
                     getId('upgrade2').style.display = cluster ? '' : 'none';
-                } else { getId('building4').style.display = 'none'; }
+                }
                 getId('building3').style.display = player.strangeness[5][6] >= 1 ? '' : 'none';
                 getId('upgrade3').style.display = buildings[3].true >= 1 ? '' : 'none';
             }
@@ -519,11 +531,12 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
         const trueSubtab = tab === 'Elements' ? tab : subtab.researchCurrent;
         if (trueSubtab === 'Researches') {
             if (active === 1) {
+                getId('stageResearch').style.display = player.discharge.current >= 4 ? '' : 'none';
                 if (player.inflation.vacuum) {
                     getId('researchExtra2').style.display = player.researchesExtra[1][2] >= 2 ? '' : 'none';
                     getId('researchExtra4').style.display = player.researchesExtra[1][2] >= 1 ? '' : 'none';
                     getId('researchExtra5').style.display = player.accretion.rank >= 6 ? '' : 'none';
-                    if (player.stage.resets < 1) { getId('extraResearch').style.display = player.discharge.current >= 5 ? '' : 'none'; }
+                    getId('extraResearch').style.display = player.discharge.current >= 5 ? '' : 'none';
                 }
             } else if (active === 2) {
                 const buildings = player.buildings[2];
@@ -537,11 +550,22 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                 getId('researchExtra3').style.display = buildings[5].trueTotal[0] > 0 ? '' : 'none';
                 getId('researchExtra4').style.display = player.accretion.rank >= 6 ? '' : 'none';
             } else if (active === 3) {
-                if (player.upgrades[3][4] === 1) { getId('research7').style.display = ''; }
+                const rank = player.accretion.rank;
+
+                getId('stageResearch').style.display = rank >= 1 ? '' : 'none';
                 getId('research3').style.display = player.buildings[3][2].trueTotal[0] > 0 ? '' : 'none';
                 getId('research4').style.display = player.buildings[3][2].trueTotal[0] > 0 ? '' : 'none';
+                getId('research5').style.display = rank >= 3 ? '' : 'none';
+                getId('research6').style.display = rank >= 3 ? '' : 'none';
+                getId('research7').style.display = rank >= 4 || player.upgrades[3][4] === 1 ? '' : 'none';
+                getId('research8').style.display = rank >= 4 ? '' : 'none';
+                getId('research9').style.display = rank >= 5 ? '' : 'none';
+                getId('extraResearch').style.display = rank >= 2 ? '' : 'none';
+                getId('researchExtra2').style.display = rank >= 3 ? '' : 'none';
+                getId('researchExtra3').style.display = rank >= 4 ? '' : 'none';
+                getId('researchExtra4').style.display = rank >= 5 ? '' : 'none';
                 if (player.inflation.vacuum) {
-                    getId('researchExtra5').style.display = player.accretion.rank >= 3 && player.researchesExtra[1][2] >= 2 ? '' : 'none';
+                    getId('researchExtra5').style.display = rank >= 3 && player.researchesExtra[1][2] >= 2 ? '' : 'none';
                 }
             } else if (active === 4) {
                 getId('research4').style.display = player.strangeness[4][2] >= 2 ? '' : 'none';
@@ -638,6 +662,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
             getId('collapseGalaxy').style.display = strangeness[5][6] >= 2 ? '' : 'none';
             if (trueStage < 2) { getId('resetToggles').style.display = player.discharge.current >= 1 ? '' : 'none'; }
             if (trueStage < 3) { getId('vaporizationToggleReset').style.display = player.vaporization.clouds[0] > 0 ? '' : 'none'; }
+            if (trueStage < 4) { getId('rankToggleReset').style.display = player.accretion.rank >= 2 ? '' : 'none'; }
             if (trueStage < 5) {
                 getId('collapseToggleReset').style.display = player.collapse.mass > 0.01235 ? '' : 'none';
                 getId('elementsAsSubtab').style.display = player.upgrades[4][1] === 1 ? '' : 'none';
@@ -682,12 +707,11 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                 if (player.inflation.vacuum) {
                     getId('rankStat0').style.display = player.strangeness[2][10] >= 1 ? '' : 'none';
                 }
+                for (let i = 1; i < global.accretionInfo.rankImage.length; i++) { getId(`rankStat${i}`).style.display = player.accretion.rank >= i ? '' : 'none'; }
             } else if (active === 4) {
-                const nova = player.researchesExtra[4][0];
-
-                getId('star1Stats').style.display = nova >= 1 ? '' : 'none';
-                getId('star2Stats').style.display = nova >= 2 ? '' : 'none';
-                getId('star3Stats').style.display = nova >= 3 ? '' : 'none';
+                getId('star1Stats').style.display = buildings[2].trueTotal[0] > 0 ? '' : 'none';
+                getId('star2Stats').style.display = buildings[3].trueTotal[0] > 0 ? '' : 'none';
+                getId('star3Stats').style.display = buildings[4].trueTotal[0] > 0 ? '' : 'none';
             }
         }
     }
@@ -1067,7 +1091,6 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         if (vacuum) {
             showU.unshift(1, 2);
             showRE.push(1, 3);
-            if (resets >= 1) { getId('extraResearch').style.display = ''; }
         } else {
             getId('upgrade1').style.display = 'none';
             getId('upgrade2').style.display = 'none';
@@ -1184,21 +1207,19 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
 };
 
 export const updateRankInfo = () => { //Visual only
-    const image = getId('rankImage', false) as HTMLImageElement;
-    if (image === null) { return; } //Safety
     const name = getId('rankName', false);
-    const { accretionInfo } = global;
+    if (name === null) { return; } //Safety
     const rank = player.accretion.rank;
 
     getId('rankMessage', false).textContent = rank === 0 ?
         'Might need more than just water... Increase Rank with Mass.' :
         `Increase it with Mass. (Return back to ${player.inflation.vacuum ? 'Preons' : 'Dust'}, but unlock something new)`;
-    if (accretionInfo.rankCost[rank] === 0) { getId('reset1Button').textContent = 'Max Rank achieved'; }
+    if (global.accretionInfo.rankCost[rank] === 0) { getId('reset1Button').textContent = 'Max Rank achieved'; }
 
-    image.src = `Used_art/${accretionInfo.rankImage[rank]}`;
-    name.textContent = accretionInfo.rankName[rank];
+    (getId('rankImage', false) as HTMLImageElement).src = `Used_art/${global.accretionInfo.rankImage[rank]}`;
+    name.textContent = global.accretionInfo.rankName[rank];
     if (rank === 0) {
-        name.style.color = ''; //Blue
+        name.style.color = 'var(--blue-text-color)';
     } else if (rank === 1) {
         name.style.color = 'var(--cyan-text-color)';
     } else if (rank === 5) {
@@ -1208,28 +1229,4 @@ export const updateRankInfo = () => { //Visual only
     } else {
         name.style.color = 'var(--gray-text-color)';
     }
-
-    getId('buildings').style.display = rank >= 1 ? '' : 'none';
-    getId('upgrades').style.display = rank >= 1 ? '' : 'none';
-    getId('upgrade3').style.display = rank >= 2 ? '' : 'none';
-    getId('upgrade5').style.display = rank >= 3 ? '' : 'none';
-    getId('upgrade6').style.display = rank >= 4 ? '' : 'none';
-    getId('upgrade7').style.display = rank >= 4 ? '' : 'none';
-    getId('upgrade8').style.display = rank >= 4 ? '' : 'none';
-    getId('upgrade10').style.display = rank >= 4 ? '' : 'none';
-    getId('upgrade11').style.display = rank >= 5 ? '' : 'none';
-    getId('upgrade12').style.display = rank >= 5 ? '' : 'none';
-    getId('upgrade13').style.display = rank >= 5 ? '' : 'none';
-    getId('stageResearch').style.display = rank >= 1 ? '' : 'none';
-    getId('research5').style.display = rank >= 3 ? '' : 'none';
-    getId('research6').style.display = rank >= 3 ? '' : 'none';
-    getId('research7').style.display = rank >= 4 ? '' : 'none';
-    getId('research8').style.display = rank >= 4 ? '' : 'none';
-    getId('research9').style.display = rank >= 5 ? '' : 'none';
-    getId('extraResearch').style.display = rank >= 2 ? '' : 'none';
-    getId('researchExtra2').style.display = rank >= 3 ? '' : 'none';
-    getId('researchExtra3').style.display = rank >= 4 ? '' : 'none';
-    getId('researchExtra4').style.display = rank >= 5 ? '' : 'none';
-    if (player.stage.true < 4) { getId('rankToggleReset').style.display = rank >= 2 ? '' : 'none'; }
-    for (let i = 1; i < accretionInfo.rankImage.length; i++) { getId(`rankStat${i}`).style.display = rank >= i ? '' : 'none'; }
 };

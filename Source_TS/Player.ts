@@ -649,7 +649,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Helium fusion'
             ],
             effectText: [
-                () => 'As fuel runs out, each star will boost production in its own special way.',
+                () => 'As fuel runs out, every Star will boost production in its own special way.',
                 () => `Fuse with Protium instead of Deuterium. Unlock ${player.stage.true >= 5 ? '5 first Elements' : 'a new upgrade type (Research tab)'}.`,
                 () => `CNO cycle is now a better source of Helium and Energy. Unlock ${player.stage.true >= 5 ? '5 more Elements' : 'even more of that upgrade type'}.`,
                 () => 'Through Triple-alpha and then Alpha process, unlock a few more Elements.'
@@ -759,8 +759,8 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             effectText: [
                 () => `From Planetesimals to Planets, will get ${format(global.researchesInfo[4].effect[0] as number)}x boost to all Stars.`,
-                () => `Each Star boost another Star. (Total to each Star is ${Limit(global.researchesInfo[4].effect[1] as overlimit).format({ padding: true })}x)`,
-                () => "Improve effect of 'Planetary system', as well increases its max level by +3.",
+                () => `All Stars boost each other. (Total boost is ${Limit(global.researchesInfo[4].effect[1] as overlimit).format({ padding: true })})`,
+                () => "Improve effect scaling of 'Planetary system', as well its max level by +3.",
                 () => `Matter expelled from Red giants, this will boost Main-sequence stars by 4, as well boost all Stars by ${format(1.25)}.`,
                 () => `An immensely energetic explosion that will boost all Stars by ${format(global.researchesInfo[4].effect[4] as number, { padding: true })}. (Effect is stronger with more Black holes)`
             ],
@@ -853,8 +853,8 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             effect: [],
             cost: [],
-            startCost: [1e-18, 1e-16, 1e26, 1e-6, 1e25],
-            scaling: [10, 100, 1, 1e5, 1e3],
+            startCost: [1e-18, 1e-16, 1e26, 1e-6, 1e20],
+            scaling: [10, 100, 1, 1e5, 1e4],
             max: [12, 5, 1, 8, 1],
             maxActive: 4
         }, { //Stage 4
@@ -890,7 +890,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         costRange: [ //Random scaling
             [],
             [4000, 10000, 16000, 24000, 32000],
-            [1e10, 1e14, 1e18, 1e23, 1e29, 1e36],
+            [1e10, 1e14, 1e18, 1e23, 1e28, 1e34],
             [1e-7, 1e10, 5e29, 2e30, 1e36],
             [1e6, 1e17, 1e28, 1e39, 1e72],
             [1, 1, 1, 1]
@@ -1177,7 +1177,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             reward: [1, 1],
             scalingOld: [
                 [1e30, 1e33, 1e36, 1e39, 1e42, 1e45],
-                [1500, 3000, 4500, 6000, 7500, 9000]
+                [1000, 2500, 4000, 5500, 7000, 9000]
             ]
         }, { //Stage 3
             name: [

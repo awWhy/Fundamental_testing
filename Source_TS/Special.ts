@@ -8,7 +8,7 @@ export const specialHTML = { //First values for images from here must be from tr
         '',
         '<span class="bigWord orangeText">Discharge</span>. Reset current Structures and Energy. Will also boost production by <span id="dischargeEffect" class="orangeText"></span>, if to reset with enough Energy.',
         '<span class="bigWord grayText">Vaporization</span>. Structures, upgrades, will be reset. But in return gain <span class="grayText">Clouds</span>. It takes a lot to form more than one.',
-        '<img id="rankImage" src="Used_art/Missing.png" alt="">Current <span class="bigWord darkorchidText">Rank</span> is: <span id="rankName" class="blueText"></span>. <span id="rankMessage"></span>',
+        '<img id="rankImage" src="Used_art/Missing.png" alt="">Current <span class="bigWord darkorchidText">Rank</span> is: <span id="rankName"></span>. <span id="rankMessage"></span>',
         '<span class="bigWord orchidText">Collapse</span> - Everything will be lost, but at same time gained. Even remnants have their own unique strength and effects.',
         ''
     ],
@@ -109,7 +109,7 @@ export const specialHTML = { //First values for images from here must be from tr
             ['ResearchS2.png', '2 stars', 'stage5borderImage'],
             ['ResearchS3.png', 'Protodisc', 'stage7borderImage'],
             ['ResearchS4.png', 'Planetary nebula', 'stage5borderImage'],
-            ['Missing.png'/*'ResearchS5.png'*/, 'Gamma-rays', 'stage7borderImage']
+            ['ResearchS5.png', 'Gamma-rays', 'stage6borderImage']
         ],
         [
             ['ResearchG1.png', 'Density', 'stage1borderImage'],
@@ -805,7 +805,7 @@ export const playEvent = (event: number, index: number) => {
             if (index !== -1) { global.accretionInfo.rankCost[4] = 5e29; }
             return void Alert('Getting more Mass, seems impossible. We need to change our approach, next Rank is going to be softcapped');
         case 3: //[0] Element activation
-            return void Alert("Elements require Collapse to be activated. Soon even more Star remnants will be obtained from Collapse (Solar mass won't decrease from Collapse), remnants strength can be seen in stats, effects will be known with proper Elements (Like Solar mass effect and '[1] Hydrogen')");
+            return void Alert("Elements require Collapse to be activated. Soon even more Star remnants will be obtained through Collapse (Solar mass cannot decrease), remnants strength can be seen in stats, effects will be known with proper Elements (Like Solar mass effect and '[1] Hydrogen')");
         case 4: //[1] Entering Intergalactic
             return void Alert("There doesn't seem to be anything here. Let's try going back to start and find what is missing");
         case 5: //[2] Creating Galaxy

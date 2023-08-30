@@ -85,7 +85,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
         case 'researches':
             if (global.researchesInfo[stageIndex].maxActive < upgrade + 1) { return false; }
             if (stageIndex === 1) {
-                return player.upgrades[1][5] === 1;
+                return player.discharge.current >= 4;
             } else if (stageIndex === 2) {
                 return true;
             } else if (stageIndex === 3) {
@@ -105,7 +105,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             if (stageIndex === 1) {
                 if (upgrade === 1) { return player.researchesExtra[1][2] >= 2; }
                 if (upgrade === 4) { return player.accretion.rank >= 6; }
-                return player.upgrades[1][5] === 1;
+                return player.discharge.current >= 5;
             } else if (stageIndex === 2) {
                 if (player.vaporization.clouds[0] === 0) { return false; }
                 if (upgrade === 3) { return player.accretion.rank >= 6; }

@@ -1529,7 +1529,7 @@ export const collapseAsyncReset = async() => {
         const active = player.stage.active;
         const unlockedG = (info.newMass >= 1e5 || player.collapse.mass >= 1e5) && player.strangeness[5][6] >= 1;
         const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).lessOrEqual(info.newMass);
-        const notMaxed = player.inflation.vacuum && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
+        const notMaxed = player.inflation.vacuum && info.newMass > player.collapse.mass && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
         if (player.toggles.confirm[4] !== 'Safe' || active !== 4 || (cantAfford && (notMaxed || unlockedG))) {
             let message = active === 4 ? 'This will reset all researches and upgrades' : `Collapse attempt while inside '${global.stageInfo.word[active]}'`;
             if (info.newMass > player.collapse.mass) {
