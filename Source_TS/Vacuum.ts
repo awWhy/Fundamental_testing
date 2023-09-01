@@ -10,7 +10,7 @@ export const prepareVacuum = () => {
     if (player.inflation.vacuum) {
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
         buildingsInfo.hoverText[2][0] = 'Tritium';
-        buildingsInfo.hoverText[3][0] = 'Preons';
+        buildingsInfo.hoverText[3][0] = 'Preons hardcap';
         buildings[1][0].current = [5.476, -3];
         buildings[2][0].current = [0, 0];
         buildings[3][0].current = [9.76185667392, -36];
@@ -59,19 +59,19 @@ export const prepareVacuum = () => {
         global.ASRInfo.costRange[3][3] = 2.47e31;
 
         const strangeness1Cost = [2, 1, 4, 20, 2, 1, 2, 4, 40];
-        const strangeness1Scaling = [2.5, 3.5, 8, 300, 6, 2.8, 2, 4, 1];
+        const strangeness1Scaling = [2.5, 3.5, 6, 300, 6, 2.8, 2, 4, 1];
         strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
         strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
-        const strangeness2Cost = [1, 2, 3, 4, 20, 2, 1, 4, 40];
-        const strangeness2Scaling = [1.8, 1.8, 3.4, 3.4, 500, 2, 2, 4, 1];
+        const strangeness2Cost = [1, 2, 3, 4, 20, 2, 4, 40];
+        const strangeness2Scaling = [1.8, 1.8, 3.4, 3.4, 500, 2, 4, 1];
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
-        const strangeness3Cost = [1, 2, 6, 18, 20, 3, 10, 40];
+        const strangeness3Cost = [1, 2, 4, 16, 20, 3, 10, 40];
         const strangeness3Scaling = [1.8, 2.8, 2, 1, 200, 2.4, 3, 1];
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
-        const strangeness4Cost = [1, 3, 5, 5, 18, 20, 3, 4, 4, 40];
-        const strangeness4Scaling = [1.8, 2.8, 3, 4, 5, 400, 2.4, 4, 1, 1];
+        const strangeness4Cost = [1, 3, 3, 5, 18, 20, 3, 4, 40];
+        const strangeness4Scaling = [1.8, 2.8, 3, 4, 5, 400, 2.4, 4, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
         const strangeness5Cost = [4, 12, 2000, 10, 10, 40, 1500, 60, 1500, 200];
@@ -79,9 +79,9 @@ export const prepareVacuum = () => {
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 12;
-        strangenessInfo[2].maxActive = 12;
+        strangenessInfo[2].maxActive = 11;
         strangenessInfo[3].maxActive = 11;
-        strangenessInfo[4].maxActive = 12;
+        strangenessInfo[4].maxActive = 11;
         strangenessInfo[5].maxActive = 11;
 
         getId('milestonesWelcome').innerHTML = 'Milestones, can only be done when inside the <span class="darkvioletText">Void</span>';
@@ -99,10 +99,8 @@ export const prepareVacuum = () => {
         getId('strangeBoostMain').style.display = '';
         getId('strange9Stage1').style.display = '';
         getId('strange8Stage2').style.display = '';
-        getId('strange9Stage2').style.display = '';
         getId('strange8Stage3').style.display = '';
         getId('strange9Stage4').style.display = '';
-        getId('strange10Stage4').style.display = '';
         getId('strange6Stage5').style.display = '';
         for (let s = 2; s <= 5; s++) {
             getId(`strangenessSection${s}`).style.display = '';
@@ -164,20 +162,20 @@ export const prepareVacuum = () => {
         global.ASRInfo.costRange[1] = [6000, 12000, 18000];
         global.ASRInfo.costRange[3][3] = 2e30;
 
-        const strangeness1Cost = [1, 1, 3, 6, 2, 1, 2, 2, 15];
+        const strangeness1Cost = [1, 1, 3, 6, 6, 1, 2, 2, 15];
         const strangeness1Scaling = [1.5, 1, 3.5, 0, 4, 0.75, 2, 4, 0];
         strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
         strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
-        const strangeness2Cost = [1, 2, 2, 1, 6, 2, 1, 3, 15];
-        const strangeness2Scaling = [0.4, 0.5, 2.5, 2, 0, 1, 0.5, 2, 0];
+        const strangeness2Cost = [1, 2, 2, 1, 6, 2, 2, 15];
+        const strangeness2Scaling = [0.4, 0.5, 2.5, 2, 0, 1, 6, 0];
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
         const strangeness3Cost = [1, 1, 2, 12, 6, 2, 10, 15];
         const strangeness3Scaling = [0.75, 1.5, 2, 0, 0, 1, 15, 0];
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
-        const strangeness4Cost = [1, 1, 3, 2, 8, 6, 3, 3, 3, 15];
-        const strangeness4Scaling = [1, 2, 2.5, 3, 52, 0, 1, 6, 0, 0];
+        const strangeness4Cost = [1, 1, 3, 2, 8, 6, 3, 3, 15];
+        const strangeness4Scaling = [1, 2, 2.5, 3, 52, 0, 1, 6, 0];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
         const strangeness5Cost = [120, 20, 80, 10, 10, 40, 800, 20, 40, 60];
@@ -185,9 +183,9 @@ export const prepareVacuum = () => {
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 9;
-        strangenessInfo[2].maxActive = 9;
+        strangenessInfo[2].maxActive = 8;
         strangenessInfo[3].maxActive = 8;
-        strangenessInfo[4].maxActive = 10;
+        strangenessInfo[4].maxActive = 9;
         strangenessInfo[5].maxActive = 10;
 
         getId('milestonesWelcome').innerHTML = 'Any reached Milestone will award 1 <span class="greenText">Strange quark</span>';

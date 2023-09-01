@@ -149,7 +149,7 @@ export const specialHTML = { //First values for images from here must be from tr
         ],
         [
             ['ResearchCollapse1.png', 'Supernova', 'stage6borderImage'],
-            ['Missing.png'/*'ResearchCollapse2.png'*/, 'Mass transfer', 'stage4borderImage'],
+            ['ResearchCollapse2.png', 'Mass transfer', 'stage7borderImage'],
             ['ResearchCollapse3.png', 'White dwarf', 'stage1borderImage']
         ],
         []

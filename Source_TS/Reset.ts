@@ -21,7 +21,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
     for (const s of stageIndex) {
         if (s === 2) {
-            if (player.strangeness[2][11] >= 1 && type !== 'vaporization' && type !== 'discharge') { continue; }
+            if (player.strangeness[2][10] >= 1 && type !== 'vaporization' && type !== 'discharge') { continue; }
             global.researchesInfo[2].effect[0] = 0;
             global.researchesInfo[2].effect[1] = 0;
         } else if (s === 4) {
@@ -132,7 +132,7 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             player.collapse.mass = 0.01235;
             player.collapse.stars = [0, 0, 0];
             player.elements = cloneArray(playerStart.elements);
-            player.elements[0] = player.strangeness[4][11] >= 1 ? 1 : 0;
+            player.elements[0] = player.strangeness[4][10] >= 1 ? 1 : 0;
             autoElementsSet();
             for (let i = 0; i < player.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
             global.lastElement = -1;
@@ -219,7 +219,6 @@ export const resetVacuum = () => {
     player.elements = cloneArray(playerStart.elements);
 
     //Stage 5 and rest
-    if (player.time.offline > 28800) { player.time.offline = 28800; }
     global.historyStorage.stage = [];
     player.history.stage.best = [0, 1, 0];
     player.stage.resets = 0;

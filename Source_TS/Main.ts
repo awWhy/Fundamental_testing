@@ -57,7 +57,8 @@ const handleOfflineTime = (): number => {
     const timeNow = Date.now();
     const offlineTime = (timeNow - time.updated) / 1000;
     time.updated = timeNow;
-    time.offline = Math.min(time.offline + offlineTime, maxOfflineTime());
+    const maxOffline = maxOfflineTime();
+    if (time.offline < maxOffline) { time.offline = Math.min(time.offline + offlineTime, maxOffline); }
     player.stage.export = Math.min(player.stage.export + offlineTime, maxExportTime());
     return offlineTime;
 };
@@ -72,8 +73,8 @@ const changeIntervals = (pause = false) => {
     clearInterval(intervalsId.autoSave);
     intervalsId.main = pause ? undefined : setInterval(timeUpdate, intervals.main);
     intervalsId.numbers = pause ? undefined : setInterval(numbersUpdate, intervals.numbers);
-    intervalsId.visual = pause ? undefined : setInterval(visualUpdate, intervals.visual * 1000);
-    intervalsId.autoSave = pause ? undefined : setInterval(saveLoad, intervals.autoSave * 1000, 'save');
+    intervalsId.visual = pause ? undefined : setInterval(visualUpdate, intervals.visual);
+    intervalsId.autoSave = pause ? undefined : setInterval(saveLoad, intervals.autoSave, 'save');
 };
 
 try { //Start everything
@@ -275,14 +276,14 @@ try { //Start everything
     });
     getId('visualInterval').addEventListener('change', () => {
         const visualInput = getId('visualInterval') as HTMLInputElement;
-        player.intervals.visual = Math.min(Math.max(Math.trunc(Number(visualInput.value) * 10) / 10, 0.2), 4);
-        visualInput.value = `${player.intervals.visual}`;
+        player.intervals.visual = Math.min(Math.max(Math.trunc(Number(visualInput.value) * 1000), 200), 4000);
+        visualInput.value = `${player.intervals.visual / 1000}`;
         changeIntervals();
     });
     getId('autoSaveInterval').addEventListener('change', () => {
         const autoSaveInput = getId('autoSaveInterval') as HTMLInputElement;
-        player.intervals.autoSave = Math.min(Math.max(Math.trunc(Number(autoSaveInput.value)), 10), 1800);
-        autoSaveInput.value = `${player.intervals.autoSave}`;
+        player.intervals.autoSave = Math.min(Math.max(Math.trunc(Number(autoSaveInput.value) * 1000), 4000), 1800000);
+        autoSaveInput.value = `${player.intervals.autoSave / 1000}`;
         changeIntervals();
     });
     getId('thousandSeparator').addEventListener('change', () => changeFormat(false));
@@ -386,7 +387,7 @@ async function saveLoad(type: 'import' | 'save' | 'export' | 'delete'): Promise<
                 const save = btoa(JSON.stringify(player));
                 localStorage.setItem('testing_save', save);
                 clearInterval(global.intervalsId.autoSave);
-                global.intervalsId.autoSave = setInterval(saveLoad, player.intervals.autoSave * 1000, 'save');
+                global.intervalsId.autoSave = setInterval(saveLoad, player.intervals.autoSave, 'save');
                 getId('isSaved').textContent = 'Saved';
                 global.lastSave = 0;
             } catch (error) {
@@ -495,7 +496,7 @@ const getDate = (type: 'dateDMY' | 'timeHMS'): string => {
 
 export const timeWarp = async() => {
     const { time } = player;
-    const waste = (8 - (player.stage.true >= 6 ? player.strangeness[2][7] : 0)) / 2;
+    const waste = (8 - player.strangeness[2][6]) / 2;
     if (time.offline < 900 * waste) { return void Alert(`Need at least ${format(15 * waste)} minutes (effective is 15 minutes) of storaged Offline time to Warp`); }
 
     const warpTime = Math.min(player.strangeness[1][7] < 2 ? (await Confirm(`Do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })}, will be consumed up to half an hour (uses ${format(waste)} seconds per added second)\nCalculates a minute per tick`) ? 1800 : 0) :

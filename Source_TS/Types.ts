@@ -1,5 +1,6 @@
 export interface playerType {
     version: string
+    saveUpdate016: boolean
     fileName: string
     separator: string[]
     stage: {

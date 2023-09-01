@@ -8,6 +8,7 @@ import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = { //Only for information that need to be saved (cannot be calculated)
     version: 'v0.1.6',
+    saveUpdate016: false, //Remove in v0.1.7
     fileName: 'Fundamental, [date] [time], [stage]',
     separator: ['', '.'], //[0] separator, [1] point
     stage: {
@@ -49,8 +50,8 @@ export const player: playerType = { //Only for information that need to be saved
     intervals: {
         main: 20,
         numbers: 80,
-        visual: 1,
-        autoSave: 60
+        visual: 1000,
+        autoSave: 20000
     },
     time: {
         updated: Date.now(),
@@ -443,7 +444,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 }
                 if (player.elements[22] >= minValue) { stars += player.collapse.stars[0]; }
 
-                let effect = (stars + 1) ** (0.5 + player.strangeness[4][11] / 40);
+                let effect = (stars + 1) ** (0.5 + player.strangeness[4][10] / 40);
                 if (player.elements[12] >= minValue) { effect *= logAny(stars + (global.elementsInfo.effect[12] as number), global.elementsInfo.effect[12] as number); }
                 return effect;
             },
@@ -531,9 +532,9 @@ export const global: globalType = { //For information that doesn't need to be sa
     },
     strangeInfo: {
         Element27: () => {
-            let effect = Math.floor(Limit(player.collapse.elementsMax).max('1e50').log(10).toNumber() - 50);
+            let effect = Math.floor(Limit(player.collapse.elementsMax).log(10).toNumber() - 48);
             if (!player.inflation.vacuum && player.upgrades[5][2] === 1) { effect = Math.floor(effect ** 1.5); }
-            return effect;
+            return Math.max(effect, 0);
         },
         gain: (stage: number) => {
             const interstellar = stage >= 4 || player.inflation.vacuum;
@@ -543,7 +544,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             if (player.inflation.vacuum) {
                 gain += player.strangeness[5][5] > 0 ? 4 : 3;
                 gain *= global.milestonesInfo[5].reward[0];
-                if (player.strangeness[2][10] >= 1) { gain *= global.vaporizationInfo.oceanWorld(); }
+                if (player.strangeness[2][9] >= 1) { gain *= global.vaporizationInfo.oceanWorld(); }
             } else { gain += global.strangeInfo.instability; }
             if (interstellar && player.strangeness[5][1] >= 1) { gain *= 2; }
             return Math.floor(gain);
@@ -849,12 +850,12 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Accretion speed is even quicker. Improved by effective Rank. (Total boost: ${format(global.researchesExtraInfo[3].effect[1] as number)})`,
                 () => "'Gravitational field' upgrade will now boost Protoplanets at reduced strength. (2x boost)",
                 () => "'Gas' upgrade is now a little stronger.",
-                () => `'Efficient growth' will now boost Drops at reduced rate. (Current boost: ${format(global.researchesExtraInfo[3].effect[4] as number)})\nLevel 3 will also boost Puddles.`
+                () => `'Efficient growth' will now boost Puddles at reduced rate. (Current boost: ${format(global.researchesExtraInfo[3].effect[4] as number)})`
             ],
             effect: [],
             cost: [],
-            startCost: [1e-18, 1e-16, 1e26, 1e-6, 1e20],
-            scaling: [10, 100, 1, 1e5, 1e4],
+            startCost: [1e-18, 1e-16, 1e26, 1e-6, 1e23],
+            scaling: [10, 100, 1, 1e5, 1e3],
             max: [12, 5, 1, 8, 1],
             maxActive: 4
         }, { //Stage 4
@@ -957,7 +958,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             () => `No corrosion, only boost to all Stars that is based on unspent Elements ^${format(global.elementsInfo.effect[24] as number)}.\n(Boost is equal to ${Limit(player.buildings[4][0].current).power(global.elementsInfo.effect[24] as number).format({ padding: true })})`,
             () => "Brittle Element, but not the bonus - 1 more level in 'Star system'.",
             () => `Any further fusion will be an endothermic process${player.inflation.vacuum ? '. Unlock a Stage reset.' : ', but what next?\nEnter Intergalactic space. (Can change active Stage from footer)'}`,
-            () => `Combined and ready to increase Stage reset reward with every new reached digit of Elements past 50.\n(+${format(global.strangeInfo.Element27())} ${player.strangeness[5][10] >= 1 ? 'of a Strange value' : 'extra Strange quarks'})`,
+            () => `Combined and ready to increase Stage reset reward with every new reached digit of Elements past 48.\n(+${format(global.strangeInfo.Element27())} ${player.strangeness[5][10] >= 1 ? 'of a Strange value' : 'extra Strange quarks'})`,
             () => `Slow to react, but will still boost all Stars by ${format(global.elementsInfo.effect[28] as number)}.`
         ],
         effect: [],
@@ -999,7 +1000,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 18, 3000],
-            scaling: [2.5, 3.5, 8, 300, 6, 2.8, 2, 4, 1, 1.8, 1, 1],
+            scaling: [2.5, 3.5, 6, 300, 6, 2.8, 2, 4, 1, 1.8, 1, 1],
             max: [4, 4, 2, 1, 2, 4, 3, 2, 1, 6, 1, 1],
             maxActive: 9
         }, { //Stage 2
@@ -1011,7 +1012,6 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Automatic Vaporization',
                 'Keep auto Structures',
                 'Longer offline',
-                'Longest offline',
                 'Strange boost',
                 'New Structure',
                 'Ocean world',
@@ -1024,18 +1024,17 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Decrease requirement per Cloud.',
                 () => `Automatically Vaporize when reach enough boost from new Clouds.${player.strangeness[1][11] >= 1 ? '\nSecond level - auto Vaporization no longer resets anything. (Also improved to reset instanly)' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[2][Math.min(player.strangeness[2][5] + 1, global.ASRInfo.max[2])]}.`,
-                () => `Increase Offline storage capacity, +${player.stage.true >= 6 ? 8 : 4} hours per level.`,
-                () => player.stage.true < 6 ? 'Offline storage is now 50% bigger. (Additive)' : 'Offline time being wasted less, -1 second per level.',
+                () => 'Decrease Offline time waste by -1 second per level.',
                 () => 'Unspend Strange quarks will boost this Stage. (Puddle production)',
                 () => 'Current Universe state allows for another Submerged Structure.', //'\nSecond level will improve spread of that Structure with a new upgrade.'
                 () => `Increase ${global.strangeInfo.name[player.strangeness[5][10]]} gained from this Stage reset based on current Cloud amount.\n(Effect can be seen in stats)`,
                 () => "Submerged is no longer affected by or affects non Microworld Stage reset types. (Requires level 1 of 'Conservation of Energy')"
             ],
             cost: [],
-            startCost: [1, 2, 3, 4, 20, 2, 1, 4, 40, 40, 200, 4000],
-            scaling: [1.8, 1.8, 3.4, 3.4, 500, 2, 2, 4, 1, 10, 1, 1],
-            max: [6, 6, 3, 3, 1, 5, 4, 2, 1, 1, 1, 1],
-            maxActive: 9
+            startCost: [1, 2, 3, 4, 20, 2, 4, 40, 40, 200, 4000],
+            scaling: [1.8, 1.8, 3.4, 3.4, 500, 2, 4, 1, 10, 1, 1],
+            max: [6, 6, 3, 3, 1, 5, 1, 1, 1, 1, 1],
+            maxActive: 8
         }, { //Stage 3
             name: [
                 'Faster Accretion',
@@ -1065,7 +1064,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Increase effective Rank by +${format(0.8)} with each level.`
             ],
             cost: [],
-            startCost: [1, 2, 6, 18, 20, 3, 10, 40, 20, 1800, 40],
+            startCost: [1, 2, 4, 16, 20, 3, 10, 40, 20, 1800, 20],
             scaling: [1.8, 2.8, 2, 1, 200, 2.4, 3, 1, 1, 2, 4],
             max: [8, 4, 3, 1, 1, 4, 3, 1, 1, 4, 2],
             maxActive: 8
@@ -1079,7 +1078,6 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Automatic Collapse',
                 'Keep auto Structures',
                 'Daily gain',
-                'Max gain',
                 'Strange boost',
                 'New Structure',
                 'Neutronium'
@@ -1093,16 +1091,15 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Automatically Collapse once reached enough boost.${player.strangeness[1][11] >= 1 ? '\nSecond level - auto Collapse will not cause reset for Star remnants. (Also improved to check boost only from Solar mass)' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[4][Math.min(player.strangeness[4][6] + 1, global.ASRInfo.max[4])]}.`,
                 () => `Increase multiplier of ${global.strangeInfo.name[player.strangeness[5][10]]} gained from export per day by +1.${player.strangeness[5][10] >= 1 ? '' : " (Can claim only full one's)"}`,
-                () => player.stage.true >= 6 ? 'Reward from Export is now increased by 5% of the best true Stage reset value.' : 'Export reward max storage is now 1 day longer.',
                 () => 'Unspend Strange quarks will boost this Stage. (All Stars production)',
                 () => 'Current Universe state allows for another Interstellar Structure.',
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
             ],
             cost: [],
-            startCost: [1, 3, 5, 5, 18, 20, 3, 4, 4, 40, 60, 1800],
-            scaling: [1.8, 2.8, 3, 4, 5, 400, 2.4, 4, 1, 1, 1, 1.4],
-            max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 1, 8],
-            maxActive: 10
+            startCost: [1, 3, 3, 5, 18, 20, 3, 4, 40, 60, 1800],
+            scaling: [1.8, 2.8, 3, 4, 5, 400, 2.4, 4, 1, 1, 1.4],
+            max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
+            maxActive: 9
         }, { //Stage 5
             name: [
                 'Omnipresent reality',
@@ -1557,16 +1554,25 @@ export const updatePlayer = (load: playerType): string => {
         }
         /*if (load.version === 'v0.1.6') {
             load.version = 'v0.1.7';
-
-            //Maybe
-            load.intervals.visual = playerStart.intervals.visual;
-            load.intervals.autoSave = playerStart.intervals.autoSave;
-            delete load.accretion['input' as keyof unknown];
+            if (!Object.hasOwn(load, 'saveUpdate016')) {
+                load.strangeness[2].splice(6, 1);
+                load.strangeness[4].splice(8, 1);
+                load.intervals = deepClone(playerStart.intervals);
+            }
+            delete load['saveUpdate016' as keyof unknown];
+            //delete load.accretion['input' as keyof unknown]; //If Mass shift will become automatic
         }*/
 
         if (load.version !== playerStart.version) {
             throw new ReferenceError('Save file version is higher than game version');
         }
+    }
+
+    if (!load.saveUpdate016) { //Remove in v0.1.7
+        load.intervals = deepClone(playerStart.intervals);
+        load.strangeness[2].splice(6, 1);
+        load.strangeness[4].splice(8, 1);
+        load.saveUpdate016 = true;
     }
 
     for (let s = 1; s < playerStart.buildings.length; s++) {
@@ -1727,8 +1733,8 @@ export const updatePlayer = (load: playerType): string => {
     (getId('saveFileNameInput') as HTMLInputElement).value = player.fileName;
     (getId('mainInterval') as HTMLInputElement).value = `${player.intervals.main}`;
     (getId('numbersInterval') as HTMLInputElement).value = `${player.intervals.numbers}`;
-    (getId('visualInterval') as HTMLInputElement).value = `${player.intervals.visual}`;
-    (getId('autoSaveInterval') as HTMLInputElement).value = `${player.intervals.autoSave}`;
+    (getId('visualInterval') as HTMLInputElement).value = `${player.intervals.visual / 1000}`;
+    (getId('autoSaveInterval') as HTMLInputElement).value = `${player.intervals.autoSave / 1000}`;
     (getId('thousandSeparator') as HTMLInputElement).value = player.separator[0];
     (getId('decimalPoint') as HTMLInputElement).value = player.separator[1];
     (getId('stageInput') as HTMLInputElement).value = format(player.stage.input, { type: 'input' });
@@ -1760,17 +1766,17 @@ export const buildVersionInfo = () => {
                 text = '- Added stats subtab\n- Added Stage resets into save file';
                 break;
             case 'v0.0.3':
-                text = '- Added new content (Stage 3)\n- Stage 2 extended\n- Max offline time base and from research is now 2 times longer\n- Offline time calculated better\n- Toggles have been reset due to change in the way they are saved\n- Researches auto update description\n- Some new stats';
+                text = '- Added new content (Stage 3)\n- Stage 2 extended\n- Max offline time base and from research is now 2 times longer\n- Offline time calculated better\n- Toggles have been reset\n- Researches auto update description\n- Some new stats';
                 break;
             case 'v0.0.4':
-                text = '- Buffed all Stages\n- Added events for early Stages\n- Update to stats visuals\n- Intervals have been reset due to change in save file saving\n\n';
+                text = '- Buffed all Stages\n- Added events for early Stages\n- Update to stats visuals\n- Intervals have been reset\n\n';
                 text += '- Numbers are now formated\n\n';
                 text += '- New stat for Stage 3';
                 break;
             case 'v0.0.5':
                 text = '- New content (Stage 4)\n- Basic loading screen\n- Full visual update\n- New formula for multi making Structures\n- Visual indication for how many Structures can be made\n\n';
-                text += '- Created Elements will show effects, even after Collapse\n- Improved transition when changing themes\n- Fixed being able to create automatization research when can\'t afford them\n\n';
-                text += '- Added hotkeys\n- Stage event reset due to small changes';
+                text += '- Created Elements will show effects after Collapse\n- Improved transition when changing themes\n- Fixed being able to create automatization research when can\'t afford them\n\n';
+                text += '- Added hotkeys\n- Stage event reset';
                 break;
             case 'v0.0.6':
                 text = '- List of hotkeys can be seen now\n\n';
@@ -1786,7 +1792,7 @@ export const buildVersionInfo = () => {
                 break;
             case 'v0.0.9':
                 text = '- New content (Milestones)\n- Stage 4 speed up\n- Fixed export reward not being saved into exported file\n- Auto Structures toggles have been reset\n\n';
-                text += '- Fixed F1 - F12 buttons working as digits\n- Milestones are now unlocked instanly (with Stage 5)\n- New event that must be triggered to progress, for changing Active Stage for the first time\n\n';
+                text += '- Fixed F1 - F12 buttons working as digits\n- Milestones are now unlocked instanly (with Stage 5)\n- New event that must be triggered to progress (entering Intergalactic space)\n\n';
                 text += '- Max offline base and research is increased by 2 times, related Strangeness cost and max level have been balanced\n\n';
                 text += '- Some quick balance changes for Stage 3 and 5';
                 break;
@@ -1807,13 +1813,14 @@ export const buildVersionInfo = () => {
                 text += '- Added requirement to unlock better control over Warp (also Warp now has a minimum value)\n- Automatically made Structures/Upgrades no longer visually update numbers';
                 break;
             case 'v0.1.4':
-                text = '- Warps now waste offline (half of normal); Max offline from upgrades decreased, cost adjusted\n- Custom scrolls\n- Notifications\n- Fixed and updated special supports\n- Auto Collapse settings reset';
+                text = '- Warps now waste offline (half of normal); Max offline from upgrades decreased, cost adjusted\n- Custom scrolls\n- Notifications\n- Fixed and updated Mobile device and Screen reader supports\n- Auto Collapse settings reset';
                 break;
             case 'v0.1.5':
                 text = "- Stage 6 minor balance changes\n- Images should no longer unload on Stage change\n- Footer now affects page height\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Screen reader support rework (also removed special tab)";
                 break;
             case 'v0.1.6':
-                text = '- New content (Void)\n- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches, effects are obtained in more direct ways now and also reward from export unlocked for free\n- More quality of life improvements\n- Descriptions no longer reset when changing active Stage\n- More work on Mobile device and Screen reader supports\n- Fixed import not working on Mobile devices\n- Some toggles were reset due to confirmation toggles rework';
+                text = '- New content (Void)\n- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches\n- Export reward now unlocked for free\n- Created Elements will show effects after Stage reset\n- Auto Galaxy is now better\n- Descriptions no longer reset when changing active Stage\n- More quality of life improvements\n- More work on Mobile device and Screen reader supports\n- Some toggles were reset\n\n';
+                text += "- Removed 'Max gain' and 'Longer offline' strangeness\n- Max offline storage is now based on current true Stage and Stage resets\n- Offline storage will no longer decrease from switching vacuum state\n- Fixed import not working on some Mobile devices\n- Intervals have been reset";
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;
