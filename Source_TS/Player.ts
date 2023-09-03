@@ -656,7 +656,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Through Triple-alpha and then Alpha process, unlock a few more Elements.'
             ],
             effect: [],
-            startCost: [100, 1000, 1e9, 1e50],
+            startCost: [100, 1000, 1e9, 1e48],
             maxActive: 4
         }, { //Stage 5
             name: [
@@ -1000,7 +1000,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 18, 3000],
-            scaling: [2.5, 3.5, 6, 300, 6, 2.8, 2, 4, 1, 1.8, 1, 1],
+            scaling: [2.4, 4, 6, 300, 6, 2.4, 2, 4, 1, 1.8, 1, 1],
             max: [4, 4, 2, 1, 2, 4, 3, 2, 1, 6, 1, 1],
             maxActive: 9
         }, { //Stage 2
@@ -1032,7 +1032,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [1, 2, 3, 4, 20, 2, 4, 40, 40, 200, 4000],
-            scaling: [1.8, 1.8, 3.4, 3.4, 500, 2, 4, 1, 10, 1, 1],
+            scaling: [1.8, 1.8, 3.6, 3.6, 500, 2, 4, 1, 10, 1, 1],
             max: [6, 6, 3, 3, 1, 5, 1, 1, 1, 1, 1],
             maxActive: 8
         }, { //Stage 3
@@ -1064,7 +1064,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Increase effective Rank by +${format(0.8)} with each level.`
             ],
             cost: [],
-            startCost: [1, 2, 4, 16, 20, 3, 10, 40, 20, 1800, 20],
+            startCost: [1, 2, 4, 16, 20, 3, 12, 40, 20, 1800, 20],
             scaling: [1.8, 2.8, 2, 1, 200, 2.4, 3, 1, 1, 2, 4],
             max: [8, 4, 3, 1, 1, 4, 3, 1, 1, 4, 2],
             maxActive: 8
@@ -1096,8 +1096,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
             ],
             cost: [],
-            startCost: [1, 3, 3, 5, 18, 20, 3, 4, 40, 60, 1800],
-            scaling: [1.8, 2.8, 3, 4, 5, 400, 2.4, 4, 1, 1, 1.4],
+            startCost: [1, 3, 3, 5, 9, 20, 3, 4, 40, 60, 1800],
+            scaling: [1.8, 2.8, 3, 4, 12, 400, 2.4, 3, 1, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
             maxActive: 9
         }, { //Stage 5
@@ -1820,7 +1820,7 @@ export const buildVersionInfo = () => {
                 break;
             case 'v0.1.6':
                 text = '- New content (Void)\n- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches\n- Export reward now unlocked for free\n- Created Elements will show effects after Stage reset\n- Auto Galaxy is now better\n- Descriptions no longer reset when changing active Stage\n- More quality of life improvements\n- More work on Mobile device and Screen reader supports\n- Some toggles were reset\n\n';
-                text += "- Removed 'Max gain' and 'Longer offline' strangeness\n- Max offline storage is now based on current true Stage and Stage resets\n- Offline storage will no longer decrease from switching vacuum state\n- Fixed import not working on some Mobile devices\n- Intervals have been reset";
+                text += "- Removed 'Max gain' and 'Longer offline' strangeness\n- Max offline storage is now based on Stage resets\n- Offline storage will no longer decrease from switching vacuum state\n- Export base is now improved by best Stage reset\n- Fixed import not working on some Mobile devices\n- Intervals have been reset";
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;

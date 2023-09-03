@@ -67,7 +67,7 @@ export const maxExportTime = (): number => player.strange[0].total > 0 ? 172800 
 export const exportMultiplier = (): number => {
     let mult = 1 + player.stage.best / 20;
     if (!player.inflation.vacuum) { mult += global.strangeInfo.instability; }
-    return Math.floor(mult * (player.strangeness[4][7] + 1));
+    return mult * (player.strangeness[4][7] + 1);
 };
 
 export const timeUpdate = (timeWarp = 0) => { //Time based information
