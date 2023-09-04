@@ -128,7 +128,6 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             }
         } else if (s === 4) {
             global.collapseInfo.trueStars = 0;
-            player.collapse.elementsMax = [1, 0];
             player.collapse.mass = 0.01235;
             player.collapse.stars = [0, 0, 0];
             player.elements = cloneArray(playerStart.elements);
@@ -209,13 +208,11 @@ export const resetVacuum = () => {
     }
 
     //Stage 4
-    const { collapse } = player;
     global.collapseInfo.trueStars = 0;
-    collapse.elementsMax = [0, 0];
-    collapse.mass = 0.01235;
-    collapse.massMax = 0.01235;
-    collapse.stars = [0, 0, 0];
-    collapse.show = 0;
+    player.collapse.mass = 0.01235;
+    player.collapse.massMax = 0.01235;
+    player.collapse.stars = [0, 0, 0];
+    player.collapse.show = 0;
     player.elements = cloneArray(playerStart.elements);
 
     //Stage 5 and rest

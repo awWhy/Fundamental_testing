@@ -59,19 +59,19 @@ export const prepareVacuum = () => {
         global.ASRInfo.costRange[3][3] = 2.47e31;
 
         const strangeness1Cost = [2, 1, 4, 20, 2, 1, 2, 4, 40];
-        const strangeness1Scaling = [2.4, 4, 6, 300, 6, 2.4, 2, 4, 1];
+        const strangeness1Scaling = [2.4, 4, 6, 300, 4, 2.4, 2, 4, 1];
         strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
         strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
         const strangeness2Cost = [1, 2, 3, 4, 20, 2, 4, 40];
-        const strangeness2Scaling = [1.8, 1.8, 3.6, 3.6, 500, 2, 4, 1];
+        const strangeness2Scaling = [1.8, 1.8, 3, 3.6, 500, 2, 4, 1];
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
-        const strangeness3Cost = [1, 2, 4, 16, 20, 3, 12, 40];
+        const strangeness3Cost = [1, 2, 4, 12, 20, 3, 12, 40];
         const strangeness3Scaling = [1.8, 2.8, 2, 1, 200, 2.4, 3, 1];
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
-        const strangeness4Cost = [1, 3, 3, 5, 9, 20, 3, 4, 40];
-        const strangeness4Scaling = [1.8, 2.8, 3, 4, 12, 400, 2.4, 3, 1];
+        const strangeness4Cost = [1, 3, 5, 5, 9, 20, 3, 4, 40];
+        const strangeness4Scaling = [1.8, 2.8, 2.4, 4, 12, 400, 2.4, 3, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
         const strangeness5Cost = [4, 12, 2000, 10, 10, 40, 1500, 60, 1500, 200];

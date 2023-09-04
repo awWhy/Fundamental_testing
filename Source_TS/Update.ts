@@ -27,10 +27,8 @@ export const switchTab = (tab: string, subtab = null as null | string) => {
                 if (checkTab(tab, inside)) {
                     getId(`${tab}SubtabBtn${inside}`).style.display = '';
                     subtabAmount++;
-                } else {
-                    if (global.subtab[`${tab as 'stage'}Current`] === inside) {
-                        switchTab(tab, global.tabList[`${tab as 'stage'}Subtabs`][0]);
-                    }
+                } else if (global.subtab[`${tab as 'stage'}Current`] === inside) {
+                    switchTab(tab, global.tabList[`${tab as 'stage'}Subtabs`][0]);
                 }
             }
         }
@@ -50,11 +48,16 @@ export const switchTab = (tab: string, subtab = null as null | string) => {
     if (global.lastActive !== null) {
         switchStage(global.lastActive);
         global.lastActive = null;
-    } else if (tab === 'Elements' || (tab === 'research' && (global.subtab.researchCurrent === 'Elements' || subtab === 'Elements'))) {
+    } else if ((global.tab === 'research' && global.subtab.researchCurrent === 'Elements') || tab === 'Elements') {
         const active = player.stage.active;
         if (active !== 4 && active !== 5) {
-            global.lastActive = active;
-            switchStage(4);
+            if (tab === 'research' && subtab === null) {
+                switchTab('research', 'Researches');
+                return;
+            } else {
+                global.lastActive = active;
+                switchStage(4);
+            }
         }
     }
     visualUpdate();

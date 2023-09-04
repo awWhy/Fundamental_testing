@@ -556,8 +556,6 @@ export const calculateGainedBuildings = (get: number, stageIndex: number, time: 
             if (player.accretion.rank < 5 && Limit(building.current).moreThan('1e30')) { building.current = [1, 30]; }
             awardMilestone(0, 3);
         }
-    } else if (stageIndex === 4) {
-        if (Limit(player.collapse.elementsMax).lessThan(building.current)) { player.collapse.elementsMax = cloneArray(building.current); }
     }
 };
 
@@ -1291,15 +1289,14 @@ export const switchStage = (stage: number) => {
         return;
     }
     if (!global.stageInfo.activeAll.includes(stage)) { return; }
-    if ((global.tab === 'Elements' || (global.tab === 'research' && global.subtab.researchCurrent === 'Elements')) && stage !== 4 && stage !== 5) {
-        global.lastActive = stage;
-        return;
+    if (((global.tab === 'research' && global.subtab.researchCurrent === 'Elements') || global.tab === 'Elements') && stage !== 4 && stage !== 5) {
+        switchTab('research', global.tab === 'research' ? 'Researches' : null);
     }
 
     player.stage.active = stage;
     stageUpdate();
 
-    if (!player.events[1] && player.stage.active === 5) { playEvent(4, 1); }
+    if (!player.events[1]) { playEvent(4, 1); }
 };
 
 export const assignDischargeInformation = () => {

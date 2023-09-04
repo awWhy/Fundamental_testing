@@ -30,7 +30,6 @@ export interface playerType {
     collapse: {
         mass: number
         massMax: number
-        elementsMax: overlimit
         stars: [number, number, number]
         show: number
         input: number

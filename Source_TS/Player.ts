@@ -7,7 +7,7 @@ import { format, visualUpdateResearches } from './Update';
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = { //Only for information that need to be saved (cannot be calculated)
-    version: 'v0.1.6',
+    version: 'v0.1.6', //'v0.1.7',
     saveUpdate016: false, //Remove in v0.1.7
     fileName: 'Fundamental, [date] [time], [stage]',
     separator: ['', '.'], //[0] separator, [1] point
@@ -38,7 +38,6 @@ export const player: playerType = { //Only for information that need to be saved
     collapse: { //Stage 4, 5
         mass: 0.01235,
         massMax: 0.01235,
-        elementsMax: [1, 0],
         stars: [0, 0, 0],
         show: 0,
         input: 2
@@ -532,7 +531,7 @@ export const global: globalType = { //For information that doesn't need to be sa
     },
     strangeInfo: {
         Element27: () => {
-            let effect = Math.floor(Limit(player.collapse.elementsMax).log(10).toNumber() - 48);
+            let effect = Math.floor(Limit(player.buildings[4][0].trueTotal).log(10).toNumber() - 48);
             if (!player.inflation.vacuum && player.upgrades[5][2] === 1) { effect = Math.floor(effect ** 1.5); }
             return Math.max(effect, 0);
         },
@@ -546,7 +545,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 gain *= global.milestonesInfo[5].reward[0];
                 if (player.strangeness[2][9] >= 1) { gain *= global.vaporizationInfo.oceanWorld(); }
             } else { gain += global.strangeInfo.instability; }
-            if (interstellar && player.strangeness[5][1] >= 1) { gain *= 2; }
+            if (interstellar && player.strangeness[5][1] >= 1) { gain *= 2; } //if (interstellar) { gain *= 2 ** player.strangeness[5][1]; }
             return Math.floor(gain);
         },
         name: ['Strange quarks', 'Strangelets'],
@@ -958,7 +957,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             () => `No corrosion, only boost to all Stars that is based on unspent Elements ^${format(global.elementsInfo.effect[24] as number)}.\n(Boost is equal to ${Limit(player.buildings[4][0].current).power(global.elementsInfo.effect[24] as number).format({ padding: true })})`,
             () => "Brittle Element, but not the bonus - 1 more level in 'Star system'.",
             () => `Any further fusion will be an endothermic process${player.inflation.vacuum ? '. Unlock a Stage reset.' : ', but what next?\nEnter Intergalactic space. (Can change active Stage from footer)'}`,
-            () => `Combined and ready to increase Stage reset reward with every new reached digit of Elements past 48.\n(+${format(global.strangeInfo.Element27())} ${player.strangeness[5][10] >= 1 ? 'of a Strange value' : 'extra Strange quarks'})`,
+            () => `Combined and ready to increase Stage reset reward with every new reached digit of total Elements past 48.\n(+${format(global.strangeInfo.Element27())} ${player.strangeness[5][10] >= 1 ? 'of a Strange value' : 'extra Strange quarks'})`,
             () => `Slow to react, but will still boost all Stars by ${format(global.elementsInfo.effect[28] as number)}.`
         ],
         effect: [],
@@ -1000,7 +999,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 18, 3000],
-            scaling: [2.4, 4, 6, 300, 6, 2.4, 2, 4, 1, 1.8, 1, 1],
+            scaling: [2.4, 4, 6, 300, 4, 2.4, 2, 4, 1, 1.8, 1, 1],
             max: [4, 4, 2, 1, 2, 4, 3, 2, 1, 6, 1, 1],
             maxActive: 9
         }, { //Stage 2
@@ -1032,7 +1031,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [1, 2, 3, 4, 20, 2, 4, 40, 40, 200, 4000],
-            scaling: [1.8, 1.8, 3.6, 3.6, 500, 2, 4, 1, 10, 1, 1],
+            scaling: [1.8, 1.8, 3, 3.6, 500, 2, 4, 1, 10, 1, 1],
             max: [6, 6, 3, 3, 1, 5, 1, 1, 1, 1, 1],
             maxActive: 8
         }, { //Stage 3
@@ -1064,7 +1063,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Increase effective Rank by +${format(0.8)} with each level.`
             ],
             cost: [],
-            startCost: [1, 2, 4, 16, 20, 3, 12, 40, 20, 1800, 20],
+            startCost: [1, 2, 4, 12, 20, 3, 12, 40, 20, 1800, 20],
             scaling: [1.8, 2.8, 2, 1, 200, 2.4, 3, 1, 1, 2, 4],
             max: [8, 4, 3, 1, 1, 4, 3, 1, 1, 4, 2],
             maxActive: 8
@@ -1096,8 +1095,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
             ],
             cost: [],
-            startCost: [1, 3, 3, 5, 9, 20, 3, 4, 40, 60, 1800],
-            scaling: [1.8, 2.8, 3, 4, 12, 400, 2.4, 3, 1, 1, 1.4],
+            startCost: [1, 3, 5, 5, 9, 20, 3, 4, 40, 60, 1800],
+            scaling: [1.8, 2.8, 2.4, 4, 12, 400, 2.4, 3, 1, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
             maxActive: 9
         }, { //Stage 5
@@ -1493,7 +1492,6 @@ export const updatePlayer = (load: playerType): string => {
                 }
             }
             load.vaporization.clouds = Limit(load.vaporization.clouds).toArray();
-            load.collapse.elementsMax = cloneArray(load.buildings[4][0].current);
             if (Object.hasOwn(load.strange[0], 'true')) { load.strange[0].current = load.strange[0]['true' as 'current']; }
             if (load.upgrades[1].length < 10) { load.upgrades[1].unshift(0, 0); }
             delete load.vaporization['current' as keyof unknown];
@@ -1561,6 +1559,7 @@ export const updatePlayer = (load: playerType): string => {
             }
             delete load['saveUpdate016' as keyof unknown];
             //delete load.accretion['input' as keyof unknown]; //If Mass shift will become automatic
+            delete load.collapse['elementsMax' as keyof unknown];
         }*/
 
         if (load.version !== playerStart.version) {
@@ -1816,17 +1815,19 @@ export const buildVersionInfo = () => {
                 text = '- Warps now waste offline (half of normal); Max offline from upgrades decreased, cost adjusted\n- Custom scrolls\n- Notifications\n- Fixed and updated Mobile device and Screen reader supports\n- Auto Collapse settings reset';
                 break;
             case 'v0.1.5':
-                text = "- Stage 6 minor balance changes\n- Images should no longer unload on Stage change\n- Footer now affects page height\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Screen reader support rework (also removed special tab)";
+                text = "- Stage 6 minor balance changes\n- Images should no longer unload on Stage change\n- Elements subtab can now be entered from any Stage or turned into a tab\n- Footer now affects page height\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always Strict, related button removed\n- More information for save files\n- New hotkeys\n- Screen reader support rework (also removed special tab)";
                 break;
             case 'v0.1.6':
-                text = '- New content (Void)\n- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches\n- Export reward now unlocked for free\n- Created Elements will show effects after Stage reset\n- Auto Galaxy is now better\n- Descriptions no longer reset when changing active Stage\n- More quality of life improvements\n- More work on Mobile device and Screen reader supports\n- Some toggles were reset\n\n';
-                text += "- Removed 'Max gain' and 'Longer offline' strangeness\n- Max offline storage is now based on Stage resets\n- Offline storage will no longer decrease from switching vacuum state\n- Export base is now improved by best Stage reset\n- Fixed import not working on some Mobile devices\n- Intervals have been reset";
+                text = '- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked (also its settings reset)\n- Small changes to auto Vaporization\n- New input for Auto Structures wait value\n- New stats for Stage 1, 2 and 3\n- New notifications\n- Removed almost all Automatization researches\n- Export reward now unlocked for free\n- Created Elements will show effects after Stage reset\n- Auto Galaxy is now better\n- Descriptions no longer reset when changing active Stage\n- More quality of life improvements\n- More work on Mobile device and Screen reader supports\n- Some toggles were reset';
+                break;
+            case 'v0.1.7':
+                text = "- New content (Void)\n- Further balance and quality of life changes\n- Removed 'Max gain' and 'Longer offline' strangeness\n- Max offline storage is based on Stage resets now\n- Offline storage will no longer decrease when switching vacuum state\n- Export base is now improved by best Stage reset\n- '[27] Cobalt' effect is now based on total Elements\n- Updated logic for entering and leaving Elements subtab\n- Fixed import not working on some Mobile devices\n- Intervals have been reset\n- Small art updates";
         }
         getId('versionText').textContent = text;
         getId('currentVesion').textContent = version;
     };
 
-    const max = 16; //v0.2.4 -> 24
+    const max = 17; //v0.2.4 -> 24
     let autoText = '';
     for (let i = 1; i <= max; i++) {
         const index = `${i}`.padStart(2, '0');
