@@ -252,7 +252,8 @@ export const switchTheme = () => {
     body.removeProperty('--button-tab-active');
     body.removeProperty('--button-tab-elements');
     body.removeProperty('--button-tab-strangeness');
-    body.removeProperty('--button-extra-hover');
+    body.removeProperty('--button-image-hover');
+    body.removeProperty('--button-footer-hover');
     body.removeProperty('--button-delete-color');
     body.removeProperty('--button-delete-hover');
     body.removeProperty('--input-border-color');
@@ -299,7 +300,7 @@ export const switchTheme = () => {
             body.setProperty('--button-main-hover', '#1515cf');
             body.setProperty('--button-tab-border', '#376ac5');
             body.setProperty('--button-tab-active', '#990000');
-            body.setProperty('--button-extra-hover', '#2400d7');
+            body.setProperty('--button-image-hover', '#2400d7');
             body.setProperty('--input-border-color', '#4747ff');
             body.setProperty('--input-text-color', 'dodgerblue');
             body.setProperty('--main-text-color', 'var(--blue-text-color)');
@@ -330,7 +331,8 @@ export const switchTheme = () => {
             body.setProperty('--button-tab-border', '#484848');
             body.setProperty('--button-tab-active', '#8d4c00');
             body.setProperty('--button-tab-elements', 'var(--button-tab-active)');
-            body.setProperty('--button-extra-hover', '#5a2100');
+            body.setProperty('--button-image-hover', '#5a2100');
+            body.setProperty('--button-footer-hover', '#1a1a1a');
             body.setProperty('--button-delete-color', '#891313');
             body.setProperty('--button-delete-hover', '#a10a0a');
             body.setProperty('--input-border-color', '#8b4a00');
@@ -363,7 +365,8 @@ export const switchTheme = () => {
             body.setProperty('--button-tab-active', '#008297');
             body.setProperty('--button-tab-elements', 'var(--button-tab-active)');
             body.setProperty('--button-tab-strangeness', '#00a500');
-            body.setProperty('--button-extra-hover', '#605100');
+            body.setProperty('--button-image-hover', '#605100');
+            body.setProperty('--button-footer-hover', '#212121');
             body.setProperty('--button-delete-color', '#8f0000');
             body.setProperty('--button-delete-hover', '#ad0000');
             body.setProperty('--input-border-color', '#008399');
@@ -396,7 +399,8 @@ export const switchTheme = () => {
             body.setProperty('--building-can-buy', '#8603ff');
             body.setProperty('--button-tab-border', '#9d0054');
             body.setProperty('--button-tab-active', '#8500ff');
-            body.setProperty('--button-extra-hover', '#3b0080');
+            body.setProperty('--button-image-hover', '#3b0080');
+            body.setProperty('--button-footer-hover', '#1a1a1a');
             body.setProperty('--button-delete-color', '#800000');
             body.setProperty('--button-delete-hover', '#9b1212');
             body.setProperty('--input-border-color', '#3656a1');
@@ -426,7 +430,7 @@ export const switchTheme = () => {
             body.setProperty('--building-can-buy', '#a80000');
             body.setProperty('--button-tab-border', '#6719c8');
             body.setProperty('--button-tab-active', '#8d0000');
-            body.setProperty('--button-extra-hover', '#490070');
+            body.setProperty('--button-image-hover', '#490070');
             body.setProperty('--button-delete-color', '#930606');
             body.setProperty('--button-delete-hover', '#b80000');
             body.setProperty('--input-border-color', '#a50000');
@@ -463,7 +467,7 @@ export const Alert = async(text: string): Promise<void> => {
         confirm.focus();
 
         const key = async(button: KeyboardEvent) => {
-            if (button.key === 'Escape' || button.key === 'Enter') {
+            if (button.key === 'Escape' || button.key === 'Enter' || button.key === ' ') {
                 button.preventDefault();
                 close();
             }
@@ -501,9 +505,11 @@ export const Confirm = async(text: string): Promise<boolean> => {
             if (button.key === 'Escape') {
                 button.preventDefault();
                 no();
-            } else if (button.key === 'Enter') {
-                button.preventDefault();
-                yes();
+            } else if (button.key === 'Enter' || button.key === ' ') {
+                if (document.activeElement !== cancel) {
+                    button.preventDefault();
+                    yes();
+                }
             }
         };
         const close = (result: boolean) => {
@@ -545,9 +551,11 @@ export const Prompt = async(text: string, inputValue = ''): Promise<string | nul
             if (button.key === 'Escape') {
                 button.preventDefault();
                 no();
-            } else if (button.key === 'Enter') {
-                button.preventDefault();
-                yes();
+            } else if (button.key === 'Enter' || button.key === ' ') {
+                if (document.activeElement !== cancel) {
+                    button.preventDefault();
+                    yes();
+                }
             }
         };
         const close = (result: string | null) => {

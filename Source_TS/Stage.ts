@@ -924,10 +924,14 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
                 max = player.strangeness[1][11] >= 1 ? 2 : 1;
             } else if (research === 6) {
                 max = player.strangeness[4][9] >= 1 ? 5 : 4;
+            } else if (research === 7) {
+                max = 3 + Math.min(player.challenges.void[3], 4);
             }
         } else if (stageIndex === 5) {
             if (research === 0) {
                 max = player.inflation.vacuum ? 1 : 3;
+            } else if (research === 1) {
+                max = 1 + Math.min(Math.floor(player.challenges.void[3] / 2), 2);
             }
         }
     }
@@ -1160,9 +1164,9 @@ export const toggleConfirm = (number: number, change = false) => {
     }
 };
 
-export const toggleBuy = (type = '' as '1' | 'max' | 'any') => {
-    const { shop } = player.toggles;
+export const toggleBuy = (type = 'none' as 'none' | '1' | 'max' | 'any') => {
     const input = getId('buyAnyInput') as HTMLInputElement;
+    const shop = player.toggles.shop;
 
     switch (type) {
         case '1':
@@ -1179,8 +1183,8 @@ export const toggleBuy = (type = '' as '1' | 'max' | 'any') => {
     getId('buy1x').style.backgroundColor = shop.howMany === 1 ? 'green' : '';
     getId('buyAny').style.backgroundColor = Math.abs(shop.howMany) !== 1 ? 'green' : '';
     getId('buyMax').style.backgroundColor = shop.howMany === -1 ? 'green' : '';
-    if (type !== '1' && type !== 'max') { input.value = format(shop.input, { type: 'input' }); }
-    numbersUpdate();
+    if (type === 'none' || type === 'any') { input.value = format(shop.input, { type: 'input' }); }
+    if (type !== 'none') { numbersUpdate(); }
 };
 
 export const stageResetCheck = (stageIndex: number, auto = false): boolean => {
@@ -1211,16 +1215,29 @@ export const stageAsyncReset = async() => {
     if (!stageResetCheck(active)) {
         if (stage.resets < 1 && (player.inflation.vacuum ? stage.current < 5 : player.discharge.current < 6)) { return; }
         if (active >= 5) { return void Alert('Awaiting "Iron" Element'); }
-        if (active === 4) { return void Alert('Reach Intergalactic space first'); }
+        if (active === 4) { return void Alert('Enter Intergalactic space first'); }
         if (active === 3) { return void Alert(`Self sustaining is not yet possible, obtain at least ${format(2.47e31)} Mass`); }
         if (active === 2) { return void Alert(`Look's like more Mass expected, need even more Drops, around ${format(1.194e29)} in total`); }
         if (active === 1) { return void Alert(`Not enough to form a single Drop of water, need at least ${format(1.67e21)} Molecules`); }
     } else {
         if (player.toggles.confirm[0] !== 'None') {
-            if (player.toggles.confirm[0] !== 'Safe' || player.challenges.active !== -1) {
-                if (!(await Confirm(active === 6 ? `Ready to reset progress for ${format(global.strangeInfo.gain(active) / 1e12 ** player.strangeness[5][10])} ${global.strangeInfo.name[player.strangeness[5][10]]}?${player.challenges.active !== -1 ? `\n(${global.challengesInfo.name[player.challenges.active]} is active)` : ''}` :
-                    active === 5 ? `Return back to Microworld for ${format(global.strangeInfo.gain(active))} Strange quarks?` :
-                    active === stage.current ? 'Ready to enter next Stage? Next one will be harder than current' : `Reset this Stage for ${format(global.strangeInfo.gain(active))} Strange quarks?`))) { return; }
+            const noNickel = active >= 4 && player.strangeness[4][4] >= 1 && player.elements[27] < 1;
+            const inChallenge = player.challenges.active !== -1;
+            if (player.toggles.confirm[0] !== 'Safe' || inChallenge || noNickel) {
+                let text;
+                if (active === 6) {
+                    text = `Ready to reset progress for ${format(global.strangeInfo.gain(active) / 1e12 ** player.strangeness[5][10])} ${global.strangeInfo.name[player.strangeness[5][10]]}?`;
+                    if (noNickel) { text += '\n(Not all important Elements obtained)'; }
+                    if (inChallenge) { text += `\n(${global.challengesInfo.name[player.challenges.active]} is active)`; }
+                } else if (active === 5) {
+                    text = `Return back to Microworld for ${format(global.strangeInfo.gain(active))} Strange quarks?`;
+                    if (noNickel) { text += '\n(Not all important Elements obtained)'; }
+                } else if (active !== stage.current) {
+                    text = `Reset this Stage for ${format(global.strangeInfo.gain(active))} Strange quarks?`;
+                } else {
+                    text = 'Ready to enter next Stage? Next one will be harder than current';
+                }
+                if (!(await Confirm(text))) { return; }
                 if (!stageResetCheck(active)) { return Notify('Stage reset canceled, requirements are no longer met'); }
             }
         }
@@ -1571,20 +1588,22 @@ const collapseReset = (toReset = true) => {
     const { collapseInfo } = global;
     const { collapse } = player;
 
-    if (player.elements.includes(0.5)) {
-        for (let i = 1; i < player.elements.length; i++) {
-            if (player.elements[i] === 0.5) { buyUpgrades(i, 4, 'elements', true); }
+    if (toReset) {
+        if (player.elements.includes(0.5)) {
+            for (let i = 1; i < player.elements.length; i++) {
+                if (player.elements[i] === 0.5) { buyUpgrades(i, 4, 'elements', true); }
+            }
         }
-    }
 
-    if (collapseInfo.newMass > collapse.mass && toReset) {
-        collapse.mass = collapseInfo.newMass;
-        if (collapse.massMax < collapse.mass) { collapse.massMax = collapse.mass; }
+        if (collapseInfo.newMass > collapse.mass) {
+            collapse.mass = collapseInfo.newMass;
+            if (collapse.massMax < collapse.mass) { collapse.massMax = collapse.mass; }
+        }
+        awardMilestone(0, 4);
     }
     collapse.stars[0] += collapseInfo.starCheck[0];
     collapse.stars[1] += collapseInfo.starCheck[1];
     collapse.stars[2] += collapseInfo.starCheck[2];
-    awardMilestone(0, 4);
     awardMilestone(1, 4);
     awardVoidReward(4);
     if (toReset) {
@@ -1718,6 +1737,8 @@ const awardVoidReward = (index: number) => {
         calculateMaxLevel(10, 3, 'strangeness', true);
         calculateMaxLevel(0, 4, 'strangeness', true);
         calculateMaxLevel(1, 4, 'strangeness', true);
+        calculateMaxLevel(7, 4, 'strangeness', true);
+        calculateMaxLevel(1, 5, 'strangeness', true);
     }
 };
 

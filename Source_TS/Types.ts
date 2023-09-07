@@ -115,7 +115,6 @@ export interface globalType {
         strangenessSubtabs: string[]
     }
     debug: {
-        versionBuild: boolean
         errorID: boolean
         errorQuery: boolean
         errorGain: boolean
