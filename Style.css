@@ -28,7 +28,8 @@ body { /* Default color variables */
     --button-tab-active: #8b00c5;
     --button-tab-elements: #9f6700;
     --button-tab-strangeness: #00b100;
-    --button-extra-hover: #170089;
+    --button-image-hover: #170089;
+    --button-footer-hover: #181818;
     --button-delete-color: firebrick;
     --button-delete-hover: #ce0000;
     --input-border-color: #831aa5;
@@ -318,7 +319,7 @@ button, input { appearance: none; }
     height: 1.75em;
 }
 
-.extraHover { background-color: var(--background-color); }
+.hollowButton { background-color: var(--background-color); }
 
 img, input[type = "image"], button, #load, #logoLinks > a {
     user-select: none;
@@ -329,11 +330,10 @@ img, input[type = "image"], button, #load, #logoLinks > a {
 }
 
 /* I could add :hover:not(:active), to make it visible that you are clicking, but that or other 10+ animations looked really awkward... */
-#footerMain button:hover { background-color: #181818; }
 button:hover, #load:hover { background-color: var(--button-main-hover); }
 #delete:hover { background-color: var(--button-delete-hover); }
 .toggle:hover, .toggleConfirm:hover, .toggleBuilding:hover, .toggleAuto:hover,
-.specialToggle:hover, .interactiveImage:hover, .extraHover:hover { background-color: var(--button-extra-hover); }
+.specialToggle:hover, .interactiveImage:hover, .hollowButton:hover { background-color: var(--button-image-hover); }
 
 input[type = "number"] { appearance: textfield; }
 input[type = "number"]::-webkit-inner-spin-button, input[type = "number"]::-webkit-outer-spin-button { appearance: none; }
@@ -541,8 +541,6 @@ input:-webkit-autofill { /* Chrome related pain */
     gap: 0.44em;
 }
 
-#challengesMain input[type = "image"]:hover { background-color: var(--button-extra-hover); }
-
 #challengeMultiline { text-align: center; }
 #challengeMultiline p { white-space: pre-line; }
 #challengeMultiline > div { margin-top: 1.2em; }
@@ -553,11 +551,10 @@ input:-webkit-autofill { /* Chrome related pain */
     margin-bottom: 0.3em;
 }
 
-#voidRewards button  {
+#voidRewards button {
     height: 1.9em;
     padding: 0 0.4em;
     border-radius: 4px;
-    background-color: var(--background-color);
 }
 
 #voidRewards > div:first-of-type {
@@ -805,7 +802,7 @@ input:-webkit-autofill { /* Chrome related pain */
     font-size: 0.77em;
 }
 
-#resetToggles .extraHover {
+#resetToggles .hollowButton {
     width: 1.45em;
     height: 1.68em;
     font-size: 0.82em;
@@ -901,7 +898,7 @@ input:-webkit-autofill { /* Chrome related pain */
 
 li input[type = "number"] { width: 3.15em; }
 
-.options button.extraHover,
+.options .hollowButton,
 .options .windowPopUp > button {
     height: 1.77em;
     padding: 0 0.45em;
@@ -976,7 +973,7 @@ input.miniInput {
     height: 1.68em;
 }
 
-#autoTogglesUpgrades button.extraHover { height: 1.82em; }
+#autoTogglesUpgrades .hollowButton { height: 1.82em; }
 
 #themeArea > h3 {
     text-align: center;
@@ -1175,7 +1172,7 @@ input.miniInput {
 }
 
 #currentSwitch { border-color: var(--stage-button-border); }
-#subtabs button:hover, #stageSelect button:hover { background-color: var(--button-extra-hover); }
+#footer button:hover { background-color: var(--button-footer-hover); }
 #stageSelect.active > #currentSwitch { clip-path: circle(0); }
 #stageSelect.active > div { display: flex; }
 
