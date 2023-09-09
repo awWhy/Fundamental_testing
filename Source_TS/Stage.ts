@@ -264,13 +264,13 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
 
         const listForMult2 = [buildings[5][2].current, producing[5][3]];
         let prod2Number = 1.5 * (3 ** researches[5][1]);
-        upgradesInfo[5].effect[1] = 6 * (3 ** strangeness[5][4]);
+        upgradesInfo[5].effect[1] = 2 * (3 ** strangeness[5][4]);
         if (upgrades[5][1] === 1) { prod2Number *= upgradesInfo[5].effect[1]; }
         producing[5][2] = Limit(prod2Number).multiply(...listForMult2).toArray();
 
         const listForMult1 = [buildings[5][1].current, producing[5][3]];
         let prod1Number = 4 ** researches[5][0];
-        upgradesInfo[5].effect[0] = 4 * (2 ** strangeness[5][3]);
+        upgradesInfo[5].effect[0] = 3 * (2 ** strangeness[5][3]);
         if (upgrades[5][0] === 1) { prod1Number *= upgradesInfo[5].effect[0]; }
         producing[5][1] = Limit(prod1Number).multiply(...listForMult1).toArray();
 

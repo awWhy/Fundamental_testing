@@ -663,7 +663,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Quasar'
             ],
             effectText: [
-                () => `Gravitational collapse within Nebulas will increase speed for production of Stars by ${format(global.upgradesInfo[5].effect[0] as number)} times.`,
+                () => `Gravitational Collapse within Nebulas will increase speed for production of Stars by ${format(global.upgradesInfo[5].effect[0] as number)} times.`,
                 () => `A very massive Star clusters, that will boost Stars by ${format(global.upgradesInfo[5].effect[1] as number)}.`,
                 () => player.inflation.vacuum ? `Boost per Galaxy increased by +1\nRequires ${format(1e6)} Solar mass` : `'[27] Cobalt' Element receives super boost of ^${format(1.5)}.`
             ],
@@ -757,7 +757,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Gamma-ray burst'
             ],
             effectText: [
-                () => `From Planetesimals to Planets, will get ${format(global.researchesInfo[4].effect[0] as number)}x boost to all Stars.`,
+                () => `From Planetesimals to Planets, will get ${format(global.researchesInfo[4].effect[0] as number, { padding: true })}x boost to all Stars.`,
                 () => `All Stars boost each other. (Total boost is ${Limit(global.researchesInfo[4].effect[1] as overlimit).format({ padding: true })})`,
                 () => "Improve effect scaling of 'Planetary system', as well its max level by +3.",
                 () => `Matter expelled from Red giants, this will boost Main-sequence stars by 4, as well boost all Stars by ${format(1.25)}.`,
@@ -998,7 +998,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 18, 3000],
-            scaling: [2.4, 4, 6, 300, 4, 2.4, 2, 4, 1, 1.8, 1, 1],
+            scaling: [2.4, 4, 6, 300, 4, 2.4, 2, 2, 1, 1.8, 1, 1],
             max: [4, 4, 2, 1, 2, 4, 3, 2, 1, 6, 1, 1],
             maxActive: 9
         }, { //Stage 2
@@ -1029,8 +1029,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => "Submerged is no longer affected by or affects non Microworld Stage reset types. (Requires level 1 of 'Conservation of Energy')"
             ],
             cost: [],
-            startCost: [1, 2, 3, 4, 20, 2, 4, 40, 40, 200, 4000],
-            scaling: [1.8, 1.8, 3, 3.6, 500, 2, 4, 1, 10, 1, 1],
+            startCost: [1, 2, 16, 2, 20, 2, 4, 40, 40, 200, 4000],
+            scaling: [1.8, 1.8, 1.6, 4, 500, 2, 2, 1, 10, 1, 1],
             max: [6, 6, 3, 3, 1, 5, 1, 1, 1, 1, 1],
             maxActive: 8
         }, { //Stage 3
@@ -1062,7 +1062,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Increase effective Rank by +${format(0.8)} with each level.`
             ],
             cost: [],
-            startCost: [1, 2, 4, 12, 20, 3, 12, 40, 20, 1800, 20],
+            startCost: [1, 2, 3, 9, 20, 3, 12, 40, 20, 1800, 20],
             scaling: [1.8, 2.8, 2, 1, 200, 2.4, 3, 1, 1, 2, 4],
             max: [8, 4, 3, 1, 1, 4, 3, 1, 1, 4, 2],
             maxActive: 8
@@ -1094,8 +1094,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
             ],
             cost: [],
-            startCost: [1, 3, 5, 5, 9, 20, 3, 4, 40, 60, 1800],
-            scaling: [1.8, 2.8, 2.4, 4, 12, 400, 2.4, 3, 1, 1, 1.4],
+            startCost: [1, 3, 5, 5, 6, 20, 3, 4, 40, 60, 1800],
+            scaling: [1.8, 2.8, 2.4, 4, 18, 400, 2.4, 3, 1, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
             maxActive: 9
         }, { //Stage 5
@@ -1146,7 +1146,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Have current Energy reach ${Limit(global.milestonesInfo[1].need[1]).format()}.`
             ],
             rewardText: [
-                () => player.inflation.vacuum ? `All Microworld Structures receive ${format(global.milestonesInfo[1].reward[0])}x boost.` : "Unknown Structure, it doesn't belong to this Universe, instability increased.",
+                () => player.inflation.vacuum ? `All Microworld Structures receive ${format(global.milestonesInfo[1].reward[0])}x boost.` : "Unknown Structure, it doesn't belong to this Universe.\nVacuum instability increased.",
                 () => player.inflation.vacuum ? `Energy from creating Stuctures increased by ${format(global.milestonesInfo[1].reward[1])}%. (Rounds down)` : `Improve effect of '[24] Chromium' by +${format(0.01)}.`
             ],
             need: [[1, 200], [4, 4]],
@@ -1166,7 +1166,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             rewardText: [
                 () => player.inflation.vacuum ? `Clouds gain increased by ${format(global.milestonesInfo[2].reward[0])}.` : 'A new Intergalactic Structure.',
-                () => player.inflation.vacuum ? `Puddles are now stronger by ${format(global.milestonesInfo[2].reward[1])}.` : "Unknown Structure, it doesn't belong to this Universe, instability increased."
+                () => player.inflation.vacuum ? `Puddles are now stronger by ${format(global.milestonesInfo[2].reward[1])}.` : "Unknown Structure, it doesn't belong to this Universe.\nVacuum instability increased."
             ],
             need: [[1, 30], [1.5, 3]],
             reward: [1, 1],
@@ -1185,7 +1185,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             rewardText: [
                 () => player.inflation.vacuum ? `Accretion speed increased by ${format(global.milestonesInfo[3].reward[0])}.` : 'A new Intergalactic Structure.',
-                () => player.inflation.vacuum ? `Improve effect of 'Planetary system' base by +${format(global.milestonesInfo[3].reward[1])}.` : "Unknown Structure, it doesn't belong to this Universe, instability increased."
+                () => player.inflation.vacuum ? `Improve effect of 'Planetary system' base by +${format(global.milestonesInfo[3].reward[1])}.` : "Unknown Structure, it doesn't belong to this Universe.\nVacuum instability increased."
             ],
             need: [[1, 30], [2.5, 1]],
             reward: [1, 1],
@@ -1204,7 +1204,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             rewardText: [
                 () => player.inflation.vacuum ? `Stars produce ${format(global.milestonesInfo[4].reward[0])} times more Elements.` : 'New Intergalactic themed Strangenesses.',
-                () => player.inflation.vacuum ? `Preons hardcap delayed by ${format(global.milestonesInfo[4].reward[1])}.` : "Unknown Structure, it doesn't belong to this Universe, instability increased."
+                () => player.inflation.vacuum ? `Preons hardcap delayed by ${format(global.milestonesInfo[4].reward[1])}.` : "Unknown Structure, it doesn't belong to this Universe.\nVacuum instability increased."
             ],
             need: [[8, 3], [1, 2]],
             reward: [1, 1],
@@ -1223,7 +1223,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             rewardText: [
                 () => player.inflation.vacuum ? `Increase ${global.strangeInfo.name[player.strangeness[5][10]]} income from Stage reset by ${format(global.milestonesInfo[5].reward[0])}.` : 'Intergalactic is always unlocked with Interstellar.',
-                () => player.inflation.vacuum ? `Boost per Galaxy is now +${format(global.milestonesInfo[5].reward[1])} bigger.` : "Unknown Structure, it can't exist in false Vacuum, instability increased."
+                () => player.inflation.vacuum ? `Boost per Galaxy is now +${format(global.milestonesInfo[5].reward[1])} bigger.` : 'Unknown Structure, it cannot exist in false Vacuum.\nVacuum instability increased.'
             ],
             need: [[1.5, 3], [2, 0]],
             reward: [5, 25],
