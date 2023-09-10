@@ -171,8 +171,8 @@ img {
 ul, ol { padding-left: 1.6em; }
 
 #footerStats img,
-#strangenessResearch input[type = "image"],
-.researchSection input[type = "image"] {
+#strangenessResearch .interactiveImage,
+.researchSection .interactiveImage {
     border-radius: 3px;
     z-index: 2;
 }
@@ -321,7 +321,7 @@ button, input { appearance: none; }
 
 .hollowButton { background-color: var(--background-color); }
 
-img, input[type = "image"], button, #load, #logoLinks > a {
+img, input[type = "image"], button, #load, a {
     user-select: none;
 
     /* Text color here works fine, but for consistency and less lag not added */
@@ -383,7 +383,7 @@ input:-webkit-autofill { /* Chrome related pain */
     border: 2px solid var(--window-border);
 }
 
-#resets > section > button:not(#stageReset) {
+#resets button:not(#stageReset) {
     width: 15.5em;
     height: 2.2em;
     font-size: 0.86em;
@@ -530,7 +530,7 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 0.6em;
 }
 
-#challengesMain input[type = "image"] {
+#challengesMain .interactiveImage {
     width: 48px;
     height: 48px;
     border-radius: 0;
@@ -610,7 +610,7 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--window-color);
 }
 
-.researchSection > div > div > p {
+.researchSection p {
     border: 2px solid;
     border-color: inherit;
     border-left: none;
@@ -671,12 +671,12 @@ input:-webkit-autofill { /* Chrome related pain */
 #element0:hover { opacity: 1; }
 
 /* Easier to do this through CSS (extra background value to prevent flashing) */
-#elementsGrid > .elementType1.awaiting { background: #780000 linear-gradient(45deg, #780000 50%, var(--background-color) 50%); }
-#elementsGrid > .elementType2.awaiting { background: #a55900 linear-gradient(45deg, #a55900 50%, var(--background-color) 50%); }
-#elementsGrid > .elementType3.awaiting { background: #0000c1 linear-gradient(45deg, #0000c1 50%, var(--background-color) 50%); }
-#elementsGrid > .elementType1.created, #elementsGrid > .elementType1.awaiting:hover { background: #780000; }
-#elementsGrid > .elementType2.created, #elementsGrid > .elementType2.awaiting:hover { background: #a55900; }
-#elementsGrid > .elementType3.created, #elementsGrid > .elementType3.awaiting:hover { background: #0000c1; }
+.elementType1.awaiting { background: #780000 linear-gradient(45deg, #780000 50%, var(--background-color) 50%); }
+.elementType2.awaiting { background: #a55900 linear-gradient(45deg, #a55900 50%, var(--background-color) 50%); }
+.elementType3.awaiting { background: #0000c1 linear-gradient(45deg, #0000c1 50%, var(--background-color) 50%); }
+.elementType1.created, .elementType1.awaiting:hover { background: #780000; }
+.elementType2.created, .elementType2.awaiting:hover { background: #a55900; }
+.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; }
 
 .strangeWelcome { width: 100%; }
 .strangeWelcome > p { margin-top: 0.3em; }
@@ -696,7 +696,11 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #strangeStructures > div > div { display: flex; }
-#strangeStructures > div > div > img { border-radius: 0; }
+
+#strangeStructures img {
+    background-color: black;
+    border-radius: 0;
+}
 
 #strangeStructures > div > div > p {
     border: 2px solid #006400;
@@ -728,12 +732,12 @@ input:-webkit-autofill { /* Chrome related pain */
     gap: 0.5em;
 }
 
-#strangenessResearch > section > div {
+#strangenessResearch div {
     display: flex;
     align-items: center;
 }
 
-#strangenessResearch > section > div > p {
+#strangenessResearch p {
     border: 2px solid;
     border-left: none;
     line-height: 28px;
@@ -761,7 +765,7 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-grow: 1;
 }
 
-#milestones > div > img {
+#milestones img {
     cursor: help;
     border-radius: 3px;
 }
@@ -778,14 +782,14 @@ input:-webkit-autofill { /* Chrome related pain */
     gap: 0.6em;
 }
 
-#resetToggles > div > section {
+#resetToggles section {
     display: flex;
     flex-direction: column;
     align-items: center;
     row-gap: 0.3em;
 }
 
-#resetToggles > div > section > div {
+#resetToggles section > div {
     display: flex;
     column-gap: 0.3em;
 }
@@ -1004,10 +1008,10 @@ input.miniInput {
     border-color: var(--stage-button-border);
 }
 
-#historyMainDiv > div { text-align: center; }
-#historyMainDiv > div > p:first-of-type { margin-bottom: 0.24em; }
+#historyMainDiv > section { text-align: center; }
+#historyMainDiv h4 { margin-bottom: 0.24em; }
 
-#historyMainDiv > div > ol {
+#historyMainDiv ol {
     list-style-type: none;
     overflow-y: overlay;
     margin: 0.5em 0;
@@ -1017,7 +1021,7 @@ input.miniInput {
     resize: vertical;
 }
 
-#historyMainDiv > div input {
+#historyMainDiv input {
     height: 1.7em;
     width: 2.6em;
 }
@@ -1047,9 +1051,9 @@ input.miniInput {
     padding: 0.4em 0.6em 0.5em;
 }
 
-.statsWindows > section > div > p { margin-bottom: 0.08em; }
+.statsWindows p { margin-bottom: 0.08em; }
 
-#strangeAllStats > div { border-color: darkgreen; }
+#strangeAllStats > section { border-color: darkgreen; }
 
 .imageList {
     display: flex;
@@ -1086,7 +1090,7 @@ input.miniInput {
     margin: 0 auto;
 }
 
-#footerMain > nav > button {
+#footerMain button {
     border-radius: 10px;
     border-color: var(--button-tab-border);
     padding: 0 0.7em;
@@ -1103,7 +1107,7 @@ input.miniInput {
 #footer img { background-color: black; }
 #footerStats > div { display: flex; }
 
-#footerStats > div > p {
+#footerStats p {
     line-height: 28px;
     text-align: center;
     border: 2px solid;
@@ -1117,7 +1121,7 @@ input.miniInput {
     z-index: 1; /* Text color issue */
 }
 
-#footerStats p > span:last-of-type {
+#footerStats span:last-of-type {
     display: inline-block;
     width: 5.2em;
 }
@@ -1218,7 +1222,7 @@ input.miniInput {
 /* Firefox related pain */
 @supports not (overflow-y: overlay) {
     body { overflow-y: auto; }
-    #historyMainDiv > div > ol {
+    #historyMainDiv ol {
         scrollbar-gutter: stable;
         overflow-y: auto;
     }
@@ -1246,7 +1250,7 @@ input.miniInput {
     .buyBuilding > div:first-of-type, .specialStar p { flex-direction: column; }
     .buyBuilding > div > p:first-of-type { width: 14em; }
     .buyBuilding > div > p:first-of-type > span:last-of-type { display: block; }
-    .buyBuilding > div > p > span.noMoveSpan { text-align: start; }
+    .buyBuilding .noMoveSpan { text-align: start; }
 
     .buyBuilding > div:last-of-type {
         row-gap: 0.16em;
