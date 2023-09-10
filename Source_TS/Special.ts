@@ -138,14 +138,14 @@ export const specialHTML = { //First values for images from here must be from tr
             ['ResearchClouds1.png', 'Vaporization+', 'stage3borderImage'],
             ['ResearchClouds2.png', 'Rain', 'stage2borderImage'],
             ['ResearchClouds3.png', 'Storm', 'stage4borderImage'],
-            ['Missing.png'/*'ResearchClouds4.png'*/, 'Water Accretion', 'stage2borderImage']
+            ['ResearchClouds4.png', 'Water Accretion', 'stage2borderImage']
         ],
         [
             ['ResearchRank1.png', 'Ocean', 'stage3borderImage'],
             ['ResearchRank2.png', 'Rank', 'stage3borderImage'],
             ['ResearchRank3.png', 'Weight', 'stage3borderImage'],
             ['ResearchRank4.png', 'Viscosity', 'stage2borderImage'],
-            ['ResearchRank5.png', 'Water rank', 'stage2borderImage']
+            ['ResearchRank5.png', 'Water Rank', 'stage2borderImage']
         ],
         [
             ['ResearchCollapse1.png', 'Supernova', 'stage6borderImage'],

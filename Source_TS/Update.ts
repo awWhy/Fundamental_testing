@@ -569,10 +569,13 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                     getId('researchExtra5').style.display = rank >= 3 && player.researchesExtra[1][2] >= 2 ? '' : 'none';
                 }
             } else if (active === 4) {
-                getId('research4').style.display = player.strangeness[4][2] >= 2 ? '' : 'none';
-                getId('research5').style.display = player.collapse.stars[2] > 0 || player.buildings[5][3].true >= 1 ? '' : 'none';
-                getId('researchExtra2').style.display = player.collapse.stars[0] > 0 || player.buildings[5][3].true >= 1 ? '' : 'none';
-                getId('researchExtra3').style.display = player.strangeness[4][2] >= 3 ? '' : 'none';
+                const stars = player.collapse.stars;
+                const galaxy = player.buildings[5][3].true >= 1;
+
+                getId('research4').style.display = (galaxy || stars[0] > 0) && player.strangeness[4][2] >= 2 ? '' : 'none';
+                getId('research5').style.display = galaxy || stars[2] > 0 ? '' : 'none';
+                getId('researchExtra2').style.display = galaxy || stars[0] > 0 ? '' : 'none';
+                getId('researchExtra3').style.display = (galaxy || stars[0] > 0) && player.strangeness[4][2] >= 3 ? '' : 'none';
             } else if (active === 5) {
                 if (!player.inflation.vacuum) {
                     getId('stageResearch').style.display = player.milestones[2][0] >= 6 || player.milestones[3][0] >= 7 ? '' : 'none';

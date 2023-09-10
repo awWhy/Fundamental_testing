@@ -386,6 +386,10 @@ export const buyBuilding = (index: number, stageIndex = player.stage.active, aut
 
     if (special === 'Galaxy') { //&& allowedToReset
         reset('galaxy', player.inflation.vacuum ? [1, 2, 3, 4, 5] : [4, 5]);
+        calculateMaxLevel(0, 4, 'researches');
+        calculateMaxLevel(1, 4, 'researches');
+        calculateMaxLevel(2, 4, 'researches');
+        calculateMaxLevel(3, 4, 'researches');
     } else {
         if (special !== 'Free') {
             currency = Limit(currency).minus(total).toArray();
@@ -629,8 +633,10 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
 
         /* Special cases */
         if (type === 'researches') {
-            if (stageIndex === 4 && upgrade === 2) {
-                calculateMaxLevel(0, 4, 'researches', true);
+            if (stageIndex === 4) {
+                if (upgrade === 2) {
+                    calculateMaxLevel(0, 4, 'researches', true);
+                }
             }
         } else if (type === 'researchesExtra') {
             if (stageIndex === 1) {
@@ -638,6 +644,10 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
                     if (player.stage.current < 4) { player.stage.current = player.researchesExtra[1][2] > 1 ? 2 : 3; }
                     stageUpdate('soft');
                     awardVoidReward(1);
+                }
+            } else if (stageIndex === 4) {
+                if (upgrade === 2) {
+                    calculateMaxLevel(3, 4, 'researches', true);
                 }
             }
         }
@@ -861,6 +871,8 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
             } else if (research === 2) {
                 max = 1;
                 if (player.elements[11] === 1) { max++; }
+            } else if (research === 3) {
+                max = 1 + player.researchesExtra[4][2];
             }
         }
     } else if (type === 'researchesExtra') {
@@ -1610,8 +1622,7 @@ const collapseReset = (toReset = true) => {
         const resetThese = player.inflation.vacuum ? [1, 2, 3, 4, 5] : (player.strangeness[5][5] < 1 ? [4, 5] : [4]);
         reset('collapse', resetThese);
         calculateMaxLevel(0, 4, 'researches');
-        calculateMaxLevel(1, 4, 'researches');
-        calculateMaxLevel(2, 4, 'researches');
+        calculateMaxLevel(3, 4, 'researches');
     }
 };
 

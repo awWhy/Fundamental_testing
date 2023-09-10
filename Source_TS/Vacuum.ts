@@ -67,15 +67,15 @@ export const prepareVacuum = () => {
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
         const strangeness3Cost = [1, 2, 3, 9, 20, 3, 12, 40];
-        const strangeness3Scaling = [1.8, 2.8, 2, 1, 200, 2.4, 3, 1];
+        const strangeness3Scaling = [1.8, 2.8, 2, 1, 200, 2.4, 2, 1];
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
         const strangeness4Cost = [1, 3, 5, 5, 6, 20, 3, 4, 40];
-        const strangeness4Scaling = [1.8, 2.8, 2.4, 4, 18, 400, 2.4, 3, 1];
+        const strangeness4Scaling = [1.8, 2.8, 2.4, 4, 8, 400, 2.4, 3, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-        const strangeness5Cost = [8, 20, 2000, 10, 10, 40, 1500, 60, 1500, 200];
-        const strangeness5Scaling = [1, 10, 1, 1.7, 1.75, 1, 5, 2, 1, 1];
+        const strangeness5Cost = [8, 16, 2000, 10, 10, 40, 1500, 60, 1500, 200];
+        const strangeness5Scaling = [1, 8, 1, 1.7, 1.75, 1, 5, 2, 1, 1];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 12;
@@ -90,6 +90,7 @@ export const prepareVacuum = () => {
         milestone1S2.src = milestone1S2.src.replace('Drop.png', 'Clouds.png');
         milestone1S2.alt = 'Clouds';
         global.milestonesInfo[3].name[0] = 'Center of gravity';
+        getQuery('#stageHistory > h4').textContent = 'Stage resets:';
 
         getId('strange10Stage2').style.display = '';
         getId('strange9Stage3').style.display = '';
@@ -178,7 +179,7 @@ export const prepareVacuum = () => {
         const strangeness4Scaling = [1, 2, 2.5, 3, 28, 0, 1, 6, 0];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-        const strangeness5Cost = [120, 20, 80, 10, 10, 40, 800, 20, 40, 60];
+        const strangeness5Cost = [120, 16, 80, 10, 10, 40, 800, 20, 40, 60];
         const strangeness5Scaling = [60, 0, 0, 8, 10, 0, 400, 20, 0, 0];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
@@ -194,6 +195,7 @@ export const prepareVacuum = () => {
         milestone1S2.src = milestone1S2.src.replace('Clouds.png', 'Drop.png');
         milestone1S2.alt = 'Drop of water';
         global.milestonesInfo[3].name[0] = 'Cluster of Mass';
+        getQuery('#stageHistory > h4').textContent = 'Interstellar Stage resets:';
 
         getId('vacuumBoost').style.display = '';
         getId('strange9Stage5').style.display = '';

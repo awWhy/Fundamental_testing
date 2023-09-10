@@ -92,7 +92,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 return player.accretion.rank >= global.accretionInfo.rankR[upgrade] && player.accretion.rank !== 0;
             } else if (stageIndex === 4) {
                 if (player.collapse.mass < global.collapseInfo.unlockR[upgrade]) { return false; }
-                if (upgrade === 3) { return player.strangeness[4][2] >= 2; }
+                if (upgrade === 3) { return (player.collapse.stars[0] > 0 || player.buildings[5][3].true >= 1) && player.strangeness[4][2] >= 2; }
                 if (upgrade === 4) { return player.collapse.stars[2] > 0 || player.buildings[5][3].true >= 1; }
                 return true;
             } else if (stageIndex === 5) {
@@ -116,7 +116,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 return true;
             } else if (stageIndex === 4) {
                 if (upgrade === 1) { return player.collapse.stars[0] > 0 || player.buildings[5][3].true >= 1; }
-                if (upgrade === 2) { return player.strangeness[4][2] >= 3; }
+                if (upgrade === 2) { return (player.collapse.stars[0] > 0 || player.buildings[5][3].true >= 1) && player.strangeness[4][2] >= 3; }
                 return true;
             }
             break;

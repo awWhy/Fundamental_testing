@@ -759,14 +759,14 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => `From Planetesimals to Planets, will get ${format(global.researchesInfo[4].effect[0] as number, { padding: true })}x boost to all Stars.`,
                 () => `All Stars boost each other. (Total boost is ${Limit(global.researchesInfo[4].effect[1] as overlimit).format({ padding: true })})`,
-                () => "Improve effect scaling of 'Planetary system', as well its max level by +3.",
+                () => "Improve effect scaling of 'Planetary system', as well increase its max level by +3.",
                 () => `Matter expelled from Red giants, this will boost Main-sequence stars by 4, as well boost all Stars by ${format(1.25)}.`,
                 () => `An immensely energetic explosion that will boost all Stars by ${format(global.researchesInfo[4].effect[4] as number, { padding: true })}. (Effect is stronger with more Black holes)`
             ],
             effect: [],
             cost: [],
             startCost: [1e3, 5e4, 1e8, 2e10, 1e28],
-            scaling: [10, 200, 1e12, 1, 2e8],
+            scaling: [10, 200, 1e12, 5e44, 2e8],
             max: [3, 2, 1, 1, 2],
             maxActive: 5
         }, { //Stage 5
@@ -786,8 +786,8 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             effect: [],
             cost: [],
-            startCost: [1e40, 1e55],
-            scaling: [1e20, 1e15],
+            startCost: [1e45, 1e50],
+            scaling: [1e15, 1e15],
             max: [3, 3],
             maxActive: 2
         }
@@ -865,7 +865,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => 'This violent stellar explosion is main source of Elements, also starts new Star formations.\nUnlock new Structure and even more, after Collapse of that Structure.',
                 () => `Star material transfers from one Star to another, ${player.inflation.vacuum ? 'delaying Preons hardcap' : 'improving Solar mass gain'} by ${format(global.collapseInfo.effect4RE1())}.\nAlso makes 'Star system' levels scale better.`,
-                () => `Matter were dispeled from Red giant and White dwarf is all that remained, improves effects of '[6] Carbon' by +${format(0.5)} and '[28] Titanium' by ${format(1.5)}.`
+                () => `Matter were dispeled from Red giant and White dwarf is all that remained, improves effect of '[6] Carbon' by +${format(0.5)} and '[28] Titanium' by ${format(1.5)}. Also increase max level of 'Planetary nebula' by +1.`
             ],
             effect: [],
             cost: [],
@@ -1055,7 +1055,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Satellites now improve all Accretion Structures${player.inflation.vacuum ? ' with reduced strength' : ''}.`,
                 () => `Automatically increase Rank when available.${player.strangeness[1][11] >= 1 ? '\nSecond level - will allow to reach Solar mass hardcap easier by making Accretion Structures only when cost is times of Solar mass hardcap. (If Cosmic dust is hardcapped)' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[3][Math.min(player.strangeness[3][5] + 1, global.ASRInfo.max[3])]}.`,
-                () => 'All upgrades/researches from any Stage will be created automatically.\n(Need to be enabled in settings, order of automatization is upgrades > researches > special researches)',
+                () => 'Will automatically create all upgrades and researches from any Stage.\n(Need to be enabled in settings, order of automatization is Upgrades > Stage researches > Special researches)',
                 () => `Unspend Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Effective Rank' : 'Cheaper Accretion'})`,
                 () => 'Current Universe state allows for another Accretion Structure.',
                 () => `Reduce amount of time required to reach Solar mass harcap by shifting Cosmic dust and Solar mass hardcaps.\nEffect is ${format(1.5)} times bigger per level (additive). (Can be reverted in Rank settings)`,
@@ -1063,7 +1063,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [1, 2, 3, 9, 20, 3, 12, 40, 20, 1800, 20],
-            scaling: [1.8, 2.8, 2, 1, 200, 2.4, 3, 1, 1, 2, 4],
+            scaling: [1.8, 2.8, 2, 1, 200, 2.4, 2, 1, 1, 2, 4],
             max: [8, 4, 3, 1, 1, 4, 3, 1, 1, 4, 2],
             maxActive: 8
         }, { //Stage 4
@@ -1095,7 +1095,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             cost: [],
             startCost: [1, 3, 5, 5, 6, 20, 3, 4, 40, 60, 1800],
-            scaling: [1.8, 2.8, 2.4, 4, 18, 400, 2.4, 3, 1, 1, 1.4],
+            scaling: [1.8, 2.8, 2.4, 4, 8, 400, 2.4, 3, 1, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
             maxActive: 9
         }, { //Stage 5
@@ -1126,8 +1126,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Unlock a new Strange structure and replace Stage reset reward, it will produce ${global.strangeInfo.name[player.strangeness[5][10]]}, but hardcaps easily.\n(Hardcap delayed by quantity of a higher tier Structure)`
             ],
             cost: [],
-            startCost: [8, 20, 2000, 10, 10, 40, 1500, 60, 1500, 200, 800],
-            scaling: [1, 10, 1, 1.7, 1.75, 1, 5, 2, 1, 1, 1],
+            startCost: [8, 16, 2000, 10, 10, 40, 1500, 60, 1500, 200, 800],
+            scaling: [1, 8, 1, 1.7, 1.75, 1, 5, 2, 1, 1, 1],
             max: [3, 1, 1, 9, 9, 1, 2, 2, 1, 1, 1],
             maxActive: 10
         }
