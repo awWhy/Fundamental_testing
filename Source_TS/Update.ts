@@ -124,7 +124,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
         } else if (s === 2) {
             if (auto[2]) { vaporizationResetCheck(true); }
         } else if (s === 1) {
-            if (auto[1]) { dischargeResetCheck('interval'); }
+            if (auto[1]) { dischargeResetCheck(true); }
         }
 
         if (autoU[s].length !== 0) { autoUpgradesBuy(s); }

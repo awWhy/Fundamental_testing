@@ -219,9 +219,8 @@ export const preventImageUnload = () => {
 
 export const setTheme = (theme: number | null) => {
     if (theme !== null) {
-        if (theme === 6) {
-            if (player.stage.true < 7 && player.strangeness[5][0] < 1) { theme = null; }
-        } else if (player.stage.true < theme) { theme = null; }
+        if (player.stage.true < theme) { theme = null; }
+        if (theme === 6 && player.stage.true < 7 && player.strangeness[5][0] < 1) { theme = null; }
     }
 
     global.theme = theme;

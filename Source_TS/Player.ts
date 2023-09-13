@@ -865,7 +865,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => 'This violent stellar explosion is main source of Elements, also starts new Star formations.\nUnlock new Structure and even more, after Collapse of that Structure.',
                 () => `Star material transfers from one Star to another, ${player.inflation.vacuum ? 'delaying Preons hardcap' : 'improving Solar mass gain'} by ${format(global.collapseInfo.effect4RE1())}.\nAlso makes 'Star system' levels scale better.`,
-                () => `Matter were dispeled from Red giant and White dwarf is all that remained, improves effect of '[6] Carbon' by +${format(0.5)} and '[28] Titanium' by ${format(1.5)}. Also increase max level of 'Planetary nebula' by +1.`
+                () => `Matter were dispeled from Red giant and White dwarf is all that remained, improves effect of '[6] Carbon' by +${format(0.5)} and '[28] Nickel' by ${format(1.5)}. Also increase max level of 'Planetary nebula' by +1.`
             ],
             effect: [],
             cost: [],
@@ -986,7 +986,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Base Discharge effect is now +1.',
                 () => `Discharge goal scales slower. (-${format(0.5)})`,
                 () => `Obtain +${format(0.5)} bonus Discharge goals.`,
-                () => `Automatically Discharge upon creating an upgrade or reaching next goal.${player.strangeness[1][11] >= 1 ? "\nSecond level - reaching new goal with auto Discharge doesn't cause reset." : ''}`,
+                () => `Automatically Discharge upon reaching next goal or spending Energy.${player.strangeness[1][11] >= 1 ? "\nSecond level - reaching new goal with auto Discharge doesn't cause reset." : ''}`,
                 () => `Gain more Energy from creating ${player.inflation.vacuum ? 'Preons, +2' : 'Particles, +1'}.`,
                 () => "Research 'Improved Tritium' is now better. (+1)",
                 () => `Always have auto for ${global.buildingsInfo.name[1][Math.min(player.strangeness[1][6] + 1, global.ASRInfo.max[1])]}.`,
@@ -994,7 +994,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Unspend Strange quarks will boost this Stage. (Bonus goals)',
                 () => `Minor boost of ${format(1.2)}x per level to all Microworld structures.`,
                 () => 'No Mass will be lost when Creating Preons.',
-                () => 'Energy is now directly based on current self-made amount of Structures.\nThis will also unlock better Reset automatization. (Also improve auto Discharge to not cause reset from upgrades)'
+                () => 'Energy is now directly based on current self-made amount of Structures.\nThis will also unlock better Reset automatization.'
             ],
             cost: [],
             startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 18, 3000],
@@ -1053,7 +1053,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Accretion Structures that produce another Structures now do it ${format(1.5)} times faster.`,
                 () => 'Some Rank researches receive extra Max level.\nFinal level will instead unlock a new upgrade.',
                 () => `Satellites now improve all Accretion Structures${player.inflation.vacuum ? ' with reduced strength' : ''}.`,
-                () => `Automatically increase Rank when available.${player.strangeness[1][11] >= 1 ? '\nSecond level - will allow to reach Solar mass hardcap easier by making Accretion Structures only when cost is times of Solar mass hardcap. (If Cosmic dust is hardcapped)' : ''}`,
+                () => `Automatically increase Rank when available.${player.strangeness[1][11] >= 1 ? '\nSecond level - auto creation of Accretion structures after reaching cosmic dust hardcap will always keep enough for highest Solar mass conversion.' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[3][Math.min(player.strangeness[3][5] + 1, global.ASRInfo.max[3])]}.`,
                 () => 'Will automatically create all upgrades and researches from any Stage.\n(Need to be enabled in settings, order of automatization is Upgrades > Stage researches > Special researches)',
                 () => `Unspend Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Effective Rank' : 'Cheaper Accretion'})`,
@@ -1113,7 +1113,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Strange growth'
             ],
             effectText: [
-                () => player.inflation.vacuum ? 'Unlock the Void. (Advanced subtab)\nAlso a new color theme.' : `Gain ability to be inside multiple Stages at once. (Next one to always be inside is ${global.stageInfo.word[player.strangeness[5][0] + 1]})\nPermanent Stages do not appear in history or reset timer.`,
+                () => player.inflation.vacuum ? 'Unlock the Void. (Advanced subtab)\nAlso a new color theme.' : `${global.stageInfo.word[player.strangeness[5][0] + 1]} will now be permanent. Permanent Stages do not affect timer.`,
                 () => `Gain ${format(1.5)} times more ${global.strangeInfo.name[player.strangeness[5][10]]} from ${player.inflation.vacuum ? '' : 'Interstellar'} Stage resets.`,
                 () => 'Allows to auto reset Stage, has some special settings.',
                 () => "Bigger Nebulas, more matter for Accretion. 'Jeans instability' upgrade is 2 times stronger.",

@@ -332,12 +332,11 @@ export const buyBuilding = (index: number, stageIndex = player.stage.active, aut
 
     let budget = currency;
     if (auto && building.true > 0 && special !== 'Free' && special !== 'Galaxy') {
-        let save = '2' as number | string;
         if (special === 'Mass' && player.strangeness[3][4] >= 2 && Limit(global.inflationInfo.dustTrue).moreOrEqual(global.inflationInfo.dustCap)) {
-            save = global.inflationInfo.massCap;
-        } else if (player.strangeness[1][7] >= 1) { save = player.toggles.shop.wait[stageIndex]; }
-
-        budget = Limit(currency).divide(save).toArray();
+            budget = Limit(global.inflationInfo.preonCap).multiply(global.inflationInfo.massCap, '-1.78266192e-33').plus(currency).toArray();
+        } else {
+            budget = Limit(currency).divide(player.strangeness[1][7] >= 1 ? player.toggles.shop.wait[stageIndex] : '2').toArray();
+        }
     }
 
     let total = calculateBuildingsCost(index, stageIndex); //This updates cost information
@@ -568,10 +567,10 @@ export const assignStrangeBoost = () => {
     const stageBoost = global.strangeInfo.stageBoost;
     const strangeQuarks = player.strange[0].current + 1;
 
-    stageBoost[1] = strangeness[1][8] < 1 ? null : strangeQuarks ** 0.12 - 1;
+    stageBoost[1] = strangeness[1][8] < 1 ? null : strangeQuarks ** 0.08 - 1;
     stageBoost[2] = strangeness[2][7] < 1 ? null : strangeQuarks ** 0.24;
     stageBoost[3] = strangeness[3][7] < 1 ? null : player.inflation.vacuum ?
-        strangeQuarks ** 0.16 - 1 : strangeQuarks ** 0.8;
+        strangeQuarks ** 0.12 - 1 : strangeQuarks ** 0.8;
     stageBoost[4] = strangeness[4][8] < 1 ? null : strangeQuarks ** 0.28;
     stageBoost[5] = strangeness[5][9] < 1 ? null : strangeQuarks ** 0.06;
 };
@@ -674,12 +673,12 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
             } else if (upgrade === 11) {
                 calculateMaxLevel(2, 4, 'researches', true);
             } else if (upgrade === 26) {
-                //awardVoidReward(4);
                 if (player.stage.current < 5) {
                     player.stage.current = 5;
-                    if (player.stage.true === 4) { player.stage.true = 5; }
-                    stageUpdate('soft');
+                    if (player.stage.true < 5) { player.stage.true = 5; }
                 }
+                //awardVoidReward(4);
+                stageUpdate('soft');
             }
         }
         if (!auto && global.screenReader[0]) { getId('SRMain').textContent = `New Element '${global.elementsInfo.name[upgrade]}' ${player.elements[upgrade] >= 1 ? 'obtained' : 'awaiting activation'}`; }
@@ -767,10 +766,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
         player.strange[0].current = currency as number;
         assignStrangeBoost();
     } else if (stageIndex === 1) {
-        if (player.strangeness[1][11] < 1) {
-            player.discharge.energy = Limit(currency).toNumber();
-            if (player.toggles.auto[1]) { dischargeResetCheck('upgrade'); }
-        }
+        if (player.strangeness[1][11] < 1) { player.discharge.energy = Limit(currency).toNumber(); }
     } else if (stageIndex === 2) {
         player.buildings[2][1].current = currency as overlimit;
 
@@ -896,13 +892,17 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
                 max = 2 + Math.min(Math.floor(player.challenges.void[3] / 2), 2);
             } else if (research === 3) {
                 max = player.strangeness[1][11] >= 1 ? 2 : 1;
+            } else if (research === 4) {
+                max = player.inflation.vacuum ? 2 : 1;
             } else if (research === 6) {
                 max = player.inflation.vacuum ? 5 : 3;
             } else if (research === 9) {
                 max = 6 + Math.min(player.challenges.void[3], 4);
             }
         } else if (stageIndex === 2) {
-            if (research === 1) {
+            if (research === 0) {
+                max = player.inflation.vacuum ? 6 : 9;
+            } else if (research === 1) {
                 max = 6 + Math.min(player.challenges.void[3], 4);
             } else if (research === 3) {
                 max = 3 + Math.min(Math.floor(player.challenges.void[3] / 2), 2);
@@ -1332,13 +1332,19 @@ export const assignDischargeInformation = () => {
     global.dischargeInfo.next = Math.round((10 - (2 * player.researches[1][3]) - (player.strangeness[1][1] / 2)) ** player.discharge.current);
 };
 
-export const dischargeResetCheck = (auto = false as false | 'interval' | 'upgrade'): boolean => {
+export const dischargeResetCheck = (auto = false): boolean => {
     if (player.upgrades[1][5] < 1 || player.buildings[1][1].true <= 0) { return false; }
     assignDischargeInformation();
 
-    if (auto !== false) {
-        if (player.strangeness[1][3] < 1 || (auto === 'interval' && player.discharge.energy < global.dischargeInfo.next)) { return false; }
-        dischargeReset(true);
+    if (auto) {
+        if (player.strangeness[1][3] < 1) { return false; }
+        if (player.discharge.energy >= global.dischargeInfo.next) {
+            dischargeReset(player.strangeness[1][3] < 2);
+            return true;
+        }
+
+        if (player.strangeness[1][11] >= 1 || player.discharge.energy >= global.dischargeInfo.energyTrue) { return false; }
+        dischargeReset();
     }
     return true;
 };
@@ -1362,13 +1368,13 @@ export const dischargeAsyncReset = async() => {
     dischargeReset();
 };
 
-const dischargeReset = (auto = false) => {
+const dischargeReset = (toReset = true) => {
     if (player.discharge.energy >= global.dischargeInfo.next) {
         player.discharge.current++;
     }
     awardMilestone(0, 1);
     awardVoidReward(1);
-    if (!auto || player.strangeness[1][3] < 2) { reset('discharge', player.inflation.vacuum ? [1, 2, 3, 4, 5] : [1]); }
+    if (toReset) { reset('discharge', player.inflation.vacuum ? [1, 2, 3, 4, 5] : [1]); }
 };
 
 export const assignVaporizationInformation = () => {
