@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription } from './Update';
-import { assignNewMassCap, assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
+import { assignNewMassCap, assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, enterChallenge, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, screenReaderSupport, mobileDeviceSupport, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify } from './Special';
 import { detectHotkey } from './Hotkeys';
 import { prepareVacuum, switchVacuum } from './Vacuum';
@@ -165,8 +165,7 @@ try { //Start everything
         const image = getId(`challenge${i + 1}`);
         if (SR) { image.addEventListener('focus', () => getChallengeDescription(i)); }
         image.addEventListener(hover, () => getChallengeDescription(i));
-        if (i === -1) { image.addEventListener('click', switchVacuum); }
-        //image.addEventListener('click', i === -1 ? switchVacuum : () => { void enterChallenge(i); });
+        image.addEventListener('click', i === -1 ? switchVacuum : () => { void enterChallenge(i); });
     }
     for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
         if (i === 5) { continue; } //Missing for now

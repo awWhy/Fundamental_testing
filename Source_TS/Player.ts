@@ -515,7 +515,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             [0, 0.005476, 6, 3, 24, 3],
             [0, 0.0028, 100, 1e7, 1e18, 1e23, 2.676e25],
             [0, 1e-19, 1e-9, 1e21, 1e17, 1e22],
-            [0, 1, 1e5, 1e15, 1e28, 1e60],
+            [0, 1, 1e5, 1e15, 1e28, 1e56],
             [0, 1e30, 1e40, 1e5]
         ],
         increase: [
@@ -777,11 +777,11 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => {
                     const index = Math.min(player.researches[5][0] + 2, 4);
-                    return `Higher density of Nebulas, will allow them to produce higher tier of Stars, but each tier is 4 times slower than previous one. Also will boost Nebulas by 4.\nNext tier will be ${player.buildings[4][index].trueTotal[0] === 0 ? '(unknown)' : global.buildingsInfo.name[4][index]}.`;
+                    return `Higher density of Nebulas, will allow them to produce higher tier of Stars, but each tier is 4 times slower than previous one. Also will boost Nebulas by 4.\nNext tier will be ${player.buildings[4][index].highest[0] > 0 ? global.buildingsInfo.name[4][index] : '(unknown)'}.`;
                 },
                 () => {
                     const index = Math.max(3 - player.researches[5][1], 1);
-                    return `More types of Stars are found within Star cluster. Increasing effect by 3, but also boosting lower tier of Stars. (3 times less than higher one)\nNext tier will be ${player.buildings[4][index].trueTotal[0] === 0 ? '(unknown)' : global.buildingsInfo.name[4][index]}.`;
+                    return `More types of Stars are found within Star cluster. Increasing effect by 3, but also boosting lower tier of Stars. (3 times less than higher one)\nNext tier will be ${player.buildings[4][index].highest[0] > 0 ? global.buildingsInfo.name[4][index] : '(unknown)'}.`;
                 }
             ],
             effect: [],
@@ -891,7 +891,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             [4000, 10000, 16000, 24000, 32000],
             [1e10, 1e14, 1e18, 1e23, 1e28, 1e34],
             [1e-7, 1e10, 5e29, 2e30, 1e36],
-            [1e6, 1e17, 1e28, 1e39, 1e72],
+            [1e6, 1e17, 1e28, 1e39, 1e61],
             [1, 1, 1, 1]
         ],
         max: [0, 5, 5, 4, 4, 0]
@@ -992,12 +992,12 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Always have auto for ${global.buildingsInfo.name[1][Math.min(player.strangeness[1][6] + 1, global.ASRInfo.max[1])]}.`,
                 () => 'First level - improve control over auto Structures toggles.\nSecond level - improve control over consumption of Offline storage.',
                 () => 'Unspend Strange quarks will boost this Stage. (Bonus goals)',
-                () => `Minor boost of ${format(1.2)}x per level to all Microworld structures.`,
+                () => `Minor boost of ${format(1.3)}x per level to all Microworld structures.`,
                 () => 'No Mass will be lost when Creating Preons.',
                 () => 'Energy is now directly based on current self-made amount of Structures.\nThis will also unlock better Reset automatization.'
             ],
             cost: [],
-            startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 18, 3000],
+            startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 16, 3000],
             scaling: [2.4, 4, 6, 300, 4, 2.4, 2, 2, 1, 1.8, 1, 1],
             max: [4, 4, 2, 1, 2, 4, 3, 2, 1, 6, 1, 1],
             maxActive: 9
@@ -1024,13 +1024,13 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Always have auto for ${global.buildingsInfo.name[2][Math.min(player.strangeness[2][5] + 1, global.ASRInfo.max[2])]}.`,
                 () => 'Decrease Offline time waste by -1 second per level.',
                 () => 'Unspend Strange quarks will boost this Stage. (Puddle production)',
-                () => 'Current Universe state allows for another Submerged Structure.', //'\nSecond level will improve spread of that Structure with a new upgrade.'
+                () => 'Current Universe state allows for another Submerged Structure.', //'\nSecond level will improve spread from that Structure with a new upgrade.',
                 () => `Increase ${global.strangeInfo.name[player.strangeness[5][10]]} gained from this Stage reset based on current Cloud amount.\n(Effect can be seen in stats)`,
                 () => "Submerged is no longer affected by or affects non Microworld Stage reset types. (Requires level 1 of 'Conservation of Energy')"
             ],
             cost: [],
             startCost: [1, 2, 16, 2, 20, 2, 4, 40, 40, 200, 4000],
-            scaling: [1.8, 1.8, 1.6, 4, 500, 2, 2, 1, 10, 1, 1],
+            scaling: [1.8, 1.8, 1.6, 4, 500, 2, 2, 1, 1, 1, 1],
             max: [6, 6, 3, 3, 1, 5, 1, 1, 1, 1, 1],
             maxActive: 8
         }, { //Stage 3
@@ -1094,7 +1094,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
             ],
             cost: [],
-            startCost: [1, 3, 5, 5, 6, 20, 3, 4, 40, 60, 1800],
+            startCost: [1, 3, 5, 5, 6, 20, 3, 4, 40, 20, 1800],
             scaling: [1.8, 2.8, 2.4, 4, 8, 400, 2.4, 3, 1, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
             maxActive: 9
@@ -1126,7 +1126,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Unlock a new Strange structure and replace Stage reset reward, it will produce ${global.strangeInfo.name[player.strangeness[5][10]]}, but hardcaps easily.\n(Hardcap delayed by quantity of a higher tier Structure)`
             ],
             cost: [],
-            startCost: [8, 16, 2000, 10, 10, 40, 1500, 60, 1500, 200, 800],
+            startCost: [4, 16, 2000, 10, 10, 80, 1500, 60, 1500, 200, 800],
             scaling: [1, 8, 1, 1.7, 1.75, 1, 5, 2, 1, 1, 1],
             max: [3, 1, 1, 9, 9, 1, 2, 2, 1, 1, 1],
             maxActive: 10
@@ -1244,7 +1244,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             () => {
                 const progress = player.challenges.void;
                 if (progress[1] === 0) { return '<span class="orangeText">- Unknown, but maybe with more Energy</span>'; }
-                let text = '<span class="orangeText">- Energy gain is decreased by 20%\n- Discharge base reduced</span>';
+                let text = `<span class="orangeText">- Preons softcap is stronger (^${format(0.15)} > ^${format(0.10, { padding: true, digits: 2 })})\n- Energy gain is decreased by 20%\n- Discharge base reduced</span>`;
                 if (progress[1] >= 3) { text += `\n\n<span class="blueText">- ${progress[2] > 0 ? `Effective Drops production count softcap no longer delayed by self-made amount and is stronger (^${format(0.2)} > ^${format(0.1)})\n- Puddles are 100 times weaker\n- 'Water spread' upgrade is weaker` : 'Unknown, but maybe if deeper'}</span>`; }
                 if (progress[1] >= 2) { text += `\n\n<span class="grayText">- ${progress[3] > 0 ? `'Jovian planet' Rank softcap starts immediately (^${format(0.92)})\n- Softcap is stronger after reaching that Rank (^${format(0.84)})\n- Increasing Rank doesn't increase effective Rank` : 'Unknown, but maybe if more Mass'}</span>`; }
                 if (progress[3] >= 5) { text += `\n\n<span class="darkorchidText">- ${progress[4] > 0 ? "Solar mass effect is 10 times weaker and scales slower\n- 'Star system' is weaker\n- Intergalactic Stage unlocked later" : 'Unknown, but maybe if long enough'}</span>`; }
@@ -1256,7 +1256,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             [
                 [],
                 ['Perform Discharge', "Get first level of 'Accretion'", "Get second level of 'Accretion'"],
-                ['Have more than 1 Cloud', 'Have more than 1e4 Clouds'],
+                ['Have more than 1 Cloud', 'Have more than 1e4 Clouds'], //'Have more than 1e8 Clouds'
                 ["Reach 'Meteoroid' Rank", "Reach 'Asteroid' Rank", "Reach 'Planet' Rank", "Reach 'Jovian planet' Rank", "Reach 'Protostar' Rank"],
                 ['Cause the Collapse', 'Get first Red giant', 'Get first Neutron star', 'Get first Black hole'],
                 []
@@ -1266,7 +1266,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             [
                 [],
                 ["'Fundamental boost' (Microworld)", "'Conservation of Mass' (Microworld)", "'Massive Ranks' (Accretion)"],
-                ["'Ocean world' (Submerged)", "'Isolation' (Submerged)"],
+                ["'Ocean world' (Submerged)", "'Isolation' (Submerged)"], //"'New structure' max level increased (Submerged)"
                 ['Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', "'Strange growth' (Intergalactic)"],
                 ["'New Milestones' (Intergalactic)", "'Conservation of Energy' (Microworld)", "'Neutronium' (Interstellar)", "'Mass shift' (Accretion)"],
                 []

@@ -313,7 +313,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
                 getId('maxEnergyStat').textContent = format(player.discharge.energyMax);
                 getId('dischargeStat').textContent = format(player.discharge.current + global.dischargeInfo.bonus);
                 getId('dischargeStatTrue').textContent = `[${format(player.discharge.current)}]`;
-                if (player.strangeness[1][11] < 1) { getId('energyStatTrue').textContent = format(global.dischargeInfo.energyTrue); }
+                if (player.strangeness[1][11] < 1) { getId('energySpent').textContent = format(global.dischargeInfo.energyTrue - player.discharge.energy); }
                 if (player.inflation.vacuum) {
                     assignWithNoMove(getId('preonCapStat'), Limit(global.inflationInfo.preonCap).format({ padding: true }));
                     assignWithNoMove(getId('preonCapTill'), Limit(global.inflationInfo.preonTrue).divide(global.inflationInfo.preonCap).format({ padding: true }));
@@ -760,7 +760,7 @@ export const getUpgradeDescription = (index: number, type: 'upgrades' | 'researc
         global.lastResearch[stageIndex] = [0, 'ASR'];
 
         getId('researchText').textContent = 'Structure Automation.';
-        getId('researchEffect').textContent = `Automatically make ${player.buildings[stageIndex][autoIndex].trueTotal[0] === 0 ? '(unknown)' : global.buildingsInfo.name[stageIndex][autoIndex]}.\n(Auto will wait until ${format(waitValue)} times of the Structure cost)`;
+        getId('researchEffect').textContent = `Automatically make ${player.buildings[stageIndex][autoIndex].highest[0] > 0 ? global.buildingsInfo.name[stageIndex][autoIndex] : '(unknown)'}.\n(Auto will wait until ${format(waitValue)} times of the Structure cost)`;
         getId('researchCost').textContent = player.ASR[stageIndex] >= ASRInfo.max[stageIndex] ? 'Maxed.' : `${format(ASRInfo.cost[stageIndex])} ${global.stageInfo.priceName}.`;
     }
 };
@@ -803,7 +803,16 @@ export const getChallengeDescription = (index: number) => {
         <div><h4 class="${color} bigWord">Effect:</h4>
         <p>${info.effectText[index]()}</p></div>`;
     }
-    getId('voidRewards').style.display = index === 0 ? '' : 'none';
+
+    if (index === 0) {
+        const progress = player.challenges.void;
+
+        getId('voidRewards').style.display = '';
+        getId('voidRewardSubmerged').style.display = progress[1] >= 3 ? '' : 'none';
+        getId('voidRewardAccretion').style.display = progress[1] >= 2 ? '' : 'none';
+        getId('voidRewardInterstellar').style.display = progress[3] >= 5 ? '' : 'none';
+    } else { getId('voidRewards').style.display = 'none'; }
+
     if (multi.innerHTML !== text) { multi.innerHTML = text; }
 };
 
@@ -967,8 +976,8 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
     stageInfo.activeAll = [vacuum ? 1 : current];
     const activeAll = stageInfo.activeAll;
     if (vacuum) {
-        if (player.researchesExtra[1][2] >= 2) { activeAll.push(2); }
-        if (player.researchesExtra[1][2] >= 1) { activeAll.push(3); }
+        if (player.researchesExtra[1][2] >= 2 && player.challenges.active !== 0) { activeAll.push(2); }
+        if (player.researchesExtra[1][2] >= 1 && player.challenges.active !== 0) { activeAll.push(3); }
         if (player.accretion.rank >= 6) {
             activeAll.push(4);
             if (player.strangeness[5][5] >= 1 && (/*current >= 5 ||*/ player.challenges.active !== 0)) { activeAll.push(5); }

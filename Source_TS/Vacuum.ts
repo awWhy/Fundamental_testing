@@ -74,7 +74,7 @@ export const prepareVacuum = () => {
         const strangeness4Scaling = [1.8, 2.8, 2.4, 4, 8, 400, 2.4, 3, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-        const strangeness5Cost = [8, 16, 2000, 10, 10, 40, 1500, 60, 1500, 200];
+        const strangeness5Cost = [4, 16, 2000, 10, 10, 80, 1500, 60, 1500, 200];
         const strangeness5Scaling = [1, 8, 1, 1.7, 1.75, 1, 5, 2, 1, 1];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
@@ -180,7 +180,7 @@ export const prepareVacuum = () => {
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
         const strangeness5Cost = [120, 16, 80, 10, 10, 40, 800, 20, 40, 60];
-        const strangeness5Scaling = [60, 0, 0, 8, 10, 0, 400, 20, 0, 0];
+        const strangeness5Scaling = [60, 0, 0, 8, 10, 0, 1600, 20, 0, 0];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 9;

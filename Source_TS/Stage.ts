@@ -5,7 +5,7 @@ import { cloneArray, global, logAny, player } from './Player';
 import { reset, resetStage } from './Reset';
 import { Alert, Confirm, Notify, playEvent } from './Special';
 import { overlimit } from './Types';
-import { format, getStrangenessDescription, numbersUpdate, stageUpdate, switchTab, updateRankInfo, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { format, getChallengeDescription, getStrangenessDescription, numbersUpdate, stageUpdate, switchTab, updateRankInfo, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
 export const assignBuildingInformation = () => { //Sets buildingInfo.producing for all active buildings, also most of effects
     const { upgradesInfo, researchesInfo, researchesExtraInfo, dischargeInfo, vaporizationInfo, milestonesInfo } = global;
@@ -28,7 +28,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
         upgradesInfo[1].effect[5] = inVoid ? (dischargeBase - 1) / 2 + 1 : dischargeBase;
         upgradesInfo[1].effect[7] = (102 + researches[1][1]) / 100;
         researchesExtraInfo[1].effect[4] = 1 + upgradesInfo[1].effect[5] / 100;
-        let totalMultiplier = (upgradesInfo[1].effect[5] ** (discharge.current + dischargeInfo.bonus)) * (1.2 ** strangeness[1][9]);
+        let totalMultiplier = (upgradesInfo[1].effect[5] ** (discharge.current + dischargeInfo.bonus)) * (1.3 ** strangeness[1][9]);
         if (vacuum) { totalMultiplier *= milestonesInfo[1].reward[0]; }
 
         const listForMult5 = [buildings[1][b5].current];
@@ -71,7 +71,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
             const listForMult1 = [buildings[1][1].current];
             if (upgrades[1][7] === 1) { listForMult1.push(Limit(upgradesInfo[1].effect[7]).power(buildings[1][1].true).toArray()); }
             producing[1][1] = Limit(0.001 * totalMultiplier).multiply(...listForMult1).toArray();
-            if (Limit(producing[1][1]).moreThan('1')) { producing[1][1] = Limit(producing[1][1]).power(0.15).toArray(); }
+            if (Limit(producing[1][1]).moreThan('1')) { producing[1][1] = Limit(producing[1][1]).power(inVoid ? 0.1 : 0.15).toArray(); }
         }
     }
     if (activeAll.includes(2)) {
@@ -240,7 +240,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
         if (stageBoost[4] !== null) { totalNumber *= stageBoost[4]; }
         const totalMultiplier = Limit(totalNumber).multiply(...listForTotal).toArray();
 
-        producing[4][5] = Limit('1e11').multiply(buildings[4][5].current, totalMultiplier).toArray();
+        producing[4][5] = Limit('1e12').multiply(buildings[4][5].current, totalMultiplier).toArray();
 
         producing[4][4] = Limit('2e9').multiply(buildings[4][4].current, totalMultiplier).toArray();
 
@@ -1759,7 +1759,7 @@ const awardVoidReward = (index: number) => {
     }
 };
 
-/*export const enterChallenge = async(index: number) => {
+export const enterChallenge = async(index: number) => {
     if (player.challenges.active === index) {
         if (await Confirm(`Leave the '${global.challengesInfo.name[index]}'?`)) { exitChallenge(); }
         getChallengeDescription(index);
@@ -1790,4 +1790,4 @@ const exitChallenge = () => {
     resetStage([1, 2, 3, 4, 5]);
 
     if (global.screenReader[0]) { getId('SRStage').textContent = 'Challenge is no longer active'; }
-};*/
+};
