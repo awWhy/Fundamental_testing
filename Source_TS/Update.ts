@@ -64,14 +64,9 @@ export const switchTab = (tab: string, subtab = null as null | string) => {
     numbersUpdate();
 };
 
-//In seconds
 export const maxOfflineTime = (): number => Math.min(7200 * player.stage.true + Math.max(player.inflation.vacuum ? player.stage.resets * 28800 : (player.stage.resets - 4) * 7200, 0), 172800);
 export const maxExportTime = (): number => player.strange[0].total > 0 ? 172800 : 86400;
-export const exportMultiplier = (): number => {
-    let mult = 1 + player.stage.best / 20;
-    if (!player.inflation.vacuum) { mult += global.strangeInfo.instability; }
-    return mult * (player.strangeness[4][7] + 1);
-};
+export const exportMultiplier = (): number => (1 + player.stage.best / 10) * (player.strangeness[4][7] + 1);
 
 export const timeUpdate = (timeWarp = 0) => { //Time based information
     const { auto, buildings: autoBuy } = player.toggles;
@@ -102,7 +97,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
             passedSeconds = 60;
         } else if (time.offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2) {
             const extraTime = Math.min(Math.max(time.offline / 3600, 1) * passedSeconds, time.offline);
-            time.offline -= Math.min(extraTime * (8 - player.strangeness[2][6]), time.offline);
+            time.offline -= Math.min(extraTime * (6 - player.strangeness[2][6]), time.offline);
             passedSeconds += extraTime;
         }
     }
@@ -269,7 +264,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
             if (player.time.offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2) {
                 const time = Math.max(player.time.offline / 3600, 1);
                 getId('offlineBoostEffect').textContent = `+${format(time * 1, { digits: 0 })} seconds`;
-                getId('offlineBoostWaste').textContent = `${format(time * (8 - player.strangeness[2][6]), { digits: 0 })} seconds`;
+                getId('offlineBoostWaste').textContent = `${format(time * (6 - player.strangeness[2][6]), { digits: 0 })} seconds`;
             }
             if (global.lastUpgrade[active] >= 0) { getUpgradeDescription(global.lastUpgrade[active], 'upgrades'); }
         } else if (subtab.stageCurrent === 'Advanced') {
@@ -751,17 +746,12 @@ export const getUpgradeDescription = (index: number, type: 'upgrades' | 'researc
             stageIndex === 4 && type === 'researches' && global.collapseInfo.unlockR[index] > player.collapse.mass ? `Unlocked at ${format(global.collapseInfo.unlockR[index])} Mass.` :
             `${format(pointer.cost[index])} ${global.stageInfo.priceName}.`;
     } else if (type === 'ASR') {
-        const { ASRInfo } = global;
-        const autoIndex = Math.min(player.ASR[stageIndex] + 1, ASRInfo.max[stageIndex]);
-        let waitValue = 2;
-        if (player.inflation.vacuum && stageIndex === 3 && player.strangeness[3][4] >= 2 && Limit(global.inflationInfo.dustTrue).moreOrEqual(global.inflationInfo.dustCap)) {
-            waitValue = global.inflationInfo.massCap;
-        } else if (player.strangeness[1][7] >= 1) { waitValue = player.toggles.shop.wait[stageIndex]; }
+        const autoIndex = Math.min(player.ASR[stageIndex] + 1, global.ASRInfo.max[stageIndex]);
         global.lastResearch[stageIndex] = [0, 'ASR'];
 
         getId('researchText').textContent = 'Structure Automation.';
-        getId('researchEffect').textContent = `Automatically make ${player.buildings[stageIndex][autoIndex].highest[0] > 0 ? global.buildingsInfo.name[stageIndex][autoIndex] : '(unknown)'}.\n(Auto will wait until ${format(waitValue)} times of the Structure cost)`;
-        getId('researchCost').textContent = player.ASR[stageIndex] >= ASRInfo.max[stageIndex] ? 'Maxed.' : `${format(ASRInfo.cost[stageIndex])} ${global.stageInfo.priceName}.`;
+        getId('researchEffect').textContent = `Automatically make ${player.buildings[stageIndex][autoIndex].highest[0] > 0 ? global.buildingsInfo.name[stageIndex][autoIndex] : '(unknown)'}.\n(Auto will wait until ${format(player.strangeness[1][7] < 1 ? 2 : player.toggles.shop.wait[stageIndex])} times of the Structure cost)`;
+        getId('researchCost').textContent = player.ASR[stageIndex] >= global.ASRInfo.max[stageIndex] ? 'Maxed.' : `${format(global.ASRInfo.cost[stageIndex])} ${global.stageInfo.priceName}.`;
     }
 };
 

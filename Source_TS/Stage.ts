@@ -1335,18 +1335,21 @@ export const assignDischargeInformation = () => {
 export const dischargeResetCheck = (auto = false): boolean => {
     if (player.upgrades[1][5] < 1 || player.buildings[1][1].true <= 0) { return false; }
     assignDischargeInformation();
+    const info = global.dischargeInfo;
+    const energy = player.discharge.energy;
 
     if (auto) {
         if (player.strangeness[1][3] < 1) { return false; }
-        if (player.discharge.energy >= global.dischargeInfo.next) {
+        if (energy >= info.next) {
             dischargeReset(player.strangeness[1][3] < 2);
             return true;
         }
 
-        if (player.strangeness[1][11] >= 1 || player.discharge.energy >= global.dischargeInfo.energyTrue) { return false; }
+        if (player.strangeness[1][11] >= 1 || energy >= info.energyTrue) { return false; }
         dischargeReset();
+        return true;
     }
-    return true;
+    return energy < info.energyTrue || energy >= info.next;
 };
 
 export const dischargeAsyncReset = async() => {
@@ -1356,15 +1359,13 @@ export const dischargeAsyncReset = async() => {
 
     if (player.toggles.confirm[1] !== 'None') {
         const active = player.stage.active;
-        const goalReached = energy >= info.next;
-        const energyRegain = energy < info.energyTrue;
-        if (player.toggles.confirm[1] !== 'Safe' || active !== 1 || (!goalReached && !energyRegain)) {
-            if (!(await Confirm(`${active === 1 ? 'This will reset all current Structures and Energy. ' : `Discarge attempt while inside '${global.stageInfo.word[active]}'.\n`}${goalReached ? 'Enough Energy to gain boost from new goal' : energyRegain ? `Can regain at least ${format(info.energyTrue - energy)} Energy` : 'There is no real reason'}, continue?`))) { return; }
+        if (player.toggles.confirm[1] !== 'Safe' || active !== 1) {
+            if (!(await Confirm(`${active === 1 ? 'This will reset all current Structures and Energy. ' : `Discarge attempt while inside '${global.stageInfo.word[active]}'.\n`}${energy >= info.next ? 'Enough Energy to gain boost from a new goal' : `Can regain at least ${format(info.energyTrue - energy)} Energy`}, continue?`))) { return; }
             if (!dischargeResetCheck()) { return Notify('Discharge canceled, requirements are no longer met'); }
         }
     }
 
-    if (global.screenReader[0]) { getId('SRMain').textContent = `Structures and Energy were reset${energy >= info.next ? ', gained boost from reaching new goal' : ''}`; }
+    if (global.screenReader[0]) { getId('SRMain').textContent = `Structures and Energy were reset${energy >= info.next ? ', also gained boost from reaching new goal' : ''}`; }
     dischargeReset();
 };
 
@@ -1403,18 +1404,17 @@ export const vaporizationResetCheck = (auto = false): boolean => {
 export const vaporizationAsyncReset = async() => {
     if (!vaporizationResetCheck()) { return; }
     const info = global.vaporizationInfo;
-    const clouds = player.vaporization.clouds;
+    const increase = player.vaporization.clouds[0] > 0 ? Limit(info.get).divide(player.vaporization.clouds).multiply('1e2').toArray() : '1e2';
 
     if (player.toggles.confirm[2] !== 'None') {
         const active = player.stage.active;
-        const increase = clouds[0] > 0 ? Limit(info.get).divide(clouds).multiply('1e2').toArray() : '1e2';
         if (player.toggles.confirm[2] !== 'Safe' || active !== 2 || Limit(increase).lessThan('1e2')) {
             if (!(await Confirm(`${active === 2 ? 'Reset structures and upgrades' : `Vaporization attempt while inside '${global.stageInfo.word[active]}'.\nConfirm`} for ${Limit(info.get).format()} (+${Limit(increase).format()}%) Clouds?`))) { return; }
             if (!vaporizationResetCheck()) { return Notify('Vaporization canceled, requirements are no longer met'); }
         }
     }
 
-    if (global.screenReader[0]) { getId('SRMain').textContent = `Progress were reset for ${Limit(info.get).format()} (+${clouds[0] > 0 ? Limit(info.get).divide(clouds).multiply('1e2').format() : 100}%) Clouds`; }
+    if (global.screenReader[0]) { getId('SRMain').textContent = `Progress were reset for ${Limit(info.get).format()} (+${Limit(increase).format()}%) Clouds`; }
     vaporizationReset();
 };
 
@@ -1555,25 +1555,26 @@ export const collapseResetCheck = (auto = false): boolean => {
 
 export const collapseAsyncReset = async() => {
     if (!collapseResetCheck()) { return; }
-    const info = global.collapseInfo;
+    const { newMass, starCheck: newStars } = global.collapseInfo;
+    const mass = player.collapse.mass;
 
     if (player.toggles.confirm[4] !== 'None') {
         const active = player.stage.active;
-        const unlockedG = (info.newMass >= 1e5 || player.collapse.mass >= 1e5) && player.strangeness[5][6] >= 1;
-        const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).lessOrEqual(info.newMass);
-        const notMaxed = player.inflation.vacuum && info.newMass > player.collapse.mass && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
+        const unlockedG = (newMass >= 1e5 || mass >= 1e5) && player.strangeness[5][6] >= 1;
+        const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).lessOrEqual(newMass);
+        const notMaxed = player.inflation.vacuum && newMass > mass && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
         if (player.toggles.confirm[4] !== 'Safe' || active !== 4 || (cantAfford && (notMaxed || unlockedG))) {
             let message = active === 4 ? 'This will reset all researches and upgrades' : `Collapse attempt while inside '${global.stageInfo.word[active]}'`;
-            if (info.newMass > player.collapse.mass) {
-                message += `\nSolar mass will increase to ${format(info.newMass)}`;
+            if (newMass > mass) {
+                message += `\nSolar mass will increase to ${format(newMass)}`;
                 if (notMaxed) { message += '\n(Hardcap is not reached)'; }
                 if (unlockedG) { message += `\n(${cantAfford ? 'Not enough for' : 'Will be able to make'} a new Galaxy)`; }
-            } else { message += "\nTotal Solar mass won't change"; }
-            if (info.starCheck[0] > 0 || info.starCheck[1] > 0 || info.starCheck[2] > 0) {
+            } else { message += "\nSolar mass won't change"; }
+            if (newStars[0] > 0 || newStars[1] > 0 || newStars[2] > 0) {
                 message += '\nAlso will gain new Star remnants:';
-                if (info.starCheck[0] > 0) { message += `\n'Red giants' - ${format(info.starCheck[0])}`; }
-                if (info.starCheck[1] > 0) { message += `\n'Neutron stars' - ${format(info.starCheck[1])}`; }
-                if (info.starCheck[2] > 0) { message += `\n'Black holes' - ${format(info.starCheck[2])}`; }
+                if (newStars[0] > 0) { message += `\n'Red giants' - ${format(newStars[0])}`; }
+                if (newStars[1] > 0) { message += `\n'Neutron stars' - ${format(newStars[1])}`; }
+                if (newStars[2] > 0) { message += `\n'Black holes' - ${format(newStars[2])}`; }
             }
             if (player.elements.includes(0.5)) {
                 let count = 0;
@@ -1590,12 +1591,12 @@ export const collapseAsyncReset = async() => {
     }
 
     if (global.screenReader[0]) {
-        let message = `Solar mass ${info.newMass > player.collapse.mass ? `is now ${format(info.newMass)}` : "haven't changed"}`;
-        if (info.starCheck[0] > 0 || info.starCheck[1] > 0 || info.starCheck[2] > 0) {
+        let message = `Solar mass ${newMass > mass ? `is now ${format(newMass)}` : "haven't changed"}`;
+        if (newStars[0] > 0 || newStars[1] > 0 || newStars[2] > 0) {
             message += ', also gained';
-            if (info.starCheck[0] > 0) { message += ` ${format(info.starCheck[0])} Red giants`; }
-            if (info.starCheck[1] > 0) { message += `, ${format(info.starCheck[1])} Neutron stars`; }
-            if (info.starCheck[2] > 0) { message += `, ${format(info.starCheck[2])} Black holes`; }
+            if (newStars[0] > 0) { message += ` ${format(newStars[0])} Red giants`; }
+            if (newStars[1] > 0) { message += `, ${format(newStars[1])} Neutron stars`; }
+            if (newStars[2] > 0) { message += `, ${format(newStars[2])} Black holes`; }
         }
         getId('SRMain').textContent = message;
     }

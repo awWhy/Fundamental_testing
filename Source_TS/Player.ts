@@ -571,7 +571,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `${player.inflation.vacuum ? 'Atoms' : 'Particle'} cost is 10 times cheaper.`,
                 () => `${player.inflation.vacuum ? 'Atoms' : 'Particle'} produce 5 times more ${player.inflation.vacuum ? 'Particles' : 'Quarks'}.`,
                 () => `${player.inflation.vacuum ? 'Molecules' : 'Atoms'} produce 5 times more ${player.inflation.vacuum ? 'Atoms' : 'Particles'}.`,
-                () => `Ability to reset at any time, and if had enough Energy, then also will boost production for all Structures by ${format(global.upgradesInfo[1].effect[5] as number)}.\nTotal boost from goals: ${Limit(global.upgradesInfo[1].effect[5] as number).power(player.discharge.current + global.dischargeInfo.bonus).format()}.`,
+                () => `Ability to regain spent Energy and if had enough Energy will also boost production for all Structures by ${format(global.upgradesInfo[1].effect[5] as number)}.\nTotal boost from goals: ${Limit(global.upgradesInfo[1].effect[5] as number).power(player.discharge.current + global.dischargeInfo.bonus).format()}.`,
                 () => `Cost scaling is decreased by ${format(global.upgradesInfo[1].effect[6] as number)}.`,
                 () => `Self-made structures boost themselves by ${format(global.upgradesInfo[1].effect[7] as number)} times.`,
                 () => `Molecules produce Molecules. At a reduced rate.\n(${Limit(global.upgradesInfo[1].effect[8] as overlimit).format({ padding: true })} per second)`,
@@ -775,14 +775,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Type frequency'
             ],
             effectText: [
-                () => {
-                    const index = Math.min(player.researches[5][0] + 2, 4);
-                    return `Higher density of Nebulas, will allow them to produce higher tier of Stars, but each tier is 4 times slower than previous one. Also will boost Nebulas by 4.\nNext tier will be ${player.buildings[4][index].highest[0] > 0 ? global.buildingsInfo.name[4][index] : '(unknown)'}.`;
-                },
-                () => {
-                    const index = Math.max(3 - player.researches[5][1], 1);
-                    return `More types of Stars are found within Star cluster. Increasing effect by 3, but also boosting lower tier of Stars. (3 times less than higher one)\nNext tier will be ${player.buildings[4][index].highest[0] > 0 ? global.buildingsInfo.name[4][index] : '(unknown)'}.`;
-                }
+                () => `Higher density of Nebulas, will allow them to produce higher tier of Stars, but each tier is 4 times slower than previous one. Also will boost Nebulas by 4.\nNext tier will be ${global.buildingsInfo.name[4][Math.min(player.researches[5][0] + 2, 4)]}.`,
+                () => `More types of Stars are found within Star cluster. Increasing effect by 3, but also boosting lower tier of Stars. (3 times less than higher one)\nNext tier will be ${global.buildingsInfo.name[4][Math.max(3 - player.researches[5][1], 1)]}.`
             ],
             effect: [],
             cost: [],
@@ -991,13 +985,13 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => "Research 'Improved Tritium' is now better. (+1)",
                 () => `Always have auto for ${global.buildingsInfo.name[1][Math.min(player.strangeness[1][6] + 1, global.ASRInfo.max[1])]}.`,
                 () => 'First level - improve control over auto Structures toggles.\nSecond level - improve control over consumption of Offline storage.',
-                () => 'Unspend Strange quarks will boost this Stage. (Bonus goals)',
+                () => 'Unspent Strange quarks will boost this Stage. (Bonus goals)',
                 () => `Minor boost of ${format(1.3)}x per level to all Microworld structures.`,
                 () => 'No Mass will be lost when Creating Preons.',
                 () => 'Energy is now directly based on current self-made amount of Structures.\nThis will also unlock better Reset automatization.'
             ],
             cost: [],
-            startCost: [2, 1, 4, 20, 2, 1, 2, 4, 40, 2, 16, 3000],
+            startCost: [2, 1, 4, 24, 2, 1, 2, 4, 36, 2, 16, 3000],
             scaling: [2.4, 4, 6, 300, 4, 2.4, 2, 2, 1, 1.8, 1, 1],
             max: [4, 4, 2, 1, 2, 4, 3, 2, 1, 6, 1, 1],
             maxActive: 9
@@ -1022,14 +1016,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Decrease requirement per Cloud.',
                 () => `Automatically Vaporize when reach enough boost from new Clouds.${player.strangeness[1][11] >= 1 ? '\nSecond level - auto Vaporization no longer resets anything. (Also improved to reset instanly)' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[2][Math.min(player.strangeness[2][5] + 1, global.ASRInfo.max[2])]}.`,
-                () => 'Decrease Offline time waste by -1 second per level.',
-                () => 'Unspend Strange quarks will boost this Stage. (Puddle production)',
+                () => 'Decrease Offline time waste by -1 second per level.\n(Effect is weaker on Warps)',
+                () => 'Unspent Strange quarks will boost this Stage. (Puddle production)',
                 () => 'Current Universe state allows for another Submerged Structure.', //'\nSecond level will improve spread from that Structure with a new upgrade.',
                 () => `Increase ${global.strangeInfo.name[player.strangeness[5][10]]} gained from this Stage reset based on current Cloud amount.\n(Effect can be seen in stats)`,
                 () => "Submerged is no longer affected by or affects non Microworld Stage reset types. (Requires level 1 of 'Conservation of Energy')"
             ],
             cost: [],
-            startCost: [1, 2, 16, 2, 20, 2, 4, 40, 40, 200, 4000],
+            startCost: [1, 2, 16, 2, 24, 2, 4, 36, 40, 200, 4000],
             scaling: [1.8, 1.8, 1.6, 4, 500, 2, 2, 1, 1, 1, 1],
             max: [6, 6, 3, 3, 1, 5, 1, 1, 1, 1, 1],
             maxActive: 8
@@ -1056,14 +1050,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Automatically increase Rank when available.${player.strangeness[1][11] >= 1 ? '\nSecond level - auto creation of Accretion structures after reaching cosmic dust hardcap will always keep enough for highest Solar mass conversion.' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[3][Math.min(player.strangeness[3][5] + 1, global.ASRInfo.max[3])]}.`,
                 () => 'Will automatically create all upgrades and researches from any Stage.\n(Need to be enabled in settings, order of automatization is Upgrades > Stage researches > Special researches)',
-                () => `Unspend Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Effective Rank' : 'Cheaper Accretion'})`,
+                () => `Unspent Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Effective Rank' : 'Cheaper Accretion'})`,
                 () => 'Current Universe state allows for another Accretion Structure.',
                 () => `Reduce amount of time required to reach Solar mass harcap by shifting Cosmic dust and Solar mass hardcaps.\nEffect is ${format(1.5)} times bigger per level (additive). (Can be reverted in Rank settings)`,
                 () => `Increase effective Rank by +${format(0.8)} with each level.`
             ],
             cost: [],
-            startCost: [1, 2, 3, 9, 20, 3, 12, 40, 20, 1800, 20],
-            scaling: [1.8, 2.8, 2, 1, 200, 2.4, 2, 1, 1, 2, 4],
+            startCost: [1, 2, 3, 9, 24, 3, 12, 36, 20, 1800, 24],
+            scaling: [1.8, 2.8, 2, 1, 200, 2.3, 2, 1, 1, 2, 4],
             max: [8, 4, 3, 1, 1, 4, 3, 1, 1, 4, 2],
             maxActive: 8
         }, { //Stage 4
@@ -1088,14 +1082,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Elements will not require Collapse for activation.\n${player.stage.true >= 6 || player.events[2] ? 'Second level will unlock auto creation of Elements.' : '(Auto creation of Elements is not yet possible in Interstellar space)'}`,
                 () => `Automatically Collapse once reached enough boost.${player.strangeness[1][11] >= 1 ? '\nSecond level - Star remnants from auto Collapse will be gained automatically without resets. (Also improved to check boost only from Solar mass)' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[4][Math.min(player.strangeness[4][6] + 1, global.ASRInfo.max[4])]}.`,
-                () => `Increase multiplier of ${global.strangeInfo.name[player.strangeness[5][10]]} gained from export per day by +1.${player.strangeness[5][10] >= 1 ? '' : " (Can claim only full one's)"}`,
-                () => 'Unspend Strange quarks will boost this Stage. (All Stars production)',
+                () => `Increase multiplier of ${global.strangeInfo.name[player.strangeness[5][10]]} gained from export per day by +1.${player.strangeness[5][10] >= 1 ? '' : " (Can claim only full one's)"}\n(Export base is increased by +10% of best Stage reset value even without this Strangeness)`,
+                () => 'Unspent Strange quarks will boost this Stage. (All Stars production)',
                 () => 'Current Universe state allows for another Interstellar Structure.',
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
             ],
             cost: [],
-            startCost: [1, 3, 5, 5, 6, 20, 3, 4, 40, 20, 1800],
-            scaling: [1.8, 2.8, 2.4, 4, 8, 400, 2.4, 3, 1, 1, 1.4],
+            startCost: [1, 3, 5, 5, 6, 24, 3, 4, 36, 20, 1800],
+            scaling: [1.8, 2.8, 2.4, 4, 8, 400, 2.3, 2, 1, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 4, 3, 1, 1, 8],
             maxActive: 9
         }, { //Stage 5
@@ -1122,11 +1116,11 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `With this a new Structure can be created.${player.stage.true >= 6 ? '' : " (Also will increase max level of 'Remnants of past' after creating that Structure)"}\nSecond level unlocks auto for it and improves auto Collapse.`,
                 () => "Increase permanent level of auto Structures. It's the only way to do it.",
                 () => `Unlock ${player.inflation.vacuum ? 'Void' : 'Intergalactic'} Milestones.`,
-                () => `Unspend Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Cosmic dust hardcap delay' : 'Solar mass gain'})`,
+                () => `Unspent Strange quarks will boost this Stage. (${player.inflation.vacuum ? 'Cosmic dust hardcap delay' : 'Solar mass gain'})`,
                 () => `Unlock a new Strange structure and replace Stage reset reward, it will produce ${global.strangeInfo.name[player.strangeness[5][10]]}, but hardcaps easily.\n(Hardcap delayed by quantity of a higher tier Structure)`
             ],
             cost: [],
-            startCost: [4, 16, 2000, 10, 10, 80, 1500, 60, 1500, 200, 800],
+            startCost: [4, 16, 2000, 10, 10, 64, 1500, 60, 1500, 180, 800],
             scaling: [1, 8, 1, 1.7, 1.75, 1, 5, 2, 1, 1, 1],
             max: [3, 1, 1, 9, 9, 1, 2, 2, 1, 1, 1],
             maxActive: 10
