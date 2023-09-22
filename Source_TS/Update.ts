@@ -66,6 +66,7 @@ export const switchTab = (tab: string, subtab = null as null | string) => {
 
 export const maxOfflineTime = (): number => Math.min(7200 * player.stage.true + Math.max(player.inflation.vacuum ? player.stage.resets * 28800 : (player.stage.resets - 4) * 7200, 0), 172800);
 export const maxExportTime = (): number => player.strange[0].total > 0 ? 172800 : 86400;
+export const offlineWaste = (): number => 6 - player.strangeness[2][6];
 export const exportMultiplier = (): number => (1 + player.stage.best / 10) * (player.strangeness[4][7] + 1);
 
 export const timeUpdate = (timeWarp = 0) => { //Time based information
@@ -97,7 +98,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
             passedSeconds = 60;
         } else if (time.offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2) {
             const extraTime = Math.min(Math.max(time.offline / 3600, 1) * passedSeconds, time.offline);
-            time.offline -= Math.min(extraTime * (6 - player.strangeness[2][6]), time.offline);
+            time.offline -= Math.min(extraTime * offlineWaste(), time.offline);
             passedSeconds += extraTime;
         }
     }
@@ -264,7 +265,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
             if (player.time.offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2) {
                 const time = Math.max(player.time.offline / 3600, 1);
                 getId('offlineBoostEffect').textContent = `+${format(time * 1, { digits: 0 })} seconds`;
-                getId('offlineBoostWaste').textContent = `${format(time * (6 - player.strangeness[2][6]), { digits: 0 })} seconds`;
+                getId('offlineBoostWaste').textContent = `${format(time * offlineWaste(), { digits: 0 })} seconds`;
             }
             if (global.lastUpgrade[active] >= 0) { getUpgradeDescription(global.lastUpgrade[active], 'upgrades'); }
         } else if (subtab.stageCurrent === 'Advanced') {

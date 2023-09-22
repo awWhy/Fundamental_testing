@@ -550,10 +550,12 @@ export const calculateGainedBuildings = (get: number, stageIndex: number, time: 
             if (get === 0) {
                 player.buildings[3][0].current = Limit(building.current).multiply('1.78266192e-33').toArray();
                 awardMilestone(0, 3);
+            } else if (get === 1) {
+                awardMilestone(0, 1);
             } else if (get === 5) {
                 player.buildings[2][0].current = Limit(building.current).divide('6.02214076e23').toArray();
             }
-        }
+        } else if (get === 0) { awardMilestone(0, 1); }
     } else if (stageIndex === 3) {
         if (get === 0) { //Never 0 for true vacuum
             if (player.accretion.rank < 5 && Limit(building.current).moreThan('1e30')) { building.current = [1, 30]; }
@@ -1373,7 +1375,6 @@ const dischargeReset = (toReset = true) => {
     if (player.discharge.energy >= global.dischargeInfo.next) {
         player.discharge.current++;
     }
-    awardMilestone(0, 1);
     awardVoidReward(1);
     if (toReset) { reset('discharge', player.inflation.vacuum ? [1, 2, 3, 4, 5] : [1]); }
 };

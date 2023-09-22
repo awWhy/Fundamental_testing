@@ -1136,7 +1136,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Energized'
             ],
             needText: [
-                () => `Discharge at least ${Limit(global.milestonesInfo[1].need[0]).format()} ${player.inflation.vacuum ? 'Preons' : 'Quarks'} at once.`,
+                () => `Have at least ${Limit(global.milestonesInfo[1].need[0]).format()} ${player.inflation.vacuum ? 'Preons' : 'Quarks'} at once.`,
                 () => `Have current Energy reach ${Limit(global.milestonesInfo[1].need[1]).format()}.`
             ],
             rewardText: [
@@ -1397,11 +1397,12 @@ Object.assign(player.toggles, { //Done separately to keep 'shop'
 player.toggles.normal[0] = false;
 
 //player.example = playerStart.example; Is not allowed (if example is an array or object), instead iterate or create clone
-export const playerStart = deepClone(player);
+export const playerStart = deepClone(player); //Cant be used until prepareVacuum() called
 
 export const updatePlayer = (load: playerType): string => {
     if (Object.hasOwn(load, 'player')) { load = load['player' as keyof unknown]; } //Old save had it
 
+    prepareVacuum(Boolean(load.inflation?.vacuum));
     for (const key in playerStart) {
         if (!Object.hasOwn(load, key)) {
             if (key === 'discharge') {
@@ -1417,7 +1418,7 @@ export const updatePlayer = (load: playerType): string => {
         if (load.version === '0.0.0') {
             load.version = 'v0.0.1';
             if (Object.hasOwn(load, 'energy')) { load.discharge.energy = load['energy' as 'discharge']['current' as 'energy']; }
-            load.researchesExtra = [];
+            load.researchesExtra = []; //Required for v0.0.9
         }
         if (load.version === 'v0.0.1') {
             load.version = 'v0.0.2';
@@ -1660,8 +1661,6 @@ export const updatePlayer = (load: playerType): string => {
     Object.assign(player, load);
 
     /* Prepare fake save file data */
-    prepareVacuum();
-
     global.debug.errorID = true;
     global.debug.errorQuery = true;
     global.debug.errorGain = true;

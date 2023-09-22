@@ -1,5 +1,5 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
-import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription } from './Update';
+import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, offlineWaste } from './Update';
 import { assignNewMassCap, assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, enterChallenge, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, screenReaderSupport, mobileDeviceSupport, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify } from './Special';
 import { detectHotkey } from './Hotkeys';
@@ -86,7 +86,7 @@ try { //Start everything
         const versionCheck = updatePlayer(load);
         void Alert(`Welcome back, you were away for ${format(handleOfflineTime(), { type: 'time' })}\n${versionCheck !== player.version ? `Game have been updated from ${versionCheck} to ${player.version}` : `Current version is ${player.version}`}`);
     } else {
-        prepareVacuum();
+        prepareVacuum(false);
         updatePlayer(deepClone(playerStart));
         void Alert(`Welcome to 'Fundamental' ${player.version}, a test-project created by awWhy\n(This idle game is not meant to be fast)`);
     }
@@ -481,21 +481,21 @@ const getDate = (type: 'dateDMY' | 'timeHMS'): string => {
     const current = new Date();
     switch (type) {
         case 'dateDMY': {
-            const day = current.getDate();
-            const month = current.getMonth() + 1;
-            return `${day < 10 ? `0${day}` : day}.${month < 10 ? `0${month}` : month}.${current.getFullYear()}`;
+            const day = `${current.getDate()}`.padStart(2, '0');
+            const month = `${current.getMonth() + 1}`.padStart(2, '0');
+            return `${day}.${month}.${current.getFullYear()}`;
         }
         case 'timeHMS': {
-            const minutes = current.getMinutes();
-            const seconds = current.getSeconds();
-            return `${current.getHours()}-${minutes < 10 ? `0${minutes}` : minutes}-${seconds < 10 ? `0${seconds}` : seconds}`;
+            const minutes = `${current.getMinutes()}`.padStart(2, '0');
+            const seconds = `${current.getSeconds()}`.padStart(2, '0');
+            return `${current.getHours()}-${minutes}-${seconds}`;
         }
     }
 };
 
 export const timeWarp = async() => {
     const { time } = player;
-    const waste = (6 - player.strangeness[2][6]) / 1.5;
+    const waste = offlineWaste() / 1.5;
     if (time.offline < 600 * waste) { return void Alert(`Need at least ${format(10 * waste)} minutes of storaged Offline time to Warp`); }
 
     const warpTime = Math.min(player.strangeness[1][7] < 2 ? (await Confirm(`Do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second), will be consumed up to half an hour\nCalculates a minute per tick`) ? 1800 : 0) :

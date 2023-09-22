@@ -3,11 +3,11 @@ import { cloneArray, global, player, playerStart } from './Player';
 import { resetVacuum } from './Reset';
 import { Alert, Confirm, specialHTML } from './Special';
 
-export const prepareVacuum = () => {
+export const prepareVacuum = (state: boolean) => { //Must not use direct player values
     const { buildings } = playerStart;
     const { buildingsInfo, upgradesInfo, researchesInfo, researchesExtraInfo, strangenessInfo } = global;
 
-    if (player.inflation.vacuum) {
+    if (state) {
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
         buildingsInfo.hoverText[2][0] = 'Tritium';
         buildingsInfo.hoverText[3][0] = 'Preons hardcap';
@@ -232,7 +232,7 @@ export const switchVacuum = async() => {
     if (player.stage.true < 6) { player.stage.true = 6; }
     player.stage.current = 1;
     player.stage.active = 1;
-    prepareVacuum();
+    prepareVacuum(true);
     resetVacuum();
 };
 
