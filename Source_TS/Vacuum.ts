@@ -63,7 +63,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
         strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
         const strangeness2Cost = [1, 2, 16, 2, 24, 2, 4, 36];
-        const strangeness2Scaling = [1.8, 1.8, 1.6, 4, 500, 2, 2, 1];
+        const strangeness2Scaling = [1.8, 1.8, 2, 4, 500, 2, 2, 1];
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
         const strangeness3Cost = [1, 2, 3, 9, 24, 3, 12, 36];
@@ -71,11 +71,11 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
         const strangeness4Cost = [1, 3, 5, 5, 6, 24, 3, 4, 36];
-        const strangeness4Scaling = [1.8, 2.8, 2.4, 4, 8, 400, 2.3, 2, 1];
+        const strangeness4Scaling = [1.8, 2.8, 2.4, 4, 16, 400, 2.3, 2, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-        const strangeness5Cost = [4, 16, 2000, 10, 10, 64, 1500, 60, 1500, 180];
-        const strangeness5Scaling = [1, 8, 1, 1.7, 1.75, 1, 5, 2, 1, 1];
+        const strangeness5Cost = [4, 16, 2000, 8, 10, 64, 1500, 60, 1500, 180];
+        const strangeness5Scaling = [1, 5, 1, 1.8, 1.8, 1, 5, 2, 1, 1];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 12;

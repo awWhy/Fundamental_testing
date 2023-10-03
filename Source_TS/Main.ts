@@ -86,7 +86,7 @@ try { //Start everything
         const versionCheck = updatePlayer(load);
         void Alert(`Welcome back, you were away for ${format(handleOfflineTime(), { type: 'time' })}\n${versionCheck !== player.version ? `Game have been updated from ${versionCheck} to ${player.version}` : `Current version is ${player.version}`}`);
     } else {
-        prepareVacuum(false);
+        prepareVacuum(false); //Set buildings values
         updatePlayer(deepClone(playerStart));
         void Alert(`Welcome to 'Fundamental' ${player.version}, a test-project created by awWhy\n(This idle game is not meant to be fast)`);
     }
@@ -498,12 +498,14 @@ export const timeWarp = async() => {
     const waste = offlineWaste() / 1.5;
     if (time.offline < 600 * waste) { return void Alert(`Need at least ${format(10 * waste)} minutes of storaged Offline time to Warp`); }
 
-    const warpTime = Math.min(player.strangeness[1][7] < 2 ? (await Confirm(`Do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second), will be consumed up to half an hour\nCalculates a minute per tick`) ? 1800 : 0) :
-        Number(await Prompt(`How many seconds do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second)\nMinimum value is 10 minutes, calculates a minute per tick`, '600')), time.offline / waste);
+    const warpTime = Math.min(player.strangeness[1][7] < 2 ? (await Confirm(`Do you wish to Warp forward? Current effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second), will be consumed up to half an hour`) ? 1800 : 0) :
+        Number(await Prompt(`How many seconds do you wish to Warp forward? (Minimum value is 10 minutes)\nCurrent effective Offline time is ${format(time.offline / waste, { type: 'time' })} (uses ${format(waste)} seconds per added second)`, '600')), time.offline / waste);
     if (warpTime < 600 || !isFinite(warpTime)) { return warpTime === 0 ? undefined : Notify('Warp failed, input or storage is below minimum value or invalid'); }
 
     time.offline -= warpTime * waste;
-    timeUpdate(warpTime);
+    try {
+        timeUpdate(warpTime / 1000, warpTime);
+    } catch (error) { Notify(`Warp failed due to Error:\n${error}`); }
 };
 
 const pauseGame = async() => {

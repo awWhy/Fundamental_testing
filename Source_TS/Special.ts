@@ -296,7 +296,7 @@ export const switchTheme = () => {
             body.setProperty('--footer-color', '#0000db');
             body.setProperty('--button-main-color', 'blue');
             body.setProperty('--button-main-border', '#427be1');
-            body.setProperty('--button-main-hover', '#1515cf');
+            body.setProperty('--button-main-hover', '#1111b0');
             body.setProperty('--button-tab-border', '#376ac5');
             body.setProperty('--button-tab-active', '#990000');
             body.setProperty('--button-image-hover', '#2400d7');
@@ -326,14 +326,14 @@ export const switchTheme = () => {
             body.setProperty('--footer-color', '#221a00');
             body.setProperty('--button-main-color', '#291344');
             body.setProperty('--button-main-border', '#404040');
-            body.setProperty('--button-main-hover', '#361f52');
+            body.setProperty('--button-main-hover', '#382055');
             body.setProperty('--button-tab-border', '#484848');
             body.setProperty('--button-tab-active', '#8d4c00');
             body.setProperty('--button-tab-elements', 'var(--button-tab-active)');
             body.setProperty('--button-image-hover', '#5a2100');
             body.setProperty('--button-footer-hover', '#1a1a1a');
             body.setProperty('--button-delete-color', '#891313');
-            body.setProperty('--button-delete-hover', '#a10a0a');
+            body.setProperty('--button-delete-hover', '#a80b0b');
             body.setProperty('--input-border-color', '#8b4a00');
             body.setProperty('--input-text-color', '#e77e00');
             body.setProperty('--main-text-color', 'var(--gray-text-color)');
@@ -770,13 +770,6 @@ export const changeFormat = (point: boolean) => {
         htmlInput.value = point ? '.' : '';
     }
     point ? player.separator[1] = htmlInput.value : player.separator[0] = htmlInput.value;
-};
-
-//If done for span, then add class="noMoveSpan";
-export const assignWithNoMove = (html: HTMLElement, text: string) => {
-    html.textContent = text;
-    const newWidth = `${text.length * 0.63}em`;
-    if (newWidth !== html.style.width) { html.style.width = newWidth; }
 };
 
 export const replayEvent = async() => {

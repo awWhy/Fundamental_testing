@@ -148,7 +148,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 6) { return false; }
                     if (upgrade === 8) { return player.challenges.void[4] >= 1; }
                     if (upgrade === 9) { return player.strangeness[5][5] >= 1; }
-                    if (upgrade === 10) { return player.challenges.void[3] >= 5; }
+                    if (upgrade === 10) { return false/*player.challenges.void[3] >= 5*/; }
                 }
                 return true;
             }

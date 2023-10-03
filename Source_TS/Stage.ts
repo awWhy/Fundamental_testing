@@ -71,7 +71,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
             const listForMult1 = [buildings[1][1].current];
             if (upgrades[1][7] === 1) { listForMult1.push(Limit(upgradesInfo[1].effect[7]).power(buildings[1][1].true).toArray()); }
             producing[1][1] = Limit(0.001 * totalMultiplier).multiply(...listForMult1).toArray();
-            if (Limit(producing[1][1]).moreThan('1')) { producing[1][1] = Limit(producing[1][1]).power(inVoid ? 0.1 : 0.15).toArray(); }
+            if (Limit(producing[1][1]).moreThan('1')) { producing[1][1] = Limit(producing[1][1]).power(0.15).toArray(); }
         }
     }
     if (activeAll.includes(2)) {
@@ -93,8 +93,8 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
         producing[2][6] = Limit(Math.max(2 * buildings[2][6].true, 1)).toArray();
 
         const listForMult5 = [producing[2][6]];
-        researchesExtraInfo[2].effect[1] = Limit(player.vaporization.clouds).power(researchesExtra[2][2] >= 1 ? 0.11 : 0.1).toNumber();
-        researchesExtraInfo[2].effect[2] = (researchesExtraInfo[2].effect[1] - 1) / 16 + 1;
+        const rain = vaporizationInfo.rainEffect();
+        researchesExtraInfo[2].effect[2] = (rain - 1) / 16 + 1;
         let prod5Number = 2 * current5;
         if (researchesExtra[2][2] >= 1) { prod5Number *= researchesExtraInfo[2].effect[2]; }
         producing[2][5] = Limit(prod5Number).multiply(...listForMult5).max('1').toArray();
@@ -108,7 +108,7 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
         upgradesInfo[2].effect[4] = (1 + researches[2][3] / 2) / 100;
         vaporizationInfo.tension = upgrades[2][3] === 1 ? Limit(buildings[2][0].current).max('1').power(upgradesInfo[2].effect[3]).toNumber() : 1;
         vaporizationInfo.stress = upgrades[2][4] === 1 ? Limit(buildings[2][1].current).max('1').power(upgradesInfo[2].effect[4]).toNumber() : 1;
-        let prod2Number = (inVoid ? 0.02 : 2) * current2 * vaporizationInfo.tension * vaporizationInfo.stress * (1.5 ** strangeness[2][1]);
+        let prod2Number = (inVoid ? 0.02 : 2) * current2 * vaporizationInfo.tension * vaporizationInfo.stress * rain * (1.5 ** strangeness[2][1]);
         if (upgrades[2][1] === 1) {
             if (inVoid) {
                 listForMult2.push(Limit('1.01').power((current2 - buildings[2][2].true) ** 0.7 + buildings[2][2].true).toArray());
@@ -124,7 +124,6 @@ export const assignBuildingInformation = () => { //Sets buildingInfo.producing f
             }
             prod2Number *= 2 ** researchesInfo[2].effect[1];
         }
-        if (researchesExtra[2][1] >= 1) { prod2Number *= researchesExtraInfo[2].effect[1]; }
         if (vacuum) { prod2Number *= milestonesInfo[2].reward[1]; }
         if (stageBoost[2] !== null) { prod2Number *= stageBoost[2]; }
         producing[2][2] = Limit(prod2Number).multiply(...listForMult2).toArray();
@@ -333,7 +332,7 @@ export const buyBuilding = (index: number, stageIndex = player.stage.active, aut
     let budget = currency;
     if (auto && building.true > 0 && special !== 'Free' && special !== 'Galaxy') {
         if (special === 'Mass' && player.strangeness[3][4] >= 2 && Limit(global.inflationInfo.dustTrue).moreOrEqual(global.inflationInfo.dustCap)) {
-            budget = Limit(global.inflationInfo.preonCap).multiply(global.inflationInfo.massCap, '-1.78266192e-33').plus(currency).toArray();
+            budget = Limit(global.inflationInfo.preonCap).multiply(global.inflationInfo.massCap, '-1.78266192e-33')/*.min(global.accretionInfo.rankCost[player.accretion.rank] * -1)*/.plus(currency).toArray();
         } else {
             budget = Limit(currency).divide(player.strangeness[1][7] >= 1 ? player.toggles.shop.wait[stageIndex] : '2').toArray();
         }
@@ -516,7 +515,7 @@ export const calculateGainedBuildings = (get: number, stageIndex: number, time: 
         add = Limit(global.buildingsInfo.producing[stageIndex][get + 1]).multiply(time).toArray();
 
         if (stageIndex === 2 && get === 1 && player.buildings[2][2].current[0] === 0 && player.researchesExtra[2][1] >= 1) {
-            add = Limit(add).plus(time * ((global.researchesExtraInfo[2].effect[1] as number) - 1)).toArray();
+            add = Limit(add).plus(time * (global.vaporizationInfo.rainEffect() - 1)).toArray();
         }
     }
     if (add[0] === 0) { return; }
@@ -1392,11 +1391,12 @@ export const assignVaporizationInformation = () => {
 
 export const vaporizationResetCheck = (auto = false): boolean => {
     assignVaporizationInformation();
-    if (player.upgrades[2][2] < 1 || global.vaporizationInfo.get[0] === 0) { return false; }
+    const info = global.vaporizationInfo;
+    if (player.upgrades[2][2] < 1 || info.get[0] === 0) { return false; }
 
     if (auto) {
         const toReset = player.strangeness[2][4] < 2;
-        if (toReset && (player.strangeness[2][4] < 1 || Limit(global.vaporizationInfo.cloudEffect(true)).divide(global.vaporizationInfo.cloudEffect()).lessThan(player.vaporization.input))) { return false; }
+        if (toReset && (player.strangeness[2][4] < 1 || Limit(info.cloudEffect(true)).multiply(info.rainEffect(true)).divide(info.cloudEffect(), info.rainEffect()).lessThan(player.vaporization.input))) { return false; }
         vaporizationReset(toReset);
     }
     return true;
@@ -1526,8 +1526,8 @@ export const assignCollapseInformation = () => {
 
 export const collapseResetCheck = (auto = false): boolean => {
     if (player.upgrades[4][0] < 1) { return false; }
-    const info = global.collapseInfo;
     assignCollapseInformation();
+    const info = global.collapseInfo;
 
     if (auto) {
         if (player.strangeness[4][5] < 1) { return false; }
@@ -1561,8 +1561,8 @@ export const collapseAsyncReset = async() => {
 
     if (player.toggles.confirm[4] !== 'None') {
         const active = player.stage.active;
-        const unlockedG = (newMass >= 1e5 || mass >= 1e5) && player.strangeness[5][6] >= 1;
-        const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).lessOrEqual(newMass);
+        const unlockedG = mass >= 1e5 && player.strangeness[5][6] >= 1;
+        const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).moreThan(newMass);
         const notMaxed = player.inflation.vacuum && newMass > mass && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
         if (player.toggles.confirm[4] !== 'Safe' || active !== 4 || (cantAfford && (notMaxed || unlockedG))) {
             let message = active === 4 ? 'This will reset all researches and upgrades' : `Collapse attempt while inside '${global.stageInfo.word[active]}'`;

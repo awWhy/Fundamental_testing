@@ -2,7 +2,7 @@ import { checkTab } from './Check';
 import Limit from './Limit';
 import { getClass, getId, getQuery } from './Main';
 import { global, player } from './Player';
-import { playEvent, assignWithNoMove, specialHTML, switchTheme } from './Special';
+import { playEvent, specialHTML, switchTheme } from './Special';
 import { autoElementsBuy, autoElementsSet, autoResearchesBuy, autoResearchesSet, autoUpgradesBuy, autoUpgradesSet, buyBuilding, calculateBuildingsCost, calculateGainedBuildings, assignBuildingInformation, collapseResetCheck, dischargeResetCheck, rankResetCheck, stageResetCheck, toggleSwap, vaporizationResetCheck, assignDischargeInformation, assignVaporizationInformation, assignCollapseInformation, shiftRange, calculateGainedStrangeness, switchStage } from './Stage';
 import { overlimit } from './Types';
 import { updateUnknown } from './Vacuum';
@@ -69,7 +69,7 @@ export const maxExportTime = (): number => player.strange[0].total > 0 ? 172800 
 export const offlineWaste = (): number => 6 - player.strangeness[2][6];
 export const exportMultiplier = (): number => (1 + player.stage.best / 10) * (player.strangeness[4][7] + 1);
 
-export const timeUpdate = (timeWarp = 0) => { //Time based information
+export const timeUpdate = (maxTick = 1, timeWarp = 0) => { //Time based information
     const { auto, buildings: autoBuy } = player.toggles;
     const { vacuum } = player.inflation;
     const { maxActive, type } = global.buildingsInfo;
@@ -77,7 +77,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
 
     let passedSeconds: number;
     if (timeWarp > 0) {
-        const extraTime = Math.min(60, timeWarp);
+        const extraTime = Math.min(maxTick, timeWarp);
         passedSeconds = extraTime;
         timeWarp -= extraTime;
     } else {
@@ -93,9 +93,10 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
             return;
         } else if (time.offline < 0) {
             time.offline = Math.min(time.offline + passedSeconds, 0);
-        } else if (passedSeconds > 60) {
-            timeWarp = passedSeconds - 60;
-            passedSeconds = 60;
+        } else if (passedSeconds > maxTick) {
+            if (maxTick < passedSeconds / 1000) { maxTick = passedSeconds / 1000; }
+            timeWarp = passedSeconds - maxTick;
+            passedSeconds = maxTick;
         } else if (time.offline > 0 && player.toggles.normal[0] && player.strangeness[1][7] >= 2) {
             const extraTime = Math.min(Math.max(time.offline / 3600, 1) * passedSeconds, time.offline);
             time.offline -= Math.min(extraTime * offlineWaste(), time.offline);
@@ -144,7 +145,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
         }
     }
 
-    if (timeWarp > 0) { timeUpdate(timeWarp); }
+    if (timeWarp > 0) { timeUpdate(maxTick, timeWarp); }
 };
 
 export const numbersUpdate = () => { //This is for relevant visual info
@@ -179,7 +180,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
 
             for (let i = 1; i < buildingsInfo.maxActive[active]; i++) {
                 const trueCountID = getId(`building${i}True`);
-                assignWithNoMove(getId(`building${i}Cur`), Limit(buildings[i].current).format({ padding: trueCountID.style.display !== 'none' }));
+                getId(`building${i}Cur`).textContent = Limit(buildings[i].current).format({ padding: trueCountID.style.display !== 'none' });
                 getId(`building${i}Prod`).textContent = Limit(buildingsInfo.producing[active][i]).format({ padding: true });
                 trueCountID.textContent = `[${format(buildings[i as 1].true)}]`;
 
@@ -229,14 +230,9 @@ export const numbersUpdate = () => { //This is for relevant visual info
                     }
                 }
 
+                getId(`building${i}`).classList[Limit(totalCost).lessOrEqual(currency) ? 'add' : 'remove']('availableBuilding');
+                getId(`building${i}Btn`).textContent = `Need: ${Limit(totalCost).format({ padding: true })} ${costName}`;
                 getId(`building${i}BuyX`).textContent = format(totalBuy);
-                if (Limit(totalCost).lessOrEqual(currency)) {
-                    getId(`building${i}`).classList.add('availableBuilding');
-                    getId(`building${i}Btn`).textContent = `Make for: ${Limit(totalCost).format({ padding: true })} ${costName}`;
-                } else {
-                    getId(`building${i}`).classList.remove('availableBuilding');
-                    getId(`building${i}Btn`).textContent = `Need: ${Limit(totalCost).format({ padding: true })} ${costName}`;
-                }
             }
             if (active === 1) {
                 assignDischargeInformation();
@@ -290,7 +286,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
         }
     } else if (tab === 'settings') {
         if (subtab.settingsCurrent === 'Settings') {
-            assignWithNoMove(getId('exportGain'), format(player.stage.export * exportMultiplier() / 86400 / 1e12 ** player.strangeness[5][10], { padding: true }));
+            getId('exportGain').textContent = format(player.stage.export * exportMultiplier() / 86400 / 1e12 ** player.strangeness[5][10], { padding: true });
             if (global.lastSave >= 1) { getId('isSaved').textContent = `${format(global.lastSave, { type: 'time' })} ago`; }
             getId('massShiftCur').textContent = format(global.inflationInfo.massCap);
             getId('massShiftMin').textContent = format(shiftRange(false));
@@ -311,14 +307,19 @@ export const numbersUpdate = () => { //This is for relevant visual info
                 getId('dischargeStatTrue').textContent = `[${format(player.discharge.current)}]`;
                 if (player.strangeness[1][11] < 1) { getId('energySpent').textContent = format(global.dischargeInfo.energyTrue - player.discharge.energy); }
                 if (player.inflation.vacuum) {
-                    assignWithNoMove(getId('preonCapStat'), Limit(global.inflationInfo.preonCap).format({ padding: true }));
-                    assignWithNoMove(getId('preonCapTill'), Limit(global.inflationInfo.preonTrue).divide(global.inflationInfo.preonCap).format({ padding: true }));
+                    getId('preonCapStat').textContent = Limit(global.inflationInfo.preonCap).format({ padding: true });
+                    getId('preonCapTill').textContent = Limit(global.inflationInfo.preonTrue).divide(global.inflationInfo.preonCap).format({ padding: true });
                 }
             } else if (active === 2) {
                 assignVaporizationInformation();
-                const before = global.vaporizationInfo.cloudEffect();
-                assignWithNoMove(getId('cloudsEffectCurrent'), Limit(before).format({ padding: true }));
-                assignWithNoMove(getId('cloudsEffectAfter'), `x${Limit(global.vaporizationInfo.cloudEffect(true)).divide(before).format({ padding: true })}`);
+                const info = global.vaporizationInfo;
+
+                const before = info.cloudEffect();
+                getId('cloudsEffectCurrent').textContent = Limit(before).format({ padding: true });
+                getId('cloudsEffectAfter').textContent = `x${Limit(info.cloudEffect(true)).divide(before).format({ padding: true })}`;
+                const rainBefore = info.rainEffect();
+                getId('rainEffectCurrent').textContent = format(rainBefore, { padding: true });
+                getId('rainEffectAfter').textContent = `x${format(info.rainEffect(true) / rainBefore, { padding: true })}`;
                 getId('maxCloudsStat').textContent = Limit(player.vaporization.cloudsMax).format();
 
                 if (player.inflation.vacuum) {
@@ -328,7 +329,7 @@ export const numbersUpdate = () => { //This is for relevant visual info
                     buildings[0].trueTotal = Limit(moles.trueTotal).divide('6.02214076e23').toArray();
                     buildings[0].highest = Limit(moles.highest).divide('6.02214076e23').toArray();
 
-                    assignWithNoMove(getId('oceanWorldEffect'), format(global.vaporizationInfo.oceanWorld(), { padding: true }));
+                    getId('oceanWorldEffect').textContent = format(info.oceanWorld(), { padding: true });
                 }
             } else if (active === 3) {
                 getId('effectiveRank').textContent = format(global.accretionInfo.effective);
@@ -339,26 +340,26 @@ export const numbersUpdate = () => { //This is for relevant visual info
                     buildings[0].trueTotal = Limit(mass.trueTotal).multiply('1.78266192e-33').toArray();
                     buildings[0].highest = Limit(mass.highest).multiply('1.78266192e-33').toArray();
 
-                    assignWithNoMove(getId('dustCapStat'), Limit(global.inflationInfo.dustCap).format({ padding: true }));
-                    assignWithNoMove(getId('dustCapTill'), Limit(global.inflationInfo.dustTrue).divide(global.inflationInfo.dustCap).format({ padding: true }));
+                    getId('dustCapStat').textContent = Limit(global.inflationInfo.dustCap).format({ padding: true });
+                    getId('dustCapTill').textContent = Limit(global.inflationInfo.dustTrue).divide(global.inflationInfo.dustCap).format({ padding: true });
                 }
             } else if (active === 4 || active === 5) {
                 assignCollapseInformation();
                 getId('maxSolarMassStat').textContent = format(player.collapse.massMax);
                 if (player.inflation.vacuum) {
-                    assignWithNoMove(getId('mainCapStat'), Limit(global.buildingsInfo.producing[1][1]).multiply('8.96499278339628e-67', global.inflationInfo.massCap).format({ padding: true }));
+                    getId('mainCapStat').textContent = Limit(global.buildingsInfo.producing[1][1]).multiply('8.96499278339628e-67', global.inflationInfo.massCap).format({ padding: true });
                     getId('mainCapLimit').textContent = format(global.inflationInfo.massCap, { type: 'time' });
                 }
                 if (active === 4) {
                     const { starEffect, massEffect } = global.collapseInfo;
 
                     const before = massEffect();
-                    assignWithNoMove(getId('starMassStatCurrent'), format(before, { padding: true }));
-                    assignWithNoMove(getId('starMassStatAfter'), `x${format(massEffect(true) / before, { padding: true })}`);
+                    getId('starMassStatCurrent').textContent = format(before, { padding: true });
+                    getId('starMassStatAfter').textContent = `x${format(massEffect(true) / before, { padding: true })}`;
                     for (let i = 0; i <= 2; i++) {
                         const before = starEffect[i]();
-                        assignWithNoMove(getId(`star${i + 1}StatCurrent`), format(before, { padding: true }));
-                        assignWithNoMove(getId(`star${i + 1}StatAfter`), `x${format(starEffect[i](true) / before, { padding: true })}`);
+                        getId(`star${i + 1}StatCurrent`).textContent = format(before, { padding: true });
+                        getId(`star${i + 1}StatAfter`).textContent = `x${format(starEffect[i](true) / before, { padding: true })}`;
                     }
                 } else if (active === 5) {
                     getId('starsStatTrue').textContent = format(global.collapseInfo.trueStars);
@@ -699,6 +700,7 @@ export const visualUpdate = () => { //This is what can appear/disappear when ins
                 getId('dischargeStatTrue').style.display = global.dischargeInfo.bonus > 0 ? '' : 'none';
             } else if (active === 2) {
                 getId('cloudsEffect').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
+                getId('rainEffect').style.display = player.researchesExtra[2][1] >= 1 ? '' : 'none';
                 getId('cloudsStats').style.display = player.vaporization.cloudsMax[0] > 0 ? '' : 'none';
                 getId('oceanWorld').style.display = player.strangeness[2][9] >= 1 ? '' : 'none';
             } else if (active === 3) {
@@ -968,8 +970,8 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
     const activeAll = stageInfo.activeAll;
     if (vacuum) {
         if (player.researchesExtra[1][2] >= 2 && player.challenges.active !== 0) { activeAll.push(2); }
-        if (player.researchesExtra[1][2] >= 1 && player.challenges.active !== 0) { activeAll.push(3); }
-        if (player.accretion.rank >= 6) {
+        if (player.researchesExtra[1][2] >= 1) { activeAll.push(3); }
+        if (player.accretion.rank >= 6 && player.challenges.active !== 0) {
             activeAll.push(4);
             if (player.strangeness[5][5] >= 1 && (/*current >= 5 ||*/ player.challenges.active !== 0)) { activeAll.push(5); }
         }

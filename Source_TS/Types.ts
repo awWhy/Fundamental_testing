@@ -142,6 +142,7 @@ export interface globalType {
         effect2U2: () => number
         oceanWorld: () => number
         cloudEffect: (post?: boolean) => overlimit
+        rainEffect: (post?: boolean) => number
         tension: number
         stress: number
         get: overlimit
