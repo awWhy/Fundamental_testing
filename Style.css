@@ -3,12 +3,19 @@
     src: url("Fonts/Inter/Inter-Regular.ttf");
 }
 
+@font-face {
+    font-family: Tight;
+    src: url("Fonts/Inter/InterTight-Regular.ttf");
+    unicode-range: U+0030-0039;
+}
+
 body *, body {
-    font-family: Inter, serif;
+    font-family: Tight, Inter, serif;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-size: inherit;
+    font-variant-numeric: tabular-nums;
 
     /* No text color, because of lags and overall being behind */
     transition-property: border-color, background-color;
@@ -31,7 +38,7 @@ body { /* Default color variables */
     --button-image-hover: #170089;
     --button-footer-hover: #181818;
     --button-delete-color: firebrick;
-    --button-delete-hover: #ce0000;
+    --button-delete-hover: #db0000;
     --input-border-color: #831aa5;
     --input-text-color: #cf71ff;
     --button-text-color: #e3e3e3;
@@ -69,7 +76,6 @@ body {
     overflow-y: overlay;
     overflow-anchor: none;
     touch-action: manipulation;
-    /* font-variant-numeric: tabular-nums; */
 }
 
 .stageText { color: var(--stage-text-color); }
@@ -195,11 +201,6 @@ p > img {
     position: absolute;
     clip-path: circle(0);
     pointer-events: none;
-}
-
-.noMoveSpan {
-    display: inline-block;
-    text-align: center;
 }
 
 .bigWord { font-size: 1.1em; }
@@ -349,6 +350,8 @@ input[type = "text"] {
     height: 1.7em;
     font-size: 0.84em;
     padding: 0.1em 0.2em;
+    font-family: Inter, serif;
+    font-variant-numeric: normal;
 }
 
 input:-webkit-autofill { /* Chrome related pain */
@@ -442,8 +445,9 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 .buyBuilding p { color: inherit; }
-.buyBuilding > div > p:first-of-type { width: 19.8em; }
-.buyBuilding > div > p:last-of-type { width: 10.7em; }
+.buyBuilding > div > p:first-of-type { width: 19.4em; }
+.buyBuilding > div > p:first-of-type > span.whiteText { padding-right: 0.06em; }
+.buyBuilding > div > p:last-of-type { width: 10.6em; }
 
 .buyBuilding > div > div {
     grid-area: buy;
@@ -452,7 +456,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 .buyBuilding > div > div > p {
-    width: 6em;
+    width: 5.8em;
     font-size: 0.92em;
     text-align: end;
 }
@@ -467,7 +471,7 @@ input:-webkit-autofill { /* Chrome related pain */
 
 .buyBuilding button:first-of-type {
     grid-area: button;
-    width: 16em;
+    width: 15em;
 }
 
 .toggleBuilding {
@@ -1248,9 +1252,8 @@ input.miniInput {
     #buildings { row-gap: 0.2em; }
     .buyBuilding, .specialStar { column-gap: 0.15em; }
     .buyBuilding > div:first-of-type, .specialStar p { flex-direction: column; }
-    .buyBuilding > div > p:first-of-type { width: 14em; }
+    .buyBuilding > div > p:first-of-type { width: 13.8em; }
     .buyBuilding > div > p:first-of-type > span:last-of-type { display: block; }
-    .buyBuilding .noMoveSpan { text-align: start; }
 
     .buyBuilding > div:last-of-type {
         row-gap: 0.16em;
@@ -1269,7 +1272,7 @@ input.miniInput {
     .buyBuilding > div > div > div { display: none; }
     .availableBuilding > div > div > p { border-color: var(--building-can-buy); }
 
-    #starsSpecial { max-width: 30em; }
+    #starsSpecial { max-width: 29em; }
 
     #researchTab .descriptionText { margin-top: -0.25em; }
 
