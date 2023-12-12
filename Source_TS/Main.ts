@@ -81,7 +81,7 @@ const saveGame = async() => {
         player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
         const save = btoa(JSON.stringify(player));
-        localStorage.setItem('save', save);
+        localStorage.setItem('testing_save', save);
         clearInterval(global.intervalsId.autoSave);
         global.intervalsId.autoSave = setInterval(saveGame, player.intervals.autoSave);
         getId('isSaved').textContent = 'Saved';
@@ -137,7 +137,7 @@ const saveConsole = async() => {
     } else if (lower === 'delete' || lower === 'clear') {
         changeIntervals(true);
         if (lower === 'delete') {
-            localStorage.removeItem('save');
+            localStorage.removeItem('testing_save');
         } else { localStorage.clear(); }
         window.location.reload();
         void Alert('Awaiting page refresh');
@@ -353,7 +353,7 @@ try { //Start everything
     }
 
     let alertText;
-    const save = localStorage.getItem('save');
+    const save = localStorage.getItem('testing_save');
     if (save !== null) {
         const load = JSON.parse(atob(save));
         const versionCheck = updatePlayer(load);
@@ -643,7 +643,7 @@ try { //Start everything
     let exported = false;
     getId('exportError').addEventListener('click', () => {
         exported = true;
-        const save = localStorage.getItem('save');
+        const save = localStorage.getItem('testing_save');
         if (save === null) { return void Alert('No save file detected'); }
         const a = document.createElement('a');
         a.href = `data:text/plain,${save}`;
@@ -652,7 +652,7 @@ try { //Start everything
     });
     getId('deleteError').addEventListener('click', async() => {
         if (!exported && !await Confirm("Recommended to export save file first\nPress 'Confirm' to confirm and delete your save file")) { return; }
-        localStorage.removeItem('save');
+        localStorage.removeItem('testing_save');
         window.location.reload();
         void Alert('Awaiting page refresh');
     });
