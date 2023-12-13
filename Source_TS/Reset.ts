@@ -134,7 +134,6 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             for (let i = 0; i < player.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
             global.lastElement = -1;
         } else if (s === 5) {
-            global.debug.historyUpdatedS = false;
             if (player.strangeness[5][6] >= 2) { player.ASR[5]++; }
         }
     }
@@ -213,7 +212,6 @@ export const resetVacuum = () => {
     player.elements = cloneArray(playerStart.elements);
 
     //Stage 5 and rest
-    global.debug.historyUpdatedS = false;
     global.historyStorage.stage = [];
     player.history.stage.best = [0, 1, 0];
     player.stage.resets = 0;

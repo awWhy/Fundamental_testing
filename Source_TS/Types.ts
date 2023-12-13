@@ -120,7 +120,7 @@ export interface globalType {
         errorQuery: boolean
         errorGain: boolean
         rankUpdated: number
-        historyUpdatedS: boolean
+        historyStage: number
     }
     trueActive: number
     lastSave: number

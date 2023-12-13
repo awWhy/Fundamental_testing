@@ -1431,7 +1431,7 @@ export const switchStage = (stage: number) => {
         if (global.trueActive !== stage) {
             global.trueActive = stage;
             getId(`${global.stageInfo.word[stage]}Switch`).style.textDecoration = 'underline';
-        } else if (!global.screenReader) { getId('stageSelect').classList.remove('active'); }
+        }
         return;
     }
 
@@ -1479,8 +1479,7 @@ export const dischargeAsyncReset = async() => {
     const energy = player.discharge.energy;
 
     if (player.toggles.confirm[1] !== 'None') {
-        const active = player.stage.active;
-        if (player.toggles.confirm[1] !== 'Safe' || active !== 1) {
+        if (player.toggles.confirm[1] !== 'Safe' || player.stage.active !== 1) {
             if (!await Confirm(`Reset Structures and Energy to ${energy >= info.next ? 'gain boost from a new goal' : `regain ${format(info.energyTrue - energy)} spent Energy`}?`)) { return; }
             if (!dischargeResetCheck()) { return Notify('Discharge canceled, requirements are no longer met'); }
         }
@@ -1537,8 +1536,9 @@ export const vaporizationAsyncReset = async() => {
     const increase = player.vaporization.clouds[0] > 0 ? Limit(info.get).divide(player.vaporization.clouds).multiply('1e2').toArray() : '1e2';
 
     if (player.toggles.confirm[2] !== 'None') {
-        const active = player.stage.active;
-        if (player.toggles.confirm[2] !== 'Safe' || active !== 2 || Limit(increase).lessThan('1e2')) {
+        const rainPost = calculateEffects.S2Extra1_2(true);
+        const rainNow = calculateEffects.S2Extra1_2();
+        if (player.toggles.confirm[2] !== 'Safe' || player.stage.active !== 2 || Limit(calculateEffects.clouds(true)).divide(info.strength, rainNow[0], rainNow[1]).multiply(rainPost[0], rainPost[1]).lessThan('2')) {
             if (!await Confirm(`Reset Structures and Upgrades for ${Limit(info.get).format()} (+${Limit(increase).format()}%) Clouds?`)) { return; }
             if (!vaporizationResetCheck()) { return Notify('Vaporization canceled, requirements are no longer met'); }
         }
@@ -1577,8 +1577,7 @@ export const rankAsyncReset = async() => {
     if (!rankResetCheck()) { return; }
 
     if (player.toggles.confirm[3] !== 'None' && player.accretion.rank !== 0) {
-        const active = player.stage.active;
-        if (player.toggles.confirm[3] !== 'Safe' || active !== 3) {
+        if (player.toggles.confirm[3] !== 'Safe' || player.stage.active !== 3) {
             if (!await Confirm('Reset Structures, Upgrades and Stage Researches to increase current Rank?')) { return; }
             if (!rankResetCheck()) { return Notify('Rank increase canceled, requirements are no longer met'); }
         }
@@ -1669,11 +1668,10 @@ export const collapseAsyncReset = async() => {
     const mass = player.collapse.mass;
 
     if (player.toggles.confirm[4] !== 'None') {
-        const active = player.stage.active;
         const unlockedG = mass >= 1e5 && player.strangeness[5][6] >= 1;
         const cantAfford = !unlockedG || Limit(calculateBuildingsCost(3, 5)).moreThan(newMass);
         const notMaxed = player.inflation.vacuum && newMass > mass && Limit(global.buildingsInfo.producing[1][1]).multiply(global.inflationInfo.massCap).moreThan(player.buildings[1][0].current);
-        if (player.toggles.confirm[4] !== 'Safe' || active !== 4 || (cantAfford && ((notMaxed && player.buildings[5][3].true < 1) || unlockedG))) {
+        if (player.toggles.confirm[4] !== 'Safe' || player.stage.active !== 4 || (cantAfford && ((notMaxed && player.buildings[5][3].true < 1) || unlockedG))) {
             let message = 'This will reset all Researches, Upgrades and Structures';
             if (newMass > mass) {
                 message += `\nSolar mass will increase to ${format(newMass)}`;
@@ -1693,9 +1691,8 @@ export const collapseAsyncReset = async() => {
                 }
                 message += `\n${format(count)} new Elements will activate`;
             }
-            if (active !== 4) { message += '\nContinue?'; }
 
-            if (!await Confirm(message)) { return; }
+            if (!await Confirm(message + '\nContinue?')) { return; }
             if (!collapseResetCheck()) { return Notify('Collapse canceled, requirements are no longer met'); }
         }
     }

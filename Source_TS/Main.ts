@@ -247,10 +247,8 @@ try { //Start everything
     const supportType = localStorage.getItem('support');
     if (supportType !== null) {
         const hangleToggle = (number: number, type: 'MD' | 'SR', reload = false) => {
-            let state;
-            if (reload) {
-                state = false;
-            } else {
+            let state = false;
+            if (!reload) {
                 const support = localStorage.getItem('support') as string;
                 state = support[number + 1] === 'F';
                 localStorage.setItem('support', `${support.slice(0, number + 1)}${state ? 'T' : 'F'}${support.slice(number + 2, support.length)}`);
@@ -327,8 +325,8 @@ try { //Start everything
             });
             if (supportType[1] === 'F') { hangleToggle(0, 'SR', true); }
 
-            const primaryIndex = (state: boolean) => {
-                const newTab = state ? -1 : 0;
+            const primaryIndex = (reload = false) => {
+                const newTab = hangleToggle(1, 'SR', reload) ? -1 : 0;
                 getId('stageReset').tabIndex = newTab;
                 getId('reset1Button').tabIndex = newTab;
                 for (let i = 1; i < specialHTML.longestBuilding; i++) {
@@ -347,8 +345,8 @@ try { //Start everything
                     getId(`${global.stageInfo.word[i]}Switch`).tabIndex = newTab;
                 }
             };
-            getId('SRToggle1').addEventListener('click', () => { primaryIndex(hangleToggle(1, 'SR')); });
-            if (supportType[2] === 'F') { primaryIndex(hangleToggle(1, 'SR', true)); }
+            getId('SRToggle1').addEventListener('click', () => { primaryIndex(); });
+            if (supportType[2] === 'F') { primaryIndex(true); }
         }
     }
 
@@ -624,7 +622,6 @@ try { //Start everything
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`${global.stageInfo.word[i]}Switch`).addEventListener('click', () => switchStage(i));
     }
-    getId('currentSwitch').addEventListener('click', () => getId('stageSelect').classList.add('active'));
 
     /* Post */
     stageUpdate('reload');

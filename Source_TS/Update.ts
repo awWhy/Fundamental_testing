@@ -275,7 +275,7 @@ export const numbersUpdate = () => {
                 }
                 if (player.inflation.vacuum) {
                     getId('mainCapStat').textContent = Limit(buildingsInfo.producing[1][1]).multiply('8.96499278339628e-67', global.inflationInfo.massCap).format({ padding: true });
-                    getId('mainCapTill').textContent = format(Limit(player.buildings[1][0].current).divide(buildingsInfo.producing[1][1]).minus(global.inflationInfo.massCap).toNumber() * -1, { type: 'time' });
+                    getId('mainCapTill').textContent = format(Limit(player.buildings[1][0].current).divide(buildingsInfo.producing[1][1]).minus(global.inflationInfo.massCap).divide(global.inflationInfo.globalSpeed).toNumber() * -1, { type: 'time' });
                 }
             }
 
@@ -331,9 +331,6 @@ export const numbersUpdate = () => {
                 getId('dischargeStat').textContent = format(global.dischargeInfo.total);
                 getId('dischargeStatTrue').textContent = ` [${player.discharge.current}]`;
                 if (player.strangeness[1][11] < 1) { getId('energySpent').textContent = format(global.dischargeInfo.energyTrue - player.discharge.energy); }
-                if (player.inflation.vacuum) {
-                    getId('preonCapStat').textContent = Limit(global.inflationInfo.preonCap).format({ padding: true });
-                }
             } else if (active === 2) {
                 assignVaporizationInformation();
 
@@ -364,8 +361,6 @@ export const numbersUpdate = () => {
                     buildings[0].total = Limit(mass.total).multiply('1.78266192e-33').toArray();
                     buildings[0].trueTotal = Limit(mass.trueTotal).multiply('1.78266192e-33').toArray();
                     buildings[0].highest = Limit(mass.highest).multiply('1.78266192e-33').toArray();
-
-                    getId('dustCapStat').textContent = Limit(global.inflationInfo.dustCap).format({ padding: true });
                 }
             } else if (active === 4 || active === 5) {
                 getId('maxSolarMassStat').textContent = format(player.collapse.massMax);
@@ -478,7 +473,6 @@ export const visualUpdate = () => {
                 if (player.inflation.vacuum) {
                     getId('building4').style.display = Limit(buildings[3].trueTotal).moreOrEqual('8') ? '' : 'none';
                     getId('building5').style.display = Limit(buildings[4].trueTotal).moreOrEqual('2') ? '' : 'none';
-                    getId('preonCap').style.display = player.researchesExtra[1][2] >= 1 ? '' : 'none';
                 }
                 getId('stageInfo').style.display = global.dischargeInfo.total > 0 ? '' : 'none';
                 getId('tritium').style.display = player.upgrades[1][8] === 1 ? '' : 'none';
@@ -967,7 +961,7 @@ const updateRankInfo = () => {
 };
 
 const updateHistory = (/*type: 'stage'*/) => {
-    if (global.debug.historyUpdatedS) { return; }
+    if (global.debug.historyStage === player.stage.resets) { return; }
     const list = global.historyStorage.stage;
 
     let text = '';
@@ -982,7 +976,7 @@ const updateHistory = (/*type: 'stage'*/) => {
     const stageBest = player.history.stage.best;
     const converted = stageBest[0] / 1e12 ** stageBest[2];
     getId('stageBest').innerHTML = `Best reset: <span class="whiteText"><span class="greenText">${format(converted)} ${global.strangeInfo.name[stageBest[2]]}</span>, <span class="blueText">${format(stageBest[1], { type: 'time' })}</span>, <span class="darkorchidText">${format(converted / stageBest[1], { padding: true })} per second</span></span>`;
-    global.debug.historyUpdatedS = true;
+    global.debug.historyStage = player.stage.resets;
 };
 
 export const format = (input: number | overlimit, settings = {} as { digits?: number, type?: 'number' | 'input' | 'time', padding?: boolean }): string => {
@@ -1101,7 +1095,7 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         numbersUpdate();
         visualUpdate();
         return;
-    } else if (global.screenReader) { //Firefox doesn't support any Aria shorthands
+    } else if (global.screenReader) { //Firefox only recently (24.10.2023) added aria shortcuts (.ariaLabel)
         getId('reset1Main').setAttribute('aria-label', `${['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', ''][active]} reset (hotkey ${['', 'D', 'V', 'R', 'C'][active]})`);
         for (let i = 1; i < buildingsInfo.maxActive[active]; i++) {
             getId(`building${i}`).setAttribute('aria-label', `${buildingsInfo.name[active][i]} (hotkey ${i})`);
@@ -1122,6 +1116,7 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         }
         global.lastElement = -1;
         global.lastStrangeness = [-1, -1];
+        global.debug.historyStage = -1;
         for (const text of ['strangeness', 'milestones']) {
             getId(`${text}Stage`).textContent = '';
             getId(`${text}Text`).textContent = 'Hover to see.';
@@ -1276,7 +1271,6 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
 
     stageInfo.priceName = ['', 'Energy', 'Drops', 'Mass', 'Elements', 'Elements'][active];
     const body = document.body.style;
-
     if (active === 1) {
         body.removeProperty('--stage-text');
         body.removeProperty('--stage-button-border');

@@ -306,7 +306,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         errorQuery: true, //About incorect Query
         errorGain: true, //About NaN or Infinity
         rankUpdated: -1, //Rank number
-        historyUpdatedS: false //History
+        historyStage: -1 //Stage resets
     },
     trueActive: 1,
     lastSave: 0,
@@ -1571,7 +1571,6 @@ export const updatePlayer = (load: playerType): string => {
     global.debug.errorID = true;
     global.debug.errorQuery = true;
     global.debug.errorGain = true;
-    global.debug.historyUpdatedS = false;
 
     global.vaporizationInfo.research0 = 0;
     global.vaporizationInfo.research1 = 0;

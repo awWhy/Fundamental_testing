@@ -96,6 +96,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('strange9Stage3').style.display = '';
         getId('strange10Stage4').style.display = '';
 
+        getId('preonCap').style.display = '';
         getId('effectiveDrops').style.display = '';
         getId('dustCap').style.display = '';
         getId('mainCap').style.display = '';

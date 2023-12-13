@@ -557,7 +557,7 @@ export const Notify = (text: string) => {
     notification.textContent = text;
     notification.style.animation = 'hideX 1s ease-in-out reverse';
     div.style.pointerEvents = '';
-    if (global.screenReader) { notification.setAttribute('role', 'alert'); } //Firefox doesn't support any Aria shorthands
+    if (global.screenReader) { notification.setAttribute('role', 'alert'); } //Firefox only recently added support for .role (in version 119)
 
     const mainDiv = getId('notifications');
     mainDiv.appendChild(notification);
@@ -601,6 +601,7 @@ export const hideFooter = () => {
         footer.style.animation = 'hideY 1s reverse';
         arrow.style.animation = 'rotate 1s reverse';
         getId('hideText').textContent = 'Hide';
+        getId('stageSelect').classList.add('active');
         setTimeout(animationReset, 1000);
 
         numbersUpdate();
@@ -609,6 +610,7 @@ export const hideFooter = () => {
         footer.style.animation = 'hideY 1s backwards';
         arrow.style.animation = 'rotate 1s backwards';
         getId('hideText').textContent = 'Show';
+        getId('stageSelect').classList.remove('active');
         setTimeout(() => {
             footerArea.style.display = 'none';
             arrow.style.transform = 'rotate(180deg)';
@@ -673,7 +675,7 @@ export const replayEvent = async() => {
     if (last >= 7) { text += '\nEvent 7: True Vacuum;'; }
 
     const event = Number(await Prompt(text, `${last}`));
-    if (!isFinite(event) || event < 1 || Math.trunc(event) !== event || event > last) { return; }
+    if (event > last) { return; }
 
     void playEvent(event, false);
 };
