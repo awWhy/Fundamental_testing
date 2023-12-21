@@ -137,7 +137,10 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             if (player.strangeness[5][6] >= 2) { player.ASR[5]++; }
         }
     }
+    player.researchesAuto[0] = player.strangeness[3][6];
+    player.researchesAuto[1] = player.strangeness[1][7] >= 1 ? 1 : 0;
 
+    for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (const s of stageIndex) { //Less errors if do it separatly
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
@@ -181,6 +184,10 @@ export const resetVacuum = () => {
         player.strangeness[s] = cloneArray(playerStart.strangeness[s]);
         player.milestones[s] = cloneArray(playerStart.milestones[s]);
         player.ASR[s] = 0;
+    }
+    for (let i = 0; i < playerStart.researchesAuto.length; i++) {
+        player.researchesAuto[i] = 0;
+        calculateMaxLevel(i, 0, 'researchesAuto');
     }
 
     //Stage 1

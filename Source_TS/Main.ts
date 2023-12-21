@@ -1,5 +1,5 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
-import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, offlineWaste, visualUpdateResearches } from './Update';
+import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, maxExportTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches } from './Update';
 import { assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, enterExitChallenge, rankAsyncReset, stageAsyncReset, switchStage, toggleBuy, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage } from './Special';
 import { detectHotkey } from './Hotkeys';
@@ -62,48 +62,56 @@ const handleOfflineTime = (): number => {
     return offlineTime;
 };
 
-const changeIntervals = (pause = false) => {
+const changeIntervals = () => {
     const intervalsId = global.intervalsId;
     const intervals = player.intervals;
+    const paused = global.paused;
 
     clearInterval(intervalsId.main);
     clearInterval(intervalsId.numbers);
     clearInterval(intervalsId.visual);
     clearInterval(intervalsId.autoSave);
-    intervalsId.main = pause ? undefined : setInterval(timeUpdate, intervals.main);
-    intervalsId.numbers = pause ? undefined : setInterval(numbersUpdate, intervals.numbers);
-    intervalsId.visual = pause ? undefined : setInterval(visualUpdate, intervals.visual);
-    intervalsId.autoSave = pause ? undefined : setInterval(saveGame, intervals.autoSave);
+    intervalsId.main = paused ? undefined : setInterval(timeUpdate, intervals.main);
+    intervalsId.numbers = paused ? undefined : setInterval(numbersUpdate, intervals.numbers);
+    intervalsId.visual = paused ? undefined : setInterval(visualUpdate, intervals.visual);
+    intervalsId.autoSave = paused ? undefined : setInterval(saveGame, intervals.autoSave);
 };
 
-const saveGame = async() => {
+const saveGame = async(saveOnly = false): Promise<string | null> => {
+    if (global.paused) {
+        Notify('No saving while game is paused');
+        return null;
+    }
     try {
         player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
 
         const save = btoa(JSON.stringify(player));
-        localStorage.setItem('testing_save', save);
-        clearInterval(global.intervalsId.autoSave);
-        global.intervalsId.autoSave = setInterval(saveGame, player.intervals.autoSave);
-        getId('isSaved').textContent = 'Saved';
-        global.lastSave = 0;
-    } catch (error) {
-        void Alert(`Failed to save game\nFull error: '${error}'`);
-    }
+        if (!saveOnly) {
+            localStorage.setItem('testing_save', save);
+            clearInterval(global.intervalsId.autoSave);
+            global.intervalsId.autoSave = setInterval(saveGame, player.intervals.autoSave);
+            getId('isSaved').textContent = 'Saved';
+            global.lastSave = 0;
+        }
+        return save;
+    } catch (error) { void Alert(`Failed to save game\nFull error: '${error}'`); }
+    return null;
 };
 const loadGame = (save: string) => {
-    changeIntervals(true);
+    if (global.paused) { return Notify('No loading while game is paused'); }
+    global.paused = true;
+    changeIntervals();
     try {
         const versionCheck = updatePlayer(JSON.parse(atob(save)));
 
         global.lastSave = handleOfflineTime();
-        Notify(`This save is ${format(global.lastSave, { type: 'time' })} old. Save file version is ${versionCheck}`);
+        Notify(`This save is ${format(global.lastSave, { type: 'time', short: true })} old. Save file version is ${versionCheck}`);
         stageUpdate('reload');
     } catch (error) { void Alert(`Incorrect save file format\nFull error: '${error}'`); }
+    global.paused = false;
     changeIntervals();
 };
 const exportFileGame = async() => {
-    player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
-
     if (player.strange[0].total > 0 && player.stage.export > 0) {
         const rewardType = player.strangeness[5][10];
         const multiplier = exportMultiplier();
@@ -121,7 +129,8 @@ const exportFileGame = async() => {
         if (rewardType === 0) { assignStrangeBoost(); }
     }
 
-    const save = btoa(JSON.stringify(player));
+    const save = await saveGame(true);
+    if (save === null) { return; }
     const a = document.createElement('a');
     a.href = `data:text/plain,${save}`;
     a.download = replaceSaveFileSpecials();
@@ -133,9 +142,11 @@ const saveConsole = async() => {
     const lower = value.toLowerCase();
 
     if (lower === 'copy') {
-        void navigator.clipboard.writeText(btoa(JSON.stringify(player))).catch((error) => Notify(`Copy to clipboard failed\nFull error: '${error}'`));
+        const save = await saveGame(true);
+        if (save !== null) { void navigator.clipboard.writeText(save); }
     } else if (lower === 'delete' || lower === 'clear') {
-        changeIntervals(true);
+        global.paused = true;
+        changeIntervals();
         if (lower === 'delete') {
             localStorage.removeItem('testing_save');
         } else { localStorage.clear(); }
@@ -208,34 +219,54 @@ const getDate = (type: 'dateDMY' | 'timeHMS'): string => {
 };
 
 export const timeWarp = async() => {
-    const time = player.time;
-    const waste = offlineWaste() / 1.5;
-    if (time.offline < 600 * waste) { return void Alert(`Need at least ${format(10 * waste)} minutes of storaged Offline time to Warp`); }
+    if (global.paused) { return Notify('No warping while game is paused'); }
+    const improved = player.strangeness[2][6] >= 1;
+    if (!await Confirm(`Do you wish to Warp ${format(player.time.offline, { type: 'time', short: true })} forward? ${improved ? 'There is no maximum tick amount, 1 tick is 1 second' : `Maximum tick amount is ${format(1000)}, 1 tick is at least 10 seconds`}`)) { return; }
+    if (player.time.offline <= 0) { return Notify('Offline storage is empty'); }
 
-    let warpTime: number;
-    const improved = player.strangeness[1][7] >= 2;
-    if (improved) {
-        warpTime = Math.min(Number(await Prompt(`How many seconds do you wish to Warp forward? (Minimum value is 10 minutes)\nCurrent Offline time is ${format(time.offline, { type: 'time' })} (${format(time.offline / waste, { type: 'time' })} effective, ${format(waste)} seconds per added second)\n(One tick will be equal to warp time / 1000)`, '600')), time.offline / waste);
-        if (!isFinite(warpTime)) { return Notify('Warp failed, input is invalid'); }
-    } else {
-        const minimum = Math.min(1200, time.offline / waste);
-        warpTime = await Confirm(`Do you wish to Warp ${format(minimum, { type: 'time' })} forward? Current Offline time is ${format(time.offline, { type: 'time' })} (${format(time.offline / waste, { type: 'time' })} effective), will consume ${format(minimum * waste, { type: 'time' })}\n(One tick is 20 seconds)`) ? minimum : 0;
-    }
-    if (warpTime < 600) { return warpTime === 0 ? undefined : Notify('Warp failed, storage or input is below minimum value'); }
-
-    time.offline -= warpTime * waste;
+    global.paused = true;
+    changeIntervals();
+    getId('alertMain').style.display = 'none';
+    getId('warpMain').style.display = '';
+    getId('blocker').style.display = '';
+    warp(player.time.offline, improved ? 1 : Math.max(10, player.time.offline / 1000));
+};
+const warp = (warpTime: number, tick: number) => {
+    if (global.screenReader) { getId('warpMain').setAttribute('aria-valuetext', `${format(100 - warpTime / player.time.offline * 100)}% done`); }
+    getId('warpRemains').textContent = format(warpTime, { type: 'time' });
+    getId('warpPercentage').textContent = format(100 - warpTime / player.time.offline * 100, { padding: true });
+    const time = Math.min(tick * 600, warpTime);
+    warpTime -= time;
     try {
-        timeUpdate(warpTime, improved ? warpTime / 1000 : 20);
-    } catch (error) { Notify(`Warp failed due to Error:\n${error}`); }
+        timeUpdate(time, tick);
+    } catch (error) {
+        warpCancel(warpTime);
+        return void Alert(`Warp failed due to Error:\n${error}`);
+    }
+    if (warpTime > 0) {
+        setTimeout(warp, 0, warpTime, tick);
+    } else { warpCancel(); }
+};
+const warpCancel = (time = 0) => {
+    player.time.offline = time;
+    Notify(`${format(handleOfflineTime(), { type: 'time', short: true })} were added into Offline storage`);
+    global.paused = false;
+    changeIntervals();
+    getId('blocker').style.display = 'none';
+    getId('warpMain').style.display = 'none';
+    getId('alertMain').style.display = '';
 };
 
 const pauseGame = async() => {
-    changeIntervals(true);
+    if (global.paused) { return Notify('Game is already paused'); }
+    global.paused = true;
+    changeIntervals();
     await Alert("Game is currently paused. Press 'confirm' to unpause it. Time spent here will be moved into Offline storage");
 
     const offline = handleOfflineTime();
-    Notify(`Game was paused for ${format(offline, { type: 'time' })}`);
+    Notify(`Game was paused for ${format(offline, { type: 'time', short: true })}`);
     global.lastSave += offline;
+    global.paused = false;
     changeIntervals();
     numbersUpdate();
     visualUpdate();
@@ -356,7 +387,7 @@ try { //Start everything
         const load = JSON.parse(atob(save));
         const versionCheck = updatePlayer(load);
         global.lastSave = handleOfflineTime();
-        alertText = `Welcome back, you were away for ${format(global.lastSave, { type: 'time' })}\n${versionCheck !== player.version ? `Game have been updated from ${versionCheck} to ${player.version}` : `Current version is ${player.version}`}`;
+        alertText = `Welcome back, you were away for ${format(global.lastSave, { type: 'time', short: true })}\n${versionCheck !== player.version ? `Game have been updated from ${versionCheck} to ${player.version}` : `Current version is ${player.version}`}`;
     } else {
         prepareVacuum(false); //Set buildings values
         updatePlayer(deepClone(playerStart));
@@ -468,6 +499,13 @@ try { //Start everything
         if (MD) { image.addEventListener('touchstart', () => getUpgradeDescription(i, 'researchesExtra')); }
         if (SR) { image.addEventListener('focus', () => getUpgradeDescription(i, 'researchesExtra')); }
         image.addEventListener('click', () => buyUpgrades(i, player.stage.active, 'researchesExtra'));
+    }
+    for (let i = 0; i < global.researchesAutoInfo.cost.length; i++) {
+        const image = getId(`researchAuto${i + 1}Image`);
+        if (PC) { image.addEventListener('mouseover', () => getUpgradeDescription(i, 'researchesAuto')); }
+        if (MD) { image.addEventListener('touchstart', () => getUpgradeDescription(i, 'researchesAuto')); }
+        if (SR) { image.addEventListener('focus', () => getUpgradeDescription(i, 'researchesAuto')); }
+        image.addEventListener('click', () => buyUpgrades(i, player.stage.active, 'researchesAuto'));
     }
     {
         const image = getId('ASRImage');
@@ -627,7 +665,7 @@ try { //Start everything
     stageUpdate('reload');
     getId('body').style.display = '';
     getId('loading').style.display = 'none';
-
+    global.paused = false;
     changeIntervals();
     document.title = `Fundamental ${playerStart.version}`;
     void Alert(alertText + `\n(Game successfully loaded after ${Date.now() - playerStart.time.started} ms)`);

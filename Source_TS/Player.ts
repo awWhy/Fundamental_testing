@@ -253,6 +253,7 @@ export const player: playerType = { //Only for information that need to be saved
     upgrades: [],
     researches: [],
     researchesExtra: [],
+    researchesAuto: [],
     ASR: [], //Auto Structures Research
     elements: [],
     strangeness: [],
@@ -263,7 +264,7 @@ export const player: playerType = { //Only for information that need to be saved
     },
     toggles: {
         normal: [], //Auto added for every element with a class 'toggle'
-        /* Offline auto use[0]; Hotkeys type[1]; Elements as tab[2] */
+        /* Empty[0]; Hotkeys type[1]; Elements as tab[2] */
         confirm: [], //Class 'toggleConfirm'
         /* Stage[0]; Discharge[1]; Vaporization[2]; Rank[3]; Collapse[4] */
         buildings: [], //Class 'toggleBuilding' ([0] everywhere, is toggle all)
@@ -310,6 +311,7 @@ export const global: globalType = { //For information that doesn't need to be sa
     },
     trueActive: 1,
     lastSave: 0,
+    paused: true,
     footer: true,
     mobileDevice: false,
     screenReader: false,
@@ -497,8 +499,8 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => 'Particles produce 5 times more Quarks.',
                 () => 'Gluons now bind Quarks into Particles, which makes Particles 10 times cheaper.',
-                () => `${player.inflation.vacuum ? 'Atoms' : 'Particle'} cost is 10 times cheaper.`,
-                () => `${player.inflation.vacuum ? 'Atoms' : 'Particle'} produce 5 times more ${player.inflation.vacuum ? 'Particles' : 'Quarks'}.`,
+                () => `${player.inflation.vacuum ? 'Atoms' : 'Particles'} are 10 times cheaper.`,
+                () => `${player.inflation.vacuum ? 'Atoms' : 'Particles'} produce 5 times more ${player.inflation.vacuum ? 'Particles' : 'Quarks'}.`,
                 () => `${player.inflation.vacuum ? 'Molecules' : 'Atoms'} produce 5 times more ${player.inflation.vacuum ? 'Atoms' : 'Particles'}.`,
                 () => `Ability to regain spent Energy and if had enough Energy will also boost production for all Structures by ${format(global.dischargeInfo.base)}.`,
                 () => `Cost scaling is decreased by ${format(calculateEffects.S1Upgrade6() / 100)}.`,
@@ -814,7 +816,28 @@ export const global: globalType = { //For information that doesn't need to be sa
             maxActive: 0
         }
     ],
+    researchesAutoInfo: { //Auto Researches Research
+        name: [
+            'Upgrade automatization',
+            'More toggles'
+        ],
+        effectText: [
+            () => `Automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.researchesAuto[0], 2)]} from any Stage.\n(Will be available next mini update)`,
+            () => 'Unlock a new toggle that will switch all auto Structure toggles at once.\n(Will be available next mini update)'
+        ],
+        cost: [0, 0],
+        costRange: [ //Random scaling
+            [0, 0, 0],
+            [0]
+        ],
+        autoStage: [ //Stage to buy from (1 per level)
+            [1, 3, 4],
+            [2]
+        ],
+        max: [3, 1]
+    },
     ASRInfo: { //Auto Structures Research
+        name: 'Auto Structures',
         cost: [0, 4000, 1e10, 1e-7, 1e6, 1],
         costRange: [ //Random scaling
             [],
@@ -907,7 +930,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Automatic Discharge',
                 'Increased Energy',
                 'Better improvement',
-                'Keep auto Structures',
+                'Auto Structures',
                 'More toggles',
                 'Strange boost',
                 'Fundamental boost',
@@ -922,10 +945,10 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Gain more Energy from creating ${player.inflation.vacuum ? 'Preons, +2' : 'Particles, +1'}.`,
                 () => "Research 'Improved Tritium' is now better. (+1)",
                 () => `Always have auto for ${global.buildingsInfo.name[1][Math.min(player.strangeness[1][6] + 1, global.ASRInfo.max[1])]}.`,
-                () => 'First level - improve control over auto Structures toggles.\nSecond level - improve control over consumption of Offline storage.',
+                () => `First level - improve control over auto Structures toggles.\n(${player.strangeness[1][7] >= 1 ? 'Auto await value input and toggle to switch all auto Structures toggles at once' : 'Not yet unlocked'})\nSecond level - will be added next mini update.\n(${player.strangeness[1][7] >= 2 ? 'Placeholder' : 'Not yet unlocked'})`,
                 () => `Unspent Strange quarks will boost Microworld with bonus Discharge goals.\n(Current effect: ${global.strangeInfo.stageBoost[1] !== null ? `+${format(global.strangeInfo.stageBoost[1], { padding: true })}` : 'none'})`,
                 () => `Minor boost of ${format(1.3)}x per level to all Microworld Structures.`,
-                () => 'No Mass will be lost when Creating Preons.',
+                () => 'No Mass will be lost when creating Preons.',
                 () => 'Energy is now directly based on current self-made amount of Structures.\nThis will also increase max levels for Reset automatization.'
             ],
             cost: [],
@@ -940,8 +963,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'More spread',
                 'Cloud density',
                 'Automatic Vaporization',
-                'Keep auto Structures',
-                'Longer Offline',
+                'Auto Structures',
+                'Improved Offline',
                 'Strange boost',
                 'New Structure',
                 'Ocean world',
@@ -954,7 +977,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Decrease requirement per Cloud.',
                 () => `Automatically Vaporize when reached enough boost from new Clouds. (Need to be enabled in Settings)${player.strangeness[1][11] >= 1 ? '\nSecond level - Automatically gain 20% of Clouds per second.' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[2][Math.min(player.strangeness[2][5] + 1, global.ASRInfo.max[2])]}.`,
-                () => 'Decrease Offline time waste by -1 second per level.\n(Effect is weaker for Warps)',
+                () => 'Remove tick limit for time warps, also reduce minimum tick to 1 second.',
                 () => `Unspent Strange quarks will boost Submerged by improving Puddles.\n(Current effect: ${global.strangeInfo.stageBoost[2] !== null ? format(global.strangeInfo.stageBoost[2], { padding: true }) : 'none'})`,
                 () => 'Current Vacuum state allows for another Submerged Structure.',
                 () => `Increase ${global.strangeInfo.name[player.strangeness[5][10]]} gained from this Stage reset based on current Cloud amount.\n(Current effect: ${format(calculateEffects.S2Strange9(), { padding: true })})`,
@@ -972,8 +995,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'More levels',
                 'Improved Satellites',
                 'Automatic Rank',
-                'Keep auto Structures',
-                'Automatization for Upgrades',
+                'Auto Structures',
+                'Upgrade automatization',
                 'Strange boost',
                 'New Structure',
                 'Mass shift',
@@ -986,7 +1009,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Satellites now improve all Accretion Structures with reduced strength (^${format(player.inflation.vacuum ? 0.2 : 0.4)}).`,
                 () => `Automatically increase Rank when available. (Need to be enabled in Settings)${player.strangeness[1][11] >= 1 ? '\nSecond level - auto creation of Accretion Structures after reaching cosmic dust hardcap will always keep enough for highest Solar mass conversion.' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[3][Math.min(player.strangeness[3][5] + 1, global.ASRInfo.max[3])]}.`,
-                () => 'Will automatically create all Upgrades and Researches from any Stage.\n(Need to be enabled in Settings, order of automatization is Upgrades > Stage Researches > Special Researches)',
+                () => `Always automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.strangeness[3][6], 2)]} from any Stage. (Need to be enabled in Settings)`,
                 () => `Unspent Strange quarks will boost Accretion by making its Structures cheaper.\n(Current effect: ${global.strangeInfo.stageBoost[3] !== null ? format(global.strangeInfo.stageBoost[3], { padding: true }) : 'none'})`,
                 () => 'Current Vacuum state allows for another Accretion Structure.\n(Not recommended until cheap)',
                 () => `Reduce amount of time required to reach Solar mass hardcap by shifting Cosmic dust and Solar mass hardcaps.\nEach level allows for ${format(1.4)} times bigger shift. (Automatic)`,
@@ -1005,7 +1028,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Main giants',
                 'Remnants of past',
                 'Automatic Collapse',
-                'Keep auto Structures',
+                'Auto Structures',
                 'Daily gain',
                 'Strange boost',
                 'New Structure',
@@ -1019,7 +1042,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Elements will not require Collapse for activation.\n${player.stage.true >= 6 || (player.strange[0].total > 0 && player.event) ? 'Second level will unlock auto creation of Elements. (Need to be enabled in settings)' : '(Auto creation of Elements is not yet possible in Interstellar space)'}`,
                 () => `Automatically Collapse once reached enough boost. (Need to be enabled in Settings)${player.strangeness[1][11] >= 1 ? '\nSecond level - Star remnants will now be gained automatically.' : ''}`,
                 () => `Always have auto for ${global.buildingsInfo.name[4][Math.min(player.strangeness[4][6] + 1, global.ASRInfo.max[4])]}.`,
-                () => `Increase multiplier of ${global.strangeInfo.name[player.strangeness[5][10]]} gained from export per day by +1.${player.strangeness[5][10] >= 1 ? '' : ' (Can claim only full ones)'}\n(Export base is increased by +10% of highest Stage reset reward even without this Strangeness)`,
+                () => `Increase multiplier of ${global.strangeInfo.name[player.strangeness[5][10]]} gained from export per day by +1 (which is equal to ${format((2 + player.strangeness[4][7]) / (1 + player.strangeness[4][7]) * 100 - 100)}% increase).\n(${player.strangeness[5][10] >= 1 ? '' : 'Can claim only full ones. '}Export base is increased by +${format(6.25)}% of highest Stage reset reward even without this Strangeness)`,
                 () => `Unspent Strange quarks will boost Interstellar by improving all Stars.\n(Current effect: ${global.strangeInfo.stageBoost[4] !== null ? format(global.strangeInfo.stageBoost[4], { padding: true }) : 'none'})`,
                 () => 'Current Vacuum state allows for another Interstellar Structure.',
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
@@ -1060,7 +1083,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Unlock a new Strange Structure that will replace current Stage reset reward, also convert all ${global.strangeInfo.name[Math.min(player.strangeness[5][10], global.strangenessInfo[5].max[10] - 1)]} and then produce them, but hardcaps quickly.\n(Hardcap delayed by quantity of a higher tier Structure, can be seen in Stats)`
             ],
             cost: [],
-            startCost: [4, 16, 2400, 8, 10, 64, 21600, 60, 1600, 180, 800],
+            startCost: [4, 16, 2400, 8, 10, 64, 21600, 40, 1600, 180, 800],
             scaling: [1, 5, 1, 1.8, 1.8, 1, 3, 2, 1, 1, 1],
             max: [3, 1, 1, 9, 9, 1, 2, 2, 1, 1, 1],
             maxActive: 10
@@ -1290,6 +1313,7 @@ Object.assign(player, {
         createArray(global.researchesExtraInfo[4].startCost.length, 'upgrade'),
         createArray(global.researchesExtraInfo[5].startCost.length, 'upgrade')
     ],
+    researchesAuto: createArray(global.researchesAutoInfo.cost.length, 'upgrade'),
     ASR: createArray(global.ASRInfo.costRange.length, 'upgrade'),
     elements: createArray(global.elementsInfo.startCost.length, 'upgrade'),
     strangeness: [
@@ -1430,8 +1454,8 @@ export const updatePlayer = (load: playerType): string => {
             for (let i = 0; i < load.history.stage.list.length; i++) {
                 load.history.stage.list[i][2] = 0;
             }
+            load.researchesAuto = []; //Can be removed if 3rd automatization research added
             delete load.time['disabled' as keyof unknown];
-            delete load['researchesAuto' as keyof unknown];
             delete load.discharge['unlock' as keyof unknown];
 
             /* Can be removed eventually */
@@ -1518,6 +1542,9 @@ export const updatePlayer = (load: playerType): string => {
             }
         }
     }
+    for (let i = load.researchesAuto.length; i < playerStart.researchesAuto.length; i++) {
+        load.researchesAuto[i] = 0;
+    }
     for (let i = load.ASR.length; i < playerStart.ASR.length; i++) {
         load.ASR[i] = 0;
     }
@@ -1599,6 +1626,12 @@ export const updatePlayer = (load: playerType): string => {
             }
         }
     }
+    if (player.inflation.vacuum) {
+        for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
+    } //else {
+    if (player.researchesAuto[0] < player.strangeness[3][6]) { player.researchesAuto[0] = player.strangeness[3][6]; }
+    if (player.researchesAuto[1] < 1 && player.strangeness[1][7] >= 1) { player.researchesAuto[1] = 1; }
+    //}
     for (let s = 1; s <= 5; s++) {
         calculateMaxLevel(0, s, 'ASR');
         const extra = player.researchesExtra[s];
@@ -1653,7 +1686,7 @@ export const buildVersionInfo = () => {
 
     getId('versionInfo').innerHTML = `<div style="display: flex; flex-direction: column; justify-content: space-between; align-items: center; width: clamp(42vw, 36em, 80vw); height: clamp(26vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em;">
         <div id="versionText" style="width: 100%; overflow-y: auto;">
-            <label>v0.1.8</label><p>- Stage 5 and 6 small balance changes\n- Solar mass requirement is removed if own a Galaxy\n- Upgrades and Researches merged (tab renamed)\n- Strangeness auto update description\n- Effects for all Upgrade types are expanded\n- Some stats moved into Stage tab\n- New stats for Stages 1, 3, 6\n- Added new save options (copy to clipboard, load from string)\n- Small visual changes\n- Added option to keep mouse events for Mobile device support\n- Support settings are now saved on page reload</p>
+            <label>v0.1.8</label><p>- Stage 5 and 6 small balance changes\n- Solar mass requirement is removed if own a Galaxy\n- Upgrades and Researches merged (tab renamed)\n- Strangeness auto update description\n- Effects for all Upgrade types are expanded\n- Some stats moved into Stage tab\n- New stats for Stages 1, 3, 6\n- Added new save options (copy to clipboard, load from string)\n- Small visual changes\n- Added option to keep mouse events for Mobile device support\n- Support settings are now saved on page reload\n\n- Added automatization Researches for Stage 6 (WIP)\n- 'More togges' second level (WIP) and 'Improved Offline' now use new effects\n- Export reward is now weaker\n- Updated time format and added new one\n- Warp reworked\n- Max offline is now 12 hours</p>
             <label>v0.1.7</label><p>- New content (Void)\n- Further balance and quality of life changes\n- Removed some Strangeness\n- Max Offline is now based on Stage resets\n- Offline storage no longer decreases\n- Export base is now improved by best Stage reset\n- Updated logic for entering and leaving Elements subtab\n- Warp minimum value is smaller and calculated better\n- Discharge now needs an actual reason\n- Fixed import not working on some Mobile devices\n- Art, themes and overall small visual updates\n- Updated numbers to move less, also to use new format</p>
             <label>v0.1.6</label><p>- Massive rebalance and reworks for all Stages\n- Auto Collapse reworked\n- Small changes to auto Vaporization\n- New stats for Stages 1, 2 and 3\n- New notifications\n- Removed almost all Automatization Researches\n- Export reward now unlocked for free\n- Elements will show effects after Stage reset\n- Descriptions no longer reset when changing active Stage\n- More quality of life improvements\n- More work on Mobile device and Screen reader supports</p>
             <label>v0.1.5</label><p>- Stage 6 minor balance changes\n- Images no longer unload when active Stage changes\n- Elements subtab can be entered from any Stage now or turned into a tab\n- Footer now affects page height\n- Many small changes to improve quality of life\n- 'Any' make toggle is now always strict, related button removed\n- More stats for save files\n- New hotkeys\n- Screen reader support rework, related tab removed</p>

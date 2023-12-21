@@ -55,7 +55,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
     return false;
 };
 
-export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'ASR' | 'elements' | 'strangeness'): boolean => {
+export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'strangeness'): boolean => {
     if (upgrade < 0) { return false; }
     switch (type) { //Some cases are handled by max level being 0
         case 'upgrades':
@@ -133,6 +133,14 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 return true;
             }
             break;
+        case 'researchesAuto':
+            return false; /*{
+            if (!player.inflation.vacuum) { return false; }
+            //if (upgrade === 0) { return player.researchesExtra[1][2] >= 1; }
+            //if (upgrade === 1) { return player.researchesExtra[1][2] >= 2; }
+            const autoStage = global.researchesAutoInfo.autoStage[upgrade][player.researchesAuto[upgrade]];
+            return autoStage === stageIndex || (stageIndex === 5 && autoStage === 4);
+        }*/
         case 'ASR':
             if (stageIndex === 1) { return player.upgrades[1][5] >= 1; }
             if (stageIndex === 3) { return player.accretion.rank !== 0; }

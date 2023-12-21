@@ -440,7 +440,7 @@ export const Alert = async(text: string): Promise<void> => {
         }
 
         getId('alertText').textContent = text;
-        const confirm = getId('confirmBtn');
+        const confirm = getId('alertConfirm');
         blocker.style.display = '';
         confirm.focus();
 
@@ -471,8 +471,8 @@ export const Confirm = async(text: string): Promise<boolean> => {
         }
 
         getId('alertText').textContent = text;
-        const cancel = getId('cancelBtn');
-        const confirm = getId('confirmBtn');
+        const cancel = getId('alertCancel');
+        const confirm = getId('alertConfirm');
         blocker.style.display = '';
         cancel.style.display = '';
         confirm.focus();
@@ -514,9 +514,9 @@ export const Prompt = async(text: string, inputValue = ''): Promise<string | nul
         }
 
         getId('alertText').textContent = text;
-        const input = getId('inputArea') as HTMLInputElement;
-        const cancel = getId('cancelBtn');
-        const confirm = getId('confirmBtn');
+        const input = getId('alertInput') as HTMLInputElement;
+        const cancel = getId('alertCancel');
+        const confirm = getId('alertConfirm');
         blocker.style.display = '';
         cancel.style.display = '';
         input.style.display = '';

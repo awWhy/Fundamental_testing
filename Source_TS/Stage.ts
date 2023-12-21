@@ -696,7 +696,7 @@ export const gainStrange = (get: number, time: number) => {
     if (get === 0) { assignStrangeBoost(); }
 };
 
-export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'ASR' | 'elements' | 'strangeness', auto = false): boolean => {
+export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'strangeness', auto = false): boolean => {
     if (!auto && !checkUpgrade(upgrade, stageIndex, type)) { return false; } //Auto should already checked if allowed, also allows for delayed purchase of Elements
 
     let currency: number | overlimit;
@@ -726,9 +726,10 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
             if (upgrade >= 5 /*&& upgrade < 9*/) { assignPuddles(); }
         } else if (stageIndex === 4 && upgrade === 1 && global.tab === 'upgrade') { switchTab('upgrade'); }
         if (!auto && global.screenReader) { getId('SRMain').textContent = `New upgrade '${pointer.name[upgrade]}', has been created`; }
-    } else if (type === 'researches' || type === 'researchesExtra' || type === 'ASR') {
-        const pointer = (type === 'researches' || type === 'researchesExtra' ? global[`${type}Info`][stageIndex] : global.ASRInfo) as typeof global.researchesInfo[0];
-        const level = type === 'researches' || type === 'researchesExtra' ? player[type][stageIndex] : player.ASR;
+    } else if (type === 'researches' || type === 'researchesExtra' || type === 'researchesAuto' || type === 'ASR') {
+        const pointer = type === 'researchesAuto' || type === 'ASR' ? global[`${type}Info`] : global[`${type}Info`][stageIndex];
+        const level = type === 'researchesAuto' || type === 'ASR' ? player[type] : player[type][stageIndex];
+        //if (type === 'ASR') { upgrade = stageIndex; }
 
         if (level[upgrade] >= pointer.max[upgrade]) { return false; }
         if (Limit(currency).lessThan(pointer.cost[upgrade])) { return false; }
@@ -760,7 +761,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
                 }
             }
         }
-        if (!auto && global.screenReader) { getId('SRMain').textContent = `Research '${type === 'ASR' ? 'Structure automation' : pointer.name[upgrade]}' level increased, it is now ${level[upgrade]} ${level[upgrade] >= pointer.max[upgrade] ? 'maxed' : ''}`; }
+        if (!auto && global.screenReader) { getId('SRMain').textContent = `Research '${type === 'ASR' ? pointer.name : pointer.name[upgrade]}' level increased, it is now ${level[upgrade]} ${level[upgrade] >= pointer.max[upgrade] ? 'maxed' : ''}`; }
     } else if (type === 'elements') {
         let level = player.elements[upgrade];
         if (level >= 1) { return false; }
@@ -810,6 +811,9 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
             } else if (upgrade === 6) {
                 player.ASR[1] = Math.max(player.strangeness[1][6], player.ASR[1]);
                 calculateMaxLevel(0, 1, 'ASR', true);
+            } else if (upgrade === 7) {
+                player.researchesAuto[1] = 1;
+                calculateMaxLevel(1, 0, 'researchesAuto', true);
             } else if (upgrade === 11) {
                 assignEnergy();
                 calculateMaxLevel(4, 2, 'strangeness', true);
@@ -837,6 +841,9 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
             } else if (upgrade === 5) {
                 player.ASR[3] = Math.max(player.strangeness[3][5], player.ASR[3]);
                 calculateMaxLevel(0, 3, 'ASR', true);
+            } else if (upgrade === 6) {
+                player.researchesAuto[0] = Math.max(player.strangeness[3][6], player.researchesAuto[0]);
+                calculateMaxLevel(0, 0, 'researchesAuto', true);
             } else if (upgrade === 8) {
                 calculateMaxLevel(0, 3, 'ASR', true);
                 calculateMaxLevel(5, 3, 'strangeness', true);
@@ -921,13 +928,15 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
 };
 
 //Currently can't allow price to be more than 2**1024. Because missing sorting function for numbers that big
-export const calculateResearchCost = (research: number, stageIndex: number, type: 'researches' | 'researchesExtra' | 'ASR' | 'strangeness') => {
+export const calculateResearchCost = (research: number, stageIndex: number, type: 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'strangeness') => {
     if (type === 'researches' || type === 'researchesExtra') {
         const pointer = global[`${type}Info`][stageIndex];
 
         pointer.cost[research] = stageIndex === 1 ?
             pointer.startCost[research] + pointer.scaling[research] * player[type][stageIndex][research] :
             pointer.startCost[research] * pointer.scaling[research] ** player[type][stageIndex][research];
+    } else if (type === 'researchesAuto') {
+        global.researchesAutoInfo.cost[research] = global.researchesAutoInfo.costRange[research][player.researchesAuto[research]];
     } else if (type === 'ASR') {
         global.ASRInfo.cost[stageIndex] = global.ASRInfo.costRange[stageIndex][player.ASR[stageIndex]];
     } else if (type === 'strangeness') {
@@ -937,7 +946,7 @@ export const calculateResearchCost = (research: number, stageIndex: number, type
     }
 };
 
-export const calculateMaxLevel = (research: number, stageIndex: number, type: 'researches' | 'researchesExtra' | 'ASR' | 'strangeness', addAuto = false) => {
+export const calculateMaxLevel = (research: number, stageIndex: number, type: 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'strangeness', addAuto = false) => {
     let max = null;
     if (type === 'ASR') {
         if (stageIndex === 1) {
@@ -1022,8 +1031,6 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
                 max = player.strangeness[1][11] >= 1 ? 2 : 1;
             } else if (research === 5) {
                 max = player.strangeness[2][8] >= 1 ? 6 : 5;
-            } else if (research === 6) {
-                max = player.stage.true >= 6 ? 2 : 1;
             }
         } else if (stageIndex === 3) {
             if (research === 0) {
@@ -1063,7 +1070,7 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
         if (max < 0) { max = 0; }
         if (type === 'ASR') {
             global.ASRInfo.max[stageIndex] = max;
-        } else {
+        } else if (type !== 'researchesAuto') {
             global[`${type}Info`][stageIndex].max[research] = max;
         }
     }
@@ -1103,7 +1110,7 @@ export const autoUpgradesSet = (which: 'all' | number) => {
 };
 
 export const autoUpgradesBuy = (stageIndex: number) => {
-    if (player.strangeness[3][6] < 1 || !player.toggles.auto[5]) { return; }
+    if (player.researchesAuto[0] < 1 || !player.toggles.auto[5]) { return; }
     const auto = global.automatization.autoU[stageIndex];
 
     for (let i = 0; i < auto.length; i++) {
@@ -1158,9 +1165,9 @@ export const autoResearchesSet = (type: 'researches' | 'researchesExtra', which:
 
 export const autoResearchesBuy = (type: 'researches' | 'researchesExtra', stageIndex: number) => {
     if (type === 'researches') {
-        if (player.strangeness[3][6] < 2 || !player.toggles.auto[6]) { return; }
+        if (player.researchesAuto[0] < 2 || !player.toggles.auto[6]) { return; }
     } else if (type === 'researchesExtra') {
-        if (player.strangeness[3][6] < 3 || !player.toggles.auto[7]) { return; }
+        if (player.researchesAuto[0] < 3 || !player.toggles.auto[7]) { return; }
     }
 
     const auto = global.automatization[type === 'researches' ? 'autoR' : 'autoE'][stageIndex];
@@ -1224,7 +1231,7 @@ export const toggleSwap = (number: number, type: 'normal' | 'buildings' | 'auto'
     if (change) {
         if (type === 'buildings') {
             if (number === 0) {
-                if (player.strangeness[1][7] < 1) { return; }
+                if (player.researchesAuto[1] < 1) { return; }
 
                 toggles[0] = !toggles[0];
                 for (let i = 1; i < toggles.length; i++) {

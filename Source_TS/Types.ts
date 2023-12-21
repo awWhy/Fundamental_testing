@@ -71,6 +71,7 @@ export interface playerType {
     upgrades: number[][]
     researches: number[][]
     researchesExtra: number[][]
+    researchesAuto: number[]
     ASR: number[]
     elements: number[]
     strangeness: number[][]
@@ -124,6 +125,7 @@ export interface globalType {
     }
     trueActive: number
     lastSave: number
+    paused: boolean
     footer: boolean
     mobileDevice: boolean
     screenReader: boolean
@@ -236,7 +238,17 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
+    researchesAutoInfo: {
+        name: string[]
+        effectText: Array<() => string>
+        cost: number[]
+        costRange: number[][]
+        max: number[]
+        autoStage: number[][]
+    }
     ASRInfo: {
+        name: string
+        //effectText: (stageIndex: number) => string
         cost: number[]
         costRange: number[][]
         max: number[]
@@ -255,7 +267,7 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
-    lastUpgrade: Array<[number, 'upgrades' | 'researches' | 'researchesExtra' | 'ASR']>
+    lastUpgrade: Array<[number, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
     lastElement: number
     lastStrangeness: [number, number]
     milestonesInfo: Array<{

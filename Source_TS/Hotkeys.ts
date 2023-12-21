@@ -13,7 +13,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
         if (activeType === 'text' || activeType === 'number') { return; }
         document.body.classList.remove('outlineOnFocus');
     }
-    if (check.ctrlKey || check.altKey) { return; }
+    if (global.paused || check.ctrlKey || check.altKey) { return; }
     const { key, code } = check;
 
     const numberKey = Number(code.slice(-1));
@@ -38,9 +38,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
                 toggleSwap(0, 'buildings', true);
             }
         } else {
-            if (stringKey === 'o') {
-                toggleSwap(0, 'normal', true);
-            } else if (stringKey === 'w') {
+            if (stringKey === 'w') {
                 check.preventDefault();
                 void timeWarp();
             } else if (stringKey === 's') {
