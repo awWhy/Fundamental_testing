@@ -16,16 +16,20 @@
         </aside>
         <aside id="versionInfo" style="display: none;"></aside>
         <div id="blocker" style="display: none;">
-            <div id="alertPopUp" role="alertdialog">
-                <h3 id="alertText" aria-live="assertive">Welcome back</h3>
+            <div id="alertMain" role="alertdialog">
+                <p id="alertText" aria-live="assertive">Welcome back</p>
                 <div>
-                    <input type="text" id="inputArea" tabindex="1" autocomplete="off" style="display: none;">
-                    <button type="button" id="confirmBtn" tabindex="1">Confirm</button>
-                    <button type="button" id="cancelBtn" tabindex="1" style="display: none;">Cancel</button>
+                    <input type="text" id="alertInput" tabindex="1" autocomplete="off" style="display: none;">
+                    <button type="button" id="alertConfirm" tabindex="1">Confirm</button>
+                    <button type="button" id="alertCancel" tabindex="1" style="display: none;">Cancel</button>
                 </div>
             </div>
+            <aside id="warpMain" style="display: none;" aria-label="Warp progress" role="progressbar">
+                <p>Calculating warp, remains <span id="warpRemains">0 seconds</span> to calculate (<span id="warpPercentage">100</span>% done)<br aria-hidden="true">(Game is paused)</p>
+            </aside>
         </div>
         <div id="notifications" aria-live="polite"></div>
+        <button type="button" id="toggleNormal0" class="toggleNormal reader" display="none">ON</button> <!-- Remove -->
         <main id="body" style="display: none;">
             <div id="stageTab">
                 <section id="stageSubtabStructures" class="insideTab" aria-label="Structures">
@@ -179,7 +183,6 @@
                     </div>
                     <div id="timeInfo">
                         <p class="blueText">Stage time: <span id="stageTime" class="cyanText">1 seconds</span><span id="stageTimeReal"> (Real: <span id="stageTimeRealStat" class="cyanText">0 seconds</span>)</span></p>
-                        <p id="offlineBoost" class="blueText">Consuming <span id="offlineBoostWaste" class="cyanText">9.00</span> from Offline storage to add <span id="offlineBoostEffect" class="cyanText">+1.00</span> to passed time</p>
                         <p id="offlineWarning" class="orangeText">Offline storage is full</p>
                     </div>
                     <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpfull stuff</p>
@@ -309,6 +312,14 @@
                                 <div id="ASR">
                                     <input type="image" src="Used_art/Auto.png" alt="Gears" draggable="false" id="ASRImage" class="stageBorderImage interactiveImage" aria-labelledby="upgradeText upgradeCost upgradeEffect">
                                     <p class="whiteText stageAllborderImage"><span id="ASRLevel" class="redText">0</span>/<span id="ASRMax" class="greenText">3</span></p>
+                                </div>
+                                <div id="researchAuto1">
+                                    <input type="image" src="Used_art/ResearchAuto1.png" alt="Upgrades" draggable="false" id="researchAuto1Image" class="interactiveImage" aria-labelledby="upgradeText upgradeCost upgradeEffect">
+                                    <p class="whiteText stage3borderImage"><span id="researchAuto1Level" class="redText">0</span>/<span id="researchAuto1Max" class="greenText">3</span></p>
+                                </div>
+                                <div id="researchAuto2">
+                                    <input type="image" src="Used_art/ResearchAuto2.png" alt="Toggles" draggable="false" id="researchAuto2Image" class="interactiveImage" aria-labelledby="upgradeText upgradeCost upgradeEffect">
+                                    <p class="whiteText stage5borderImage"><span id="researchAuto2Level" class="redText">0</span>/<span id="researchAuto2Max" class="greenText">1</span></p>
                                 </div>
                             </div>
                         </section>
@@ -722,7 +733,7 @@
                     </aside>
                     <article class="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
-                        <p id="exportSpecial" class="whiteText center">Gain <span id="exportGain" class="greenText">0</span> <span id="exportType">Strange quarks</span> by exporting<br aria-hidden="true">(<span id="exportSecond" class="greenText">0</span> per second)</p>
+                        <p id="exportSpecial" class="whiteText center">Gain <span id="exportGain" class="greenText">0</span> <span id="exportType">Strange quarks</span> by exporting<br aria-hidden="true">(<span id="exportSecond" class="greenText">0 per second</span>)</p>
                         <div>
                             <div>
                                 <button type="button" id="save">Save</button>
@@ -764,7 +775,6 @@
                                         <p class="mainText">Escape - <span class="whiteText">cancel close Alert</span></p>
                                         <div class="hotkeysGrid">
                                             <p class="darkvioletText">W - <span class="whiteText">Warp</span></p>
-                                            <p id="offlineHotkey" class="blueText">O - <span class="whiteText">Toggle Offline</span></p>
                                             <p id="stageHotkey" class="stageText stage2Unlock">S - <span class="whiteText">Stage reset</span></p>
                                             <p id="dischargeHotkey" class="orangeText stage1Include">D - <span class="whiteText">Discharge</span></p>
                                             <p id="vaporizationHotkey" class="grayText stage2Include">V - <span class="whiteText">Vaporization</span></p>
@@ -813,8 +823,7 @@
                                 <button type="button" id="toggleAuto7" class="toggleAuto">Auto OFF</button>
                             </div>
                             <div>
-                                <label for="toggleNormal0" class="whiteText">Consume Offline storage</label>
-                                <button type="button" id="toggleNormal0" class="toggleNormal">ON</button>
+                                <label for="offlineWarp" class="whiteText">Consume Offline storage</label>
                                 <button type="button" id="offlineWarp" class="hollowButton">Warp</button>
                             </div>
                         </section>
