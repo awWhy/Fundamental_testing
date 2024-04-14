@@ -2,43 +2,53 @@ import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
 import { buyBuilding, collapseAsyncReset, dischargeAsyncReset, rankAsyncReset, stageAsyncReset, switchStage, toggleSwap, vaporizationAsyncReset } from './Stage';
-import { timeWarp } from './Main';
+import { buyAll, timeWarp } from './Main';
+import { globalSave } from './Special';
 
 export const detectHotkey = (check: KeyboardEvent) => {
     if (check.code === 'Tab') {
         document.body.classList.add('outlineOnFocus');
         return;
     } else {
-        const activeType = (document.activeElement as HTMLInputElement).type;
+        const activeType = (document.activeElement as HTMLInputElement)?.type;
         if (activeType === 'text' || activeType === 'number') { return; }
         document.body.classList.remove('outlineOnFocus');
     }
-    if (global.paused || check.ctrlKey || check.altKey) { return; }
+    if (global.paused) { return; }
     const { key, code } = check;
+    let { shiftKey } = check;
+
+    if (shiftKey) { global.hotkeys.shift = true; } //Can be undefined on Safari
+    if (check.ctrlKey) {
+        global.hotkeys.ctrl = true;
+        return;
+    }
+    if (check.altKey) { return; }
 
     const numberKey = Number(code.slice(-1));
     if (!isNaN(numberKey)) {
-        let isShift = check.shiftKey;
         if (isNaN(Number(key))) {
             if (code === '' || code[0] === 'F') { return; }
-            if (!isShift) { //Numpad
-                isShift = true;
+            if (!shiftKey) { //Numpad
+                shiftKey = true;
                 check.preventDefault();
             }
         }
 
-        if (isShift) {
+        if (shiftKey) {
             if (check.repeat) { return; }
             toggleSwap(numberKey, 'buildings', true);
         } else { buyBuilding(numberKey); }
     } else if (key.length === 1) {
-        const stringKey = (player.toggles.normal[1] ? code.replace('Key', '') : key).toLowerCase();
-        if (check.shiftKey) {
+        const stringKey = (globalSave.toggles[0] ? key : code.replace('Key', '')).toLowerCase();
+        if (shiftKey) {
             if (stringKey === 'a') {
                 toggleSwap(0, 'buildings', true);
             }
         } else {
-            if (stringKey === 'w') {
+            if (stringKey === 'm') {
+                buyAll();
+            } else if (stringKey === 'w') {
                 check.preventDefault();
                 void timeWarp();
             } else if (stringKey === 's') {
@@ -55,7 +65,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
         }
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
         if (check.repeat) { return; }
-        if (check.shiftKey) {
+        if (shiftKey) {
             const activeAll = global.stageInfo.activeAll;
             if (activeAll.length === 1) { return; }
             let index = activeAll.indexOf(player.stage.active);
@@ -92,9 +102,10 @@ export const detectHotkey = (check: KeyboardEvent) => {
             }
         }
     } else if (key === 'ArrowDown' || key === 'ArrowUp') {
-        if (check.shiftKey || check.repeat || !Object.hasOwn(global.subtab, `${global.tab}Current`)) { return; }
+        const subtab = global.subtab[`${global.tab}Current` as keyof unknown] as string | undefined;
+        if (shiftKey || check.repeat || subtab === undefined) { return; }
         const subtabs = global.tabList[`${global.tab as 'stage'}Subtabs`];
-        let index = subtabs.indexOf(global.subtab[`${global.tab as 'stage'}Current`]);
+        let index = subtabs.indexOf(subtab);
 
         if (key === 'ArrowDown') {
             do {
