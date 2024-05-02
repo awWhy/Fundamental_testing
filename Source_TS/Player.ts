@@ -1357,7 +1357,7 @@ export const updatePlayer = (load: playerType): string => {
 
     const oldVersion = load.version;
     if (oldVersion !== playerStart.version) {
-        if (load.version === '0.0.0') {
+        /*if (load.version === '0.0.0') {
             load.version = 'v0.0.1';
             load.researchesExtra = []; //Required for v0.0.9
         }
@@ -1485,7 +1485,7 @@ export const updatePlayer = (load: playerType): string => {
             delete load.toggles['normal' as keyof unknown];
             delete load.toggles.shop['howMany' as keyof unknown];
 
-            /* Can be removed eventually */
+            /* Can be removed eventually * /
             load.researchesAuto[1] = 0;
             load.strangeness[1].splice(1, 0, load.strangeness[1].splice(5, 1)[0]);
             load.strangeness[1].splice(7, 1);
@@ -1501,10 +1501,10 @@ export const updatePlayer = (load: playerType): string => {
             load.strangeness[5].splice(6, 1);
             load.fileName = load.fileName.replace('[date]', '[dateD.M.Y]');
             load.fileName = load.fileName.replace('[time]', '[timeH-M-S]');
-        }
+        }*/
 
         if (load.version !== playerStart.version) {
-            throw new ReferenceError('Save file version is higher than game version');
+            throw new ReferenceError('Because update isn\'t finished only save files created in this version are allowed');
         }
     }
 
@@ -1665,7 +1665,7 @@ export const buildVersionInfo = () => {
 
     getId('versionInfo').innerHTML = `<div>
         <div id="versionText">
-            <label>v0.2.0</label><p>- Will be added later</p>
+            <label>v0.2.0</label><p>- <a href="https://docs.google.com/document/d/1Kwy-NhKUx3cnfv04I5wwbr-WKyg3yZAZ4t-GA2AAm0k/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Link</a></p>
             <label>v0.1.9</label><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>
             <label>v0.1.8</label><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Added copy to clipboard, load from string save file options</p>
             <label>v0.1.7</label><p>- New content (Void)\n- Further balance changes</p>
