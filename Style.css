@@ -65,9 +65,8 @@ body { /* Default color variables */
     --stage-button-border: darkcyan;
     --stage-image-borderColor: #008b8b;
     --image-border: url("Used_art/Stage1 border.png");
-}
 
-body {
+    /* Other */
     color: var(--main-text);
     background-color: var(--background-color);
     overscroll-behavior: none;
@@ -528,10 +527,8 @@ input:-webkit-autofill { /* Chrome related pain */
     display: none;
     text-align: center;
     position: absolute;
-    /* top: 100%; */
     right: 50%;
     transform: translateX(50%);
-    /* Fix going off screen later */
     background-color: var(--window-color);
     border: 2px solid var(--window-border);
     border-radius: 8px;
@@ -539,6 +536,7 @@ input:-webkit-autofill { /* Chrome related pain */
     max-width: min(60vw, 26em);
     padding: 0.3em 0.8em 0.5em;
     margin-top: 0.38em;
+    /* No idea how to prevent it from going off screen */
 }
 
 .labelPopUp:focus-within > label { display: block; }
