@@ -160,7 +160,7 @@ export const calculateEffects = {
         let mass = player.collapse.mass;
         if (post) {
             minValue = 0.5;
-            if (player.strangeness[4][4] < 2) { blackHoles += global.collapseInfo.starCheck[2]; } //Just in case to prevent early reset
+            if (player.strangeness[4][4] < 2) { blackHoles += global.collapseInfo.starCheck[2]; } //To prevent early reset
             if (global.collapseInfo.newMass > mass) { mass = global.collapseInfo.newMass; }
         }
 
@@ -171,12 +171,12 @@ export const calculateEffects = {
     },
     S4Extra1: (): number => (10 + player.researches[4][1]) / 10,
     S5Upgrade0: (): number => {
-        let effect = 3 * (2 ** player.strangeness[5][3]);
+        let effect = 12 * (2 ** player.strangeness[5][3]);
         if (player.challenges.active === 0) { effect = (effect / 1536) + 2; }
         return effect;
     },
     S5Upgrade1: (): number => {
-        let effect = 2 * (3 ** player.strangeness[5][4]);
+        let effect = 4 * (3 ** player.strangeness[5][4]);
         if (player.challenges.active === 0) { effect = (effect / 39366) + 1; }
         return effect;
     },
@@ -387,13 +387,13 @@ export const assignBuildingInformation = () => {
         producing[5][3].setValue(prod3Number).power(buildings[5][3].true);
 
         const listForMult2 = [buildings[5][2].current, producing[5][3]];
-        let prod2Number = 1.5 * (3 ** researches[5][1]);
+        let prod2Number = 1.5 * (2 ** researches[5][1]);
         if (upgrades[5][1] === 1) { prod2Number *= calculateEffects.S5Upgrade1(); }
         producing[5][2].setValue(prod2Number).multiply(...listForMult2).max('1');
         if (inVoid) { producing[5][2].power(0.8); }
 
         const listForMult1 = [buildings[5][1].current, producing[5][3]];
-        let prod1Number = 4 ** researches[5][0];
+        let prod1Number = 3 ** researches[5][0];
         if (upgrades[5][0] === 1) { prod1Number *= calculateEffects.S5Upgrade0(); }
         //if (researchesExtra[2][4] >= 1) { prod1Number *= tension * stress; }
         producing[5][1].setValue(prod1Number).multiply(...listForMult1);
@@ -787,9 +787,6 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
         if (!free) { currency.minus(cost); }
 
         /* Special cases */
-        if (type === 'ASR') {
-            if (player.maxASR[upgrade] < level[upgrade]) { player.maxASR[upgrade] = level[upgrade]; }
-        }
         if (!auto && globalSave.SRSettings[0]) { getId('SRMain').textContent = `Research '${type === 'ASR' ? pointer.name : pointer.name[upgrade]}' level increased, it is now ${level[upgrade]} ${level[upgrade] >= pointer.max[upgrade] ? 'maxed' : ''}`; }
     } else if (type === 'elements') {
         let level = player.elements[upgrade];
@@ -874,10 +871,8 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
         /* Special cases */
         if (stageIndex === 1) {
             if (upgrade === 5) {
-                if (player.ASR[1] < player.maxASR[1]) {
-                    player.ASR[1] = player.maxASR[1];
-                    visualUpdateResearches(0, 1, 'ASR');
-                }
+                player.ASR[1] = global.ASRInfo.max[1];
+                visualUpdateResearches(0, 1, 'ASR');
             } else if (upgrade === 7) {
                 calculateTrueEnergy();
             } else if (upgrade === 9) {
@@ -890,10 +885,8 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 calculateMaxLevel(4, 2, 'researches', true);
                 calculateMaxLevel(5, 2, 'researches', true);
             } else if (upgrade === 5) {
-                if (player.ASR[2] < player.maxASR[2]) {
-                    player.ASR[2] = player.maxASR[2];
-                    visualUpdateResearches(0, 2, 'ASR');
-                }
+                player.ASR[2] = global.ASRInfo.max[2];
+                visualUpdateResearches(0, 2, 'ASR');
             } else if (upgrade === 8) {
                 calculateMaxLevel(2, 2, 'researches', true);
                 calculateMaxLevel(3, 2, 'researches', true);
@@ -903,10 +896,8 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 calculateMaxLevel(0, 3, 'researchesExtra', true);
                 calculateMaxLevel(1, 3, 'researchesExtra', true);
             } else if (upgrade === 5) {
-                if (player.ASR[3] < player.maxASR[3]) {
-                    player.ASR[3] = player.maxASR[3];
-                    visualUpdateResearches(0, 3, 'ASR');
-                }
+                player.ASR[3] = global.ASRInfo.max[3];
+                visualUpdateResearches(0, 3, 'ASR');
             } else if (upgrade === 6) {
                 if (player.researchesAuto[0] < player.strangeness[3][6]) {
                     player.researchesAuto[0] = player.strangeness[3][6];
@@ -918,10 +909,8 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
             }*/
         } else if (stageIndex === 4) {
             if (upgrade === 5) {
-                if (player.ASR[4] < player.maxASR[4]) {
-                    player.ASR[4] = player.maxASR[4];
-                    visualUpdateResearches(0, 4, 'ASR');
-                }
+                player.ASR[4] = global.ASRInfo.max[4];
+                visualUpdateResearches(0, 4, 'ASR');
             } else if (upgrade === 6) {
                 for (let i = 1; i < player.elements.length; i++) {
                     i = player.elements.indexOf(0.5, i);
@@ -949,10 +938,8 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
             } else if (upgrade === 5) {
                 if (player.inflation.vacuum) { stageUpdate('soft'); }
             } else if (upgrade === 6) {
-                if (player.ASR[5] < player.maxASR[5]) {
-                    player.ASR[5] = player.maxASR[5];
-                    visualUpdateResearches(0, 5, 'ASR');
-                }
+                player.ASR[5] = 2;
+                visualUpdateResearches(0, 5, 'ASR');
             } else if (upgrade === 8) {
                 const strange = player.strange;
                 const level = player.strangeness[5][8];
@@ -988,7 +975,7 @@ export const calculateResearchCost = (research: number, stageIndex: number, type
     }
 };
 
-export const calculateMaxLevel = (research: number, stageIndex: number, type: 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'strangeness', addAuto = false) => {
+export const calculateMaxLevel = (research: number, stageIndex: number, type: 'researches' | 'researchesExtra' | 'ASR' | 'strangeness', addAuto = false) => {
     let max = null;
     if (type === 'ASR') {
         if (stageIndex === 1) {
@@ -1091,12 +1078,12 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
         if (max < 0) { max = 0; }
         if (type === 'ASR') {
             global.ASRInfo.max[stageIndex] = max;
-        } else if (type !== 'researchesAuto') {
+        } else {
             global[`${type}Info`][stageIndex].max[research] = max;
         }
     }
 
-    if (type !== 'researchesAuto' && type !== 'ASR') { calculateResearchCost(research, stageIndex, type); }
+    if (type !== 'ASR') { calculateResearchCost(research, stageIndex, type); }
     visualUpdateResearches(research, stageIndex, type);
     if (addAuto && (type === 'researches' || type === 'researchesExtra')) { autoResearchesSet(type, [stageIndex, research]); }
 };
@@ -1339,7 +1326,7 @@ export const stageResetCheck = (stageIndex: number, auto = false): boolean => {
     }
 
     if (auto && allowed) {
-        if (player.strangeness[5][2] < 1 || (stageIndex >= 4 && global.strangeInfo.gain(stageIndex) / 1e12 ** player.strangeness[5][8] < player.stage.input)) { return false; }
+        if (player.strangeness[5][2] < 1 || (stageIndex >= 4 && (player.stage.input <= 0 || player.stage.input > global.strangeInfo.gain(stageIndex) / 1e12 ** player.strangeness[5][8]))) { return false; }
         stageResetReward(stageIndex);
     }
     return allowed;

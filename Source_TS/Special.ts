@@ -182,7 +182,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Cloud%20Researches.png', 'stage2borderImage'],
         ['Rank%20Researches.png', 'stage6borderImage'],
         ['Collapse%20Researches.png', 'stage6borderImage'],
-        ['Galaxy%20Researches.png', 'stage7borderImage']
+        ['Missing.png'/*'Galaxy%20Researches.png'*/, 'stage7borderImage']
     ],
     researchExtraHTML: [
         [],

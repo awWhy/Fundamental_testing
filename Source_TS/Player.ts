@@ -18,7 +18,7 @@ export const player: playerType = { //Only for information that need to be saved
         best: 0,
         time: 0,
         peak: 0,
-        input: 20
+        input: 0
     },
     discharge: { //Stage 1
         energy: 0,
@@ -249,7 +249,6 @@ export const player: playerType = { //Only for information that need to be saved
     researchesExtra: [],
     researchesAuto: [],
     ASR: [], //Auto Structures Research
-    maxASR: [], //Highest reached
     elements: [],
     strangeness: [],
     milestones: [],
@@ -274,7 +273,7 @@ export const player: playerType = { //Only for information that need to be saved
         }
     },
     history: {
-        stage: {
+        stage: { //[Quarks, time, reward type]
             best: [0, 1, 0],
             list: [],
             input: [5, 10]
@@ -598,7 +597,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Cost scaling will be -${format(0.03)} smaller with each level.`,
                 () => `Self-made Structures will boost each other by additional +${format(0.01)}.`,
                 () => `Molecules will produce themselves ${format(calculateEffects.S1Research2())} times quicker.`,
-                () => `Next goal for Discharge bonus will scale by -2 less.\n(Creating this Research will make next Discarge goal to be ${format((getDischargeScale() - 2) ** player.discharge.current)} Energy)`,
+                () => `Next goal for Discharge bonus will scale by -2 less.\n(Creating this Research will make next Discharge goal to be ${format((getDischargeScale() - 2) ** player.discharge.current)} Energy)`,
                 () => { //[4]
                     const newBase = calculateEffects.dischargeBase(player.researches[1][4] + 1);
                     return `Discharge production boost from reached goals will now be +${format(newBase - global.dischargeInfo.base)}.\n(Boost increase: ${format((newBase / global.dischargeInfo.base) ** global.dischargeInfo.total, { padding: true })})`;
@@ -833,10 +832,10 @@ export const global: globalType = { //For information that doesn't need to be sa
         costRange: [ //Random scaling
             [],
             [4000, 12000, 20000, 36000, 60000],
-            [1e10, 1e14, 1e18, 1e23, 1e28, 1e32],
+            [1e10, 1e14, 1e18, 1e23, 1e28, 1e30],
             [1e-7, 1e10, 5e29, 2e30, 2e36],
-            [1e6, 1e17, 1e28, 1e39, 1e56],
-            [1e62, 1e66, 1e100]
+            [1e6, 1e17, 1e28, 1e39, 1e54],
+            [1e58, 1e62, 1e100]
         ],
         max: [0, 3, 5, 4, 4, 2]
     },
@@ -934,14 +933,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Discharge goals requirement will scale slower. (-${format(0.5)})`,
                 () => `Obtain +${format(0.5)} bonus Discharge goals.`,
                 () => 'Automatically Discharge upon reaching next goal or spending Energy. (Need to be enabled in Settings)',
-                () => `Make Microworld 'Auto Structures' Research immune to Stage reset.\n(And restore level to highest reached, which is ${player.maxASR[1]})`,
+                () => 'Make auto for all Microworld Structures permanent.',
                 () => `Unspent Strange quarks will boost Microworld by improving its Structures.\n(Current effect: ${format(global.strangeInfo.stageBoost[1], { padding: true })})`,
                 () => 'Increase Energy gain from creating Preons by +2.',
                 () => 'No Mass will be lost when creating Preons, only works when Accretion Stage is unlocked.',
                 () => 'No Energy will be lost when creating any Upgrades or Researches, only works when Interstellar Stage is unlocked.\nAlso will increase max levels for Reset automatization Strangeness.'
             ],
             cost: [],
-            startCost: [1, 2, 1, 4, 20, 2, 40, 2, 16, 4000],
+            startCost: [1, 2, 1, 4, 12, 2, 40, 2, 16, 4000],
             scaling: [2.46, 4, 6, 8, 1, 1, 1, 6, 1, 1],
             max: [6, 2, 4, 2, 1, 1, 1, 2, 1, 1],
             maxActive: 7
@@ -969,7 +968,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 },
                 () => 'Decrease required Drops quantity for a Cloud by 2 times.',
                 () => `Automatically Vaporize when reached enough boost from new Clouds. (Need to be enabled in Settings)${global.strangenessInfo[2].max[4] > 1 ? '\nSecond level - Automatically gain 20% of Clouds per second. (Not affected by global speed)' : ''}`,
-                () => `Make Submerged 'Auto Structures' Research immune to Stage reset.\n(And restore level to highest reached, which is ${player.maxASR[2]})`,
+                () => 'Make auto for all Submerged Structures permanent.',
                 () => `Unspent Strange quarks will boost Submerged by improving Puddles.\n(Current effect: ${format(global.strangeInfo.stageBoost[2], { padding: true })})`,
                 () => `Increase Stage reset reward based on current Cloud amount.\n(Current effect: ${format(calculateEffects.S2Strange7(), { padding: true })})`,
                 () => { //[8]
@@ -981,7 +980,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 }
             ],
             cost: [],
-            startCost: [1, 1, 2, 4, 20, 4, 40, 800, 6000],
+            startCost: [1, 1, 2, 4, 12, 4, 40, 800, 6000],
             scaling: [2.46, 2, 3, 6, 800, 1, 1, 1, 2],
             max: [6, 8, 3, 2, 1, 1, 1, 1, 3],
             maxActive: 7
@@ -1010,14 +1009,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 },
                 () => `Satellites will now be able to improve all${player.inflation.vacuum ? ' lower tier' : ''} Accretion Structures with reduced strength (^${format(player.inflation.vacuum ? 0.2 : 0.3)}).`,
                 () => `Automatically increase Rank when possible. (Need to be enabled in Settings)${global.strangenessInfo[3].max[4] > 1 ? '\nSecond level - Accretion auto Structures will always keep enough Mass for highest Solar mass gain on Collapse (if Cosmic dust is hardcapped).' : ''}`,
-                () => `Make Accretion 'Auto Structures' Research immune to Stage reset.\n(And restore level to highest reached, which is ${player.maxASR[3]})`,
+                () => 'Make auto for all Accretion Structures permanent.',
                 () => `Always automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.strangeness[3][6], 2)]} from any Stage. (Need to be enabled in Settings)`,
                 () => `Unspent Strange quarks will boost Accretion by making its Structures cheaper.\n(Current effect: ${format(global.strangeInfo.stageBoost[3], { padding: true })})`,
                 () => `Reduce amount of time required to reach Solar mass hardcap by shifting Cosmic dust and Solar mass hardcaps.\nEach level allows for ${format(1.4)} times bigger shift. (Automatic)`
                 //() => 'Unlock a new Accretion Rank to achieve. (Not yet in game)'
             ],
             cost: [],
-            startCost: [1, 2, 4, 16, 20, 4, 4, 40, 2400],
+            startCost: [1, 2, 4, 16, 12, 4, 4, 40, 2400],
             scaling: [2, 3.4, 2, 1, 500, 1, 1.74, 1, 2],
             max: [8, 4, 3, 1, 1, 1, 3, 1, 4],
             maxActive: 8
@@ -1046,14 +1045,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 },
                 () => '10% of Brown dwarfs will turn into Red giants.',
                 () => `Automatically Collapse once reached enough boost. (Need to be enabled in Settings)${global.strangenessInfo[4].max[4] > 1 ? '\nSecond level - Star remnants will now be gained automatically.' : ''}`,
-                () => `Make Interstellar 'Auto Structures' Research immune to Stage reset.\n(And restore level to highest reached, which is ${player.maxASR[4]})`,
+                () => 'Make auto for all Interstellar Structures permanent.',
                 () => `Elements will not require Collapse for activation.\nSecond level will unlock auto creation of Elements. (${global.strangenessInfo[4].max[6] > 1 ? 'Need to be enabled in settings' : 'Not yet unlocked for Interstellar space'})`,
                 () => `Unspent Strange quarks will boost Interstellar by improving all Stars.\n(Current effect: ${format(global.strangeInfo.stageBoost[4], { padding: true })})`,
                 () => "Improve Neutron Stars strength and improve scaling of '[12] Magnesium' effect."
                 //() => `Unlock yet another new Upgrade.\n(Current unlocks: ${player.strangeness[4][9] >= 1 ? "'Nucleosynthesis' (Upgrade)" : 'none'})`
             ],
             cost: [],
-            startCost: [1, 2, 4, 4, 20, 6, 6, 40, 1600],
+            startCost: [1, 2, 4, 4, 12, 6, 6, 40, 1600],
             scaling: [2, 3.4, 3, 4, 300, 1, 2, 1, 1.4],
             max: [8, 4, 3, 2, 1, 1, 1, 1, 8],
             maxActive: 8
@@ -1075,13 +1074,13 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Automatically trigger Stage reset. (Need to be enabled in Settings)',
                 () => "Bigger Nebulas, more matter for Accretion. (Flavor text)\n'Jeans instability' will be 2 times stronger.",
                 () => "'Super star cluster' will be even bigger. Increase effect by 3.",
-                () => player.inflation.vacuum ? 'Unlock Intergalactic Stage.' : 'Intergalactic Stage will no longer be affected by Collapse reset.\nAlso unlock first Intergalactic Milestone.',
-                () => `Make Intergalactic 'Auto Structures' Research immune to Stage reset.\n(And restore level to highest reached, which is ${player.maxASR[5]})`,
+                () => player.inflation.vacuum ? 'Unlock Intergalactic Stage.' : 'Intergalactic Stage will no longer be affected by Collapse reset.\nAlso unlock first Intergalactic Milestone which as a reward will unlock better auto for Elements and more.',
+                () => `Make auto for first two Intergalactic Structures permanent${player.stage.true >= 6 || player.buildings[5][3].highest.moreThan('0') ? ' and also prevent rest from reseting' : ''}.`,
                 () => `Unspent Strange quarks will boost Intergalactic by increasing Solar mass gain.\n(Current effect: ${format(global.strangeInfo.stageBoost[5], { padding: true })})`,
                 () => `Unlock a new Strange Structure that will replace current Stage reset reward, also convert all ${global.strangeInfo.name[Math.min(player.strangeness[5][8], global.strangenessInfo[5].max[10] - 1)]} and then produce them, but hardcaps quickly.\n(Hardcap delayed by quantity of a higher tier Structure, production speed not affected by global speed)`
             ],
             cost: [],
-            startCost: [4, 16, 2400, 16, 20, 80, 80, 200, 800],
+            startCost: [4, 80, 2400, 40, 60, 40, 60, 400, 800],
             scaling: [1, 8, 1, 2, 2, 1, 1, 1, 1],
             max: [3, 1, 1, 8, 8, 1, 1, 1, 1],
             maxActive: 8
@@ -1185,7 +1184,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             need: [new Overlimit('1.5e3'), new Overlimit('2')],
             reward: [1, 1],
             scalingOld: [
-                [1600, 1650, 1700, 1750, 1800, 1900, 2000, 2200],
+                [1500, 1550, 1600, 1650, 1700, 1750, 1850, 2000],
                 [2, 4, 6, 8, 10, 13, 16, 20]
             ]
         }
@@ -1385,7 +1384,6 @@ export const updatePlayer = (load: playerType): string => {
             load.strange = deepClone(playerStart.strange);
             load.strangeness = deepClone(playerStart.strangeness);
             load.vaporization.input = 3;
-            load.stage.input = 20;
         }
         if (load.version === 'v0.0.7' || load.version === 'v0.0.8') {
             load.version = 'v0.0.9';
@@ -1477,7 +1475,7 @@ export const updatePlayer = (load: playerType): string => {
         if (load.version === 'v0.1.9') {
             load.version = 'v0.2.0';
             load.stage.peak = 0;
-            load.maxASR = cloneArray(load.ASR);
+            load.stage.input = 0;
             load.events = cloneArray(playerStart.events);
             delete load['event' as keyof unknown];
             delete load['separator' as keyof unknown];
@@ -1507,6 +1505,7 @@ export const updatePlayer = (load: playerType): string => {
             throw new ReferenceError('Because update isn\'t finished only save files created in this version are allowed');
         }
     }
+    delete load['maxASR' as keyof unknown]; //Remove when version is out to main website
 
     for (let s = 1; s <= 5; s++) {
         for (let i = load.buildings[s].length; i < playerStart.buildings[s].length; i++) {
@@ -1528,7 +1527,6 @@ export const updatePlayer = (load: playerType): string => {
         }
         if (load.ASR[s] === undefined) {
             load.ASR[s] = 0;
-            load.maxASR[s] = 0;
         }
 
         for (let i = load.strangeness[s].length; i < playerStart.strangeness[s].length; i++) {
@@ -1635,7 +1633,7 @@ export const updatePlayer = (load: playerType): string => {
         calculateMaxLevel(0, s, 'ASR');
     }
     for (let i = 0; i < playerStart.researchesAuto.length; i++) {
-        calculateMaxLevel(i, 0, 'researchesAuto');
+        visualUpdateResearches(i, 0, 'researchesAuto');
     }
 
     assignBuildingInformation();

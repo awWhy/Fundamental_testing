@@ -314,7 +314,7 @@ export const numbersUpdate = () => {
             const stageGain = global.strangeInfo.gain(active) / 1e12 ** player.strangeness[5][8];
             getId('strangeGain').textContent = format(stageGain);
             getId('strangeRate').textContent = format(stageGain / player.time.stage, { type: 'income', padding: true });
-            getId('strangePeak').textContent = player.inflation.vacuum || active >= Math.min(stage.current, 4) ? format(stage.peak, { type: 'income', padding: true }) : 'disabled';
+            getId('strangePeak').textContent = format(stage.peak, { type: 'income', padding: true });
             getId('strange0Cur').textContent = format(player.strange[0].current);
             getId('strange1Cur').textContent = format(player.strange[1].current);
             if (global.lastStrangeness[0] >= 0) { getStrangenessDescription(global.lastStrangeness[0], global.lastStrangeness[1], 'strangeness'); }
@@ -871,15 +871,18 @@ export const getStrangenessDescription = (index: number, stageIndex: number, typ
         getId('strangenessCost').textContent = player.strangeness[stageIndex][index] >= pointer.max[index] ? 'Maxed.' : `${format(pointer.cost[index])} Strange quarks.`;
     } else {
         const pointer = global.milestonesInfo[stageIndex];
+        const multilineID = getId('milestonesMultiline');
+        const container = multilineID.parentElement as HTMLElement;
 
         getId('milestonesText').textContent = `${pointer.name[index]}. (${format(player.milestones[stageIndex][index])})`;
         if (player.inflation.vacuum) {
-            getId('milestonesMultiline').innerHTML = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
+            multilineID.innerHTML = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
             <p class="darkvioletText">Effect: <span class="greenText">${pointer.rewardText[index]()}</span></p>`;
         } else if (pointer.need[index].notEqual('0')) {
-            getId('milestonesMultiline').innerHTML = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
+            multilineID.innerHTML = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
             <p class="darkvioletText">Unlock: <span class="greenText">Main reward unlocked after ${pointer.scalingOld[index].length - player.milestones[stageIndex][index]} more completions.</span></p>`;
-        } else { getId('milestonesMultiline').innerHTML = `<p class="darkvioletText">Reward: <span class="greenText">${pointer.rewardText[index]()}</span></p>`; }
+        } else { multilineID.innerHTML = `<p class="darkvioletText">Reward: <span class="greenText">${pointer.rewardText[index]()}</span></p>`; }
+        container.style.minHeight = `${container.offsetHeight}px`;
     }
 };
 

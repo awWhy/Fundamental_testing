@@ -69,7 +69,6 @@ export interface playerType {
     researchesExtra: number[][]
     researchesAuto: number[]
     ASR: number[]
-    maxASR: number[]
     elements: number[]
     strangeness: number[][]
     milestones: number[][]
