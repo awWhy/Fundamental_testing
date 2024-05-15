@@ -120,7 +120,7 @@ export const timeUpdate = (timeWarp = 0) => { //Time based information
         } else if (s === 2) {
             vaporizationResetCheck(auto[2], trueSeconds);
         } else if (s === 1) {
-            if (auto[1]) { dischargeResetCheck(true); }
+            dischargeResetCheck(auto[1], true);
         }
 
         if (autoU[s].length !== 0) { autoUpgradesBuy(s); }
@@ -191,7 +191,14 @@ export const numbersUpdate = () => {
                 getId(`building${i}Prod`).textContent = format(buildingsInfo.producing[active][i], { padding: true });
                 trueCountID.textContent = `[${format(buildings[i as 1].true)}]`;
 
-                if (active === 4) {
+                if (active === 3) {
+                    if (i > 1 && player.upgrades[3][global.accretionInfo.unlockA[i - 2]] !== 1) {
+                        getId(`building${i}`).classList.remove('availableBuilding');
+                        getId(`building${i}Btn`).textContent = 'Unlocked with Upgrade';
+                        getId(`building${i}BuyX`).textContent = 'Locked';
+                        continue;
+                    }
+                } else if (active === 4) {
                     const unlock = global.collapseInfo.unlockB[i];
                     if (player.collapse.mass < unlock && player.buildings[5][3].true < 1) {
                         getId(`building${i}`).classList.remove('availableBuilding');
@@ -505,13 +512,14 @@ export const visualUpdate = () => {
                 } else { getId('stageInfo').style.display = player.upgrades[2][2] === 1 ? '' : 'none'; }
             } else if (active === 3) {
                 const upgrades = player.upgrades[3];
+                const rank = player.accretion.rank;
 
-                getId('buildings').style.display = player.accretion.rank >= 1 ? '' : 'none';
-                getId('building2').style.display = upgrades[2] === 1 ? '' : 'none';
-                getId('building3').style.display = upgrades[4] === 1 ? '' : 'none';
-                getId('building4').style.display = upgrades[8] === 1 ? '' : 'none';
+                getId('buildings').style.display = rank >= 1 ? '' : 'none';
+                getId('building2').style.display = rank >= 3 || upgrades[2] === 1 ? '' : 'none';
+                getId('building3').style.display = rank >= 4 || upgrades[4] === 1 ? '' : 'none';
+                getId('building4').style.display = rank >= 5 || upgrades[8] === 1 ? '' : 'none';
                 if (vacuum) {
-                    getId('building5').style.display = upgrades[11] === 1 ? '' : 'none';
+                    getId('building5').style.display = rank >= 6 || upgrades[11] === 1 ? '' : 'none';
                     getId('submersionBoost').style.display = player.researchesExtra[1][2] >= 2 ? '' : 'none';
                 }
                 updateRankInfo();
@@ -528,7 +536,7 @@ export const visualUpdate = () => {
                 getId('star1Effect').style.display = buildings[2].trueTotal.moreThan('0') ? '' : 'none';
                 getId('star2Effect').style.display = buildings[3].trueTotal.moreThan('0') ? '' : 'none';
                 getId('star3Effect').style.display = buildings[4].trueTotal.moreThan('0') ? '' : 'none';
-                if (vacuum) { getId('building5').style.display = player.collapse.stars[2] > 0 || player.buildings[5][3].true >= 1 ? '' : 'none'; }
+                if (vacuum) { getId('building5').style.display = player.elements[26] >= 1 ? '' : 'none'; }
             } else if (active === 5) {
                 if (!vacuum) {
                     getId('buildings').style.display = player.milestones[2][0] >= 7 || player.milestones[3][0] >= 7 ? '' : 'none';
@@ -668,14 +676,13 @@ export const visualUpdate = () => {
                 getId('strange8Stage1').style.display = voidProgress[1] >= 1 ? '' : 'none';
                 getId('strange9Stage1').style.display = voidProgress[1] >= 2 ? '' : 'none';
                 getId('strange10Stage1').style.display = voidProgress[4] >= 2 ? '' : 'none';
-                getId('strange8Stage2').style.display = voidProgress[2] >= 1 ? '' : 'none';
-                getId('strange9Stage2').style.display = voidProgress[2] >= 2 ? '' : 'none';
-                //getId('strange?Stage2').style.display = voidProgress[1] >= 3 ? '' : 'none';
+                getId('strange8Stage2').style.display = voidProgress[1] >= 3 ? '' : 'none';
+                getId('strange9Stage2').style.display = voidProgress[2] >= 1 ? '' : 'none';
+                getId('strange10Stage2').style.display = voidProgress[2] >= 2 ? '' : 'none';
                 getId('strange9Stage3').style.display = voidProgress[4] >= 4 ? '' : 'none';
                 //getId('strange10Stage3').style.display = voidProgress[5] >= 2 ? '' : 'none';
                 getId('strange9Stage4').style.display = voidProgress[4] >= 3 ? '' : 'none';
                 //getId('strange10Stage4').style.display = voidProgress[5] >= 1 ? '' : 'none';
-                //getId('strange?Stage5').style.display = voidProgress[4] >= 1 ? '' : 'none';
                 getId('strange8Stage5').style.display = bound ? '' : 'none';
                 getId('strange9Stage5').style.display = voidProgress[3] >= 5 ? '' : 'none';
             } else {
@@ -764,7 +771,7 @@ export const visualUpdate = () => {
                 getId('cloudStats').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
             } else if (active === 3) {
                 if (vacuum) {
-                    getId('rankStat0').style.display = strangeness[2][7] >= 1 ? '' : 'none';
+                    getId('rankStat0').style.display = strangeness[2][9] >= 1 ? '' : 'none';
                 }
                 for (let i = 1; i < global.accretionInfo.rankImage.length; i++) { getId(`rankStat${i}`).style.display = player.accretion.rank >= i ? '' : 'none'; }
             } else if (active === 4) {
@@ -906,7 +913,7 @@ export const getChallengeDescription = (index: number) => {
         getId('voidRewardSubmerged').style.display = progress[1] >= 3 ? '' : 'none';
         getId('voidRewardAccretion').style.display = progress[1] >= 2 ? '' : 'none';
         getId('voidRewardInterstellar').style.display = progress[3] >= 5 ? '' : 'none';
-        getId('voidRewardIntergalactic').style.display = progress[3] >= 5 ? '' : 'none';
+        getId('voidRewardIntergalactic').style.display = progress[4] >= 4 ? '' : 'none';
     } else { getId('voidRewards').style.display = 'none'; }
 
     getId('challengeMultiline').innerHTML = text;
@@ -1254,7 +1261,6 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         global.lastElement = -1;
         global.lastStrangeness = [-1, -1];
         global.lastMilestone = [-1, -1];
-        global.lastChallenge = [-1, -1];
         global.debug.historyStage = -1;
         for (const text of ['strangeness', 'milestones']) {
             getId(`${text}Stage`).textContent = '';
@@ -1263,7 +1269,8 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         getId('strangenessEffect').textContent = 'Hover to see.';
         getId('strangenessCost').textContent = 'Strange quarks.';
         getId('milestonesMultiline').innerHTML = '<p class="orchidText">Requirement: <span class="greenText">Hover to see.</span></p><p class="darkvioletText">Unlock: <span class="greenText">Hover to see.</span></p>';
-        getChallengeDescription(player.inflation.vacuum && player.strangeness[5][0] >= 1 ? 0 : -1);
+        global.lastChallenge = [player.inflation.vacuum && player.strangeness[5][0] >= 1 ? 0 : -1, -1];
+        getChallengeDescription(global.lastChallenge[0]);
 
         global.trueActive = active;
         for (let i = 0; i < global.elementsInfo.startCost.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }

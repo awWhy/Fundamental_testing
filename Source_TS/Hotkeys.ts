@@ -18,11 +18,9 @@ export const detectHotkey = (check: KeyboardEvent) => {
     const { key, code } = check;
     let { shiftKey } = check;
 
-    if (shiftKey) { global.hotkeys.shift = true; } //Can be undefined on Safari
-    if (check.ctrlKey) {
-        global.hotkeys.ctrl = true;
-        return;
-    }
+    //Can be undefined on Safari
+    if (shiftKey) { global.hotkeys.shift = true; }
+    if (check.ctrlKey) { return void (global.hotkeys.ctrl = true); }
     if (check.altKey) { return; }
 
     const numberKey = Number(code.slice(-1));

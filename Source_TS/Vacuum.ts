@@ -31,6 +31,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         const upgrades1Cost = [40, 60, 120, 140, 200, 400, 2000, 4000, 16000, 84000];
         upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
         upgradesInfo[2].startCost[0] = 10;
+        upgradesInfo[2].startCost[7] = 1e30;
         //upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 9;
         //upgradesInfo[3].maxActive = 13;
@@ -59,30 +60,30 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         global.ASRInfo.costRange[1] = [4000, 12000, 20000, 36000, 60000];
         global.ASRInfo.costRange[3][3] = 2.45576045e31;
 
-        const strangeness1Cost = [1, 2, 1, 4, 12, 2, 40];
+        const strangeness1Cost = [1, 2, 1, 4, 12, 2, 24];
         const strangeness1Scaling = [2.46, 4, 6, 8, 1, 1, 1];
         strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
         strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
-        const strangeness2Cost = [1, 1, 2, 4, 12, 4, 40];
+        const strangeness2Cost = [1, 1, 2, 4, 12, 4, 24];
         const strangeness2Scaling = [2.46, 2, 3, 6, 800, 1, 1];
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
-        const strangeness3Cost = [1, 2, 4, 16, 12, 4, 4, 40];
+        const strangeness3Cost = [1, 2, 4, 16, 12, 4, 4, 24];
         const strangeness3Scaling = [2, 3.4, 2, 1, 500, 1, 1.74, 1];
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
-        const strangeness4Cost = [1, 2, 4, 4, 12, 6, 6, 40];
+        const strangeness4Cost = [1, 2, 4, 4, 12, 6, 6, 24];
         const strangeness4Scaling = [2, 3.4, 3, 4, 300, 1, 2, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-        const strangeness5Cost = [4, 80, 2400, 40, 60, 40, 60, 400];
-        const strangeness5Scaling = [1, 4, 1, 2, 2, 1, 1, 1];
+        const strangeness5Cost = [4, 24, 800, 24, 36, 36, 40, 120];
+        const strangeness5Scaling = [1, 10, 1, 2, 2, 1, 1, 1];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 10;
-        strangenessInfo[2].maxActive = 9;
-        strangenessInfo[3].maxActive = 9;
-        strangenessInfo[4].maxActive = 9;
+        strangenessInfo[2].maxActive = 10;
+        strangenessInfo[3].maxActive = 9; //10
+        strangenessInfo[4].maxActive = 9; //10
         strangenessInfo[5].maxActive = 9;
 
         getId('milestonesWelcome').innerHTML = 'Milestones, can only be done when inside the <span class="darkvioletText">Void</span>';
@@ -108,6 +109,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('strange8Stage3').style.display = '';
         getId('strange8Stage4').style.display = '';
         getId('strange6Stage5').style.display = '';
+        getId('collapseCapped').style.display = '';
         for (let s = 2; s <= 5; s++) {
             getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}${s}`).style.display = '';
             getId(`milestone1Stage${s}Div`).style.display = '';
@@ -139,6 +141,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         const upgrades1Cost = [0, 0, 9, 12, 36, 300, 800, 2000, 4000, 22000];
         upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
         upgradesInfo[2].startCost[0] = 1e4;
+        upgradesInfo[2].startCost[7] = 1e28;
         upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 8;
         upgradesInfo[3].maxActive = 13;
@@ -219,6 +222,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('submersionBoost').style.display = 'none';
         getId('mainCap').style.display = 'none';
         getId('researchAuto1').style.display = 'none';
+        getId('collapseCapped').style.display = 'none';
         for (let s = 1; s < strangenessInfo.length; s++) {
             for (let i = strangenessInfo[s].maxActive + 1; i <= strangenessInfo[s].startCost.length; i++) {
                 getId(`strange${i}Stage${s}`).style.display = 'none';

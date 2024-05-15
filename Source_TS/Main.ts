@@ -179,18 +179,6 @@ const saveConsole = async() => {
     }
 };
 
-const changeSaveFileName = () => {
-    const input = getId('saveFileNameInput') as HTMLInputElement;
-    const newValue = input.value.length === 0 ? playerStart.fileName : input.value.replaceAll(/[\\/:*?"<>|]/g, '_');
-
-    try {
-        btoa(newValue); //Test for any illegal characters
-        player.fileName = newValue;
-        input.value = newValue;
-    } catch (error) {
-        void Alert(`Save file name is not allowed\n${error}`);
-    }
-};
 const replaceSaveFileSpecials = (): string => {
     let realName = player.fileName;
 
@@ -764,13 +752,27 @@ try { //Start everything
     /* Settings tab */
     getId('vaporizationInput').addEventListener('change', () => {
         const input = getId('vaporizationInput') as HTMLInputElement;
-        player.vaporization.input = Math.max(Number(input.value), 0);
-        input.value = format(player.vaporization.input, { type: 'input' });
+        player.vaporization.input[0] = Math.max(Number(input.value), 0);
+        input.value = format(player.vaporization.input[0], { type: 'input' });
+    });
+    getId('vaporizationInputMax').addEventListener('change', () => {
+        const input = getId('vaporizationInputMax') as HTMLInputElement;
+        player.vaporization.input[1] = Math.max(Number(input.value), 0);
+        input.value = format(player.vaporization.input[1], { type: 'input' });
     });
     getId('collapseStarsInput').addEventListener('change', () => {
         const input = getId('collapseStarsInput') as HTMLInputElement;
-        player.collapse.input = Math.max(Number(input.value), 1);
-        input.value = format(player.collapse.input, { type: 'input' });
+        let value: string | number = input.value.replace(',', '.');
+        let hard = value.includes('!');
+        if (hard) { value = value.replace('!', ''); }
+        value = Math.max(Number(value), 1);
+        if (isNaN(value)) {
+            value = 2;
+            hard = false;
+        }
+        player.collapse.input[1] = hard;
+        player.collapse.input[0] = value;
+        input.value = `${format(value, { type: 'input' })}${hard ? '!' : ''}`;
     });
     getId('stageInput').addEventListener('change', () => {
         const input = getId('stageInput') as HTMLInputElement;
@@ -801,7 +803,19 @@ try { //Start everything
     getId('toggleAuto5').addEventListener('click', () => autoUpgradesSet('all'));
     getId('toggleAuto6').addEventListener('click', () => autoResearchesSet('researches', 'all'));
     getId('toggleAuto7').addEventListener('click', () => autoResearchesSet('researchesExtra', 'all'));
-    getId('saveFileNameInput').addEventListener('change', changeSaveFileName);
+    getId('saveFileNameInput').addEventListener('change', () => {
+        const input = getId('saveFileNameInput') as HTMLInputElement;
+        const testValue = input.value; //.replaceAll(/[\\/:*?"<>|]/g, '_');
+        if (testValue.length < 1) { return void (input.value = playerStart.fileName); }
+
+        try {
+            btoa(testValue); //Test for any illegal characters
+            player.fileName = testValue;
+            //input.value = testValue;
+        } catch (error) {
+            void Alert(`Save file name is not allowed\n${error}`);
+        }
+    });
     {
         const button = getId('saveFileHoverButton');
         const hoverFunc = () => (getId('saveFileNamePreview').textContent = replaceSaveFileSpecials());

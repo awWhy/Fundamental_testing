@@ -22,7 +22,7 @@ export interface playerType {
     vaporization: {
         clouds: Overlimit
         cloudsMax: Overlimit
-        input: number
+        input: [number, number]
     }
     accretion: {
         rank: number
@@ -32,7 +32,7 @@ export interface playerType {
         massMax: number
         stars: [number, number, number]
         show: number
-        input: number
+        input: [number, boolean]
     }
     inflation: {
         vacuum: boolean
@@ -150,6 +150,7 @@ export interface globalType {
         get: Overlimit
     }
     accretionInfo: {
+        unlockA: number[]
         rankU: number[]
         rankR: number[]
         rankE: number[]
@@ -274,7 +275,7 @@ export interface globalType {
         name: string[]
         description: string[]
         effectText: Array<() => string>
-        needText: string[][][]
+        needText: string[][][] //Change into Array<Array<Array<() => string | null>>>
         rewardText: string[][][]
         color: string[]
     }
