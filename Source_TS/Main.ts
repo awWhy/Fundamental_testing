@@ -115,7 +115,10 @@ const loadGame = (save: string) => {
         global.lastSave = handleOfflineTime();
         Notify(`This save is ${format(global.lastSave, { type: 'time', padding: false })} old. Save file version is ${versionCheck}`);
         stageUpdate('reload');
-    } catch (error) { void Alert(`Incorrect save file format\n${error}`); }
+    } catch (error) {
+        prepareVacuum(Boolean(player.inflation.vacuum)); //Fix vacuum state
+        void Alert(`Incorrect save file format\n${error}`);
+    }
     global.paused = false;
     changeIntervals();
 };
@@ -504,7 +507,8 @@ try { //Start everything
     };
     body.addEventListener('keyup', releaseHotkey);
     body.addEventListener('contextmenu', (event) => {
-        if (!globalSave.developerMode) { event.preventDefault(); }
+        const activeType = (document.activeElement as HTMLInputElement)?.type;
+        if (activeType !== 'text' && activeType !== 'number' && !globalSave.developerMode) { event.preventDefault(); }
     });
     if (PC) {
         body.addEventListener('mouseup', (event) => {

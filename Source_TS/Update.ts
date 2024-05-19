@@ -1059,7 +1059,7 @@ const updateHistory = (/*type: 'stage'*/) => {
 };
 
 export const format = (input: number | Overlimit, settings = {} as { digits?: number, type?: 'number' | 'input' | 'time' | 'income', padding?: boolean }): string => {
-    if (typeof input === 'object') { return input.format(settings as any); }
+    if (typeof input === 'object') { return input?.format(settings as any); }
     const type = settings.type ?? 'number';
 
     let extra;

@@ -983,7 +983,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Increase Stage reset reward based on current Cloud amount.\n(Current effect: ${format(calculateEffects.S2Strange9(), { padding: true })})`
             ],
             cost: [],
-            startCost: [1, 1, 2, 4, 12, 4, 24, 60, 800, 3600],
+            startCost: [1, 1, 2, 4, 12, 4, 24, 80, 800, 3600],
             scaling: [2.46, 2, 3, 6, 800, 1, 1, 3.4, 3, 1],
             max: [6, 8, 3, 2, 1, 1, 1, 4, 3, 1],
             maxActive: 7
@@ -1083,7 +1083,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Unlock a new Strange Structure that will replace current Stage reset reward, also convert all ${global.strangeInfo.name[Math.min(player.strangeness[5][8], global.strangenessInfo[5].max[10] - 1)]} and then produce them, but hardcaps quickly.\n(Hardcap delayed by quantity of a higher tier Structure, production speed not affected by global speed)`
             ],
             cost: [],
-            startCost: [4, 24, 800, 24, 36, 36, 40, 120, 800],
+            startCost: [4, 24, 360, 24, 36, 36, 40, 120, 800],
             scaling: [1, 10, 1, 2, 2, 1, 1, 1, 1],
             max: [3, 1, 1, 8, 8, 1, 1, 1, 1],
             maxActive: 8

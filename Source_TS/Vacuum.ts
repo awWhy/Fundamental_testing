@@ -76,7 +76,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         const strangeness4Scaling = [2, 3.4, 3, 4, 300, 1, 2, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-        const strangeness5Cost = [4, 24, 800, 24, 36, 36, 40, 120];
+        const strangeness5Cost = [4, 24, 360, 24, 36, 36, 40, 120];
         const strangeness5Scaling = [1, 10, 1, 2, 2, 1, 1, 1];
         strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
