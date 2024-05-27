@@ -972,6 +972,8 @@ input:-webkit-autofill { /* Chrome related pain */
     column-gap: 0.2em;
 }
 
+#exportReward { margin: -0.2em 0 0.1em; }
+
 #save, #load {
     width: 5.65em;
     height: 2em;
@@ -1122,7 +1124,7 @@ li .hollowButton {
     list-style-type: none;
     overflow-y: overlay;
     margin: 0.5em 0;
-    padding: 0;
+    padding: 0 1em;
     height: 7.5em;
     max-height: 70vh;
     resize: vertical;

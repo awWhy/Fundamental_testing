@@ -389,8 +389,8 @@
                 <section id="strangenessSubtabMatter" class="insideTab" aria-label="Strangeness">
                     <div class="fullWidth center greenText">
                         <h2 class="biggerWord">Strange matter</h2>
-                        <p>Stage reset reward: <span id="strangeGain" class="whiteText">1</span> <span id="strangeType" class="whiteText">Strange quarks</span></p>
-                        <p>Rate: <span id="strangeRate" class="whiteText">0 per eon</span> (Peak: <span id="strangePeak" class="whiteText">0 per eon</span>)</p>
+                        <p>Stage reset reward: <span id="strange0Inc" class="whiteText">1</span> <span class="whiteText">Strange quarks</span><span id="strange1Gain">, <span id="strange1Inc" class="whiteText">1</span> <span class="whiteText">Strangelets</span></span></p>
+                        <p><span id="strangeRateType">Rate</span>: <span id="strangeRate" class="whiteText">0 per eon</span> (Peak: <span id="strangePeak" class="whiteText">0 per eon</span>)</p>
                     </div>
                     <section id="strangeStructures" aria-label="Strange Structures">
                         <div id="strange0" class="greenText">
@@ -684,7 +684,7 @@
                                  --><div id="toggleAuto0Main" class="windowPopUp">
                                         <button type="button" class="focusButton hollowButton stageAllborderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                         <div role="menu" aria-label="Settings menu">
-                                            <label>Perform Interstellar Stage reset when can get at least <input type="number" id="stageInput" value="0" step="any"> <span id="stageReward">Strange quarks</span>, doesn't reset if set to 0</label>
+                                            <label>Perform Interstellar Stage reset when can get at least <input type="number" id="stageInput" value="0" step="any"> Strange quarks, doesn't reset if set to 0</label>
                                             <p id="stageInstant">(Other Stages will reset instanly)</p>
                                         </div>
                                     </div>
@@ -747,7 +747,7 @@
                     </aside>
                     <article id="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
-                        <p id="exportSpecial" class="whiteText center" title="1 per day">Gain <span id="exportGain" class="greenText">0</span> <span id="exportType">Strange quarks</span> by exporting</p>
+                        <p id="exportReward" class="whiteText center stage7Unlock">Strange quarks ⟶ <span id="exportQuarksCur" class="greenText">0</span>, max <span id="exportQuarksMax" class="greenText">0</span> in <span id="exportQuarksTime" class="blueText">0 seconds</span><span id="exportStrangelets"><br aria-hidden="true">Strangelets ⟶ <span id="exportStrangeletsCur" class="greenText">0</span>, max <span id="exportStrangeletsMax" class="greenText">0</span> in <span id="exportStrangeletsTime" class="blueText">0 seconds</span></span></p>
                         <div>
                             <div>
                                 <button type="button" id="save">Save</button>
@@ -769,8 +769,7 @@
                                         <p class="whiteText center">Any of these can be added for extra information of a save file</p>
                                         <p class="stageText">[true] - <span class="whiteText">for current true Stage</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current active Stage</span></p>
-                                        <p class="greenText stage5Unlock">[strange] - <span class="whiteText">for current Strange reward</span></p>
-                                        <p id="saveNameMatter" class="greenText">[matter] - <span class="whiteText">for current Strange type</span></p>
+                                        <p class="greenText stage5Unlock">[strange] - <span class="whiteText">for total Strange quarks</span></p>
                                         <p class="darkvioletText stage6Unlock">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
                                         <p class="cyanText">[date<span class="whiteText">Data</span>] - <span class="whiteText">for current date</span></p>
                                         <div class="dateGrid">
@@ -826,7 +825,7 @@
                             <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
                             <li id="elementsAsTab" class="stage4Unlock"><label>Elements as Tab<button type="button" id="toggleNormal1" class="specialToggle">OFF</button></label></li>
                             <li><span id="pauseGame" aria-hidden="true">Pause game</span><button type="button" id="reviewEvents" class="hollowButton" aria-label="Replay event">Events</button></li>
-                            <li aria-hidden="true" title="Default is 16px. Art wont scale"><label>Font size: <input type="number" id="customFontSize" step="any" min="12" max="24" value="16" tabindex="-1"> px</label></li>
+                            <li aria-hidden="true" title="Default is 16px. Art won't scale"><label>Font size: <input type="number" id="customFontSize" step="any" min="12" max="24" value="16" tabindex="-1"> px</label></li>
                         </ul>
                     </section>
                     <div class="options">
@@ -886,8 +885,7 @@
                     <div class="stats">
                         <p id="firstPlay" title="Total online time is 0 seconds">Started playing: <span id="firstPlayStat" class="whiteText">00.00.0000, 00:00:00 (0 seconds ago)</span></p>
                         <p>Offline storage: <span id="offlineStat" class="whiteText">0 seconds</span> | Max: <span id="maxOfflineStat" class="whiteText">2 hours</span></p>
-                        <p id="maxExportStats">Max export: <span id="maxExportStat" class="greenText">1</span> <span id="maxExportType" class="whiteText">Strange quarks</span>, <span id="maxExportTime" class="whiteText">24 hours</span></p>
-                        <p id="stageResets">Stage resets: <span id="stageResetsCount" class="whiteText">0</span><span id="stageHighest"> | Highest reward: <span id="stageHighestGain" class="greenText">0</span> <span id="stageHighestType" class="whiteText">Strange quarks</span></span></p>
+                        <p id="stageResets">Stage resets: <span id="stageResetsCount" class="whiteText">0</span></p>
                         <article id="buildingsAllStats" class="statsWindows" aria-label="Structures">
                             <section id="building0Stats">
                                 <h4 id="building0StatName" class="stageText bigWord">Missing</h4>
@@ -1002,20 +1000,12 @@
                                     <p>Total:</p>
                                     <span id="strange0StatTotal" class="whiteText">0</span>
                                 </div>
-                                <div id="strange0StatProdDiv">
-                                    <p>Cap:</p>
-                                    <span id="strange0StatProd" class="whiteText">0</span>
-                                </div>
                             </section>
                             <section id="strange1Stats">
                                 <h4 class="greenText bigWord">Strangelets</h4>
                                 <div>
                                     <p>Total:</p>
                                     <span id="strange1StatTotal" class="whiteText">0</span>
-                                </div>
-                                <div>
-                                    <p>Speed:</p>
-                                    <span id="strange1StatProd" class="whiteText">0</span>
                                 </div>
                             </section>
                         </article>
