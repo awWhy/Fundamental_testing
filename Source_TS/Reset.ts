@@ -221,13 +221,13 @@ export const resetVacuum = () => {
 
     //Stage 5 and rest
     global.historyStorage.stage = [];
-    player.history.stage.best = [0, 1, 0];
+    player.history.stage.best = [1, 0, 0, 0];
     player.stage.resets = 0;
-    player.stage.best = 0;
     player.stage.peak = 0;
     player.stage.time = 0;
     player.time.stage = 0;
     for (let i = 0; i < player.strange.length; i++) {
+        player.time.export[i + 1] = 0;
         player.strange[i].current = 0;
         player.strange[i].total = 0;
     }

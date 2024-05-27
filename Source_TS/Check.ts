@@ -13,7 +13,7 @@ export const checkTab = (tab: string, subtab = null as null | string): boolean =
             return subtab === 'Upgrades' || subtab === null;
         case 'strangeness':
             if (player.strange[0].total <= 0 && (!player.inflation.vacuum || player.stage.current < 5)) { return false; }
-            if (subtab === 'Milestones') { return /*player.strangeness[5][8] >= 1 ||*/ !player.inflation.vacuum; }
+            if (subtab === 'Milestones') { return /*unlockCondition ||*/ !player.inflation.vacuum; }
             return subtab === 'Matter' || subtab === null;
         case 'settings':
             if (subtab === 'History') { return player.strange[0].total > 0; }
@@ -156,7 +156,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 8) { return player.challenges.void[4] >= 3; }
                     //if (upgrade === 9) { return player.challenges.void[5] >= 1; }
                 } else if (stageIndex === 5) {
-                    if (upgrade === 8) { return player.challenges.void[3] >= 5; }
+                    if (upgrade === 8) { return false; } //player.challenges.void[3] >= 5
                     if ([3, 4, 6, 7].includes(upgrade)) { return player.strangeness[5][5] >= 1; }
                 }
                 return true;

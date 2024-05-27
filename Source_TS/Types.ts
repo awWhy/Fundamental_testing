@@ -8,8 +8,6 @@ export interface playerType {
         current: number
         active: number
         resets: number
-        export: number
-        best: number
         time: number
         peak: number
         input: number
@@ -42,6 +40,7 @@ export interface playerType {
         updated: number
         started: number
         offline: number
+        export: [number, number, number, number]
         online: number
         stage: number
         universe: number
@@ -89,8 +88,8 @@ export interface playerType {
     }
     history: {
         stage: {
-            best: number[]
-            list: number[][]
+            best: [number, number, number, number]
+            list: Array<[number, number, number, number]>
             input: [number, number]
         }
     }
@@ -202,7 +201,6 @@ export interface globalType {
         producing: Overlimit[][]
     }
     strangeInfo: {
-        gain: (stage: number) => number
         name: string[]
         stageBoost: number[]
         instability: number
@@ -280,6 +278,6 @@ export interface globalType {
         color: string[]
     }
     historyStorage: {
-        stage: number[][]
+        stage: Array<[number, number, number, number]>
     }
 }

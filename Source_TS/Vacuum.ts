@@ -61,7 +61,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         global.ASRInfo.costRange[3][3] = 2.45576045e31;
 
         const strangeness1Cost = [1, 2, 1, 4, 12, 2, 24];
-        const strangeness1Scaling = [2.46, 4, 6, 8, 1, 1, 1];
+        const strangeness1Scaling = [2.46, 4, 6, 8, 100, 1, 1];
         strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
         strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
         const strangeness2Cost = [1, 1, 2, 4, 12, 4, 24];
@@ -69,11 +69,11 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
         strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
         const strangeness3Cost = [1, 2, 4, 16, 12, 4, 4, 24];
-        const strangeness3Scaling = [2, 3.4, 2, 1, 500, 1, 1.74, 1];
+        const strangeness3Scaling = [2, 3.4, 2, 1, 400, 1, 1.74, 1];
         strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
         strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
         const strangeness4Cost = [1, 2, 4, 4, 12, 6, 6, 24];
-        const strangeness4Scaling = [2, 3.4, 3, 4, 300, 1, 2, 1];
+        const strangeness4Scaling = [2, 3.4, 3, 4, 1300, 1, 2, 1];
         strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
         strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
         const strangeness5Cost = [4, 24, 360, 24, 36, 36, 40, 120];
@@ -256,6 +256,7 @@ export const switchVacuum = async() => {
     player.stage.active = 1;
     prepareVacuum(true);
     resetVacuum();
+    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Vacuum state is now true'; }
 };
 
 export const updateUnknown = () => {

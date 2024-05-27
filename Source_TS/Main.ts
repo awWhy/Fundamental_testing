@@ -1,5 +1,5 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
-import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, exportMultiplier, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches } from './Update';
+import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, maxOfflineTime, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches } from './Update';
 import { assignStrangeBoost, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseAsyncReset, dischargeAsyncReset, enterExitChallenge, rankAsyncReset, stageAsyncReset, switchStage, toggleConfirm, toggleSwap, vaporizationAsyncReset } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings } from './Special';
 import { detectHotkey } from './Hotkeys';
@@ -63,7 +63,7 @@ const handleOfflineTime = (): number => {
     const offlineTime = (timeNow - time.updated) / 1000;
     time.updated = timeNow;
     time.offline = Math.min(time.offline + offlineTime, maxOfflineTime());
-    player.stage.export = Math.min(player.stage.export + offlineTime, 86400);
+    time.export[0] += offlineTime;
     return offlineTime;
 };
 
@@ -123,21 +123,27 @@ const loadGame = (save: string) => {
     changeIntervals();
 };
 const exportFileGame = async() => {
-    if (player.stage.resets >= (player.inflation.vacuum ? 1 : 4) && player.stage.export > 0) {
-        const rewardType = player.strangeness[5][8];
-        const multiplier = exportMultiplier();
+    const exportReward = player.time.export;
+    if ((player.stage.true >= 7 || player.stage.resets >= (player.inflation.vacuum ? 1 : 4)) && exportReward[0] > 0) {
+        const { strange } = player;
+        const conversion = Math.min(exportReward[0] / 86400, 1);
+        const quarks = Math.floor((exportReward[1] / 2.5 + 1) * conversion);
 
-        let strangeGain;
-        if (rewardType >= 1) {
-            strangeGain = player.stage.export * multiplier / 86400 / 1e12 ** rewardType;
-            player.stage.export = 0;
-        } else {
-            strangeGain = Math.floor(player.stage.export * multiplier / 86400);
-            player.stage.export -= strangeGain * 86400 / multiplier;
+        strange[0].current += quarks;
+        strange[0].total += quarks;
+        exportReward[1] = Math.max(exportReward[1] - quarks, 0);
+        let reset = quarks >= 1;
+        if (player.strangeness[5][8] >= 1) {
+            const strangelets = Math.floor(exportReward[2] / 2.5 * conversion);
+            strange[1].current += strangelets;
+            strange[1].total += strangelets;
+            exportReward[2] -= strangelets;
+            if (!reset) { reset = strangelets >= 1; }
         }
-        player.strange[rewardType].current += strangeGain;
-        player.strange[rewardType].total += strangeGain;
-        if (rewardType === 0) { assignStrangeBoost(); }
+        if (reset) {
+            exportReward[0] = 0;
+            assignStrangeBoost();
+        }
     }
 
     const save = await saveGame(true);
@@ -233,14 +239,12 @@ const replaceSaveFileSpecials = (): string => {
         '[stage]',
         '[true]',
         '[strange]',
-        '[matter]',
         '[vacuum]'
     ];
     const replaceWith = [
         global.stageInfo.word[player.stage.active],
         global.stageInfo.word[player.stage.true],
-        `${global.strangeInfo.gain(player.stage.active)}`,
-        `${global.strangeInfo.name[player.strangeness[5][8]]}`,
+        `${player.strange[0].total}`,
         `${player.inflation.vacuum}`
     ];
     for (let i = 0; i < special.length; i++) {
@@ -249,7 +253,7 @@ const replaceSaveFileSpecials = (): string => {
     return `${realName}.txt`;
 };
 
-/* Arguments are not done as '(...data: any) => any, ...data: any' because TS wont do type safety */
+/* Arguments are not done as '(...data: any) => any, ...data: any' because TS won't do type safety */
 const repeatFunction = (repeat: () => any) => {
     if (global.intervalsId.mouseRepeat !== undefined) { return; }
     global.intervalsId.mouseRepeat = setTimeout(() => {
@@ -543,8 +547,22 @@ try { //Start everything
     }
 
     /* Stage tab */
-    getId('stageReset').addEventListener('click', stageAsyncReset);
-    if (MD) { getId('stageFooter').addEventListener('click', stageAsyncReset); }
+    {
+        const clickHoldFunc = () => {
+            if (player.inflation.vacuum || player.stage.active >= 4) { return; }
+            void stageAsyncReset();
+        };
+        const stageButton = getId('stageReset');
+        stageButton.addEventListener('click', stageAsyncReset);
+        if (PC) { stageButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+        if (MD) {
+            stageButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
+            const footerButton = getId('stageFooter');
+            footerButton.addEventListener('click', stageAsyncReset);
+            footerButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
+            if (PC) { footerButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+        }
+    }
     {
         const clickFunc = () => {
             const active = player.stage.active;
@@ -558,8 +576,20 @@ try { //Start everything
                 void collapseAsyncReset();
             }
         };
-        getId('reset1Button').addEventListener('click', clickFunc);
-        if (MD) { getId('reset1Footer').addEventListener('click', clickFunc); }
+        const clickHoldFunc = () => {
+            if (player.stage.active !== 1 && player.stage.active !== 3) { return; }
+            clickFunc();
+        };
+        const resetButton = getId('reset1Button');
+        resetButton.addEventListener('click', clickFunc);
+        if (PC) { resetButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+        if (MD) {
+            resetButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
+            const footerButton = getId('reset1Footer');
+            footerButton.addEventListener('click', clickFunc);
+            footerButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
+            if (PC) { footerButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+        }
     }
     for (let i = 1; i < specialHTML.longestBuilding; i++) {
         const button = getId(`building${i}Btn`);
