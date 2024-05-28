@@ -717,6 +717,16 @@ export const changeFontSize = (change = false) => {
 
     document.documentElement.style.fontSize = size === 16 ? '' : `${size}px`;
     input.value = `${size}`;
+
+    /* Only decent work around with media no allowing var() and rem units being bugged, maybe editable env() will solve it eventually */
+    const styleSheet = (getId('primaryRules') as HTMLStyleElement).sheet as CSSStyleSheet;
+    const styleLength = styleSheet.cssRules.length - 1;
+    const rule1 = styleSheet.cssRules[styleLength - 1] as CSSMediaRule; //Primary phone size
+    const rule2 = styleSheet.cssRules[styleLength] as CSSMediaRule; //Tiny phone size
+    styleSheet.deleteRule(styleLength);
+    styleSheet.deleteRule(styleLength - 1);
+    styleSheet.insertRule(rule1.cssText.replace(rule1.conditionText, `screen and (max-width: ${893 * (size / 16) + 32}px)`), styleLength - 1);
+    styleSheet.insertRule(rule2.cssText.replace(rule2.conditionText, `screen and (max-width: ${362 * (size / 16) + 32}px)`), styleLength);
 };
 
 export const changeFormat = (point: boolean) => {

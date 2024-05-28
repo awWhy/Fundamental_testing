@@ -1358,6 +1358,7 @@ li .hollowButton {
     body { scrollbar-color: var(--input-border) black; }
 }
 
+/* Everything bellow gets edited in changeFontSize function, because rem units are bugged and there isn't any better alternatives */
 @media screen and (max-width: 55rem) {
     #MDMessage1 {
         display: block;
@@ -1377,14 +1378,24 @@ li .hollowButton {
         margin-top: 1vh;
     }
 
-    #buildings { row-gap: 0.2em; }
+    #buildings {
+        row-gap: 0.2em;
+        min-width: min-content; /* clamp() breaks with that value */
+        width: 100vw;
+        max-width: calc(32px + 32.198em);
+    }
+
     .buyBuilding, #specials > div { column-gap: 0.15em; }
     .buyBuilding > div:first-of-type, #specials p { flex-direction: column; }
-    .buyBuilding > div > p:first-of-type { width: 13.8em; }
-    .buyBuilding > div > p:first-of-type > span:last-of-type { display: block; }
+    .buyBuilding > div:first-of-type { width: 100%; } /* max-width: 19.2em; */
+    .buyBuilding button:first-of-type,
+    .buyBuilding > div > p:first-of-type { width: unset; }
+    .buyBuilding > div > p:first-of-type > span { white-space: nowrap; }
 
     .buyBuilding > div:last-of-type {
+        flex-shrink: 0;
         row-gap: 0.16em;
+        width: clamp(11.5em, 38vw, 12.5em);
         grid-template-areas: "button button" "buy toggle";
     }
 
@@ -1400,8 +1411,6 @@ li .hollowButton {
     .buyBuilding .toggleBuilding { margin-left: auto; }
     .buyBuilding > div > div > div { display: none; }
     .availableBuilding > div > div > p { border-color: var(--building-afford); }
-
-    #specials { max-width: 29em; }
 
     .descriptionText > p { max-width: 90vw; }
 
@@ -1443,3 +1452,7 @@ li .hollowButton {
     #subtabs button { width: 100%; }
     #phoneHotkeys { gap: 0.8vw; }
 }
+@media screen and (max-width: 22rem) {
+    .buyBuilding { margin-left: calc(-32px - 0.348em); }
+}
+/* No rules are allowed past this point */
