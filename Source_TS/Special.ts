@@ -720,6 +720,11 @@ export const changeFontSize = (change = false) => {
 
     /* Only decent work around with media no allowing var() and rem units being bugged, maybe editable env() will solve it eventually */
     const styleSheet = (getId('primaryRules') as HTMLStyleElement).sheet as CSSStyleSheet;
+    if (styleSheet == null) {
+        Notify(`Error: style sheet value is ${styleSheet}`);
+        getId('primaryRules').addEventListener('load', () => void Alert('Post error: style sheet finished loading, but code already executed\n(Please report this on game Discord)'));
+        return;
+    }
     const styleLength = styleSheet.cssRules.length - 1;
     const rule1 = styleSheet.cssRules[styleLength - 1] as CSSMediaRule; //Primary phone size
     const rule2 = styleSheet.cssRules[styleLength] as CSSMediaRule; //Tiny phone size

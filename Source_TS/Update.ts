@@ -476,6 +476,8 @@ export const visualUpdate = () => {
                 showReset1 = player.upgrades[2][2] === 1;
             } else if (active === 4) {
                 showReset1 = player.upgrades[4][0] === 1;
+            } else if (active === 5) {
+                showReset1 = false;
             }
         }
         getId('reset1Footer').style.display = showReset1 ? '' : 'none';
@@ -1226,14 +1228,8 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         return;
     }
     if (globalSave.MDSettings[0]) {
-        const reset1Footer = getId('reset1Footer');
-        reset1Footer.textContent = specialHTML.resetHTML[active];
+        getId('reset1Footer').textContent = specialHTML.resetHTML[active];
         if (extra === 'reload') { MDStrangenessPage(1); }
-        if (active === 3) {
-            reset1Footer.style.display = '';
-        } else if (active === 5) {
-            reset1Footer.style.display = 'none';
-        }
     }
     if (globalSave.SRSettings[0]) { //Firefox only recently (24.10.2023) added aria shortcuts (.ariaLabel)
         getId('reset1Main').setAttribute('aria-label', `${specialHTML.resetHTML[active]} reset (hotkey ${['', 'D', 'V', 'R', 'C', 'Shift + M'][active]})`);

@@ -391,6 +391,8 @@ try { //Start everything
             reset1Button.type = 'button';
             getId('phoneHotkeys').prepend(reset1Button, stageButton);
 
+            getId('toggleMax0').classList.add('stage2Unlock');
+            getId('researchToggles').classList.remove('stage2Unlock');
             const createUpgButton = document.createElement('button');
             createUpgButton.classList.add('hollowButton');
             createUpgButton.textContent = 'Create';
