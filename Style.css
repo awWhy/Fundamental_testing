@@ -118,8 +118,8 @@ body { /* Default color variables */
 .stage6windowBackground { background-color: #01003c !important; }
 
 /* Right now it works only with keyboard tab button */
-body:not(.outlineOnFocus) button:focus-visible,
-body:not(.outlineOnFocus) input:not(input[type = "text"], input[type = "number"]):focus-visible { outline: none; }
+body.noFocusOutline button, body.noFocusOutline .noFocusOutline,
+body.noFocusOutline input:not(input[type = "text"], input[type = "number"]) { outline: none; }
 
 ::-webkit-scrollbar {
     width: 1.2vh;
@@ -165,8 +165,6 @@ img {
     font-size: 0.66rem;
 }
 
-ul, ol { padding-left: 1.6em; }
-
 #footerStats img,
 #strangenessResearch .interactiveImage,
 #researches .interactiveImage {
@@ -179,7 +177,6 @@ p > img {
     margin: 0.5em 0.5em 0 0.2em;
 }
 
-#pauseGame,
 .interactiveImage { cursor: pointer; }
 
 .stageBorderImage {
@@ -733,7 +730,7 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--window-color);
 }
 
-#elementsGrid[class = "Elements10App"] { grid-template-columns: repeat(8, 1fr); }
+#elementsGrid.tenElements { grid-template-columns: repeat(8, 1fr); }
 
 #elementsGrid > .interactiveImage {
     width: 38px;
@@ -742,8 +739,8 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #element2 { grid-column: 18; }
-.Elements10App #element2 { grid-column: 8; }
-#elementsGrid:not([class = "Elements10App"]) #element5, #element13 { grid-column: 13; }
+#elementsGrid.tenElements #element2 { grid-column: 8; }
+#elementsGrid:not(.tenElements) #element5, #element13 { grid-column: 13; }
 
 #element0 {
     position: absolute;
@@ -785,7 +782,7 @@ input:-webkit-autofill { /* Chrome related pain */
     border-radius: 0;
 }
 
-#strangeStructures > div > div > p {
+#strangeStructures > div > div:first-of-type > p {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -795,6 +792,34 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: black;
     width: 6em;
     height: 32px;
+}
+
+#strangeStructures > div > div:last-of-type {
+    position: absolute;
+    flex-direction: column;
+    right: 50%;
+    transform: translateX(50%);
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+    border-radius: 7px;
+    width: max-content;
+    max-width: 90vw;
+    padding: 0.5em 0.6em 0.6em;
+    margin-top: calc(1.9em + 32px);
+    row-gap: 0.2em;
+    z-index: 3;
+}
+
+#strangeStructures ul {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    row-gap: 0.1em;
+}
+
+#strangeStructures li {
+    list-style: inside "− ";
+    line-height: 1.2em;
 }
 
 #strangenessResearch {
@@ -1000,13 +1025,12 @@ input:-webkit-autofill { /* Chrome related pain */
     display: flex;
     flex-direction: column;
     margin-top: 0.2em;
-    margin-left: -1em;
 }
 
 .options li {
     font-size: 0.92em;
     line-height: 1.63em;
-    list-style-type: ">  ";
+    list-style: inside "> ";
     width: max-content;
 }
 
@@ -1359,7 +1383,7 @@ li .hollowButton {
 }
 
 /* Everything bellow gets edited in changeFontSize function, because rem units are bugged and there isn't any better alternatives */
-@media screen and (max-width: 55rem) {
+@media screen and (max-width: 925px) {
     #MDMessage1 {
         display: block;
         text-align: center;
@@ -1414,17 +1438,9 @@ li .hollowButton {
 
     .descriptionText > p { max-width: 90vw; }
 
-    #elementsGrid {
-        gap: 0.15em;
-        padding: 0.25em;
-    }
-
-    #elementsGrid > .interactiveImage {
-        width: 32px;
-        height: 32px;
-        object-fit: scale-down;
-    }
-
+    #elementsGrid { grid-template-columns: repeat(9, 1fr); }
+    #element2 { grid-column: 9; }
+    #elementsGrid:not(.tenElements) #element5, #element13 { grid-column: 4; }
     #element0 { display: none; }
 
     #strangenessResearch {
@@ -1452,7 +1468,18 @@ li .hollowButton {
     #subtabs button { width: 100%; }
     #phoneHotkeys { gap: 0.8vw; }
 }
-@media screen and (max-width: 22rem) {
+@media screen and (max-width: 394px) {
     .buyBuilding { margin-left: calc(-32px - 0.348em); }
+
+    #elementsGrid {
+        gap: 0.15em;
+        padding: 0.25em;
+    }
+
+    #elementsGrid > .interactiveImage {
+        width: 32px;
+        height: 32px;
+        object-fit: scale-down;
+    }
 }
 /* No rules are allowed past this point */

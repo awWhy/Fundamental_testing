@@ -9,7 +9,7 @@
         <meta name="description" content="Explore the Universe with this idle-game">
         <script src="Code.js" defer></script>
     </head>
-    <body>
+    <body class="noFocusOutline">
         <aside id="loading">
             <h1 class="biggerWord">Fundamental</h1>
             <p class="whiteText">Game is loading. If it won't load (after trying to reload at least once), then can try to report it on <a href="https://discord.gg/JftTEJW83d" target="_blank" rel="noopener noreferrer">discord</a> or <a href="https://github.com/awWhy/Fundamental/issues" target="_blank" rel="noopener noreferrer">github</a></p>
@@ -48,15 +48,15 @@
                     <article id="buildings" aria-label="Structures (hotkeys are numbers to make, shift + number to toggle auto)">
                         <section id="specials" class="stage4Only" aria-label="Stars reward">
                             <div id="special1" title="Red giants">
-                                <img src="Used_art/Red%20giant.png" alt="Red giant" loading="lazy" draggable="false">
+                                <img src="Used_art/Red%20giant.png" alt="" loading="lazy" draggable="false">
                                 <p class="whiteText"><span id="special1Cur" class="redText">0</span><span>(+<span id="special1Get">0</span>)</span></p>
                             </div>
                             <div id="special2" title="Neutron stars">
-                                <img src="Used_art/Neutron%20star.png" alt="Neutron stars" loading="lazy" draggable="false">
+                                <img src="Used_art/Neutron%20star.png" alt="" loading="lazy" draggable="false">
                                 <p class="whiteText"><span id="special2Cur" class="darkvioletText">0</span><span>(+<span id="special2Get">0</span>)</span></p>
                             </div>
                             <div id="special3" title="Black holes">
-                                <img src="Used_art/Black%20hole.png" alt="Black hole" loading="lazy" draggable="false">
+                                <img src="Used_art/Black%20hole.png" alt="" loading="lazy" draggable="false">
                                 <p class="whiteText"><span id="special3Cur" class="grayText">0</span><span>(+<span id="special3Get">0</span>)</span></p>
                             </div>
                         </section>
@@ -212,13 +212,13 @@
                         <div id="voidRewards">
                             <h3 class="darkvioletText bigWord">Rewards:</h3>
                             <div>
-                                <button type="button" id="voidRewardMicroworld" class="hollowButton stage1borderButton cyanText" aria-haspopup="menu">Microworld</button>
-                                <button type="button" id="voidRewardSubmerged" class="hollowButton stage2borderButton blueText" aria-haspopup="menu">Submerged</button>
-                                <button type="button" id="voidRewardAccretion" class="hollowButton stage3borderButton grayText" aria-haspopup="menu">Accretion</button>
-                                <button type="button" id="voidRewardInterstellar" class="hollowButton stage4borderButton orangeText" aria-haspopup="menu">Interstellar</button>
-                                <button type="button" id="voidRewardIntergalactic" class="hollowButton stage5borderButton darkorchidText" aria-haspopup="menu">Intergalactic</button>
+                                <button type="button" id="voidRewardMicroworld" class="hollowButton stage1borderButton cyanText" aria-haspopup="dialog">Microworld</button>
+                                <button type="button" id="voidRewardSubmerged" class="hollowButton stage2borderButton blueText" aria-haspopup="dialog">Submerged</button>
+                                <button type="button" id="voidRewardAccretion" class="hollowButton stage3borderButton grayText" aria-haspopup="dialog">Accretion</button>
+                                <button type="button" id="voidRewardInterstellar" class="hollowButton stage4borderButton orangeText" aria-haspopup="dialog">Interstellar</button>
+                                <button type="button" id="voidRewardIntergalactic" class="hollowButton stage5borderButton darkorchidText" aria-haspopup="dialog">Intergalactic</button>
                             </div>
-                            <div id="voidRewardsDiv" role="menu" aria-label="Reward list">
+                            <div id="voidRewardsDiv" role="dialog" aria-label="Reward list">
                                 <p class="greenText center">All rewards are connected to Strangeness</p>
                                 <div id="voidRewardsDivText" class="whiteText"></div>
                             </div>
@@ -376,7 +376,7 @@
                         <input type="image" src="Used_art/Element26.png" alt="Iron" draggable="false" id="element26" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                         <input type="image" src="Used_art/Element27.png" alt="Cobalt" draggable="false" id="element27" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                         <input type="image" src="Used_art/Element28.png" alt="Nickel" draggable="false" id="element28" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
-                        <!-- <input type="image" src="Used_art/Element29.png" alt="Copper" draggable="false" id="element29" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect"> -->
+                        <input type="image" src="Used_art/Element29.png" alt="Copper" draggable="false" id="element29" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                     </div>
                     <div class="descriptionText">
                         <h3>Element: <span id="elementText" class="darkorchidText">Hover to see.</span></h3>
@@ -391,20 +391,38 @@
                         <h2 class="biggerWord">Strange matter</h2>
                         <p>Stage reset reward: <span id="strange0Inc" class="whiteText">1</span> <span class="whiteText">Strange quarks</span><span id="strange1Gain">, <span id="strange1Inc" class="whiteText">1</span> <span class="whiteText">Strangelets</span></span></p>
                         <p><span id="strangeRateType">Rate</span>: <span id="strangeRate" class="whiteText">0 per eon</span> (Peak: <span id="strangePeak" class="whiteText">0 per eon</span>)</p>
+                        <p>Stage time: <span id="stageTimeStrangeness" class="whiteText">0 seconds</span> (In best reset: <span id="stageTimeBestReset" class="whiteText">1 seconds</span>)</p>
                     </div>
-                    <section id="strangeStructures" aria-label="Strange Structures">
-                        <div id="strange0" class="greenText">
+                    <section id="strangeStructures" class="greenText" aria-label="Strange Structures">
+                        <div id="strange0" class="noFocusOutline" tabindex="0" aria-haspopup="dialog">
                             <p>Strange quarks</p>
                             <div>
                                 <img src="Used_art/Strange%20Quarks.png" alt="" loading="lazy" draggable="false">
                                 <p id="strange0Cur">0</p>
                             </div>
+                            <div id="quarksEffectsMain" class="mainText" style="display: none;" role="dialog">
+                                <h4 class="bigWord">Current effects:</h4>
+                                <ul class="whiteText">
+                                    <li>Improving all Microworld Structures by <span id="quarksEffect1Stat">1</span></li>
+                                    <li>Improving Puddles by <span id="quarksEffect2Stat">1</span></li>
+                                    <li>Making all Accretion Structures cheaper by <span id="quarksEffect3Stat">1</span></li>
+                                    <li>Improving all Interstellar Structures by <span id="quarksEffect4Stat">1</span></li>
+                                    <li>Increasing Solar mass gain by <span id="quarksEffect5Stat">1</span></li>
+                                </ul>
+                            </div>
                         </div>
-                        <div id="strange1" class="greenText">
+                        <div id="strange1" class="noFocusOutline" tabindex="0" aria-haspopup="dialog">
                             <p>Strangelets</p>
                             <div>
                                 <img src="Used_art/Strangelets.png" alt="" loading="lazy" draggable="false">
                                 <p id="strange1Cur">0</p>
+                            </div>
+                            <div id="strangeletsEffectsMain" class="mainText" style="display: none;" role="dialog">
+                                <h4 class="bigWord">Current effects:</h4>
+                                <ul class="whiteText">
+                                    <li>Producing <span id="strangeletsEffect1Stat">0</span> Strange quarks per second<br aria-hidden="true">(improved by best Stage reset from history)</li>
+                                    <li>Increasing Stage reset reward by <span id="strangeletsEffect2Stat">1</span></li>
+                                </ul>
                             </div>
                         </div>
                     </section>
@@ -482,7 +500,7 @@
                                 <p class="whiteText stage6borderImage"><span id="strange7Stage2Level" class="redText">0</span>/<span id="strange7Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange8Stage2">
-                                <input type="image" src="Used_art/Missing.png" alt="Water flow" draggable="false" id="strange8Stage2Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
+                                <input type="image" src="Used_art/Better%20water.png" alt="Better water flow" draggable="false" id="strange8Stage2Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
                                 <p class="whiteText stage2borderImage"><span id="strange8Stage2Level" class="redText">0</span>/<span id="strange8Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage2">
@@ -528,13 +546,13 @@
                                 <p class="whiteText stage6borderImage"><span id="strange8Stage3Level" class="redText">0</span>/<span id="strange8Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage3">
-                                <input type="image" src="Used_art/Shift.png" alt="Mass shift" draggable="false" id="strange9Stage3Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
+                                <input type="image" src="Used_art/Cosmic%20mass.png" alt="Mass delay" draggable="false" id="strange9Stage3Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
                                 <p class="whiteText stage3borderImage"><span id="strange9Stage3Level" class="redText">0</span>/<span id="strange9Stage3Max" class="greenText">1</span></p>
                             </div>
-                            <!-- <div id="strange10Stage3">
+                            <div id="strange10Stage3">
                                 <input type="image" src="Used_art/Rank%20max.png" alt="Rank raise" draggable="false" id="strange10Stage3Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
                                 <p class="whiteText stage3borderImage"><span id="strange10Stage3Level" class="redText">0</span>/<span id="strange10Stage3Max" class="greenText">3</span></p>
-                            </div> -->
+                            </div>
                         </section>
                         <section id="strangenessSection4" class="stage4borderImage" aria-label="Interstellar">
                             <div id="strange1Stage4">
@@ -573,10 +591,10 @@
                                 <input type="image" src="Used_art/Neutronium.png" alt="Neutronium" draggable="false" id="strange9Stage4Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
                                 <p class="whiteText stage6borderImage"><span id="strange9Stage4Level" class="redText">0</span>/<span id="strange9Stage4Max" class="greenText">1</span></p>
                             </div>
-                            <!-- <div id="strange10Stage4">
+                            <div id="strange10Stage4">
                                 <input type="image" src="Used_art/Brown%20dwarf%20time%20hot.png" alt="Newer Upgrade" draggable="false" id="strange10Stage4Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
                                 <p class="whiteText stage1borderImage"><span id="strange10Stage4Level" class="redText">0</span>/<span id="strange10Stage4Max" class="greenText">1</span></p>
-                            </div> -->
+                            </div>
                         </section>
                         <section id="strangenessSection5" class="stage5borderImage" aria-label="Intergalactic">
                             <div id="strange1Stage5">
@@ -629,16 +647,16 @@
                         <p id="milestonesWelcome" class="whiteText">Any reached Milestone will award 1 <span class="greenText">Strange quark</span></p>
                     </div>
                     <div id="milestones">
-                        <div id="milestone1Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Quarks.png" alt="Fundamental Matter" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone2Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Energy.png" alt="Energized" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone1Stage2Div" class="stage2borderImage stage2windowBackground"><img src="Used_art/Drop.png" alt="A Nebula of Drops" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone2Stage2Div" class="stage2borderImage stage2windowBackground"><img src="Used_art/Puddle.png" alt="Just a bigger Puddle" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone1Stage3Div" class="stage3borderImage stage3windowBackground"><img src="Used_art/Mass.png" alt="Cluster of Mass" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone2Stage3Div" class="stage3borderImage stage3windowBackground"><img src="Used_art/Natural%20satellite.png" alt="Satellites of Satellites" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone1Stage4Div" class="stage4borderImage stage4windowBackground"><img src="Used_art/Main_sequence%20mass.png" alt="Supermassive" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone2Stage4Div" class="stage4borderImage stage4windowBackground"><img src="Used_art/Black%20hole.png" alt="Biggest of all" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone1Stage5Div" class="stage5borderImage stage5windowBackground"><img src="Used_art/Stars.png" alt="Light in the dark" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
-                        <div id="milestone2Stage5Div" class="stage5borderImage stage5windowBackground"><img src="Used_art/Galaxy.png" alt="End of Greatness" tabindex="1" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone1Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Quarks.png" alt="Fundamental Matter" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone2Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Energy.png" alt="Energized" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone1Stage2Div" class="stage2borderImage stage2windowBackground"><img src="Used_art/Drop.png" alt="A Nebula of Drops" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone2Stage2Div" class="stage2borderImage stage2windowBackground"><img src="Used_art/Puddle.png" alt="Just a bigger Puddle" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone1Stage3Div" class="stage3borderImage stage3windowBackground"><img src="Used_art/Mass.png" alt="Cluster of Mass" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone2Stage3Div" class="stage3borderImage stage3windowBackground"><img src="Used_art/Natural%20satellite.png" alt="Satellites of Satellites" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone1Stage4Div" class="stage4borderImage stage4windowBackground"><img src="Used_art/Main_sequence%20mass.png" alt="Supermassive" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone2Stage4Div" class="stage4borderImage stage4windowBackground"><img src="Used_art/Black%20hole.png" alt="Biggest of all" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone1Stage5Div" class="stage5borderImage stage5windowBackground"><img src="Used_art/Stars.png" alt="Light in the dark" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
+                        <div id="milestone2Stage5Div" class="stage5borderImage stage5windowBackground"><img src="Used_art/Galaxy.png" alt="End of Greatness" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
                     </div>
                     <div class="descriptionText">
                         <h3 class="darkorchidText">Stage: <span id="milestonesStage"></span><span id="milestonesText" class="greenText">Hover to see.</span></h3>
@@ -726,7 +744,7 @@
                                  --><div id="toggleAuto4Main" class="windowPopUp">
                                         <button type="button" class="focusButton hollowButton stage4borderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                         <div role="menu" aria-label="Settings menu">
-                                            <label>Collapse when boost from doing it reached at least <input type="text" id="collapseStarsInput" value="2" autocomplete="off"><span id="collapseCapped">, adding '!' will make it wait for hardcap</span></label>
+                                            <label>Collapse when boost from doing it reached at least <input type="text" id="collapseStarsInput" value="2" autocomplete="off"><span id="collapseCapped">, adding '!' will make it wait for Solar mass hardcap, but only if resetting now would increase Solar mass</span></label>
                                             <p>(Value for boost comes from Interstellar stats)</p>
                                         </div>
                                     </div>
@@ -763,8 +781,8 @@
                         <ul class="whiteText">
                             <li><input type="text" id="saveFileNameInput" value="Fundamental" aria-label="Save file name" minlength="4"> + '<span class="mainText">.txt</span>'<!--
                                 --><div class="windowPopUp">
-                                    <button type="button" id="saveFileHoverButton" class="focusButton hollowButton" aria-haspopup="menu">Preview</button>
-                                    <div role="menu" aria-label="Save file name preview">
+                                    <button type="button" id="saveFileHoverButton" class="focusButton hollowButton" aria-haspopup="dialog">Preview</button>
+                                    <div role="dialog" aria-label="Save file name preview">
                                         <p id="saveFileNamePreview" class="mainText bigWord">Fundamental.txt</p>
                                         <p class="whiteText center">Any of these can be added for extra information of a save file</p>
                                         <p class="stageText">[true] - <span class="whiteText">for current true Stage</span></p>
@@ -790,8 +808,8 @@
                             </li>
                             <li><label title="Turn ON, if using non QWERTY layout keyboard">Language dependant hotkeys<button type="button" id="toggleNormal0" class="specialToggle">OFF</button></label><!--
                                 --><div class="windowPopUp">
-                                    <button type="button" class="focusButton hollowButton" aria-label="Check hotkey list" aria-haspopup="menu">Hotkeys</button>
-                                    <div role="menu" aria-label="Hotkeys list">
+                                    <button type="button" class="focusButton hollowButton" aria-label="Check hotkey list" aria-haspopup="dialog">Hotkeys</button>
+                                    <div role="dialog" aria-label="Hotkeys list">
                                         <p class="mainText">Arrows left and right - <span class="whiteText">change tab</span></p>
                                         <p class="mainText">Arrows up and down - <span class="whiteText">change subtab</span></p>
                                         <p class="mainText">Numbers - <span class="whiteText">make a new Structure</span></p>
@@ -818,13 +836,13 @@
                             </li>
                             <li title="Set as low as device can handle"><label>Automatization speed interval <input type="number" id="mainInterval" min="20" max="100" value="20" step="1"> ms</label></li>
                             <li><label>Numbers update interval <input type="number" id="numbersInterval" min="40" max="200" value="80" step="1"> ms</label></li>
-                            <li><label>Visual update interval <input type="number" id="visualInterval" min="0.2" max="4" value="1" step="any"> s</label></li>
+                            <li><label>Visual update interval <input type="number" id="visualInterval" min="0.2" max="4" value="1" step="any"> s</label><button type="button" id="reviewEvents" class="hollowButton" aria-label="Replay event">Events</button></li>
                             <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="4" max="1800" value="20" step="1"> s</label></li>
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" value="." maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" value="" maxlength="1" autocomplete="off"></label></li>
                             <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label></li>
                             <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
+                            <li class="stage5Unlock" title="Works only for newly unlocked Stages, skips unimportant one's"><label>Allow automatic Stage switch<button type="button" id="toggleNormal2" class="specialToggle">OFF</button></label></li>
                             <li id="elementsAsTab" class="stage4Unlock"><label>Elements as Tab<button type="button" id="toggleNormal1" class="specialToggle">OFF</button></label></li>
-                            <li><span id="pauseGame" aria-hidden="true">Pause game</span><button type="button" id="reviewEvents" class="hollowButton" aria-label="Replay event">Events</button></li>
                             <li aria-hidden="true" title="Default is 16px. Art won't scale"><label>Font size: <input type="number" id="customFontSize" step="any" min="12" max="24" value="16" tabindex="-1"> px</label></li>
                         </ul>
                     </section>
