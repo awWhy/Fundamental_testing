@@ -19,7 +19,7 @@ export const getId = (id: string, noError = false): HTMLElement => {
     if (noError) { return null as unknown as HTMLElement; }
     if (global.debug.errorID) {
         global.debug.errorID = false;
-        Notify(`Error encountered, ID - '${id}' doesn't exist\n(More infomation in console)`);
+        Notify(`Error encountered, ID - '${id}' doesn't exist`);
         setTimeout(() => { global.debug.errorID = true; }, 6e4);
     }
     throw new ReferenceError(`ID - '${id}' doesn't exist`);
@@ -27,7 +27,7 @@ export const getId = (id: string, noError = false): HTMLElement => {
 /** From cache, not document */
 export const removeId = (id: string) => { specialHTML.cache.idMap.delete(id); };
 
-/** Adding any new HTML to existing class will require reseting it */
+/** Adding any new HTML to existing class will require resetting it */
 export const getClass = (idCollection: string): HTMLCollectionOf<HTMLElement> => {
     const test = specialHTML.cache.classMap.get(idCollection);
     if (test !== undefined) { return test; }
@@ -51,7 +51,7 @@ export const getQuery = (query: string): HTMLElement => {
 
     if (global.debug.errorQuery) {
         global.debug.errorQuery = false;
-        Notify(`Error encountered, Query - '${query}' failed to find anything\n(More infomation in console)`);
+        Notify(`Error encountered, Query - '${query}' failed to find anything`);
         setTimeout(() => { global.debug.errorQuery = true; }, 6e4);
     }
     throw new ReferenceError(`Query - '${query}' failed`);
@@ -346,7 +346,7 @@ const warpEnd = () => {
     getId('alertMain').style.display = '';
 };
 
-const pauseGame = async() => {
+export const pauseGame = async() => {
     if (global.paused) { return Notify('Game is already paused'); }
     global.paused = true;
     changeIntervals();
@@ -364,6 +364,7 @@ const pauseGame = async() => {
 try { //Start everything
     preventImageUnload();
 
+    const globalSaveStart = deepClone(globalSave); //For cases with incorrect length
     const globalSettings = localStorage.getItem('fundamentalSettings');
     if (globalSettings !== null) {
         Object.assign(globalSave, JSON.parse(atob(globalSettings)));
@@ -373,14 +374,29 @@ try { //Start everything
         (getId('numbersInterval') as HTMLInputElement).value = `${globalSave.intervals.numbers}`;
         (getId('visualInterval') as HTMLInputElement).value = `${globalSave.intervals.visual / 1000}`;
         (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
-        for (let i = 0; i < globalSave.toggles.length; i++) { toggleSpecial(i, 'normal'); }
-        changeFontSize();
+        for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'normal'); }
+        if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also will set breakpoints for screen size
 
         if (globalSave.MDSettings[0]) {
             (document.getElementById('MDMessage1') as HTMLElement).remove();
             specialHTML.styleSheet.textContent += 'input[type = "image"], img { -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu
             specialHTML.styleSheet.textContent += '#themeArea.windowOpen > div > div { display: flex; } #themeArea.windowOpen > div > button { clip-path: circle(0); }'; //More Safari junk to make windows work without focus
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
+
+            const arrowStage = document.createElement('button');
+            arrowStage.append(document.createElement('div'));
+            arrowStage.type = 'button';
+            const arrowReset1 = document.createElement('button');
+            arrowReset1.append(document.createElement('div'));
+            arrowReset1.type = 'button';
+            getId('resetStage').append(arrowStage);
+            arrowStage.addEventListener('click', () => getId('resetStage').classList.toggle('open'));
+            arrowStage.addEventListener('blur', () => getId('resetStage').classList.remove('open'));
+            getId('reset1Main').append(arrowReset1);
+            arrowReset1.addEventListener('click', () => getId('reset1Main').classList.toggle('open'));
+            arrowReset1.addEventListener('blur', () => getId('reset1Main').classList.remove('open'));
+            specialHTML.styleSheet.textContent += '#resets { row-gap: 1em; } #resets > section { position: relative; flex-direction: row; justify-content: center; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; } #resets > section:not(.open) > p { display: none !important; } #stageReset { width: 15.5em; font-size: 0.86em; }';
+            specialHTML.styleSheet.textContent += '#resets > section > button:last-of-type { width: 2.2em !important; margin-left: -2px; } #resets button > div { clip-path: polygon(0 0, 50% 100%, 100% 0, 50% 25%); width: 1.24em; height: 1.24em; background-color: var(--main-text); pointer-events: none; margin: auto; } #resets p { position: absolute; width: 17.9em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(1.892em - 2px); z-index: 1; }';
 
             const stageButton = document.createElement('button');
             stageButton.textContent = 'Stage';
@@ -389,7 +405,12 @@ try { //Start everything
             const reset1Button = document.createElement('button');
             reset1Button.id = 'reset1Footer';
             reset1Button.type = 'button';
-            getId('phoneHotkeys').prepend(reset1Button, stageButton);
+            const resetCollapse = document.createElement('button');
+            resetCollapse.textContent = 'Collapse';
+            resetCollapse.id = 'resetCollapseFooter';
+            resetCollapse.type = 'button';
+            getId('phoneHotkeys').prepend(reset1Button, resetCollapse, stageButton);
+            resetCollapse.addEventListener('click', collapseAsyncReset);
 
             getId('toggleMax0').classList.add('stage2Unlock');
             getId('researchToggles').classList.remove('stage2Unlock');
@@ -412,7 +433,7 @@ try { //Start everything
             getId('MDLi').after(MDToggle1);
 
             getId('MDToggle1').addEventListener('click', () => toggleSpecial(1, 'mobile', true, true));
-            for (let i = 0; i < globalSave.MDSettings.length; i++) { toggleSpecial(i, 'mobile'); }
+            for (let i = 0; i < globalSaveStart.MDSettings.length; i++) { toggleSpecial(i, 'mobile'); }
         }
         if (globalSave.SRSettings[0]) {
             (document.getElementById('SRMessage1') as HTMLElement).remove();
@@ -467,8 +488,16 @@ try { //Start everything
             getId('SRToggle2').addEventListener('click', () => { primaryIndex(); });
 
             if (globalSave.SRSettings[2]) { primaryIndex(true); }
-            for (let i = 0; i < globalSave.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
+            for (let i = 0; i < globalSaveStart.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
             specialHTML.styleSheet.textContent += '#starEffects > p > span { display: unset !important; }';
+        }
+        if (globalSave.developerMode) {
+            const pauseButton = document.createElement('button');
+            pauseButton.classList.add('hollowButton');
+            pauseButton.textContent = 'Pause';
+            pauseButton.type = 'button';
+            getId('offlineWarp').after(pauseButton);
+            pauseButton.addEventListener('click', pauseGame);
         }
     }
 
@@ -529,7 +558,7 @@ try { //Start everything
     }
 
     /* Toggles */
-    for (let i = 0; i < globalSave.toggles.length; i++) {
+    for (let i = 0; i < globalSaveStart.toggles.length; i++) {
         getId(`toggleNormal${i}`).addEventListener('click', () => toggleSpecial(i, 'normal', true, i === 1));
     }
     for (let i = 0; i < playerStart.toggles.confirm.length; i++) {
@@ -750,6 +779,22 @@ try { //Start everything
     }
 
     /* Strangeness tab */
+    for (let i = 0; i < 2; i++) {
+        const strange = getId(`strange${i}`);
+        const type = ['quarks', 'strangelets'][i];
+        const openFunction = () => {
+            if (type === 'quarks' && !player.inflation.vacuum && player.milestones[4][0] < 8) { return; }
+            getId(`${type}EffectsMain`).style.display = '';
+            numbersUpdate();
+        };
+        strange.addEventListener('focus', openFunction);
+        if (MD) { strange.addEventListener('click', openFunction); }
+        strange.addEventListener('blur', () => (getId(`${type}EffectsMain`).style.display = 'none'));
+        getId(`${type}EffectsMain`).addEventListener('click', (event: MouseEvent) => {
+            getId(`${type}EffectsMain`).style.display = 'none';
+            event.stopPropagation();
+        });
+    }
     for (let s = 1; s < global.strangenessInfo.length; s++) {
         if (MD) { getId(`strangenessPage${s}`).addEventListener('click', () => MDStrangenessPage(s)); }
         for (let i = 0; i < global.strangenessInfo[s].startCost.length; i++) {
@@ -781,7 +826,11 @@ try { //Start everything
             const image = getQuery(`#milestone${i + 1}Stage${s}Div > img`);
             if (PC) { image.addEventListener('mouseover', () => hoverStrangeness(i, s, 'milestones')); }
             if (MD) { image.addEventListener('touchstart', () => hoverStrangeness(i, s, 'milestones')); }
-            if (SR) { image.addEventListener('focus', () => hoverStrangeness(i, s, 'milestones')); }
+            if (SR) {
+                image.tabIndex = 0;
+                image.classList.add('noFocusOutline');
+                image.addEventListener('focus', () => hoverStrangeness(i, s, 'milestones'));
+            }
         }
     }
 
@@ -890,10 +939,9 @@ try { //Start everything
     getId('decimalPoint').addEventListener('change', () => changeFormat(true));
     getId('MDToggle0').addEventListener('click', () => toggleSpecial(0, 'mobile', true, true));
     getId('SRToggle0').addEventListener('click', () => toggleSpecial(0, 'reader', true, true));
-    getId('pauseGame').addEventListener('click', pauseGame);
     getId('reviewEvents').addEventListener('click', replayEvent);
     getId('offlineWarp').addEventListener('click', timeWarp);
-    getId('customFontSize').addEventListener('change', () => changeFontSize(true));
+    getId('customFontSize').addEventListener('change', () => changeFontSize(false));
 
     getId('stageResetsSave').addEventListener('change', () => {
         const inputID = getId('stageResetsSave') as HTMLInputElement;

@@ -35,7 +35,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         //upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 9;
         //upgradesInfo[3].maxActive = 13;
-        //upgradesInfo[4].maxActive = 4;
+        upgradesInfo[4].maxActive = 5;
         //upgradesInfo[5].maxActive = 3;
 
         const researches1Cost = [2400, 6000, 20000, 36000, 20000, 28000];
@@ -82,8 +82,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
         strangenessInfo[1].maxActive = 10;
         strangenessInfo[2].maxActive = 10;
-        strangenessInfo[3].maxActive = 9; //10
-        strangenessInfo[4].maxActive = 9; //10
+        strangenessInfo[3].maxActive = 10;
+        strangenessInfo[4].maxActive = 10;
         strangenessInfo[5].maxActive = 9;
 
         getId('milestonesWelcome').innerHTML = 'Milestones, can only be done when inside the <span class="darkvioletText">Void</span>';

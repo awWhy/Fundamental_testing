@@ -281,3 +281,21 @@ export interface globalType {
         stage: Array<[number, number, number, number]>
     }
 }
+
+/* Because I am lazy to deal with missing types right now */
+export type nullableBoolean = boolean | undefined | null;
+export interface globalSaveType {
+    intervals: {
+        main: number
+        numbers: number
+        visual: number
+        autoSave: number
+    }
+    toggles: [boolean, boolean, ...nullableBoolean[]]
+    format: [string, string]
+    theme: null | number
+    fontSize: number
+    MDSettings: [boolean, boolean, ...nullableBoolean[]]
+    SRSettings: [boolean, boolean, boolean, ...nullableBoolean[]]
+    developerMode: boolean
+}

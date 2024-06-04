@@ -2,17 +2,17 @@ import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
 import { buyBuilding, collapseAsyncReset, dischargeAsyncReset, rankAsyncReset, stageAsyncReset, switchStage, toggleSwap, vaporizationAsyncReset } from './Stage';
-import { buyAll, timeWarp } from './Main';
 import { globalSave } from './Special';
+import { buyAll, pauseGame, timeWarp } from './Main';
 
 export const detectHotkey = (check: KeyboardEvent) => {
     if (check.code === 'Tab') {
-        document.body.classList.add('outlineOnFocus');
+        document.body.classList.remove('noFocusOutline');
         return;
     } else {
         const activeType = (document.activeElement as HTMLInputElement)?.type;
         if (activeType === 'text' || activeType === 'number') { return; }
-        document.body.classList.remove('outlineOnFocus');
+        document.body.classList.add('noFocusOutline');
     }
     if (global.paused) { return; }
     const { key, code } = check;
@@ -59,6 +59,8 @@ export const detectHotkey = (check: KeyboardEvent) => {
                 if (global.stageInfo.activeAll.includes(3)) { void rankAsyncReset(); }
             } else if (stringKey === 'c') {
                 if (global.stageInfo.activeAll.includes(4)) { void collapseAsyncReset(); }
+            } else if (stringKey === 'p') {
+                if (globalSave.developerMode) { void pauseGame(); }
             }
         }
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {

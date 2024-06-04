@@ -1,18 +1,19 @@
 import { changeIntervals, getId, getQuery } from './Main';
 import { global, player } from './Player';
 import { assignMaxRank } from './Stage';
+import type { globalSaveType } from './Types';
 import { numbersUpdate, visualUpdate } from './Update';
 
-export const globalSave = {
+export const globalSave: globalSaveType = {
     intervals: {
         main: 20,
         numbers: 80,
         visual: 1000,
         autoSave: 20000
     },
-    toggles: [false, false], //Hotkeys type[0]; Elements as tab[1]
+    toggles: [false, false, false], //Hotkeys type[0]; Elements as tab[1]; Auto Stage switch[2]
     format: ['.', ''], //Point[0]; Separator[1]
-    theme: null as null | number,
+    theme: null,
     fontSize: 16,
     MDSettings: [false, false], //Status[0]; Mouse events[1]
     SRSettings: [false, false, false], //Status[0]; Tabindex Upgrades[1]; Tabindex primary[2]
@@ -22,7 +23,7 @@ export const globalSave = {
 export const saveGlobalSettings = () => localStorage.setItem('fundamentalSettings', btoa(JSON.stringify(globalSave)));
 
 export const toggleSpecial = (number: number, type: 'normal' | 'mobile' | 'reader', change = false, reload = false) => {
-    let toggles: boolean[];
+    let toggles;
     if (type === 'mobile') {
         toggles = globalSave.MDSettings;
     } else if (type === 'reader') {
@@ -124,8 +125,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeS1.png',
             'UpgradeS2.png',
             'UpgradeS3.png',
-            'UpgradeS4.png'
-            //'UpgradeS5.png'
+            'UpgradeS4.png',
+            'UpgradeS5.png'
         ],
         [
             'UpgradeG1.png',
@@ -255,7 +256,7 @@ export const preventImageUnload = () => {
     const { footerStatsHTML: footer, buildingHTML: build, upgradeHTML: upgrade, researchHTML: research, researchExtraHTML: extra, researchExtraDivHTML: extraDiv } = specialHTML;
     //Duplicates are ignored, unless they are from Strangeness, because duplicates from there could become unique in future
 
-    let images = '';
+    let images = '<img src="Used_art/Red%20giant" loading="lazy"><img src="Used_art/White%20dwarf" loading="lazy">';
     for (let s = 1; s <= 5; s++) {
         for (let i = 0; i < footer[s].length; i++) {
             if (s === 2) {
@@ -500,7 +501,9 @@ export const Alert = async(text: string): Promise<void> => {
         const blocker = getId('blocker');
         if (blocker.style.display !== 'none') {
             resolve();
-            Notify('Another Alert is already active');
+            Notify(`Another Alert is already active${globalSave.developerMode ?
+                `, type: 'Alert'\nText: ${text}` : ''
+            }`);
             return;
         }
 
@@ -532,7 +535,9 @@ export const Confirm = async(text: string): Promise<boolean> => {
         const blocker = getId('blocker');
         if (blocker.style.display !== 'none') {
             resolve(false);
-            Notify('Another Alert is already active');
+            Notify(`Another Alert is already active${globalSave.developerMode ?
+                `, type: 'Confirm'\nText: ${text}` : ''
+            }`);
             return;
         }
 
@@ -575,7 +580,9 @@ export const Prompt = async(text: string, placeholder = ''): Promise<string | nu
         const blocker = getId('blocker');
         if (blocker.style.display !== 'none') {
             resolve(null);
-            Notify('Another Alert is already active');
+            Notify(`Another Alert is already active${globalSave.developerMode ?
+                `, type: 'Prompt'\nText: ${text}` : ''
+            }`);
             return;
         }
 
@@ -707,31 +714,40 @@ export const hideFooter = () => {
     }
 };
 
-export const changeFontSize = (change = false) => {
+export const changeFontSize = (initial: boolean) => {
     const input = getId('customFontSize') as HTMLInputElement;
-    const size = Math.min(Math.max(change ? (input.value === '' ? 16 : Math.floor(Number(input.value) * 100) / 100) : globalSave.fontSize, 12), 24);
-    if (change) {
+    const size = Math.min(Math.max(initial ? globalSave.fontSize : (input.value === '' ? 16 : Math.floor(Number(input.value) * 100) / 100), 12), 24);
+    if (!initial) {
         globalSave.fontSize = size;
         saveGlobalSettings();
     }
 
     document.documentElement.style.fontSize = size === 16 ? '' : `${size}px`;
     input.value = `${size}`;
-
-    /* Only decent work around with media no allowing var() and rem units being bugged, maybe editable env() will solve it eventually */
-    const styleSheet = (getId('primaryRules') as HTMLStyleElement).sheet as CSSStyleSheet;
-    if (styleSheet == null) {
-        Notify(`Error: style sheet value is ${styleSheet}`);
-        getId('primaryRules').addEventListener('load', () => void Alert('Post error: style sheet finished loading, but code already executed\n(Please report this on game Discord)'));
-        return;
+    adjustCSSRules(initial);
+};
+/* Only decent work around media not allowing var() and rem units being bugged */
+const adjustCSSRules = (initial: boolean) => {
+    const styleSheet = (getId('primaryRules') as HTMLStyleElement).sheet;
+    if (styleSheet == null) { //Safari doesn't wait for CSS to load even if script is defered
+        if (initial) {
+            Notify('Failed to adjust CSS, will retry after its loading is finished');
+            getId('primaryRules').addEventListener('load', () => {
+                Notify('Trying to adjust CSS again\n(Ignore it if no more notifications about it afterwards)');
+                adjustCSSRules(false);
+            });
+            return;
+        }
+        return Notify(`Failed to adjust CSS due to style sheet being ${styleSheet}`);
     }
     const styleLength = styleSheet.cssRules.length - 1;
+    const fontRatio = globalSave.fontSize / 16;
     const rule1 = styleSheet.cssRules[styleLength - 1] as CSSMediaRule; //Primary phone size
     const rule2 = styleSheet.cssRules[styleLength] as CSSMediaRule; //Tiny phone size
     styleSheet.deleteRule(styleLength);
     styleSheet.deleteRule(styleLength - 1);
-    styleSheet.insertRule(rule1.cssText.replace(rule1.conditionText, `screen and (max-width: ${893 * (size / 16) + 32}px)`), styleLength - 1);
-    styleSheet.insertRule(rule2.cssText.replace(rule2.conditionText, `screen and (max-width: ${362 * (size / 16) + 32}px)`), styleLength);
+    styleSheet.insertRule(rule1.cssText.replace(rule1.conditionText, `screen and (max-width: ${893 * fontRatio + 32}px)`), styleLength - 1);
+    styleSheet.insertRule(rule2.cssText.replace(rule2.conditionText, `screen and (max-width: ${362 * fontRatio + 32}px)`), styleLength);
 };
 
 export const changeFormat = (point: boolean) => {

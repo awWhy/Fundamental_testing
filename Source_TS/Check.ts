@@ -74,7 +74,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (player.collapse.mass < global.collapseInfo.unlockU[upgrade] && player.buildings[5][3].true < 1) { return false; }
                 if (upgrade === 2) { return player.upgrades[4][1] === 1; }
                 if (upgrade === 3) { return player.strangeness[4][2] >= 2 && player.upgrades[4][2] === 1 && player.collapse.stars[1] > 0; }
-                //if (upgrade === 4) { return player.strangeness[4][9] >= 1 && player.upgrades[4][3] === 1; }
+                if (upgrade === 4) { return player.strangeness[4][9] >= 1 && player.upgrades[4][3] === 1; }
                 return true;
             } else if (stageIndex === 5) {
                 if (upgrade === 0) { return player.inflation.vacuum || player.milestones[2][0] >= 7; }
@@ -133,7 +133,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             if (stageIndex === 3) { return player.accretion.rank !== 0; }
             return true;
         case 'elements':
-            //if (upgrade >= 29) { return player.upgrades[4][4] === 1; }
+            if (upgrade >= 29) { return player.upgrades[4][4] === 1; }
             if (upgrade >= 27) { return player.upgrades[4][3] === 1; }
             if (upgrade >= 11) { return player.upgrades[4][2] === 1 && (player.collapse.stars[1] > 0 || player.buildings[5][3].true >= 1); }
             if (upgrade >= 6) { return player.upgrades[4][2] === 1; }
@@ -151,12 +151,12 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 9) { return player.challenges.void[2] >= 2; }
                 } else if (stageIndex === 3) {
                     if (upgrade === 8) { return player.challenges.void[4] >= 4; }
-                    //if (upgrade === 9) { return player.challenges.void[5] >= 2; }
+                    if (upgrade === 9) { return player.challenges.void[5] >= 2; }
                 } else if (stageIndex === 4) {
                     if (upgrade === 8) { return player.challenges.void[4] >= 3; }
-                    //if (upgrade === 9) { return player.challenges.void[5] >= 1; }
+                    if (upgrade === 9) { return player.challenges.void[5] >= 1; }
                 } else if (stageIndex === 5) {
-                    if (upgrade === 8) { return false; } //player.challenges.void[3] >= 5
+                    if (upgrade === 8) { return player.challenges.void[3] >= 5; }
                     if ([3, 4, 6, 7].includes(upgrade)) { return player.strangeness[5][5] >= 1; }
                 }
                 return true;
@@ -205,7 +205,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             }
             break;
         case 'elements':
-            return check !== 26;
+            return check !== 26 && check !== 29;
     }
 
     return true;

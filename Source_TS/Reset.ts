@@ -1,7 +1,7 @@
 import { allowedToBeReset } from './Check';
 import { cloneArray, global, player, playerStart } from './Player';
 import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, calculateMilestoneInformation, assignStrangeBoost, assignMaxRank, assignEnergyArray } from './Stage';
-import { numbersUpdate, stageUpdate, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { numbersUpdate, setRemnants, stageUpdate, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
     if (type === 'galaxy') {
@@ -72,6 +72,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             calculateResearchCost(i, s, 'researchesExtra');
         }
         autoResearchesSet('researchesExtra', s);
+        setRemnants();
     }
 
     if (player.inflation.vacuum) {
@@ -143,6 +144,7 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
     }
     player.researchesAuto[0] = player.strangeness[3][6];
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
+    setRemnants();
 
     for (const s of stageIndex) { //Less errors if do it separatly
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
