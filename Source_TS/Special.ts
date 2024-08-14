@@ -2,7 +2,7 @@ import { changeIntervals, getId, getQuery } from './Main';
 import { global, player } from './Player';
 import { assignMaxRank } from './Stage';
 import type { globalSaveType } from './Types';
-import { numbersUpdate, visualUpdate } from './Update';
+import { format, numbersUpdate, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -11,7 +11,8 @@ export const globalSave: globalSaveType = {
         visual: 1000,
         autoSave: 20000
     },
-    toggles: [false, false, false], //Hotkeys type[0]; Elements as tab[1]; Auto Stage switch[2]
+    toggles: [false, false, false],
+    //Hotkeys type[0]; Elements as tab[1]; Allow text selection[2]
     format: ['.', ''], //Point[0]; Separator[1]
     theme: null,
     fontSize: 16,
@@ -22,7 +23,7 @@ export const globalSave: globalSaveType = {
 
 export const saveGlobalSettings = () => localStorage.setItem('fundamentalSettings', btoa(JSON.stringify(globalSave)));
 
-export const toggleSpecial = (number: number, type: 'normal' | 'mobile' | 'reader', change = false, reload = false) => {
+export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reader', change = false, reload = false) => {
     let toggles;
     if (type === 'mobile') {
         toggles = globalSave.MDSettings;
@@ -55,7 +56,7 @@ export const toggleSpecial = (number: number, type: 'normal' | 'mobile' | 'reade
     } else if (type === 'reader') {
         toggleHTML = getId(`SRToggle${number}`);
     } else {
-        toggleHTML = getId(`toggleNormal${number}`);
+        toggleHTML = getId(`globalToggle${number}`);
     }
 
     if (!toggles[number]) {
@@ -70,7 +71,7 @@ export const toggleSpecial = (number: number, type: 'normal' | 'mobile' | 'reade
 };
 
 export const specialHTML = { //Images here are from true vacuum for easier cache
-    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge'], //[0] === textContent
+    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', ''], //[0] === textContent
     longestBuilding: 7, //+1
     buildingHTML: [ //outerHTML is slow
         [],
@@ -125,8 +126,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeS1.png',
             'UpgradeS2.png',
             'UpgradeS3.png',
-            'UpgradeS4.png',
-            'UpgradeS5.png'
+            'UpgradeS4.png'
         ],
         [
             'UpgradeG1.png',
@@ -183,7 +183,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Cloud%20Researches.png', 'stage2borderImage'],
         ['Rank%20Researches.png', 'stage6borderImage'],
         ['Collapse%20Researches.png', 'stage6borderImage'],
-        ['Missing.png'/*'Galaxy%20Researches.png'*/, 'stage7borderImage']
+        ['Galaxy%20Researches.png', 'stage3borderImage']
     ],
     researchExtraHTML: [
         [],
@@ -199,7 +199,6 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchClouds2.png', 'stage2borderImage'],
             ['ResearchClouds3.png', 'stage4borderImage'],
             ['ResearchClouds4.png', 'stage2borderImage']
-            //['ResearchClouds5.png', 'stage2borderImage']
         ],
         [
             ['ResearchRank1.png', 'stage3borderImage'],
@@ -225,9 +224,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Energy.png', 'stage4borderImage orangeText', 'Energy']
         ],
         [
-            ['Clouds.png', 'stage3borderImage grayText', 'Clouds'],
             ['Water.png', 'stage2borderImage blueText', 'Moles'],
-            ['Drop.png', 'stage2borderImage blueText', 'Drops']
+            ['Drop.png', 'stage2borderImage blueText', 'Drops'],
+            ['Clouds.png', 'stage3borderImage grayText', 'Clouds']
         ],
         [
             ['Mass.png', 'stage3borderImage grayText', 'Mass']
@@ -249,6 +248,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         queryMap: new Map<string, HTMLElement>()
     },
     notifications: [] as Array<[string, () => void]>,
+    alert: [null, null] as [number | null, (() => void) | null],
     styleSheet: document.createElement('style') //Secondary
 };
 
@@ -276,22 +276,22 @@ export const preventImageUnload = () => {
         for (let i = 0; i < extra[s].length; i++) {
             images += `<img src="Used_art/${extra[s][i][0]}" loading="lazy">`;
         }
-        if (extraDiv[s].length > 0) { images += `<img src="Used_art/${extraDiv[s][0]}" loading="lazy">`; }
+        images += `<img src="Used_art/${extraDiv[s][0]}" loading="lazy">`;
         images += `<img src="Used_art/Stage${s}%20border.png" loading="lazy">`;
     }
     specialHTML.cache.imagesDiv.innerHTML = images; //Saved just in case
 };
 
-export const setTheme = (theme: number | null, reload = false) => {
+export const setTheme = (theme: number | null, noSwitch = false) => {
     if (theme !== null) {
         if (player.stage.true < theme) { theme = null; }
-        if (theme === 6 && player.stage.true < 7) { theme = null; }
-        if (reload && theme !== null) { return; }
+        if (theme === 6) { theme = null; }
+        if (noSwitch && theme !== null) { return; }
     }
 
     globalSave.theme = theme;
     saveGlobalSettings();
-    switchTheme();
+    if (!noSwitch) { switchTheme(); }
 };
 
 export const switchTheme = () => {
@@ -487,8 +487,8 @@ export const switchTheme = () => {
             body.setProperty('--red-text', 'red');
             body.setProperty('--yellow-text', 'var(--red-text)');
     }
-    getQuery('#footerStat2 > p').style.color = dropStatColor;
-    getQuery('#footerStat3 > p').style.color = waterStatColor;
+    getQuery('#footerStat1 > p').style.color = dropStatColor;
+    getQuery('#footerStat2 > p').style.color = waterStatColor;
 
     setTimeout(() => {
         body.removeProperty('--transition-all');
@@ -496,19 +496,22 @@ export const switchTheme = () => {
     }, 1000);
 };
 
-export const Alert = async(text: string): Promise<void> => {
+export const Alert = async(text: string, priority = 0): Promise<void> => {
     return await new Promise((resolve) => {
-        const blocker = getId('blocker');
-        if (blocker.style.display !== 'none') {
-            resolve();
-            Notify(`Another Alert is already active${globalSave.developerMode ?
-                `, type: 'Alert'\nText: ${text}` : ''
-            }`);
-            return;
+        if (specialHTML.alert[0] !== null) {
+            if (specialHTML.alert[0] < priority) {
+                (specialHTML.alert[1] as () => undefined)();
+                Notify(`Alert has been replaced with higher priority one\nOld text: ${getId('alertText').textContent}`);
+            } else {
+                resolve();
+                Notify(`Another Alert is already active\nMissed text: ${text}`);
+                return;
+            }
         }
 
         getId('alertText').textContent = text;
         const body = document.body;
+        const blocker = getId('alertMain');
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
         confirm.focus();
@@ -523,26 +526,31 @@ export const Alert = async(text: string): Promise<void> => {
             blocker.style.display = 'none';
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', close);
+            specialHTML.alert = [null, null];
             resolve();
         };
+        specialHTML.alert = [priority, close];
         body.addEventListener('keydown', key);
         confirm.addEventListener('click', close);
     });
 };
 
-export const Confirm = async(text: string): Promise<boolean> => {
+export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
     return await new Promise((resolve) => {
-        const blocker = getId('blocker');
-        if (blocker.style.display !== 'none') {
-            resolve(false);
-            Notify(`Another Alert is already active${globalSave.developerMode ?
-                `, type: 'Confirm'\nText: ${text}` : ''
-            }`);
-            return;
+        if (specialHTML.alert[0] !== null) {
+            if (specialHTML.alert[0] < priority) {
+                (specialHTML.alert[1] as () => undefined)();
+                Notify(`Alert has been replaced with higher priority one\nOld text: ${getId('alertText').textContent}`);
+            } else {
+                resolve(false);
+                Notify(`Another Alert is already active\nMissed text: ${text}`);
+                return;
+            }
         }
 
         getId('alertText').textContent = text;
         const body = document.body;
+        const blocker = getId('alertMain');
         const cancel = getId('alertCancel');
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
@@ -567,27 +575,32 @@ export const Confirm = async(text: string): Promise<boolean> => {
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', yes);
             cancel.removeEventListener('click', no);
+            specialHTML.alert = [null, null];
             resolve(result);
         };
+        specialHTML.alert = [priority, no];
         body.addEventListener('keydown', key);
         confirm.addEventListener('click', yes);
         cancel.addEventListener('click', no);
     });
 };
 
-export const Prompt = async(text: string, placeholder = ''): Promise<string | null> => {
+export const Prompt = async(text: string, placeholder = '', priority = 0): Promise<string | null> => {
     return await new Promise((resolve) => {
-        const blocker = getId('blocker');
-        if (blocker.style.display !== 'none') {
-            resolve(null);
-            Notify(`Another Alert is already active${globalSave.developerMode ?
-                `, type: 'Prompt'\nText: ${text}` : ''
-            }`);
-            return;
+        if (specialHTML.alert[0] !== null) {
+            if (specialHTML.alert[0] < priority) {
+                (specialHTML.alert[1] as () => undefined)();
+                Notify(`Alert has been replaced with higher priority one\nOld text: ${getId('alertText').textContent}`);
+            } else {
+                resolve(null);
+                Notify(`Another Alert is already active\nMissed text: ${text}`);
+                return;
+            }
         }
 
         getId('alertText').textContent = text;
         const body = document.body;
+        const blocker = getId('alertMain');
         const input = getId('alertInput') as HTMLInputElement;
         const cancel = getId('alertCancel');
         const confirm = getId('alertConfirm');
@@ -622,8 +635,10 @@ export const Prompt = async(text: string, placeholder = ''): Promise<string | nu
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', yes);
             cancel.removeEventListener('click', no);
+            specialHTML.alert = [null, null];
             resolve(result);
         };
+        specialHTML.alert = [priority, no];
         body.addEventListener('keydown', key);
         confirm.addEventListener('click', yes);
         cancel.addEventListener('click', no);
@@ -699,8 +714,8 @@ export const hideFooter = () => {
         getId('stageSelect').classList.add('active');
         setTimeout(animationReset, 800);
 
-        numbersUpdate();
         visualUpdate();
+        numbersUpdate();
     } else {
         footer.style.animation = 'hideY 800ms backwards';
         arrow.style.animation = 'rotate 800ms backwards';
@@ -731,14 +746,11 @@ const adjustCSSRules = (initial: boolean) => {
     const styleSheet = (getId('primaryRules') as HTMLStyleElement).sheet;
     if (styleSheet == null) { //Safari doesn't wait for CSS to load even if script is defered
         if (initial) {
-            Notify('Failed to adjust CSS, will retry after its loading is finished');
-            getId('primaryRules').addEventListener('load', () => {
-                Notify('Trying to adjust CSS again\n(Ignore it if no more notifications about it afterwards)');
+            return getId('primaryRules').addEventListener('load', () => {
                 adjustCSSRules(false);
-            });
-            return;
+            }, { once: true });
         }
-        return Notify(`Failed to adjust CSS due to style sheet being ${styleSheet}`);
+        return Notify(`Due to ${styleSheet} related Error some font size features will not work`);
     }
     const styleLength = styleSheet.cssRules.length - 1;
     const fontRatio = globalSave.fontSize / 16;
@@ -770,50 +782,51 @@ export const MDStrangenessPage = (stageIndex: number) => {
 };
 
 export const replayEvent = async() => {
-    if (getId('blocker').style.display !== 'none') { return; }
-
     let last;
     if (player.stage.true >= 6) {
-        last = 6;
+        last = player.stage.resets >= 1 ? 7 : 6;
     } else {
         last = player.stage.true - (player.events[0] ? 0 : 1);
         if (last < 1) { return void Alert('There are no unlocked events'); }
     }
 
-    let text = 'Which event do you want to see again?\nEvent 1: Discharge requirement';
+    let text = 'Which event do you want to see again?\nEvent 1: Stage reset';
     if (last >= 2) { text += '\nEvent 2: Clouds softcap'; }
     if (last >= 3) { text += '\nEvent 3: New Rank'; }
-    if (last >= 4) { text += '\nEvent 4: Element activation'; }
-    if (last >= 5) { text += '\nEvent 5: Intergalactic space'; }
+    if (last >= 4) { text += '\nEvent 4: New Elements'; }
+    if (last >= 5) { text += '\nEvent 5: Intergalactic'; }
     if (last >= 6) { text += '\nEvent 6: True Vacuum'; }
+    if (last >= 7) { text += '\nEvent 7: Void unlocked'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event > last) { return; }
-
-    void playEvent(event, -1);
+    playEvent(event, null);
 };
 
-export const playEvent = async(event: number, index: number) => {
-    if (getId('blocker').style.display !== 'none') { return; }
-    if (index >= 0) { player.events[index] = true; }
+export const playEvent = (event: number, index: number | null) => {
+    if (index !== null) {
+        if (specialHTML.alert[0] !== null) { return Notify("Please close current Alert to see 'Event' message"); }
+        player.events[index] = true;
+    }
 
     switch (event) {
         case 1:
-            return void Alert("Spent Energy can be regained only with Discharge, reaching new goal isn't required");
+            return void Alert('New reset tier has been unlocked. It will allow to reach higher tiers of Structures, but for the price of everything else');
         case 2:
-            return void Alert('Cloud density is too high... Strength of new Clouds will be weaker');
+            return void Alert(`Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to softcap`);
         case 3:
-            if (index >= 0) {
-                global.debug.rankUpdated = -1;
+            if (index !== null) {
+                global.debug.rankUpdated = null;
                 assignMaxRank();
             }
-            return void Alert("Accretion can't continue without a new Rank. Next Rank is going to be softcapped");
+            return void Alert("Can't gain any more Mass with current Rank. New one has been unlocked, but reaching it will softcap the Mass production");
         case 4:
-            return void Alert("Elements require Collapse to be activated. Solar mass won't decrease from Collapse");
+            return void Alert('Last explosion not only created first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis');
         case 5:
-            return void Alert('Intergalactic space is currently empty, but completing different Milestones from previous Stages will allow creation of new Structures');
+            return void Alert("There aren't any Structures in Intergalactic yet, but maybe new ones can be created within previous Stages. Any new Stage resets and exports from now on will award Strange quarks\n(Stars in Intergalactic are just Stars from Interstellar)");
         case 6:
-            await Alert('Vacuum is too unstable. Vacuum instability is imminent');
-            return void Alert('False Vacuum decayed, new Forces and Structures are expected');
+            return void Alert('Vacuum had decayed into its true State. New Forces and Structures are expected');
+        case 7:
+            return void Alert("Something new has been just discovered, it can be found inside 'Advanced' subtab");
     }
 };

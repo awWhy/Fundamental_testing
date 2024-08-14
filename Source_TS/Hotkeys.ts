@@ -1,9 +1,9 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
-import { buyBuilding, collapseAsyncReset, dischargeAsyncReset, rankAsyncReset, stageAsyncReset, switchStage, toggleSwap, vaporizationAsyncReset } from './Stage';
+import { buyBuilding, collapseResetUser, dischargeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
+import { buyAll, pauseGame } from './Main';
 import { globalSave } from './Special';
-import { buyAll, pauseGame, timeWarp } from './Main';
 
 export const detectHotkey = (check: KeyboardEvent) => {
     if (check.code === 'Tab') {
@@ -41,25 +41,27 @@ export const detectHotkey = (check: KeyboardEvent) => {
         const stringKey = (globalSave.toggles[0] ? key : code.replace('Key', '')).toLowerCase();
         if (shiftKey) {
             if (stringKey === 'a') {
+                if (check.repeat) { return; }
                 toggleSwap(0, 'buildings', true);
             }
         } else {
             if (stringKey === 'm') {
                 buyAll();
-            } else if (stringKey === 'w') {
-                check.preventDefault();
-                void timeWarp();
             } else if (stringKey === 's') {
-                void stageAsyncReset();
+                if (check.repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return; }
+                void stageResetUser();
             } else if (stringKey === 'd') {
-                if (global.stageInfo.activeAll.includes(1)) { void dischargeAsyncReset(); }
+                if (global.stageInfo.activeAll.includes(1)) { void dischargeResetUser(); }
             } else if (stringKey === 'v') {
-                if (global.stageInfo.activeAll.includes(2)) { void vaporizationAsyncReset(); }
+                if (check.repeat) { return; }
+                if (global.stageInfo.activeAll.includes(2)) { void vaporizationResetUser(); }
             } else if (stringKey === 'r') {
-                if (global.stageInfo.activeAll.includes(3)) { void rankAsyncReset(); }
+                if (global.stageInfo.activeAll.includes(3)) { void rankResetUser(); }
             } else if (stringKey === 'c') {
-                if (global.stageInfo.activeAll.includes(4)) { void collapseAsyncReset(); }
+                if (check.repeat) { return; }
+                if (global.stageInfo.activeAll.includes(4)) { void collapseResetUser(); }
             } else if (stringKey === 'p') {
+                if (check.repeat) { return; }
                 if (globalSave.developerMode) { void pauseGame(); }
             }
         }
@@ -102,25 +104,26 @@ export const detectHotkey = (check: KeyboardEvent) => {
             }
         }
     } else if (key === 'ArrowDown' || key === 'ArrowUp') {
-        const subtab = global.subtab[`${global.tab}Current` as keyof unknown] as string | undefined;
-        if (shiftKey || check.repeat || subtab === undefined) { return; }
-        const subtabs = global.tabList[`${global.tab as 'stage'}Subtabs`];
-        let index = subtabs.indexOf(subtab);
+        if (shiftKey || check.repeat) { return; }
+        const tab = global.tab;
+        const subtabs = global.tabList[`${tab}Subtabs`] as string[];
+        if (subtabs.length < 2) { return; } //To remove never[]
+        let index = subtabs.indexOf(global.subtab[`${tab}Current`]);
 
         if (key === 'ArrowDown') {
             do {
                 if (index <= 0) {
                     index = subtabs.length - 1;
                 } else { index--; }
-            } while (!checkTab(global.tab, subtabs[index]));
-            switchTab(global.tab, subtabs[index]);
+            } while (!checkTab(tab, subtabs[index]));
+            switchTab(tab, subtabs[index]);
         } else {
             do {
                 if (index >= subtabs.length - 1) {
                     index = 0;
                 } else { index++; }
-            } while (!checkTab(global.tab, subtabs[index]));
-            switchTab(global.tab, subtabs[index]);
+            } while (!checkTab(tab, subtabs[index]));
+            switchTab(tab, subtabs[index]);
         }
     }
 };

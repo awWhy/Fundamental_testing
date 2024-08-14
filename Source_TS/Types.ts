@@ -30,7 +30,7 @@ export interface playerType {
         massMax: number
         stars: [number, number, number]
         show: number
-        input: [number, boolean]
+        input: [number, number]
     }
     inflation: {
         vacuum: boolean
@@ -39,8 +39,8 @@ export interface playerType {
     time: {
         updated: number
         started: number
-        offline: number
         export: [number, number, number, number]
+        offline: number
         online: number
         stage: number
         universe: number
@@ -50,13 +50,11 @@ export interface playerType {
             current: Overlimit
             total: Overlimit
             trueTotal: Overlimit
-            highest: Overlimit
         }, ...Array<{
             true: number
             current: Overlimit
             total: Overlimit
             trueTotal: Overlimit
-            highest: Overlimit
         }>
     ]>
     strange: Array<{
@@ -76,7 +74,8 @@ export interface playerType {
         void: number[]
     }
     toggles: {
-        confirm: Array<'All' | 'Safe' | 'None'>
+        normal: boolean[]
+        confirm: Array<'Safe' | 'None'>
         buildings: boolean[][]
         hover: boolean[]
         max: boolean[]
@@ -104,6 +103,7 @@ export interface globalType {
         stageCurrent: string
         settingsCurrent: string
         upgradeCurrent: string
+        ElementsCurrent: never
         strangenessCurrent: string
     }
     tabList: {
@@ -111,14 +111,16 @@ export interface globalType {
         stageSubtabs: string[]
         settingsSubtabs: string[]
         upgradeSubtabs: string[]
+        ElementsSubtabs: never[]
         strangenessSubtabs: string[]
     }
     debug: {
+        offlineSpeed: number
         errorID: boolean
         errorQuery: boolean
         errorGain: boolean
-        rankUpdated: number
-        historyStage: number
+        rankUpdated: number | null
+        historyStage: number | null
     }
     trueActive: number
     lastSave: number
@@ -143,9 +145,10 @@ export interface globalType {
         next: number
     }
     vaporizationInfo: {
+        trueResearch0: number
+        trueResearch1: number
+        trueResearchRain: number
         strength: Overlimit
-        research0: number
-        research1: number
         get: Overlimit
     }
     accretionInfo: {
@@ -153,6 +156,7 @@ export interface globalType {
         rankU: number[]
         rankR: number[]
         rankE: number[]
+        dustSoft: number
         maxRank: number
         rankCost: number[]
         rankColor: string[]
@@ -169,8 +173,10 @@ export interface globalType {
         starCheck: [number, number, number]
         trueStars: number
     }
+    mergeInfo: {
+        galaxyBase: number
+    }
     inflationInfo: {
-        globalSpeed: number
         preonCap: Overlimit
         dustCap: Overlimit
         massCap: number
@@ -203,7 +209,9 @@ export interface globalType {
     strangeInfo: {
         name: string[]
         stageBoost: number[]
-        instability: number
+        strangeletsInfo: [number, number]
+        quarksGain: number
+        bestHistoryRate: number
     }
     upgradesInfo: Array<{
         name: string[]
@@ -256,24 +264,25 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
-    lastUpgrade: Array<[number, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
-    lastElement: number
-    lastStrangeness: [number, number]
-    lastMilestone: [number, number]
-    lastChallenge: [number, number]
+    lastUpgrade: Array<[number | null, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
+    lastElement: number | null
+    lastStrangeness: [number | null, number]
+    lastMilestone: [number | null, number]
+    lastChallenge: [number, number | null]
     milestonesInfo: Array<{
         name: string[]
-        need: Overlimit[]
-        reward: number[]
-        scalingOld: number[][]
         needText: Array<() => string>
         rewardText: Array<() => string>
+        need: Overlimit[]
+        time: number[]
+        scaling: number[][]
+        max: number[]
     }>
     challengesInfo: {
         name: string[]
         description: string[]
         effectText: Array<() => string>
-        needText: string[][][] //Change into Array<Array<Array<() => string | null>>>
+        needText: string[][][]
         rewardText: string[][][]
         color: string[]
     }
