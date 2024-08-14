@@ -152,7 +152,7 @@ const saveGame = async(noSaving = false): Promise<string | null> => {
 
         const save = btoa(JSON.stringify(player));
         if (!noSaving) {
-            localStorage.setItem('save', save);
+            localStorage.setItem('testing_save', save);
             clearInterval(global.intervalsId.autoSave);
             global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
             getId('isSaved').textContent = 'Saved';
@@ -231,7 +231,7 @@ const saveConsole = async() => {
         global.paused = true;
         changeIntervals();
         if (lower === 'delete') {
-            localStorage.removeItem('save');
+            localStorage.removeItem('testing_save');
         } else if (lower === 'reset') {
             localStorage.removeItem('fundamentalSettings');
         } else { localStorage.clear(); }
@@ -533,7 +533,7 @@ try { //Start everything
     }
 
     let oldVersion = player.version;
-    const save = localStorage.getItem('save');
+    const save = localStorage.getItem('testing_save');
     if (save !== null) {
         oldVersion = updatePlayer(JSON.parse(atob(save)));
     } else {
@@ -1034,7 +1034,7 @@ try { //Start everything
     let exported = false;
     getId('exportError').addEventListener('click', () => {
         exported = true;
-        const save = localStorage.getItem('save');
+        const save = localStorage.getItem('testing_save');
         if (save === null) { return void Alert('No save file detected'); }
         const a = document.createElement('a');
         a.href = `data:text/plain,${save}`;
@@ -1043,7 +1043,7 @@ try { //Start everything
     });
     getId('deleteError').addEventListener('click', async() => {
         if (!exported && !await Confirm("Recommended to export save file first\nPress 'Confirm' to confirm and delete your save file")) { return; }
-        localStorage.removeItem('save');
+        localStorage.removeItem('testing_save');
         window.location.reload();
         void Alert('Awaiting game reload');
     });

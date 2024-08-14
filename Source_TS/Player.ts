@@ -7,7 +7,7 @@ import { format, visualUpdateResearches } from './Update';
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = { //Only for information that need to be saved (cannot be calculated)
-    version: 'v0.2.1',
+    version: 'v0.2.1a',
     fileName: 'Fundamental, [dateD.M.Y] [timeH-M-S], [stage]',
     stage: {
         true: 1,
@@ -1485,7 +1485,7 @@ export const updatePlayer = (load: playerType): string => {
             if (load.inflation.vacuum) { load.milestones = deepClone(playerStart.milestones); }
         }
         if (load.version === 'v0.2.0') {
-            load.version = 'v0.2.1';
+            load.version = playerStart.version;
             load.time.offline = 0;
             load.toggles.normal = cloneArray(playerStart.toggles.normal);
             load.collapse.input = cloneArray(playerStart.collapse.input);
