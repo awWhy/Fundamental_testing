@@ -48,6 +48,7 @@
                             <p class="whiteText stage2Only"><span class="grayText">Vaporization</span> resets Structures and Upgrades for <span class="grayText">Clouds</span>. Their gain is based on current amount of <span class="blueText">Drops</span>.</p>
                             <p class="whiteText stage3Only"><img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false" id="rankImage">Current <span class="darkorchidText">Rank</span> is <span id="rankName"></span>.<br>Resets Structures, Upgrades and Stage Researches.</p>
                             <p class="whiteText stage4Only"><span class="orchidText">Collapse</span> resets Structures, Upgrades and all Researches for <span class="cyanText">Solar mass</span> and <span class="darkorchidText">Star remnants</span>.</p>
+                            <p class="whiteText stage5Only" id="mergeResetText">Missing</p>
                             <button type="button" id="reset1Button" tabindex="-1">Missing</button>
                         </section>
                     </article>
@@ -202,11 +203,15 @@
                             <p class="cyanText">Solar mass after Collapse: <span id="solarMassCollapse" class="orangeText">0</span><span id="solarMassCollapseMaxMain"> | Hardcap: <span id="solarMassCollapseMax" class="orangeText">0</span></span></p>
                             <p class="redText">Total production of Elements: <span id="elementsIntergalactic" class="orangeText">0</span></p>
                             <p class="orchidText">Total boost after Collapse: <span id="collapseBoostIntergalacticTotal" class="orangeText">1</span></p>
+                            <div id="mergeEffects">
+                                <p class="cyanText bigWord">Current effects</p>
+                                <p class="grayText">Galaxy groups: <span id="merge1Current" class="greenText">1</span><span id="merge1Explanation" class="greenText">Not yet in game</span></p>
+                            </div>
                         </div>
                     </div>
                     <div id="timeInfo">
                         <p class="blueText">Stage time: <span id="stageTime" class="cyanText">1 seconds</span><span id="stageTimeReal"> (Real: <span id="stageTimeRealStat" class="cyanText">0 seconds</span>)</span></p>
-                        <p id="currentChallenge" class="redText">Currently inside the <span>Void</span></p>
+                        <p id="currentChallenge" class="redText">Currently inside the <span>Missing</span></p>
                     </div>
                     <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpfull stuff</p>
                     <p id="MDMessage1" aria-hidden="true">If you are playing on Mobile device, then enabling support in Settings will add helpfull stuff, as well can fix some bugs</p>
@@ -389,6 +394,7 @@
                         <input type="image" src="Used_art/Element26.png" alt="Iron" draggable="false" id="element26" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                         <input type="image" src="Used_art/Element27.png" alt="Cobalt" draggable="false" id="element27" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                         <input type="image" src="Used_art/Element28.png" alt="Nickel" draggable="false" id="element28" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
+                        <input type="image" src="Used_art/Element29.png" alt="Copper" draggable="false" id="element29" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                     </div>
                     <div class="descriptionText">
                         <h3>Element: <span id="elementText" class="darkorchidText">Hover to see.</span></h3>
@@ -761,6 +767,13 @@
                                 </div>
                                 <button type="button" id="toggleAuto4" class="toggleAuto" title="Auto Collapse">Auto OFF</button>
                             </section>
+                            <section id="mergeToggleReset" class="stage5Include" aria-label="Merge">
+                                 <!-- src="Used_art/Merge%20toggle.png" --><img src="Used_art/Missing.png" alt="Merge" loading="lazy" draggable="false" title="Collapse" aria-hidden="true">
+                                <div>
+                                    <button type="button" id="toggleConfirm5" class="toggleConfirm" title="Merge Confirmation">All</button>
+                                </div>
+                                <!-- <button type="button" id="toggleAuto9" class="toggleAuto" title="Auto Merge">Auto OFF</button> -->
+                            </section>
                         </div>
                     </article>
                     <aside id="logoLinks" aria-label="Links">
@@ -832,12 +845,15 @@
                                             <p id="vaporizationHotkey" class="grayText stage2Include">V - <span class="whiteText">Vaporization</span></p>
                                             <p class="darkorchidText stage3Include">R - <span class="whiteText">Rank</span></p>
                                             <p id="collapseHotkey" class="orchidText stage4Include">C - <span class="whiteText">Collapse</span></p>
+                                            <p id="galaxyHotkey" class="grayText stage5Include">G - <span class="whiteText">Galaxy</span></p>
                                         </div>
                                         <p class="center bigWord mainText">When holding Shift:</p>
                                         <p id="stageChangeHotkey" class="mainText">Arrows left and right - <span class="whiteText">change active Stage</span></p>
                                         <p class="mainText">Numbers - <span class="whiteText">toggle auto Structure</span></p>
                                         <div class="hotkeysGrid">
                                             <p id="allStructuresHotkey" class="redText">A <span class="whiteText">or</span> 0 - <span class="whiteText">toggle all auto Structures</span></p>
+                                            <p id="mergeHotkey" class="cyanText stage5Include">M - <span class="whiteText">Merge</span></p>
+                                            <p class="darkvioletText stage6Include">U - <span class="whiteText">Universe</span></p>
                                         </div>
                                         <p class="mainText center bigWord">Holding Enter on last selected button will repeatedly press it, also works with Mouse on some buttons</p>
                                     </div>
@@ -887,7 +903,7 @@
                                     <button type="button" id="switchTheme3" class="stage3borderButton hollowButton grayText">Accretion</button>
                                     <button type="button" id="switchTheme4" class="stage4borderButton hollowButton orangeText">Interstellar</button>
                                     <button type="button" id="switchTheme5" class="stage5borderButton hollowButton darkorchidText">Intergalactic</button>
-                                    <button type="button" id="switchTheme6" class="stage6borderButton hollowButton darkvioletText">Void</button>
+                                    <button type="button" id="switchTheme6" class="stage6borderButton hollowButton darkvioletText">Abyss</button>
                                 </div>
                             </div>
                         </div>
@@ -908,7 +924,7 @@
                 <section id="settingsSubtabStats" class="insideTab" style="display: none;" aria-label="Stats">
                     <div class="stats">
                         <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span></p>
-                        <p>Online time: <span id="onlineTotal" class="whiteText">0 seconds ago</span><span id="stageResets"> | Stage resets: <span id="stageResetsCount" class="whiteText">0</span></p>
+                        <p>Online time: <span id="onlineTotal" class="whiteText">0 seconds ago</span><span id="stageResets"> | Stage resets: <span id="stageResetsCount" class="whiteText">0</span></span></p>
                         <p id="exportStats">Max export: <span class="whiteText"><span id="exportQuarksMax">1</span> Strange quarks</span><span id="exportStrangeletsMaxMain">, <span class="whiteText"><span id="exportStrangeletsMax">0</span> Strangelets</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
                         <article id="buildingsAllStats" class="statsWindows" aria-label="Structures">
                             <section id="building0Stats">
@@ -1029,6 +1045,7 @@
                                 <img src="Used_art/Planet.png" alt="Planet" loading="lazy" draggable="false" title="Planet" id="rankStat4">
                                 <img src="Used_art/Giant.png" alt="Jovian planet" loading="lazy" draggable="false" title="Jovian planet" id="rankStat5">
                                 <img src="Used_art/Protostar.png" alt="Protostar" loading="lazy" draggable="false" title="Protostar" id="rankStat6">
+                                <img src="Used_art/Protogalaxy.png" alt="Protogalaxy" loading="lazy" draggable="false" title="Protogalaxy" id="rankStat7">
                             </div>
                         </div>
                         <div class="stats stage4Only">
@@ -1060,7 +1077,7 @@
                             <button type="button" class="stage3borderButton stage3Include grayText" id="AccretionSwitch" tabindex="-1">Accretion</button>
                             <button type="button" class="stage4borderButton stage4Include orangeText" id="InterstellarSwitch" tabindex="-1">Interstellar</button>
                             <button type="button" class="stage5borderButton stage5Include darkorchidText" id="IntergalacticSwitch" tabindex="-1">Intergalactic</button>
-                            <button type="button" class="stage6borderButton stage6Include darkvioletText" id="VoidSwitch" tabindex="-1">Void</button>
+                            <button type="button" class="stage6borderButton stage6Include darkvioletText" id="AbyssSwitch" tabindex="-1">Abyss</button>
                         </div>
                     </nav>
                     <nav id="subtabs" style="display: none;" aria-label="Subtab list, Arrows down and up to change">
