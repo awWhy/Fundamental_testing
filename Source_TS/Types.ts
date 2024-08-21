@@ -32,7 +32,11 @@ export interface playerType {
         show: number
         input: [number, number]
     }
+    merge: {
+        reward: [number]
+    }
     inflation: {
+        cosmon: number
         vacuum: boolean
         age: number
     }
@@ -175,6 +179,7 @@ export interface globalType {
     }
     mergeInfo: {
         galaxyBase: number
+        checkReward: [number]
     }
     inflationInfo: {
         preonCap: Overlimit
@@ -280,7 +285,7 @@ export interface globalType {
     }>
     challengesInfo: {
         name: string[]
-        description: string[]
+        description: Array<() => string>
         effectText: Array<() => string>
         needText: string[][][]
         rewardText: string[][][]

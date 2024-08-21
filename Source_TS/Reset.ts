@@ -73,7 +73,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             calculateResearchCost(i, s, 'researchesExtra');
         }
         autoResearchesSet('researchesExtra', s);
-        setRemnants();
+        if (player.stage.active === 4) { setRemnants(); }
     }
 
     if (player.inflation.vacuum) {
@@ -97,11 +97,13 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;
 
-        for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
-            buildings[i as 1].true = 0;
-            buildings[i].current.setValue('0');
-            buildings[i].total.setValue('0');
-            buildings[i].trueTotal.setValue('0');
+        if (s !== 6) {
+            for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
+                buildings[i as 1].true = 0;
+                buildings[i].current.setValue('0');
+                buildings[i].total.setValue('0');
+                buildings[i].trueTotal.setValue('0');
+            }
         }
         buildings[0].current.setValue(buildingResetValue);
         buildings[0].total.setValue(buildingResetValue);
@@ -141,12 +143,13 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             global.lastElement = null;
         } else if (s === 5) {
             if (player.strangeness[5][5] < 1) { player.ASR[5] = 0; }
+            player.merge.reward = [0];
         }
     }
     player.researchesAuto[0] = player.strangeness[3][6];
     player.researchesAuto[1] = player.strangeness[4][6];
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
-    setRemnants();
+    if (player.stage.active === 4) { setRemnants(); }
 
     for (const s of stageIndex) { //Less errors if do it separatly
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
@@ -168,15 +171,17 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
 };
 
 export const resetVacuum = () => {
-    for (let s = 1; s <= 5; s++) {
+    for (let s = 1; s <= 6; s++) {
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;
 
-        for (let i = 1; i < playerStart.buildings[s].length; i++) {
-            buildings[i as 1].true = 0;
-            buildings[i].current.setValue('0');
-            buildings[i].total.setValue('0');
-            buildings[i].trueTotal.setValue('0');
+        if (s !== 6) {
+            for (let i = 1; i < playerStart.buildings[s].length; i++) {
+                buildings[i as 1].true = 0;
+                buildings[i].current.setValue('0');
+                buildings[i].total.setValue('0');
+                buildings[i].trueTotal.setValue('0');
+            }
         }
         buildings[0].current.setValue(buildingResetValue);
         buildings[0].total.setValue(buildingResetValue);
@@ -185,9 +190,11 @@ export const resetVacuum = () => {
         player.upgrades[s] = cloneArray(playerStart.upgrades[s]);
         player.researches[s] = cloneArray(playerStart.researches[s]);
         player.researchesExtra[s] = cloneArray(playerStart.researchesExtra[s]);
-        player.strangeness[s] = cloneArray(playerStart.strangeness[s]);
-        player.milestones[s] = cloneArray(playerStart.milestones[s]);
-        player.ASR[s] = 0;
+        if (s !== 6) {
+            player.strangeness[s] = cloneArray(playerStart.strangeness[s]);
+            player.milestones[s] = cloneArray(playerStart.milestones[s]);
+            player.ASR[s] = 0;
+        }
     }
     for (let i = 0; i < playerStart.researchesAuto.length; i++) {
         player.researchesAuto[i] = 0;
@@ -220,9 +227,13 @@ export const resetVacuum = () => {
     player.elements = cloneArray(playerStart.elements);
 
     //Stage 5 and Strangeness
+    player.merge.reward = [0];
+    player.challenges.active = -1;
     global.historyStorage.stage = [];
     player.history.stage.best = [3.1556952e16, 0, 0, 0];
     global.strangeInfo.bestHistoryRate = 0;
+    player.stage.current = 1;
+    player.stage.active = 1;
     player.stage.resets = 0;
     player.stage.peak = 0;
     player.stage.time = 0;
@@ -233,18 +244,16 @@ export const resetVacuum = () => {
         player.strange[i].total = 0;
     }
 
-    //Stage 6
-    player.challenges.active = -1;
-
     assignBuildingInformation();
     assignStrangeInfo[1]();
     assignStrangeInfo[0]();
     assignMaxRank();
     assignEnergyArray();
-    for (let s = 1; s <= 5; s++) {
+    for (let s = 1; s <= 6; s++) {
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
         calculateMaxLevel(0, s, 'ASR');
+        if (s === 6) { continue; }
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
         for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
     }

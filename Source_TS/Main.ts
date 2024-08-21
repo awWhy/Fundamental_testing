@@ -1,9 +1,9 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches } from './Update';
-import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
+import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings } from './Special';
 import { detectHotkey } from './Hotkeys';
-import { prepareVacuum, switchVacuum } from './Vacuum';
+import { prepareVacuum } from './Vacuum';
 
 /** Only for static HTML, by default (false) throws error if id is null */
 export const getId = (id: string, noError = false): HTMLElement => {
@@ -105,7 +105,7 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
         setTimeout(calculateOffline, 0, warpTime, start);
         getId('offlineRemains').textContent = format(warpTime, { type: 'time' });
         getId('offlinePercentage').textContent = format(100 - warpTime / start * 100, { padding: true });
-        if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').setAttribute('aria-valuetext', `${format(100 - warpTime / start * 100)}% done`); }
+        if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').ariaValueText = `${format(100 - warpTime / start * 100)}% done`; }
     } else { offlineEnd(); }
 };
 const offlineEnd = () => {
@@ -186,7 +186,7 @@ const loadGame = (save: string) => {
     }
 };
 const exportFileGame = async() => {
-    if (player.stage.resets >= (player.inflation.vacuum ? 1 : 4) &&
+    if ((player.stage.true >= 7 || player.stage.resets >= (player.inflation.vacuum ? 1 : 4)) &&
         (!globalSave.developerMode || await Confirm('Claim export reward? Export storage will not be reduced if to refuse'))) {
         awardExport();
     }
@@ -307,7 +307,7 @@ const replaceSaveFileSpecials = (): string => {
     ];
     const replaceWith = [
         global.stageInfo.word[player.stage.active],
-        global.stageInfo.word[Math.min(player.stage.true, 5)],
+        global.stageInfo.word[player.stage.true >= 7 ? 6 : Math.min(player.stage.true, 5)],
         `${player.strange[0].total}`,
         `${player.inflation.vacuum}`
     ];
@@ -444,8 +444,15 @@ try { //Start everything
             resetCollapse.textContent = 'Collapse';
             resetCollapse.id = 'resetCollapseFooter';
             resetCollapse.type = 'button';
-            getId('phoneHotkeys').prepend(reset1Button, resetCollapse, stageButton);
+            resetCollapse.className = 'stage5Only';
+            const resetGalaxy = document.createElement('button');
+            resetGalaxy.textContent = 'Galaxy';
+            resetGalaxy.id = 'resetGalaxyFooter';
+            resetGalaxy.type = 'button';
+            resetGalaxy.className = 'stage4Only';
+            getId('phoneHotkeys').prepend(resetGalaxy, reset1Button, resetCollapse, stageButton);
             resetCollapse.addEventListener('click', collapseResetUser);
+            resetGalaxy.addEventListener('click', () => buyBuilding(3, 5));
 
             const createUpgButton = document.createElement('button');
             createUpgButton.classList.add('hollowButton');
@@ -472,6 +479,10 @@ try { //Start everything
             (document.getElementById('SRMessage1') as HTMLElement).remove();
             for (let i = 0; i < 3; i++) {
                 const effectID = getId(i === 0 ? 'solarMassExplanation' : `star${i}Explanation`);
+                effectID.textContent = ` (${effectID.textContent})`;
+            }
+            for (let i = 1; i <= 1; i++) {
+                const effectID = getId(`merge${i}Explanation`);
                 effectID.textContent = ` (${effectID.textContent})`;
             }
 
@@ -520,7 +531,7 @@ try { //Start everything
 
             if (globalSave.SRSettings[2]) { primaryIndex(true); }
             for (let i = 0; i < globalSaveStart.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
-            specialHTML.styleSheet.textContent += '#starEffects > p > span { display: unset !important; }';
+            specialHTML.styleSheet.textContent += '#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }';
         }
         if (globalSave.developerMode) {
             const pauseButton = document.createElement('button');
@@ -634,6 +645,8 @@ try { //Start everything
                 void rankResetUser();
             } else if (active === 4) {
                 void collapseResetUser();
+            } else if (active === 5) {
+                void mergeResetUser();
             }
         };
         const clickHoldFunc = () => {
@@ -683,7 +696,9 @@ try { //Start everything
         if (PC) { image.addEventListener('mouseover', () => hoverChallenge(i, 'challenge')); }
         if (MD) { image.addEventListener('touchstart', () => hoverChallenge(i, 'challenge')); }
         if (SR) { image.addEventListener('focus', () => hoverChallenge(i, 'challenge')); }
-        image.addEventListener('click', i === -1 ? switchVacuum : () => { void enterExitChallengeUser(i); });
+        if (i >= 0) {
+            image.addEventListener('click', () => { void enterExitChallengeUser(i); });
+        }
     }
     for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
         const image = getId(`voidReward${global.stageInfo.word[i]}`);
@@ -781,7 +796,7 @@ try { //Start everything
                 if (key.code === 'Tab' && key.shiftKey) {
                     const element = getId('element0');
                     element.tabIndex = 0;
-                    element.setAttribute('aria-hidden', 'false');
+                    element.ariaHidden = 'false';
                 }
             });
             button.addEventListener('keydown', (key) => {
@@ -790,10 +805,16 @@ try { //Start everything
             button.addEventListener('blur', () => {
                 const element = getId('element0');
                 element.tabIndex = -1;
-                element.setAttribute('aria-hidden', 'true');
+                element.ariaHidden = 'true';
             });
         }
         if (PC) { button.addEventListener('dblclick', dblclickFunc); }
+        if (MD) {
+            button.addEventListener('touchstart', () => {
+                if (global.intervalsId.mouseRepeat !== undefined) { return; }
+                global.intervalsId.mouseRepeat = setTimeout(dblclickFunc, 3000);
+            });
+        }
     }
     for (let i = 1; i < global.elementsInfo.startCost.length; i++) {
         const image = getId(`element${i}`);

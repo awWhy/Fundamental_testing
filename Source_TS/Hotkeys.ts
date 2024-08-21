@@ -1,7 +1,7 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
-import { buyBuilding, collapseResetUser, dischargeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
+import { buyBuilding, collapseResetUser, dischargeResetUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGame } from './Main';
 import { globalSave } from './Special';
 
@@ -43,6 +43,11 @@ export const detectHotkey = (check: KeyboardEvent) => {
             if (stringKey === 'a') {
                 if (check.repeat) { return; }
                 toggleSwap(0, 'buildings', true);
+            } else if (stringKey === 'm') {
+                if (check.repeat) { return; }
+                void mergeResetUser();
+            } else if (stringKey === 'u') {
+                buyBuilding(1, 6);
             }
         } else {
             if (stringKey === 'm') {
@@ -51,18 +56,20 @@ export const detectHotkey = (check: KeyboardEvent) => {
                 if (check.repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return; }
                 void stageResetUser();
             } else if (stringKey === 'd') {
-                if (global.stageInfo.activeAll.includes(1)) { void dischargeResetUser(); }
+                void dischargeResetUser();
             } else if (stringKey === 'v') {
                 if (check.repeat) { return; }
-                if (global.stageInfo.activeAll.includes(2)) { void vaporizationResetUser(); }
+                void vaporizationResetUser();
             } else if (stringKey === 'r') {
-                if (global.stageInfo.activeAll.includes(3)) { void rankResetUser(); }
+                void rankResetUser();
             } else if (stringKey === 'c') {
                 if (check.repeat) { return; }
-                if (global.stageInfo.activeAll.includes(4)) { void collapseResetUser(); }
+                void collapseResetUser();
+            } else if (stringKey === 'g') {
+                buyBuilding(3, 5);
             } else if (stringKey === 'p') {
-                if (check.repeat) { return; }
-                if (globalSave.developerMode) { void pauseGame(); }
+                if (check.repeat || !globalSave.developerMode) { return; }
+                void pauseGame();
             }
         }
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {

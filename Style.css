@@ -568,13 +568,15 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 0.2em;
 }
 
-#starEffects {
+#starEffects, #mergeEffects {
     width: max-content;
     align-self: center;
     cursor: help;
 }
 
+#mergeEffects:hover > p > span:first-of-type,
 #starEffects:hover > p > span:first-of-type { display: none; }
+#mergeEffects:not(:hover) > p > span:last-of-type,
 #starEffects:not(:hover) > p > span:last-of-type { display: none; }
 
 #timeInfo {
@@ -606,6 +608,8 @@ input:-webkit-autofill { /* Chrome related pain */
 #challengeMultiline { text-align: center; }
 #challengeMultiline p { white-space: pre-line; }
 #challengeMultiline > div { margin-top: 1.2em; }
+
+#challenge0 { cursor: help; }
 
 #voidRewards > h3 {
     text-align: center;
@@ -1438,7 +1442,6 @@ li .hollowButton {
     #elementsGrid { grid-template-columns: repeat(var(--elements-columns-phone), 1fr); }
     #element2 { grid-column: var(--elements-columns-phone); }
     #element5, #element13 { grid-column: calc(var(--elements-columns-phone) - 5); }
-    #element0 { display: none; }
 
     #strangeStructures {
         margin-top: -0.4em;
@@ -1483,5 +1486,7 @@ li .hollowButton {
         height: 32px;
         object-fit: scale-down;
     }
+
+    #element0 { display: none; }
 }
 /* No rules are allowed past this point */

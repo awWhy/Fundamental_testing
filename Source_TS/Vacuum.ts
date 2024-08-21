@@ -1,23 +1,24 @@
 import { getId, getQuery } from './Main';
 import { global, player, playerStart } from './Player';
 import { resetVacuum } from './Reset';
-import { Alert, Confirm, globalSave, playEvent, specialHTML } from './Special';
+import { globalSave, playEvent, specialHTML } from './Special';
 import { switchTab } from './Update';
 
 export const prepareVacuum = (state: boolean) => { //Must not use direct player values
     const { buildings } = playerStart;
     const { buildingsInfo, upgradesInfo, researchesInfo, researchesExtraInfo, strangenessInfo } = global;
     const star3ExpId = getId('star3Explanation');
-    let upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
+    let buildingsActive, upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
 
     if (state) {
+        getId('mergeResetText').innerHTML = '<span class="cyanText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
         buildingsInfo.hoverText[2][0] = 'Tritium';
         buildingsInfo.hoverText[3][0] = 'Preons hardcap';
         buildings[1][0].current.setValue('5.476e-3');
         buildings[2][0].current.setValue('0');
         buildings[3][0].current.setValue('9.76185667392e-36');
-        buildingsInfo.maxActive = [0, 6, 7, 6, 6, 4];
+        buildingsActive = [6, 7, 6, 6, 4];
         if (buildingsInfo.name[1][0] !== 'Mass') {
             specialHTML.buildingHTML[1].unshift('Preon.png', 'Quarks.png');
             buildingsInfo.name[1].unshift('Mass', 'Preons');
@@ -30,11 +31,12 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
         upgrades1Cost = [40, 60, 100, 120, 180, 360, 1200, 3600, 12000, 80000];
         upgradesInfo[2].startCost[0] = 10;
+        upgradesInfo[5].startCost[3] = 1e160;
         //upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 9;
         //upgradesInfo[3].maxActive = 13;
-        //upgradesInfo[4].maxActive = 4;
-        //upgradesInfo[5].maxActive = 3;
+        upgradesInfo[4].maxActive = 5;
+        //upgradesInfo[5].maxActive = 4;
 
         researches1Cost = [1600, 4800, 16000, 32000, 16000, 24000];
         researches1Scaling = [400, 1200, 8000, 40000, 16000, 16000];
@@ -43,13 +45,13 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         //researchesInfo[1].maxActive = 6;
         //researchesInfo[2].maxActive = 6;
         //researchesInfo[3].maxActive = 9;
-        //researchesInfo[4].maxActive = 5;
+        researchesInfo[4].maxActive = 6;
         //researchesInfo[5].maxActive = 2;
 
         researchesExtraInfo[1].maxActive = 5;
         researchesExtraInfo[2].maxActive = 4;
         researchesExtraInfo[3].maxActive = 5;
-        //researchesExtraInfo[4].maxActive = 3;
+        researchesExtraInfo[4].maxActive = 4;
         //researchesExtraInfo[5].maxActive = 1;
 
         global.elementsInfo.startCost[27] = 1e54;
@@ -102,7 +104,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
             buildingsInfo.name[1].splice(0, 2);
             buildingsInfo.hoverText[1].splice(0, 2);
         }
-        buildingsInfo.maxActive = [0, 4, 6, 5, 5, 4];
+        buildingsActive = [4, 6, 5, 5, 4];
         buildingsInfo.startCost[1] = [0, 3, 24, 3];
         buildingsInfo.type[2][1] = 'producing';
         buildingsInfo.type[3][1] = 'producing';
@@ -110,11 +112,12 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
         upgrades1Cost = [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800];
         upgradesInfo[2].startCost[0] = 1e4;
+        upgradesInfo[5].startCost[3] = 1e150;
         upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 8;
         upgradesInfo[3].maxActive = 13;
         upgradesInfo[4].maxActive = 4;
-        upgradesInfo[5].maxActive = 3;
+        upgradesInfo[5].maxActive = 4;
 
         researches1Cost = [600, 2000, 4000, 4000, 6000, 6000];
         researches1Scaling = [200, 400, 2000, 12000, 4000, 6000];
@@ -179,6 +182,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         }
     }
 
+    buildingsInfo.maxActive.splice(1, buildingsActive.length, ...buildingsActive);
     upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
     researchesInfo[1].startCost.splice(0, researches1Cost.length, ...researches1Cost);
     researchesInfo[1].scaling.splice(0, researches1Scaling.length, ...researches1Scaling);
@@ -200,21 +204,17 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     }
 };
 
-export const switchVacuum = async() => {
-    if (player.inflation.vacuum) { return void Alert('This cannot be undone'); }
-    if (player.milestones[5][1] < 8) { return void Alert('Universe is still stable'); }
-    if (global.paused || !await Confirm('Allow Vacuum to decay into its true State?\nThis will not be possible to undo')) { return; }
-
-    if (player.stage.true < 6) {
+export const switchVacuum = () => {
+    if (player.inflation.vacuum) { return; }
+    if (player.stage.true >= 7) {
+        player.inflation.cosmon += 1;
+    } else {
         player.stage.true = 6;
         player.collapse.show = 0;
         switchTab('stage', 'Structures');
-        playEvent(6, null);
+        playEvent(6);
     }
     player.inflation.vacuum = true;
-    player.stage.current = 1;
-    player.stage.active = 1;
     prepareVacuum(true);
     resetVacuum();
-    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Vacuum state is now true'; }
 };

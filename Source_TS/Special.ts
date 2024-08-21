@@ -1,6 +1,5 @@
 import { changeIntervals, getId, getQuery } from './Main';
 import { global, player } from './Player';
-import { assignMaxRank } from './Stage';
 import type { globalSaveType } from './Types';
 import { format, numbersUpdate, visualUpdate } from './Update';
 
@@ -71,7 +70,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 };
 
 export const specialHTML = { //Images here are from true vacuum for easier cache
-    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', ''], //[0] === textContent
+    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge'], //[0] === textContent
     longestBuilding: 7, //+1
     buildingHTML: [ //outerHTML is slow
         [],
@@ -79,12 +78,12 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Drop.png', 'Puddle.png', 'Pond.png', 'Lake.png', 'Sea.png', 'Ocean.png'],
         ['Cosmic%20dust.png', 'Planetesimal.png', 'Protoplanet.png', 'Natural%20satellite.png', 'Subsatellite.png'],
         ['Brown%20dwarf.png', 'Orange%20dwarf.png', 'Red%20supergiant.png', 'Blue%20hypergiant.png', 'Quasi%20star.png'],
-        ['Nebula.png', 'Star%20cluster.png', 'Galaxy.png']
+        ['Nebula.png', 'Star%20cluster.png', 'Galaxy.png'],
+        ['Missing.png'] //Universe
     ],
     longestUpgrade: 13,
     upgradeHTML: [
-        [],
-        [
+        [], [
             'UpgradeQ1.png',
             'UpgradeQ2.png',
             'UpgradeQ3.png',
@@ -95,8 +94,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeQ8.png',
             'UpgradeQ9.png',
             'UpgradeQ10.png'
-        ],
-        [
+        ], [
             'UpgradeW1.png',
             'UpgradeW2.png',
             'UpgradeW3.png',
@@ -106,8 +104,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeW7.png',
             'UpgradeW8.png',
             'UpgradeW9.png'
-        ],
-        [
+        ], [
             'UpgradeA1.png',
             'UpgradeA2.png',
             'UpgradeA3.png',
@@ -121,39 +118,36 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeA11.png',
             'UpgradeA12.png',
             'UpgradeA13.png'
-        ],
-        [
+        ], [
             'UpgradeS1.png',
             'UpgradeS2.png',
             'UpgradeS3.png',
-            'UpgradeS4.png'
-        ],
-        [
+            'UpgradeS4.png',
+            'UpgradeS5.png'
+        ], [
             'UpgradeG1.png',
             'UpgradeG2.png',
-            'UpgradeG3.png'
-        ]
+            'UpgradeG3.png',
+            'Missing.png' //'UpgradeG4.png'
+        ], []
     ],
     longestResearch: 9,
     researchHTML: [
-        [],
-        [
+        [], [
             ['ResearchQ1.png', 'stage1borderImage'], //[1] === className
             ['ResearchQ2.png', 'stage1borderImage'],
             ['ResearchQ3.png', 'stage1borderImage'],
             ['ResearchQ4.png', 'stage4borderImage'],
             ['ResearchQ5.png', 'stage4borderImage'],
             ['ResearchQ6.png', 'stage4borderImage']
-        ],
-        [
+        ], [
             ['ResearchW1.png', 'stage2borderImage'],
             ['ResearchW2.png', 'stage2borderImage'],
             ['ResearchW3.png', 'stage2borderImage'],
             ['ResearchW4.png', 'stage2borderImage'],
             ['ResearchW5.png', 'stage2borderImage'],
             ['ResearchW6.png', 'stage2borderImage']
-        ],
-        [
+        ], [
             ['ResearchA1.png', 'stage3borderImage'],
             ['ResearchA2.png', 'stage2borderImage'],
             ['ResearchA3.png', 'stage3borderImage'],
@@ -163,18 +157,17 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchA7.png', 'stage1borderImage'],
             ['ResearchA8.png', 'stage7borderImage'],
             ['ResearchA9.png', 'stage1borderImage']
-        ],
-        [
+        ], [
             ['ResearchS1.png', 'stage5borderImage'],
             ['ResearchS2.png', 'stage5borderImage'],
             ['ResearchS3.png', 'stage7borderImage'],
             ['ResearchS4.png', 'stage5borderImage'],
-            ['ResearchS5.png', 'stage6borderImage']
-        ],
-        [
+            ['ResearchS5.png', 'stage6borderImage'],
+            ['Missing.png', 'stage7borderImage'] //['ResearchS5.png', 'stage6borderImage']
+        ], [
             ['ResearchG1.png', 'stage1borderImage'],
             ['ResearchG2.png', 'stage6borderImage']
-        ]
+        ], []
     ],
     longestResearchExtra: 5,
     researchExtraDivHTML: [
@@ -183,62 +176,57 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Cloud%20Researches.png', 'stage2borderImage'],
         ['Rank%20Researches.png', 'stage6borderImage'],
         ['Collapse%20Researches.png', 'stage6borderImage'],
-        ['Galaxy%20Researches.png', 'stage3borderImage']
+        ['Galaxy%20Researches.png', 'stage3borderImage'],
+        ['Missing.png', 'stage7borderImage']
     ],
     researchExtraHTML: [
-        [],
-        [
+        [], [
             ['ResearchEnergy1.png', 'stage1borderImage'],
             ['ResearchEnergy2.png', 'stage5borderImage'],
             ['ResearchEnergy3.png', 'stage3borderImage'],
             ['ResearchEnergy4.png', 'stage1borderImage'],
             ['ResearchEnergy5.png', 'stage6borderImage']
-        ],
-        [
+        ], [
             ['ResearchClouds1.png', 'stage3borderImage'],
             ['ResearchClouds2.png', 'stage2borderImage'],
             ['ResearchClouds3.png', 'stage4borderImage'],
             ['ResearchClouds4.png', 'stage2borderImage']
-        ],
-        [
+        ], [
             ['ResearchRank1.png', 'stage3borderImage'],
             ['ResearchRank2.png', 'stage3borderImage'],
             ['ResearchRank3.png', 'stage3borderImage'],
             ['ResearchRank4.png', 'stage2borderImage'],
             ['ResearchRank5.png', 'stage2borderImage']
-        ],
-        [
+        ], [
             ['ResearchCollapse1.png', 'stage6borderImage'],
             ['ResearchCollapse2.png', 'stage7borderImage'],
-            ['ResearchCollapse3.png', 'stage1borderImage']
-        ],
-        [
+            ['ResearchCollapse3.png', 'stage1borderImage'],
+            ['Missing.png', 'stage7borderImage'] //['ResearchCollapse4.png', 'stage1borderImage']
+        ], [
             ['ResearchGalaxy1.png', 'stage3borderImage']
-        ]
+        ], []
     ],
     longestFooterStats: 3,
     footerStatsHTML: [
-        [],
-        [
+        [], [
             ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'], //[2] === textcontent
             ['Energy.png', 'stage4borderImage orangeText', 'Energy']
-        ],
-        [
+        ], [
             ['Water.png', 'stage2borderImage blueText', 'Moles'],
             ['Drop.png', 'stage2borderImage blueText', 'Drops'],
             ['Clouds.png', 'stage3borderImage grayText', 'Clouds']
-        ],
-        [
+        ], [
             ['Mass.png', 'stage3borderImage grayText', 'Mass']
-        ],
-        [
+        ], [
             ['Main_sequence%20mass.png', 'stage1borderImage cyanText', 'Mass'],
             ['Elements.png', 'stage4borderImage orangeText', 'Elements']
-        ],
-        [
+        ], [
             ['Main_sequence%20mass.png', 'stage1borderImage cyanText', 'Mass'],
             ['Elements.png', 'stage4borderImage orangeText', 'Elements'],
             ['Stars.png', 'stage7borderImage redText', 'Stars']
+        ], [
+            ['Missing.png', 'stage7borderImage redText', 'Missing'],
+            ['Missing.png', 'stage7borderImage redText', 'Cosmon']
         ]
     ],
     cache: {
@@ -256,8 +244,9 @@ export const preventImageUnload = () => {
     const { footerStatsHTML: footer, buildingHTML: build, upgradeHTML: upgrade, researchHTML: research, researchExtraHTML: extra, researchExtraDivHTML: extraDiv } = specialHTML;
     //Duplicates are ignored, unless they are from Strangeness, because duplicates from there could become unique in future
 
-    let images = '<img src="Used_art/Red%20giant" loading="lazy"><img src="Used_art/White%20dwarf" loading="lazy">';
-    for (let s = 1; s <= 5; s++) {
+    let images = '<img src="Used_art/Red%20giant.png" loading="lazy"><img src="Used_art/White%20dwarf.png" loading="lazy">';
+    images += '<img src="Used_art/Neutron%20star.png" loading="lazy"><img src="Used_art/Missing.png" loading="lazy">'; //Quark%20star.png
+    for (let s = 1; s <= 6; s++) { //6
         for (let i = 0; i < footer[s].length; i++) {
             if (s === 2) {
                 if (i === 2) { continue; } //Drops
@@ -285,7 +274,7 @@ export const preventImageUnload = () => {
 export const setTheme = (theme: number | null, noSwitch = false) => {
     if (theme !== null) {
         if (player.stage.true < theme) { theme = null; }
-        if (theme === 6) { theme = null; }
+        if (theme === 6 && player.stage.true < 7) { theme = null; }
         if (noSwitch && theme !== null) { return; }
     }
 
@@ -665,7 +654,7 @@ export const Notify = (text: string) => {
         html.textContent = text;
         html.style.animation = 'hideX 800ms ease-in-out reverse';
         html.style.pointerEvents = 'none';
-        if (globalSave.SRSettings[0]) { html.setAttribute('role', 'alert'); } //Firefox only recently added support for .role (in version 119)
+        if (globalSave.SRSettings[0]) { html.role = 'alert'; }
         getId('notifications').append(html);
 
         const pointer = notifications[notifications.push([text, () => {
@@ -784,7 +773,7 @@ export const MDStrangenessPage = (stageIndex: number) => {
 export const replayEvent = async() => {
     let last;
     if (player.stage.true >= 6) {
-        last = player.stage.resets >= 1 ? 7 : 6;
+        last = player.events[1] ? 8 : player.stage.resets >= 1 ? 7 : 6;
     } else {
         last = player.stage.true - (player.events[0] ? 0 : 1);
         if (last < 1) { return void Alert('There are no unlocked events'); }
@@ -797,17 +786,17 @@ export const replayEvent = async() => {
     if (last >= 5) { text += '\nEvent 5: Intergalactic'; }
     if (last >= 6) { text += '\nEvent 6: True Vacuum'; }
     if (last >= 7) { text += '\nEvent 7: Void unlocked'; }
+    if (last >= 8) { text += '\nEvent 8: New Universe'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event > last) { return; }
-    playEvent(event, null);
+    playEvent(event);
 };
 
-export const playEvent = (event: number, index: number | null) => {
-    if (index !== null) {
-        if (specialHTML.alert[0] !== null) { return Notify("Please close current Alert to see 'Event' message"); }
-        player.events[index] = true;
-    }
+/** Sets player.events[index] to true if provided */
+export const playEvent = (event: number, index = null as number | null) => {
+    if (specialHTML.alert[0] !== null) { return Notify(`Missed Event ${event}, you can replay it from options`); }
+    if (index !== null) { player.events[index] = true; }
 
     switch (event) {
         case 1:
@@ -815,18 +804,16 @@ export const playEvent = (event: number, index: number | null) => {
         case 2:
             return void Alert(`Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to softcap`);
         case 3:
-            if (index !== null) {
-                global.debug.rankUpdated = null;
-                assignMaxRank();
-            }
             return void Alert("Can't gain any more Mass with current Rank. New one has been unlocked, but reaching it will softcap the Mass production");
         case 4:
             return void Alert('Last explosion not only created first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis');
         case 5:
             return void Alert("There aren't any Structures in Intergalactic yet, but maybe new ones can be created within previous Stages. Any new Stage resets and exports from now on will award Strange quarks\n(Stars in Intergalactic are just Stars from Interstellar)");
         case 6:
-            return void Alert('Vacuum had decayed into its true State. New Forces and Structures are expected');
+            return void Alert('As Galaxies started to Merge, their combined Gravity pushed Vacuum out of its local minimum into more stable global minimum. New forces and Structures are expected within this new and true Vacuum state');
         case 7:
-            return void Alert("Something new has been just discovered, it can be found inside 'Advanced' subtab");
+            return void Alert("With Vacuum decaying remaining matter had rearranged itself in such way that lead to the formation of the 'Void'. Check it out in 'Advanced' subtab");
+        case 8:
+            return void Alert("There is now enough matter to create the 'Universe', it can be done within new 'Abyss' Stage. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
     }
 };

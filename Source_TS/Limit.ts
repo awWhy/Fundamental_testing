@@ -60,7 +60,7 @@ export default class Overlimit extends Array<number> {
     /** Power must be a number */
     power(power: number) { return this.#privateSet(technical.pow(this, power)); }
     /** Root must be a number, default value is 2 */
-    //root(root = 2) { return this.#privateSet(technical.pow(this, 1 / root)); }
+    root(root = 2) { return this.#privateSet(technical.pow(this, 1 / root)); }
     /** Base must be a number, default value is Math.E */
     log(base = 2.718281828459045) { return this.#privateSet(technical.log(this, base)); }
 
