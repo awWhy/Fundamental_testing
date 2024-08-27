@@ -36,8 +36,9 @@ export interface playerType {
         reward: [number]
     }
     inflation: {
-        cosmon: number
+        tree: number[]
         vacuum: boolean
+        resets: number
         age: number
     }
     time: {
@@ -65,6 +66,10 @@ export interface playerType {
         current: number
         total: number
     }>
+    cosmon: {
+        current: number
+        total: number
+    }
     upgrades: number[][]
     researches: number[][]
     researchesExtra: number[][]
@@ -74,7 +79,7 @@ export interface playerType {
     strangeness: number[][]
     milestones: number[][]
     challenges: {
-        active: number
+        active: number | null
         void: number[]
     }
     toggles: {
@@ -99,7 +104,7 @@ export interface playerType {
     events: boolean[]
 }
 
-export type gameTab = 'stage' | 'upgrade' | 'strangeness' | 'settings' | 'Elements';
+export type gameTab = 'stage' | 'upgrade' | 'Elements' | 'strangeness' | 'inflation' | 'settings';
 
 export interface globalType {
     tab: gameTab
@@ -109,6 +114,7 @@ export interface globalType {
         upgradeCurrent: string
         ElementsCurrent: never
         strangenessCurrent: string
+        inflationCurrent: string
     }
     tabList: {
         tabs: gameTab[]
@@ -117,6 +123,7 @@ export interface globalType {
         upgradeSubtabs: string[]
         ElementsSubtabs: never[]
         strangenessSubtabs: string[]
+        inflationSubtabs: string[]
     }
     debug: {
         offlineSpeed: number
@@ -175,6 +182,7 @@ export interface globalType {
         unlockR: number[]
         newMass: number
         starCheck: [number, number, number]
+        trueProduction: Overlimit
         trueStars: number
     }
     mergeInfo: {
@@ -182,6 +190,7 @@ export interface globalType {
         checkReward: [number]
     }
     inflationInfo: {
+        globalSpeed: number
         preonCap: Overlimit
         dustCap: Overlimit
         massCap: number
@@ -269,20 +278,34 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
+    inflationTreeInfo: {
+        name: string[]
+        effectText: Array<() => string>
+        cost: number[]
+        startCost: number[]
+        scaling: number[]
+        max: number[]
+    }
     lastUpgrade: Array<[number | null, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
     lastElement: number | null
     lastStrangeness: [number | null, number]
+    lastInflation: number | null
     lastMilestone: [number | null, number]
-    lastChallenge: [number, number | null]
+    lastChallenge: [number | null, number | null]
     milestonesInfo: Array<{
         name: string[]
         needText: Array<() => string>
         rewardText: Array<() => string>
         need: Overlimit[]
         time: number[]
+        reward: number[]
         scaling: number[][]
         max: number[]
     }>
+    milestonesInfoS6: {
+        requirement: number[]
+        active: boolean[]
+    }
     challengesInfo: {
         name: string[]
         description: Array<() => string>

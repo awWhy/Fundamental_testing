@@ -1,7 +1,7 @@
-import { allowedToBeReset } from './Check';
+import { allowedToBeReset, checkTab } from './Check';
 import { cloneArray, global, player, playerStart } from './Player';
 import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignEnergyArray } from './Stage';
-import { numbersUpdate, setRemnants, stageUpdate, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { numbersUpdate, setRemnants, stageUpdate, switchTab, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
     if (type === 'galaxy') {
@@ -159,6 +159,7 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
         autoResearchesSet('researches', s);
         autoResearchesSet('researchesExtra', s);
     }
+    switchTab(checkTab(global.tab) ? global.tab : 'stage'); //Update subtab list
 
     assignBuildingInformation();
     if (update !== false) {
@@ -228,12 +229,12 @@ export const resetVacuum = () => {
 
     //Stage 5 and Strangeness
     player.merge.reward = [0];
-    player.challenges.active = -1;
+    //if (!global.milestones2Info.active[0]) { player.challenges.void = cloneArray(playerStart.challenges.void); }
+    player.challenges.active = null;
     global.historyStorage.stage = [];
     player.history.stage.best = [3.1556952e16, 0, 0, 0];
     global.strangeInfo.bestHistoryRate = 0;
     player.stage.current = 1;
-    player.stage.active = 1;
     player.stage.resets = 0;
     player.stage.peak = 0;
     player.stage.time = 0;

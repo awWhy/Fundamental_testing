@@ -1,5 +1,5 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
-import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches } from './Update';
+import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation } from './Update';
 import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings } from './Special';
 import { detectHotkey } from './Hotkeys';
@@ -25,11 +25,10 @@ export const getId = (id: string, noError = false): HTMLElement => {
     throw new ReferenceError(`ID - '${id}' doesn't exist`);
 };
 
-/** Adding any new HTML to existing class will require resetting it */
+/** Id collection will be auto updated by browser */
 export const getClass = (idCollection: string): HTMLCollectionOf<HTMLElement> => {
     const test = specialHTML.cache.classMap.get(idCollection);
     if (test !== undefined) { return test; }
-
     const store = document.getElementsByClassName(idCollection) as HTMLCollectionOf<HTMLElement>;
     specialHTML.cache.classMap.set(idCollection, store);
     return store;
@@ -307,7 +306,7 @@ const replaceSaveFileSpecials = (): string => {
     ];
     const replaceWith = [
         global.stageInfo.word[player.stage.active],
-        global.stageInfo.word[player.stage.true >= 7 ? 6 : Math.min(player.stage.true, 5)],
+        player.stage.true === 6 ? 'Void' : global.stageInfo.word[player.stage.true >= 7 ? 6 : player.stage.true],
         `${player.strange[0].total}`,
         `${player.inflation.vacuum}`
     ];
@@ -331,11 +330,15 @@ const cancelRepeat = () => {
     global.intervalsId.mouseRepeat = undefined;
 };
 
-const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements') => {
-    if (player.toggles.hover[0] && player.stage.true >= 2) { buyUpgrades(index, player.stage.active, type); }
-    if (type === 'elements') {
-        global.lastElement = index;
-    } else { global.lastUpgrade[player.stage.active] = [index, type]; }
+const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'inflation') => {
+    if (type === 'inflation') {
+        global.lastInflation = index;
+    } else {
+        if (player.toggles.hover[0] && player.stage.true >= 2) { buyUpgrades(index, player.stage.active, type); }
+        if (type === 'elements') {
+            global.lastElement = index;
+        } else { global.lastUpgrade[player.stage.active] = [index, type]; }
+    }
     getUpgradeDescription(index, type);
 };
 const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones') => {
@@ -451,16 +454,20 @@ try { //Start everything
             resetGalaxy.type = 'button';
             resetGalaxy.className = 'stage4Only';
             getId('phoneHotkeys').prepend(resetGalaxy, reset1Button, resetCollapse, stageButton);
-            resetCollapse.addEventListener('click', collapseResetUser);
-            resetGalaxy.addEventListener('click', () => buyBuilding(3, 5));
 
             const createUpgButton = document.createElement('button');
             createUpgButton.classList.add('hollowButton');
             createUpgButton.textContent = 'Create';
             createUpgButton.id = 'upgradeCreate';
             createUpgButton.type = 'button';
-            specialHTML.styleSheet.textContent += '#upgradeCreate { height: 1.76em; padding: 0 0.44em; border-radius: 2px; font-size: 0.92em; }';
             getId('toggleHover0').after(createUpgButton);
+
+            const createInfButton = document.createElement('button');
+            createInfButton.classList.add('hollowButton');
+            createInfButton.textContent = 'Activate';
+            createInfButton.id = 'inflationActivate';
+            createInfButton.type = 'button';
+            getId('inflationRefund').before(createInfButton);
 
             const pages = document.createElement('div');
             pages.id = 'strangenessPages';
@@ -504,6 +511,9 @@ try { //Start everything
                     for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) {
                         visualUpdateResearches(i, s, 'strangeness');
                     }
+                }
+                for (let i = 0; i < playerStart.inflation.tree.length; i++) {
+                    visualUpdateInflation(i);
                 }
             });
 
@@ -662,6 +672,8 @@ try { //Start everything
             footerButton.addEventListener('click', clickFunc);
             footerButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
             if (PC) { footerButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+            getId('resetCollapseFooter').addEventListener('click', collapseResetUser);
+            getId('resetGalaxyFooter').addEventListener('click', () => buyBuilding(3, 5));
         }
     }
     for (let i = 1; i < specialHTML.longestBuilding; i++) {
@@ -691,14 +703,12 @@ try { //Start everything
         input.value = format(value, { type: 'input' });
     });
 
-    for (let i = -1; i < global.challengesInfo.name.length; i++) {
+    for (let i = 0; i < global.challengesInfo.name.length; i++) {
         const image = getId(`challenge${i + 1}`);
         if (PC) { image.addEventListener('mouseover', () => hoverChallenge(i, 'challenge')); }
         if (MD) { image.addEventListener('touchstart', () => hoverChallenge(i, 'challenge')); }
         if (SR) { image.addEventListener('focus', () => hoverChallenge(i, 'challenge')); }
-        if (i >= 0) {
-            image.addEventListener('click', () => { void enterExitChallengeUser(i); });
-        }
+        image.addEventListener('click', () => { void enterExitChallengeUser(i); });
     }
     for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
         const image = getId(`voidReward${global.stageInfo.word[i]}`);
@@ -857,9 +867,7 @@ try { //Start everything
             const hoverFunc = () => hoverStrangeness(i, s, 'strangeness');
             if (PC) { image.addEventListener('mouseover', hoverFunc); }
             if (MD) {
-                image.addEventListener('touchstart', () => {
-                    /*repeatFunction(*/hoverFunc(); //, true);
-                });
+                image.addEventListener('touchstart', () => { /*repeatFunction(*/hoverFunc(); /*, true);*/ });
             } else {
                 const clickFunc = () => buyStrangeness(i, s, 'strangeness');
                 image.addEventListener('click', clickFunc);
@@ -889,6 +897,30 @@ try { //Start everything
                 image.addEventListener('focus', () => hoverStrangeness(i, s, 'milestones'));
             }
         }
+    }
+
+    /* Inflation tab */
+    for (let i = 0; i < global.inflationTreeInfo.startCost.length; i++) {
+        const image = getId(`inflation${i + 1}`);
+        const hoverFunc = () => hoverUpgrades(i, 'inflation');
+        if (PC) { image.addEventListener('mouseover', hoverFunc); }
+        if (MD) {
+            image.addEventListener('touchstart', () => { /*repeatFunction(*/hoverFunc(); /*, true);*/ });
+        } else {
+            const clickFunc = () => buyStrangeness(i, 0, 'inflation');
+            image.addEventListener('click', clickFunc);
+            image.addEventListener('mousedown', () => repeatFunction(clickFunc));
+        }
+        if (SR) { image.addEventListener('focus', hoverFunc); }
+    }
+    if (MD) {
+        const button = getId('inflationActivate');
+        const clickFunc = () => {
+            if (global.lastInflation !== null) { buyStrangeness(global.lastInflation, 0, 'inflation'); }
+        };
+        button.addEventListener('click', clickFunc);
+        button.addEventListener('touchstart', () => repeatFunction(clickFunc));
+        if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
     }
 
     /* Settings tab */

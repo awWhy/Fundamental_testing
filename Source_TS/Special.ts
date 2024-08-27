@@ -79,7 +79,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Cosmic%20dust.png', 'Planetesimal.png', 'Protoplanet.png', 'Natural%20satellite.png', 'Subsatellite.png'],
         ['Brown%20dwarf.png', 'Orange%20dwarf.png', 'Red%20supergiant.png', 'Blue%20hypergiant.png', 'Quasi%20star.png'],
         ['Nebula.png', 'Star%20cluster.png', 'Galaxy.png'],
-        ['Missing.png'] //Universe
+        ['Universe.png']
     ],
     longestUpgrade: 13,
     upgradeHTML: [
@@ -163,7 +163,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchS3.png', 'stage7borderImage'],
             ['ResearchS4.png', 'stage5borderImage'],
             ['ResearchS5.png', 'stage6borderImage'],
-            ['Missing.png', 'stage7borderImage'] //['ResearchS5.png', 'stage6borderImage']
+            ['Missing.png', 'stage4borderImage'] //['ResearchS5.png', 'stage6borderImage']
         ], [
             ['ResearchG1.png', 'stage1borderImage'],
             ['ResearchG2.png', 'stage6borderImage']
@@ -201,7 +201,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchCollapse1.png', 'stage6borderImage'],
             ['ResearchCollapse2.png', 'stage7borderImage'],
             ['ResearchCollapse3.png', 'stage1borderImage'],
-            ['Missing.png', 'stage7borderImage'] //['ResearchCollapse4.png', 'stage1borderImage']
+            ['Missing.png', 'stage5borderImage'] //['ResearchCollapse4.png', 'stage1borderImage']
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage']
         ], []
@@ -225,8 +225,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Elements.png', 'stage4borderImage orangeText', 'Elements'],
             ['Stars.png', 'stage7borderImage redText', 'Stars']
         ], [
-            ['Missing.png', 'stage7borderImage redText', 'Missing'],
-            ['Missing.png', 'stage7borderImage redText', 'Cosmon']
+            ['Missing.png', 'stage3borderImage grayText', 'Matter'],
+            ['Missing.png', 'stage6borderImage darkvioletText', 'Cosmon']
         ]
     ],
     cache: {
@@ -290,6 +290,7 @@ export const switchTheme = () => {
 
     let dropStatColor = '';
     let waterStatColor = '';
+    const upgradeTypes = ['upgrade', 'element', 'inflation'];
     body.setProperty('--transition-all', '1s');
     body.setProperty('--transition-buttons', '700ms');
 
@@ -305,6 +306,7 @@ export const switchTheme = () => {
     body.removeProperty('--tab-active');
     body.removeProperty('--tab-elements');
     body.removeProperty('--tab-strangeness');
+    body.removeProperty('--tab-inflation');
     body.removeProperty('--hollow-hover');
     body.removeProperty('--footerButton-hover');
     body.removeProperty('--input-border');
@@ -327,14 +329,15 @@ export const switchTheme = () => {
         --button-border > '.stage2borderButton' and 'global.stageInfo.buttonBorder[2]'; */
     switch (theme) {
         case 1:
-            for (const text of ['upgrade', 'element']) {
+            for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = '';
                 getId(`${text}Effect`).style.color = '';
                 getId(`${text}Cost`).style.color = '';
             }
+            body.setProperty('--tab-inflation', 'var(--tab-active)');
             break;
         case 2:
-            for (const text of ['upgrade', 'element']) {
+            for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = 'var(--white-text)';
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--cyan-text)';
@@ -363,7 +366,7 @@ export const switchTheme = () => {
             }
             break;
         case 3:
-            for (const text of ['upgrade', 'element']) {
+            for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = 'var(--orange-text)';
                 getId(`${text}Effect`).style.color = '';
                 getId(`${text}Cost`).style.color = 'var(--green-text)';
@@ -392,7 +395,7 @@ export const switchTheme = () => {
             }
             break;
         case 4:
-            for (const text of ['upgrade', 'element']) {
+            for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = 'var(--blue-text)';
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--cyan-text)';
@@ -424,7 +427,7 @@ export const switchTheme = () => {
             body.setProperty('--yellow-text', 'var(--green-text)');
             break;
         case 5:
-            for (const text of ['upgrade', 'element']) {
+            for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = 'var(--orange-text)';
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--red-text)';
@@ -438,6 +441,7 @@ export const switchTheme = () => {
             body.setProperty('--button-hover', '#6800d6');
             body.setProperty('--building-afford', '#8603ff');
             body.setProperty('--tab-active', '#8500ff');
+            body.setProperty('--tab-inflation', 'var(--tab-active)');
             body.setProperty('--hollow-hover', '#3b0080');
             body.setProperty('--footerButton-hover', '#1a1a1a');
             body.setProperty('--input-border', '#3656a1');
@@ -451,7 +455,7 @@ export const switchTheme = () => {
             body.setProperty('--yellow-text', 'var(--darkviolet-text)');
             break;
         case 6:
-            for (const text of ['upgrade', 'element']) {
+            for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = 'var(--orchid-text)';
                 getId(`${text}Effect`).style.color = 'var(--red-text)';
                 getId(`${text}Cost`).style.color = '';
@@ -465,6 +469,7 @@ export const switchTheme = () => {
             body.setProperty('--button-hover', '#3d00d6');
             body.setProperty('--building-afford', '#b30000');
             body.setProperty('--tab-active', '#8d0000');
+            body.setProperty('--tab-inflation', 'var(--tab-active)');
             body.setProperty('--hollow-hover', '#490070');
             body.setProperty('--input-border', '#a50000');
             body.setProperty('--input-text', 'red');
@@ -474,7 +479,7 @@ export const switchTheme = () => {
             body.setProperty('--darkviolet-text', '#8157ff');
             body.setProperty('--white-text', '#f9f5ff');
             body.setProperty('--red-text', 'red');
-            body.setProperty('--yellow-text', 'var(--red-text)');
+            body.setProperty('--yellow-text', 'var(--green-text)');
     }
     getQuery('#footerStat1 > p').style.color = dropStatColor;
     getQuery('#footerStat2 > p').style.color = waterStatColor;

@@ -38,6 +38,7 @@ body { /* Default color variables */
     --tab-active: #8b00c5;
     --tab-elements: #9f6700;
     --tab-strangeness: #00b100;
+    --tab-inflation: #6c1ad1;
     --hollow-hover: #170089;
     --footerButton-hover: #181818;
     --input-border: #831aa5;
@@ -609,8 +610,6 @@ input:-webkit-autofill { /* Chrome related pain */
 #challengeMultiline p { white-space: pre-line; }
 #challengeMultiline > div { margin-top: 1.2em; }
 
-#challenge0 { cursor: help; }
-
 #voidRewards > h3 {
     text-align: center;
     margin-top: 0.6em;
@@ -708,6 +707,7 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #researches div > div { display: flex; }
 
+#inflationBottomDiv,
 #researchBottomDiv {
     display: flex;
     flex-direction: column;
@@ -729,10 +729,19 @@ input:-webkit-autofill { /* Chrome related pain */
 .descriptionText > h3,
 .descriptionText > p { max-width: 80%; }
 
+#inflationToggles,
 #researchToggles {
     display: flex;
     align-items: center;
     column-gap: 0.4em;
+}
+
+#inflationToggles > .hollowButton,
+#researchToggles > .hollowButton {
+    height: 1.76em;
+    padding: 0 0.44em;
+    border-radius: 2px;
+    font-size: 0.92em;
 }
 
 #elementsGrid {
@@ -909,6 +918,47 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #milestonesProgressArea span { width: 5em; }
 #milestonesProgressArea span:first-of-type { width: 10.8em; }
+
+#inflationContainer {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--window-color);
+    border: 2px solid var(--stage-image-borderColor);
+    border-radius: 4px;
+    padding: 0.4em;
+    margin-bottom: -0.4em;
+}
+
+#inflationContainer > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-height: 32px;
+    width: 100%;
+    gap: 0.4em;
+}
+
+#inflationCreated {
+    border-top: 2px solid var(--stage-image-borderColor);
+    margin-top: 0.4em;
+    padding-top: 0.4em;
+    box-sizing: content-box;
+}
+
+#inflationMilestones > div {
+    background-color: #4d0000;
+    color: var(--red-text);
+    border: 2px solid darkred;
+    border-radius: 6px;
+    padding: 0.3em 0.6em;
+    text-align: center;
+}
+
+#inflationMilestones > div.completed {
+    background-color: #004200;
+    color: var(--green-text);
+    border-color: darkgreen;
+}
 
 #resetToggles > h3 { text-align: center; }
 
@@ -1185,6 +1235,7 @@ li .hollowButton {
 .statsWindows p { margin-bottom: 0.08em; }
 
 #strangeAllStats > section { border-color: darkgreen; }
+#cosmonStat > section { border-color: #7100ff; }
 
 .imageList {
     display: flex;
@@ -1233,7 +1284,8 @@ li .hollowButton {
 
 .tabActive { border-color: var(--tab-active) !important; }
 #ElementsTabBtn.tabActive, #upgradeSubtabBtnElements.tabActive { border-color: var(--tab-elements) !important; }
-#strangenessTabBtn.tabActive, #strangenessSubtabBtnMatter.tabActive { border-color: var(--tab-strangeness) !important; }
+#strangenessTabBtn.tabActive { border-color: var(--tab-strangeness) !important; }
+#inflationTabBtn.tabActive { border-color: var(--tab-inflation) !important; }
 
 #footer img { background-color: black; }
 #footerStats > div { display: flex; }

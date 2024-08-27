@@ -208,6 +208,7 @@
                                 <p class="grayText">Galaxy groups: <span id="merge1Current" class="greenText">1</span><span id="merge1Explanation" class="greenText">Not yet in game</span></p>
                             </div>
                         </div>
+                        <p class="darkvioletText stage6Only">Cosmon gain from current Vacuum reset: <span id="cosmonGainStat" class="greenText">1</span></p>
                     </div>
                     <div id="timeInfo">
                         <p class="blueText">Stage time: <span id="stageTime" class="cyanText">1 seconds</span><span id="stageTimeReal"> (Real: <span id="stageTimeRealStat" class="cyanText">0 seconds</span>)</span></p>
@@ -220,10 +221,9 @@
                     <div id="challengesMain">
                         <div>
                             <input type="image" src="Used_art/Void.png" alt="Void" draggable="false" id="challenge1" class="interactiveImage" aria-labelledby="challengeMultiline">
-                            <input type="image" src="Used_art/False%20vacuum.png" alt="Vacuum state" draggable="false" id="challenge0" class="interactiveImage" aria-labelledby="challengeMultiline">
                         </div>
                         <div id="challengeMultiline">
-                            <h3 class="orchidText">Vacuum state: <span class="redText">false</span></h3>
+                            <p>Hover to see</p>
                         </div>
                         <div id="voidRewards">
                             <h3 class="darkvioletText bigWord">Rewards:</h3>
@@ -241,6 +241,7 @@
                         </div>
                     </div>
                     <div id="advancedInfo">
+                        <p id="globalSpeed" class="blueText">Global speed: <span id="globalSpeedStat" class="cyanText">1</span>x</p>
                         <p class="grayText">Universe age: <span id="universeAge" class="orangeText">0 seconds</span><span id="universeAgeReal"> (Real: <span id="universeAgeTime" class="orangeText">0 seconds</span>)</span></p>
                     </div>
                 </section>
@@ -662,7 +663,7 @@
                 <section id="strangenessSubtabMilestones" class="insideTab" style="display: none;" aria-label="Milestones">
                     <div class="fullWidth center">
                         <h2 class="stageText bigWord">Milestones</h2>
-                        <p class="whiteText">Any reached Milestone will award 1 <span class="greenText">Strange quark</span></p>
+                        <p id="milestonesWelcome" class="whiteText">Any reached Milestone will award 1 <span class="greenText">Strange quark</span></p>
                     </div>
                     <div id="milestones">
                         <div id="milestone1Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Quarks.png" alt="Fundamental Matter" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
@@ -690,11 +691,11 @@
                             <p><span>Energized</span> ⟶ <span id="milestone2Stage1Current" class="greenText">0</span> / <span id="milestone2Stage1Required" class="greenText">0</span></p>
                         </div>
                         <div class="stage2Include stage2borderImage stage2windowBackground blueText">
-                            <p><span>A Nebula of Drops</span> ⟶ <span id="milestone1Stage2Current" class="greenText">0</span> / <span id="milestone1Stage2Required" class="greenText">0</span></p>
+                            <p><span id="milestone1Stage2Name">A Nebula of Drops</span> ⟶ <span id="milestone1Stage2Current" class="greenText">0</span> / <span id="milestone1Stage2Required" class="greenText">0</span></p>
                             <p><span>Just a bigger Puddle</span> ⟶ <span id="milestone2Stage2Current" class="greenText">0</span> / <span id="milestone2Stage2Required" class="greenText">0</span></p>
                         </div>
                         <div class="stage3Include stage3borderImage stage3windowBackground grayText">
-                            <p><span>Cluster of Mass</span> ⟶ <span id="milestone1Stage3Current" class="greenText">0</span> / <span id="milestone1Stage3Required" class="greenText">0</span></p>
+                            <p><span id="milestone1Stage3Name">Cluster of Mass</span> ⟶ <span id="milestone1Stage3Current" class="greenText">0</span> / <span id="milestone1Stage3Required" class="greenText">0</span></p>
                             <p><span>Satellites of Satellites</span> ⟶ <span id="milestone2Stage3Current" class="greenText">0</span> / <span id="milestone2Stage3Required" class="greenText">0</span></p>
                         </div>
                         <div class="stage4Include stage4borderImage stage4windowBackground orangeText">
@@ -705,6 +706,31 @@
                             <p><span>Light in the dark</span> ⟶ <span id="milestone1Stage5Current" class="greenText">0</span> / <span id="milestone1Stage5Required" class="greenText">0</span></p>
                             <p id="milestone2Stage5Progress" class="stage5Include"><span>End of Greatness</span> ⟶ <span id="milestone2Stage5Current" class="greenText">0</span> / <span id="milestone2Stage5Required" class="greenText">0</span></p>
                         </div>
+                    </div>
+                </section>
+            </div>
+            <div id="inflationTab" style="display: none;">
+                <section id="inflationSubtabResearches" class="insideTab" aria-label="Researches">
+                    <div id="inflationContainer">
+                        <div id="inflationAvailable">
+                            <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="inflation1" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                        </div>
+                        <div id="inflationCreated"></div>
+                    </div>
+                    <div id="inflationBottomDiv">
+                        <div id="inflationToggles">
+                            <button type="button" id="inflationRefund" class="hollowButton">Refund</button>
+                        </div>
+                        <div class="descriptionText">
+                            <h3>Research: <span id="inflationText" class="darkorchidText">Hover to see.</span></h3>
+                            <p>Effect: <span id="inflationEffect" class="blueText">Hover to see.</span></p>
+                            <p>Requirement: <span id="inflationCost" class="orangeText">Resource.</span></p>
+                        </div>
+                    </div>
+                </section>
+                <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Milestones">
+                    <div id="inflationMilestones">
+                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Void rewards persist through Vacuum resets, also unlock Milestones for true Vacuum and new Void rewards (WIP)</div>
                     </div>
                 </section>
             </div>
@@ -742,6 +768,7 @@
                                         <button type="button" class="hollowButton stage2borderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                         <div class="popUpMenu" role="menu" aria-label="Settings menu">
                                             <p><label>Vaporize when boost from new Clouds has reached at least <input type="number" id="vaporizationInput" value="3" step="any" inputmode="text"></label> <label>until <input type="number" id="vaporizationInputMax" value="0" step="any" inputmode="text"> Clouds, ignored if set to 0</label></p>
+                                            <label id="vaporizationExtra">(Automatically turn off if auto level is 2 or more <button type="button" id="toggleNormal1" class="toggleNormal">ON</button>)</label>
                                         </div>
                                     </div>
                                 </div>
@@ -808,7 +835,7 @@
                                     <div class="popUpMenu" role="dialog" aria-label="Save file name preview">
                                         <p id="saveFileNamePreview" class="mainText bigWord">Fundamental.txt</p>
                                         <p class="whiteText center">Any of these can be added for extra information of a save file</p>
-                                        <p class="stageText">[true] - <span class="whiteText">for current true Stage</span></p>
+                                        <p class="stageText">[true] - <span class="whiteText">for current progress</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current active Stage</span></p>
                                         <p id="saveFileNameStrange" class="greenText">[strange] - <span class="whiteText">for total Strange quarks</span></p>
                                         <p id="saveFileNameVacuum" class="darkvioletText">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
@@ -923,9 +950,9 @@
                 </section>
                 <section id="settingsSubtabStats" class="insideTab" style="display: none;" aria-label="Stats">
                     <div class="stats">
-                        <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span></p>
-                        <p>Online time: <span id="onlineTotal" class="whiteText">0 seconds ago</span><span id="stageResets"> | Stage resets: <span id="stageResetsCount" class="whiteText">0</span></span></p>
+                        <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span> | Online time: <span id="onlineTotal" class="whiteText">0 seconds</span></p>
                         <p id="exportStats">Max export: <span class="whiteText"><span id="exportQuarksMax">1</span> Strange quarks</span><span id="exportStrangeletsMaxMain">, <span class="whiteText"><span id="exportStrangeletsMax">0</span> Strangelets</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
+                        <p id="stageResets">Stage resets: <span id="stageResetsCount" class="whiteText">0</span></p>
                         <article id="buildingsAllStats" class="statsWindows" aria-label="Structures">
                             <section id="building0Stats">
                                 <h4 id="building0StatName" class="stageText bigWord">Missing</h4>
@@ -1021,6 +1048,15 @@
                                 </div>
                             </section>
                         </article>
+                        <article id="cosmonStat" class="statsWindows">
+                            <section>
+                                <h4 class="darkvioletText bigWord">Cosmon</h4>
+                                <div>
+                                    <p>Total:</p>
+                                    <span id="cosmonStatTotal" class="whiteText">0</span>
+                                </div>
+                            </section>
+                        </article>
                         <div class="stats stage1Only">
                             <p id="dischargeStats" class="orangeText">Discharge goals: <span id="dischargeStat" class="whiteText">0</span><span id="dischargeStatTrue" class="cyanText">[0]</span></p>
                             <p id="energyStats" class="orangeText">Most Energy at once: <span id="maxEnergyStat" class="whiteText">0</span></p>
@@ -1061,6 +1097,10 @@
                             </div>
                         </div>
                         <p class="redText stage5Only">Self-made Stars: <span id="starsStatTrue" class="orangeText">0</span></p>
+                        <div class="stats stage6Only">
+                            <p class="orchidText">Vacuum state: <span id="vacuumState">False</span></p>
+                            <p class="orchidText">Vacuum resets: <span id="vacuumResets" class="darkorchidText">0</span></p>
+                        </div>
                         <p id="solarMassStat" class="cyanText">Highest Solar mass: <span id="maxSolarMassStat" class="orchidText">0.01235</span></p>
                     </div>
                 </section>
@@ -1088,6 +1128,8 @@
                         <button type="button" id="upgradeSubtabBtnElements" tabindex="-1" style="display: none;">Elements</button>
                         <button type="button" id="strangenessSubtabBtnMatter" class="tabActive" tabindex="-1" style="display: none;">Matter</button>
                         <button type="button" id="strangenessSubtabBtnMilestones" tabindex="-1" style="display: none;">Milestones</button>
+                        <button type="button" id="inflationSubtabBtnResearches" class="tabActive" tabindex="-1" style="display: none;">Researches</button>
+                        <button type="button" id="inflationSubtabBtnMilestones" tabindex="-1" style="display: none;">Milestones</button>
                         <button type="button" id="settingsSubtabBtnSettings" class="tabActive" tabindex="-1" style="display: none;">Settings</button>
                         <button type="button" id="settingsSubtabBtnHistory" tabindex="-1" style="display: none;">History</button>
                         <button type="button" id="settingsSubtabBtnStats" tabindex="-1" style="display: none;">Stats</button>
@@ -1118,6 +1160,7 @@
                         <button type="button" id="stageTabBtn" class="tabActive" tabindex="-1">Stage</button>
                         <button type="button" id="upgradeTabBtn" tabindex="-1">Upgrade</button>
                         <button type="button" id="strangenessTabBtn" tabindex="-1">Strangeness</button>
+                        <button type="button" id="inflationTabBtn" class="stage6Include" tabindex="-1">Inflation</button>
                         <button type="button" id="settingsTabBtn" tabindex="-1">Settings</button>
                     </nav>
                 </div>
