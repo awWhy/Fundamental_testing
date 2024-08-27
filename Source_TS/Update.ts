@@ -308,15 +308,15 @@ export const numbersUpdate = () => {
                 }
             } else if (active === 2) {
                 getId('reset1Button').textContent = `Reset for ${format(global.vaporizationInfo.get, { padding: true })} Clouds`;
-                getId('cloudEffectStat').textContent = format(global.vaporizationInfo.strength, { padding: true });
+                getId('cloudEffectStat').textContent = format(calculateEffects.clouds(), { padding: true });
                 if (player.inflation.vacuum) {
                     getId('molesProductionStat').textContent = format(new Overlimit(global.dischargeInfo.tritium).divide('6.02214076e23'), { padding: true });
                 }
 
-                const rainNow = calculateEffects.S2Extra1();
-                const rainAfter = calculateEffects.S2Extra1(true);
+                const rainNow = calculateEffects.S2Extra1(player.researchesExtra[2][1]);
+                const rainAfter = calculateEffects.S2Extra1(player.researchesExtra[2][1], true);
                 const storm = calculateEffects.S2Extra2(rainAfter) / calculateEffects.S2Extra2(rainNow);
-                getId('vaporizationBoostTotal').textContent = format(new Overlimit(calculateEffects.clouds(true)).divide(global.vaporizationInfo.strength).toNumber() * (rainAfter / rainNow) * storm, { padding: true });
+                getId('vaporizationBoostTotal').textContent = format(new Overlimit(calculateEffects.clouds(true)).divide(calculateEffects.clouds()).toNumber() * (rainAfter / rainNow) * storm, { padding: true });
             } else if (active === 3) {
                 getId('dustSoftcapStat').textContent = format(global.accretionInfo.dustSoft);
                 if (player.inflation.vacuum) {
@@ -326,18 +326,20 @@ export const numbersUpdate = () => {
                     getId('submersionBoostStat').textContent = format(calculateEffects.submersion(), { padding: true });
                 }
             } else if (active === 4 || active === 5) {
-                const { collapseInfo } = global;
                 assignNewMass();
-                let total = (calculateEffects.mass(true) / collapseInfo.massEffect) * (calculateEffects.S4Research4(true) / calculateEffects.S4Research4()) * ((1 + (calculateEffects.S5Upgrade2(true) - calculateEffects.S5Upgrade2()) / global.mergeInfo.galaxyBase) ** (player.buildings[5][3].true * 2));
-                if (player.strangeness[4][4] < 2) { total *= (calculateEffects.star[0](true) / collapseInfo.starEffect[0]) * (calculateEffects.star[1](true) / collapseInfo.starEffect[1]) * (calculateEffects.star[2](true) / collapseInfo.starEffect[2]); }
+                const { collapseInfo } = global;
+                const massEffect = calculateEffects.mass();
+                const starEffect = [calculateEffects.star[0](), collapseInfo.starEffect1, calculateEffects.star[2]()];
+                let total = (calculateEffects.mass(true) / massEffect) * (calculateEffects.S4Research4(true) / calculateEffects.S4Research4()) * ((1 + (calculateEffects.S5Upgrade2(true) - calculateEffects.S5Upgrade2()) / global.mergeInfo.galaxyBase) ** (player.buildings[5][3].true * 2));
+                if (player.strangeness[4][4] < 2) { total *= (calculateEffects.star[0](true) / starEffect[0]) * (calculateEffects.star[1](true) / starEffect[1]) * (calculateEffects.star[2](true) / starEffect[2]); }
 
                 if (active === 4) {
                     getId('reset1Button').textContent = `Collapse is at ${format(collapseInfo.newMass, { padding: true })} Mass`;
-                    getId('solarMassCurrent').textContent = format(collapseInfo.massEffect, { padding: true });
-                    for (let i = 1; i <= 3; i++) {
-                        getId(`special${i}Cur`).textContent = format(player.collapse.stars[i - 1], { padding: 'exponent' });
-                        getId(`special${i}Get`).textContent = format(collapseInfo.starCheck[i - 1], { padding: 'exponent' });
-                        getId(`star${i}Current`).textContent = format(collapseInfo.starEffect[i - 1], { padding: true });
+                    getId('solarMassCurrent').textContent = format(massEffect, { padding: true });
+                    for (let i = 0; i < 3; i++) {
+                        getId(`special${i + 1}Cur`).textContent = format(player.collapse.stars[i], { padding: 'exponent' });
+                        getId(`special${i + 1}Get`).textContent = format(collapseInfo.starCheck[i], { padding: 'exponent' });
+                        getId(`star${i + 1}Current`).textContent = format(starEffect[i], { padding: true });
                     }
                     getId('collapseBoostTotal').textContent = format(total, { padding: true });
                     if (player.inflation.vacuum) {
@@ -454,10 +456,10 @@ export const numbersUpdate = () => {
                 getId('dischargeStat').textContent = format(global.dischargeInfo.total);
                 getId('dischargeStatTrue').textContent = ` [${player.discharge.current}]`;
             } else if (active === 2) {
-                const clouds = new Overlimit(calculateEffects.clouds(true)).divide(global.vaporizationInfo.strength).toNumber();
+                const clouds = new Overlimit(calculateEffects.clouds(true)).divide(calculateEffects.clouds()).toNumber();
                 getId('cloudEffectAfter').textContent = format(clouds, { padding: true });
-                const rainNow = calculateEffects.S2Extra1();
-                const rainAfter = calculateEffects.S2Extra1(true);
+                const rainNow = calculateEffects.S2Extra1(player.researchesExtra[2][1]);
+                const rainAfter = calculateEffects.S2Extra1(player.researchesExtra[2][1], true);
                 const rain = rainAfter / rainNow;
                 const storm = calculateEffects.S2Extra2(rainAfter) / calculateEffects.S2Extra2(rainNow);
                 getId('rainEffectAfter').textContent = format(rain, { padding: true });
@@ -480,17 +482,16 @@ export const numbersUpdate = () => {
                     buildings[0].trueTotal.setValue(mass.trueTotal).multiply('1.78266192e-33');
                 }
             } else if (active === 4 || active === 5) {
-                const collapseInfo = global.collapseInfo;
                 getId('maxSolarMassStat').textContent = format(player.collapse.massMax, { padding: true });
                 if (active === 4) {
                     const auto2 = player.strangeness[4][4] >= 2;
                     assignNewMass();
 
-                    const mass = calculateEffects.mass(true) / collapseInfo.massEffect;
+                    const mass = calculateEffects.mass(true) / calculateEffects.mass();
                     getId('massEffectAfter').textContent = format(mass, { padding: true });
-                    const star0 = auto2 ? 1 : calculateEffects.star[0](true) / collapseInfo.starEffect[0];
-                    const star1 = auto2 ? 1 : calculateEffects.star[1](true) / collapseInfo.starEffect[1];
-                    const star2 = auto2 ? 1 : calculateEffects.star[2](true) / collapseInfo.starEffect[2];
+                    const star0 = auto2 ? 1 : calculateEffects.star[0](true) / calculateEffects.star[0]();
+                    const star1 = auto2 ? 1 : calculateEffects.star[1](true) / global.collapseInfo.starEffect1;
+                    const star2 = auto2 ? 1 : calculateEffects.star[2](true) / calculateEffects.star[2]();
                     if (!auto2) {
                         getId('star1After').textContent = format(star0, { padding: true });
                         getId('star2After').textContent = format(star1, { padding: true });
@@ -502,7 +503,7 @@ export const numbersUpdate = () => {
                     getId('quasarAfter').textContent = format(quasar, { padding: true });
                     getId('starTotal').textContent = format(mass * star0 * star1 * star2 * gamma * (quasar ** 2), { padding: true });
                 } else if (active === 5) {
-                    getId('starsStatTrue').textContent = format(collapseInfo.trueStars, { padding: 'exponent' });
+                    getId('starsStatTrue').textContent = format(global.collapseInfo.trueStars, { padding: 'exponent' });
                     const stars = player.buildings[4];
 
                     buildings[0].current.setValue(stars[1].current).plus(stars[2].current, stars[3].current, stars[4].current, stars[5].current);

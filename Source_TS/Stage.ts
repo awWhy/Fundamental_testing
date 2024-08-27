@@ -51,8 +51,8 @@ export const calculateEffects = {
     S2Upgrade4: (research = player.researches[2][3]): number => (1 + research / 2) / 100,
     S2Upgrade5: (): number => 1 + player.researches[2][4],
     S2Upgrade6: (): number => 1 + player.researches[2][5],
-    /** Level is global.vaporizationInfo.trueResearchRain */
-    S2Extra1: (post = false, level = global.vaporizationInfo.trueResearchRain): number => { //+^0.05 per level; Drops up to +^(0.05 / 3) after softcap
+    /** Level is global.vaporizationInfo.trueResearchRain if used for production and player.researchesExtra[2][1] if for automatization */
+    S2Extra1: (level: number, post = false): number => { //+^0.05 per level; Drops up to +^(0.05 / 3) after softcap
         if (level <= 0) { return 1; }
         const effect = new Overlimit(player.vaporization.clouds);
         if (post) { effect.plus(global.vaporizationInfo.get); }
@@ -146,7 +146,7 @@ export const calculateEffects = {
         let blackHoles = player.collapse.stars[2];
         let mass = player.collapse.mass;
         if (post) {
-            if (player.strangeness[4][4] < 2) { blackHoles += global.collapseInfo.starCheck[2]; } //To prevent early reset
+            blackHoles += global.collapseInfo.starCheck[2];
             if (global.collapseInfo.newMass > mass) { mass = global.collapseInfo.newMass; }
         }
 
@@ -199,10 +199,11 @@ export const calculateEffects = {
 
 export const assignBuildingInformation = () => {
     const { buildings, upgrades, researches, researchesExtra, elements, strangeness } = player;
-    const { dischargeInfo, collapseInfo } = global;
+    const { dischargeInfo } = global;
     const producing = global.buildingsInfo.producing;
     const stageBoost = global.strangeInfo.stageBoost;
     const activeAll = global.stageInfo.activeAll;
+    const interstellar = activeAll.includes(4);
     const vacuum = player.inflation.vacuum;
     const inVoid = player.challenges.active === 0;
 
@@ -265,9 +266,8 @@ export const assignBuildingInformation = () => {
     if (activeAll.includes(2)) {
         const { vaporizationInfo } = global;
         if (vaporizationInfo.trueResearchRain !== researchesExtra[2][1]) { vaporizationInfo.trueResearchRain = Math.min(researchesExtra[2][1], new Overlimit(buildings[2][1].total).divide(1e12 / 999).plus('1').log(1e3).toNumber()); }
-        const rain = calculateEffects.S2Extra1();
+        const rain = calculateEffects.S2Extra1(vaporizationInfo.trueResearchRain);
         const flow = 1.24 ** strangeness[2][7];
-        vaporizationInfo.strength = calculateEffects.clouds();
 
         if (buildings[2][6].true >= 1) {
             producing[2][6].setValue(upgrades[2][8] === 1 ? '1.1' : '1.08').power(buildings[2][6].true).multiply(flow);
@@ -279,7 +279,7 @@ export const assignBuildingInformation = () => {
 
         producing[2][3].setValue(2 * flow).multiply(buildings[2][3].current, producing[2][4]).max('1');
 
-        const listForMult2 = [buildings[2][2].current, producing[2][3], vaporizationInfo.strength];
+        const listForMult2 = [buildings[2][2].current, producing[2][3], calculateEffects.clouds()];
         if (vaporizationInfo.trueResearch1 !== researches[2][1]) { vaporizationInfo.trueResearch1 = Math.min(researches[2][1], new Overlimit(buildings[2][1].total).divide('1e2').plus('1').log(5).toNumber()); }
         let prod2Number = (inVoid ? 6e-4 : 4.8) * tension * stress * (2 ** vaporizationInfo.trueResearch1) * rain * ((vacuum ? 1.8 : 1.6) ** strangeness[2][1]);
         if (upgrades[2][1] === 1) { listForMult2.push(calculateEffects.S2Upgrade1()); }
@@ -350,11 +350,12 @@ export const assignBuildingInformation = () => {
         } else { accretionInfo.dustSoft = 1; }
         producing[3][1].power(accretionInfo.dustSoft);
     } else if (vacuum) { producing[3][1].setValue('1'); }
-    if (activeAll.includes(4)) {
-        collapseInfo.massEffect = calculateEffects.mass();
-        collapseInfo.starEffect = [calculateEffects.star[0](), calculateEffects.star[1](), calculateEffects.star[2]()];
+    if (interstellar) {
+        const { collapseInfo } = global;
+        collapseInfo.starEffect1 = calculateEffects.star[1]();
+        const massEffect = calculateEffects.mass();
         const listForTotal = [new Overlimit(calculateEffects.S4Research1()).power(collapseInfo.trueStars)];
-        let totalNumber = calculateEffects.S4Research0(calculateEffects.S4Research0_base()) * collapseInfo.massEffect * collapseInfo.starEffect[1] * calculateEffects.S4Research4() * (1.6 ** strangeness[4][0]);
+        let totalNumber = calculateEffects.S4Research0(calculateEffects.S4Research0_base()) * massEffect * collapseInfo.starEffect1 * calculateEffects.S4Research4() * (1.6 ** strangeness[4][0]);
         if (elements[4] >= 1) { totalNumber *= 1.4; }
         if (elements[14] >= 1) { totalNumber *= 1.4; }
         if (elements[24] >= 1) { totalNumber *= new Overlimit(buildings[4][0].current).max('1').power(calculateEffects.element24()).toNumber(); }
@@ -375,13 +376,13 @@ export const assignBuildingInformation = () => {
 
         producing[4][3].setValue('6e7').multiply(buildings[4][3].current, totalMultiplier);
 
-        producing[4][2].setValue(1200 * collapseInfo.starEffect[0] * (2 ** researches[4][3])).multiply(buildings[4][2].current, totalMultiplier);
+        producing[4][2].setValue(1200 * calculateEffects.star[0]() * (2 ** researches[4][3])).multiply(buildings[4][2].current, totalMultiplier);
 
         let prod1Number = 40;
         if (elements[1] >= 1) { prod1Number *= 2; }
-        if (elements[19] >= 1 && collapseInfo.massEffect > 1) { prod1Number *= collapseInfo.massEffect; }
+        if (elements[19] >= 1 && massEffect > 1) { prod1Number *= massEffect; }
         producing[4][1].setValue(prod1Number).multiply(buildings[4][1].current, totalMultiplier);
-    } else { collapseInfo.starEffect[2] = 1; }
+    }
     if (activeAll.includes(5)) {
         const clusterProd = producing[5][2];
 
@@ -418,7 +419,7 @@ export const assignBuildingInformation = () => {
             producing[6][1].setValue(buildings[6][1].current).power(buildings[6][1].true);
         } else { producing[6][1].setValue('0'); }
     }
-    if (activeAll.includes(4)) { collapseInfo.trueProduction.setValue(producing[4][1]).plus(producing[4][2], producing[4][3], producing[4][4], producing[4][5]); }
+    if (interstellar) { global.collapseInfo.trueProduction.setValue(producing[4][1]).plus(producing[4][2], producing[4][3], producing[4][4], producing[4][5]); } //Temprorary fix
     if (vacuum) {
         const inflationInfo = global.inflationInfo;
         const laterPreons = energy ** calculateEffects.S1Extra3();
@@ -430,7 +431,7 @@ export const assignBuildingInformation = () => {
         inflationInfo.dustCap.setValue((player.accretion.rank >= 5 ? 1e48 : 8e46) * accretionMass * (1.4 ** strangeness[3][8]));
         if (producing[3][1].moreThan(inflationInfo.dustCap)) { producing[3][1].setValue(inflationInfo.dustCap); }
 
-        let microworldMass = collapseInfo.starEffect[2];
+        let microworldMass = interstellar ? calculateEffects.star[2]() : 1; //Just in case
         if (elements[10] >= 1) { microworldMass *= 2; }
         if (researchesExtra[4][1] >= 1) { microworldMass *= calculateEffects.S4Extra1(); }
         inflationInfo.preonCap.setValue(1e14 * laterPreons * microworldMass).multiply(producing[3][1]);
@@ -612,7 +613,7 @@ export const calculateBuildingsCost = (index: number, stageIndex: number): Overl
         buildingsInfo.increase[4][index] = increase / 100;
 
         firstCost /= 2 ** player.strangeness[4][1];
-        if (player.researchesExtra[4][3] >= 1) { firstCost /= global.collapseInfo.starEffect[1]; }
+        if (player.researchesExtra[4][3] >= 1) { firstCost /= global.collapseInfo.starEffect1; }
         if (player.elements[13] >= 1) { firstCost /= 100; }
     }
 
@@ -653,7 +654,7 @@ export const gainBuildings = (get: number, stageIndex: number, time: number) => 
         add.multiply(global.buildingsInfo.producing[stageIndex][get + 1]);
 
         if (stageIndex === 2 && get === 1 && player.buildings[2][2].true < 1 && player.researchesExtra[2][1] >= 1) {
-            add.plus(time * (calculateEffects.S2Extra1(false, player.researchesExtra[2][1]) - 1));
+            add.plus(time * (calculateEffects.S2Extra1(player.researchesExtra[2][1]) - 1));
         }
     }
     if (add.lessOrEqual('0')) { return; }
@@ -911,7 +912,6 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
         }
     }
 
-    assignBuildingInformation();
     if (type === 'upgrades' || type === 'elements') {
         visualUpdateUpgrades(upgrade, stageIndex, type);
     } else {
@@ -1018,7 +1018,6 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
         if (globalSave.SRSettings[0]) { getId('SRMain').textContent = `Strength of Inflation Research '${pointer.name[upgrade]}' increased ${player.inflation.tree[upgrade] >= pointer.max[upgrade] ? 'and maxed at' : 'to'} ${format(player.inflation.tree[upgrade])}`; }
     }
 
-    assignBuildingInformation();
     calculateResearchCost(upgrade, stageIndex, type);
     if (type === 'inflation') {
         visualUpdateInflation(upgrade);
@@ -1687,10 +1686,10 @@ export const vaporizationResetCheck = (clouds = null as number | null): boolean 
         } else if (!player.toggles.auto[2] || player.strangeness[2][4] < 1) { return false; }
 
         if (player.vaporization.input[1] > 0 && player.vaporization.clouds.moreOrEqual(player.vaporization.input[1])) { return false; }
-        const rainNow = calculateEffects.S2Extra1();
-        const rainAfter = calculateEffects.S2Extra1(true);
+        const rainNow = calculateEffects.S2Extra1(player.researchesExtra[2][1]);
+        const rainAfter = calculateEffects.S2Extra1(player.researchesExtra[2][1], true);
         const storm = calculateEffects.S2Extra2(rainAfter) / calculateEffects.S2Extra2(rainNow);
-        if (calculateEffects.clouds(true).divide(global.vaporizationInfo.strength).multiply((rainAfter / rainNow) * storm).lessThan(player.vaporization.input[0])) { return false; }
+        if (calculateEffects.clouds(true).divide(calculateEffects.clouds()).multiply((rainAfter / rainNow) * storm).lessThan(player.vaporization.input[0])) { return false; }
         vaporizationReset();
     }
     return true;
@@ -1703,10 +1702,10 @@ export const vaporizationResetUser = async() => {
         if (player.strangeness[2][4] >= 2) {
             errorText += 'already gaining Clouds without needing to reset';
         }
-        const rainNow = calculateEffects.S2Extra1();
-        const rainAfter = calculateEffects.S2Extra1(true);
+        const rainNow = calculateEffects.S2Extra1(player.researchesExtra[2][1]);
+        const rainAfter = calculateEffects.S2Extra1(player.researchesExtra[2][1], true);
         const storm = calculateEffects.S2Extra2(rainAfter) / calculateEffects.S2Extra2(rainNow);
-        if (calculateEffects.clouds(true).divide(global.vaporizationInfo.strength).multiply((rainAfter / rainNow) * storm).lessThan('2')) {
+        if (calculateEffects.clouds(true).divide(calculateEffects.clouds()).multiply((rainAfter / rainNow) * storm).lessThan('2')) {
             if (errorText !== '') { errorText += '\nAlso '; }
             errorText += 'boost from doing it is bellow 2x';
         }
@@ -1808,7 +1807,7 @@ const calculateMassGain = (): number => {
     } else {
         if (elements[10] >= 1) { massGain *= 2; }
         if (player.researchesExtra[4][1] >= 1) { massGain *= calculateEffects.S4Extra1(); }
-        massGain *= global.collapseInfo.starEffect[2];
+        massGain *= calculateEffects.star[2]();
         if (player.strangeness[5][7] >= 1) { massGain *= global.strangeInfo.stageBoost[5]; }
     }
     return massGain;
@@ -1851,12 +1850,13 @@ export const collapseResetCheck = (remnants = false): boolean => {
             const timeUntil = new Overlimit(global.inflationInfo.massCap / 8.96499278339628e-67).minus(player.buildings[1][0].current).divide(global.buildingsInfo.producing[1][1]).toNumber() / global.inflationInfo.globalSpeed;
             if (timeUntil < player.collapse.input[1] && timeUntil > 0) { return false; }
         }
-        const massBoost = (calculateEffects.mass(true) / info.massEffect) * (calculateEffects.S4Research4(true) / calculateEffects.S4Research4()) * ((1 + (calculateEffects.S5Upgrade2(true) - calculateEffects.S5Upgrade2()) / global.mergeInfo.galaxyBase) ** (player.buildings[5][3].true * 2));
+        const massBoost = (calculateEffects.mass(true) / calculateEffects.mass()) * (calculateEffects.S4Research4(true) / calculateEffects.S4Research4()) * ((1 + (calculateEffects.S5Upgrade2(true) - calculateEffects.S5Upgrade2()) / global.mergeInfo.galaxyBase) ** (player.buildings[5][3].true * 2));
         if (massBoost >= player.collapse.input[0]) {
             collapseReset();
             return true;
         }
-        if (level >= 2 || massBoost * (calculateEffects.star[0](true) / info.starEffect[0]) * (calculateEffects.star[1](true) / info.starEffect[1]) * (calculateEffects.star[2](true) / info.starEffect[2]) < player.collapse.input[0]) { return false; }
+        const calculateStar = calculateEffects.star;
+        if (level >= 2 || massBoost * (calculateStar[0](true) / calculateStar[0]()) * (calculateStar[1](true) / calculateStar[1]()) * (calculateStar[2](true) / calculateStar[2]()) < player.collapse.input[0]) { return false; }
         collapseReset();
         return true;
     }

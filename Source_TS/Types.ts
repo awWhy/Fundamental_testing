@@ -159,7 +159,6 @@ export interface globalType {
         trueResearch0: number
         trueResearch1: number
         trueResearchRain: number
-        strength: Overlimit
         get: Overlimit
     }
     accretionInfo: {
@@ -175,8 +174,7 @@ export interface globalType {
         rankImage: string[]
     }
     collapseInfo: {
-        massEffect: number
-        starEffect: [number, number, number]
+        starEffect1: number
         unlockB: number[]
         unlockU: number[]
         unlockR: number[]

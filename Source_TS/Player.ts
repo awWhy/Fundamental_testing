@@ -348,7 +348,6 @@ export const global: globalType = { //For information that doesn't need to be sa
         trueResearch0: 0,
         trueResearch1: 0,
         trueResearchRain: 0,
-        strength: new Overlimit('1'),
         get: new Overlimit('0')
     },
     accretionInfo: {
@@ -364,8 +363,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         rankImage: ['Ocean%20world.png', 'Dust.png', 'Meteoroids.png', 'Asteroid.png', 'Planet.png', 'Giant.png', 'Protostar.png', 'Protogalaxy.png']
     },
     collapseInfo: {
-        massEffect: 1,
-        starEffect: [1, 1, 1],
+        starEffect1: 1,
         unlockB: [0, 0.01235, 0.23, 10, 40, 1000], //Buildings
         unlockU: [0.01235, 0.076, 1.3, 10, 40], //Upgrades
         unlockR: [0.18, 0.3, 0.8, 1.3, 40, 1000], //Researches
@@ -769,9 +767,9 @@ export const global: globalType = { //For information that doesn't need to be sa
                     const maxLevel = player.researchesExtra[2][1];
                     const trueLevel = global.vaporizationInfo.trueResearchRain;
                     const penalty = player.buildings[2][2].true < 1 ? 1 : 0;
-                    return `Some Clouds will start pouring Drops themselves. This will produce Drops until a Puddle, afterwards it will boost Puddles.${trueLevel !== maxLevel ? `\nBoost to Puddles is weakened by recent reset, effective level is ${format(trueLevel, { padding: true })}, will be restored with more Drops.` : ''}\n(Effect: ${format(calculateEffects.S2Extra1(false, penalty === 0 ? trueLevel : maxLevel) - penalty, { padding: true })} ⟶ ${format(calculateEffects.S2Extra1(false, maxLevel + 1) - penalty, { padding: true })}, weaker after ${format(1e6)} Clouds)`;
+                    return `Some Clouds will start pouring Drops themselves. This will produce Drops until a Puddle, afterwards it will boost Puddles.${trueLevel !== maxLevel ? `\nBoost to Puddles is weakened by recent reset, effective level is ${format(trueLevel, { padding: true })}, will be restored with more Drops.` : ''}\n(Effect: ${format(calculateEffects.S2Extra1(penalty === 0 ? trueLevel : maxLevel) - penalty, { padding: true })} ⟶ ${format(calculateEffects.S2Extra1(maxLevel + 1) - penalty, { padding: true })}, weaker after ${format(1e6)} Clouds)`;
                 },
-                () => `Make 'Rain Clouds' also boost Seas at a reduced rate.\n(Effect: ${format(calculateEffects.S2Extra2(calculateEffects.S2Extra1(), 1), { padding: true })})`,
+                () => `Make 'Rain Clouds' also boost Seas at a reduced rate.\n(Effect: ${format(calculateEffects.S2Extra2(calculateEffects.S2Extra1(global.vaporizationInfo.trueResearchRain), 1), { padding: true })})`,
                 () => { //[3]
                     const level = player.researchesExtra[2][3];
                     const tension = player.upgrades[2][3] === 1 ? new Overlimit(player.buildings[2][0].current).max('1').power(calculateEffects.S2Upgrade3()).toNumber() : 1;
