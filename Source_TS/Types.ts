@@ -149,6 +149,7 @@ export interface globalType {
     }
     dischargeInfo: {
         energyType: number[][]
+        energyStage: number[]
         energyTrue: number
         tritium: Overlimit
         base: number
@@ -180,7 +181,6 @@ export interface globalType {
         unlockR: number[]
         newMass: number
         starCheck: [number, number, number]
-        trueProduction: Overlimit
         trueStars: number
     }
     mergeInfo: {
@@ -308,7 +308,7 @@ export interface globalType {
         name: string[]
         description: Array<() => string>
         effectText: Array<() => string>
-        needText: string[][][]
+        needText: Array<Array<Array<() => string | null>>>
         rewardText: string[][][]
         color: string[]
     }

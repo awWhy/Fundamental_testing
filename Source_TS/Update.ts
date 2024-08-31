@@ -2,8 +2,8 @@ import { checkTab, milestoneGetValue } from './Check';
 import Overlimit from './Limit';
 import { getClass, getId, getQuery, simulateOffline } from './Main';
 import { global, player } from './Player';
-import { MDStrangenessPage, globalSave, playEvent, specialHTML, switchTheme } from './Special';
-import { autoElementsBuy, autoElementsSet, autoResearchesBuy, autoResearchesSet, autoUpgradesBuy, autoUpgradesSet, buyBuilding, calculateBuildingsCost, gainBuildings, assignBuildingInformation, collapseResetCheck, dischargeResetCheck, rankResetCheck, stageResetCheck, toggleSwap, vaporizationResetCheck, assignNewMass, switchStage, setActiveStage, calculateEffects, assignNewClouds, awardMilestone, exitChallengeAuto, assignMergeReward, assignMaxRank, assignGlobalSpeed, assignQuarksGain } from './Stage';
+import { MDStrangenessPage, Notify, globalSave, playEvent, specialHTML, switchTheme } from './Special';
+import { autoElementsBuy, autoElementsSet, autoResearchesBuy, autoResearchesSet, autoUpgradesBuy, autoUpgradesSet, buyBuilding, calculateBuildingsCost, gainBuildings, assignBuildingInformation, collapseResetCheck, dischargeResetCheck, rankResetCheck, stageResetCheck, toggleSwap, vaporizationResetCheck, assignNewMass, switchStage, setActiveStage, calculateEffects, assignNewClouds, awardMilestone, exitChallengeAuto, assignMergeReward, assignMaxRank, assignGlobalSpeed, assignQuarksGain, assignTrueEnergy } from './Stage';
 import type { gameTab } from './Types';
 
 export const switchTab = (tab: gameTab, subtab = null as null | string) => {
@@ -103,11 +103,11 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
     player.stage.time += passedSeconds;
     player.inflation.age += passedSeconds;
 
-    assignBuildingInformation();
     if (vacuum || activeAll.includes(4)) {
         stageResetCheck(5, auto[0], trueSeconds);
     } else if (activeAll.includes(6)) { assignQuarksGain(); } //Visual fix
     if (challenge === 0 && time.stage > 3600) { exitChallengeAuto(); }
+    assignBuildingInformation();
     if (activeAll.includes(6)) {
         /*if (!activeAll.includes(6)) {
             if (autoU[6].length !== 0) { autoUpgradesBuy(6); }
@@ -134,6 +134,7 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
         if (research >= 2) { gainBuildings(2, 5, passedSeconds); } //Red supergiants
         if (research >= 3) { gainBuildings(3, 5, passedSeconds); } //Blue hypergiants
         if (research >= 4 && challenge !== 0) { gainBuildings(4, 5, passedSeconds); } //Quasi-stars
+        assignBuildingInformation();
     }
     if (activeAll.includes(4)) {
         if (global.automatization.elements.length !== 0) { autoElementsBuy(); }
@@ -142,8 +143,8 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
         if (autoE[4].length !== 0) { autoResearchesBuy('researchesExtra', 4); }
         for (let i = maxActive[4] - 1; i >= 1; i--) {
             if (autoBuy[4][i] && ASR[4] >= i) { buyBuilding(i, 4, 0, true); }
+            gainBuildings(i - 1, 4, passedSeconds); //Elements
         }
-        gainBuildings(0, 4, passedSeconds); //Elements
         awardMilestone(0, 5); //It being here is more efficient if more than 2 star types made
         awardMilestone(0, 4); //To remove the need to check for Stage 4 in gain
         collapseResetCheck(true);
@@ -158,7 +159,9 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
             if (autoBuy[3][i] && ASR[3] >= i) { buyBuilding(i, 3, 0, true); }
         }
         gainBuildings(2, 3, passedSeconds); //Planetesimals
+        assignBuildingInformation();
         gainBuildings(1, 3, passedSeconds); //Cosmic dust
+        assignBuildingInformation();
         if (!vacuum) { gainBuildings(0, 3, passedSeconds); } //Mass
     }
     if (activeAll.includes(2)) {
@@ -171,6 +174,7 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
             if (autoBuy[2][i] && ASR[2] >= i) { buyBuilding(i, 2, 0, true); }
         }
         gainBuildings(1, 2, passedSeconds); //Drops
+        assignBuildingInformation();
         if (!vacuum) { gainBuildings(0, 2, passedSeconds); } //Moles
         awardMilestone(1, 2); //Should be more efficient if more than 2 Puddle types made
         awardMilestone(0, 2); //To remove the need to check for Stage 2 in gain
@@ -180,17 +184,30 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
         if (autoU[1].length !== 0) { autoUpgradesBuy(1); }
         if (autoR[1].length !== 0) { autoResearchesBuy('researches', 1); }
         if (autoE[1].length !== 0) { autoResearchesBuy('researchesExtra', 1); }
-        if (player.upgrades[1][8] === 1) { gainBuildings(5, 1, passedSeconds); } //Molecules
+        if (player.upgrades[1][8] === 1) {
+            gainBuildings(5, 1, passedSeconds);
+            assignBuildingInformation(); //Molecules
+        }
         for (let i = maxActive[1] - 1; i >= 1; i--) {
             if (autoBuy[1][i] && ASR[1] >= i) { buyBuilding(i, 1, 0, true); }
             gainBuildings(i - 1, 1, passedSeconds); //Rest of Microworld
+            assignBuildingInformation();
         }
         awardMilestone(1, 1); //Should be more efficient if more than 2 Structures made
         awardMilestone(0, 1); //To remove the need to check for Stage 1 in gain
         dischargeResetCheck(true);
     }
 
-    assignBuildingInformation(); //Only for visual
+    { //Remove
+        const old = global.dischargeInfo.energyTrue;
+        assignTrueEnergy();
+        if (old !== global.dischargeInfo.energyTrue) {
+            Notify(`Please report this to Discord testing channel\nTrue Energy was wrong: ${old}, when should had been ${global.dischargeInfo.energyTrue}`);
+        }
+        if (player.discharge.energy > global.dischargeInfo.energyTrue) {
+            Notify(`Please report this to Discord testing channel\nEnergy above its max value: ${player.discharge.energy}, when should had been ${global.dischargeInfo.energyTrue}`);
+        }
+    }
     if (timeWarp > 0) { timeUpdate(timeWarp, tick); }
 };
 
@@ -301,7 +318,7 @@ export const numbersUpdate = () => {
                 getId('reset1Button').textContent = `Next goal is ${format(global.dischargeInfo.next, { padding: 'exponent' })} Energy`;
                 getId('tritiumEffect').textContent = format(global.dischargeInfo.tritium, { padding: true });
                 getId('dischargeEffectStat').textContent = format(new Overlimit(global.dischargeInfo.base).power(global.dischargeInfo.total), { padding: true });
-                getId('energySpent').textContent = format(global.dischargeInfo.energyTrue - player.discharge.energy);
+                getId('energySpent').textContent = format(global.dischargeInfo.energyTrue - player.discharge.energy, { padding: 'exponent' });
                 if (player.inflation.vacuum) {
                     getId('preonCapStat').textContent = format(global.inflationInfo.preonCap, { padding: true });
                     getId('preonCapRatio').textContent = format(new Overlimit(global.inflationInfo.preonTrue).divide(global.inflationInfo.preonCap), { padding: true });
@@ -354,7 +371,8 @@ export const numbersUpdate = () => {
                         getId(`special${i}Cur`).textContent = format(player.merge.reward[0], { padding: 'exponent' });
                         getId(`special${i}Get`).textContent = format(global.mergeInfo.checkReward[0], { padding: 'exponent' });
                     }
-                    getId('elementsIntergalactic').textContent = format(collapseInfo.trueProduction, { padding: true });
+                    const starProd = global.buildingsInfo.producing[4];
+                    getId('elementsIntergalactic').textContent = format(new Overlimit(starProd[1]).plus(starProd[2], starProd[3], starProd[4], starProd[5]), { padding: true });
                     getId('collapseBoostIntergalacticTotal').textContent = format(total, { padding: true });
                     getId('solarMassCollapse').textContent = format(collapseInfo.newMass, { padding: true });
                     if (player.inflation.vacuum) {
@@ -1081,12 +1099,14 @@ export const getStrangenessDescription = (index: number, stageIndex: number, typ
 
         getId('milestonesText').textContent = `${pointer.name[index]}. (${format(level)})`;
         if (player.inflation.vacuum) {
+            const isActive = player.challenges.active === 0;
             text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
+            <p class="blueText">Time limit: <span class="greenText">${format(3600 - (isActive ? player.time.stage : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to increase its tier within 'Void'.</span></p>
             <p class="darkvioletText">Effect: <span class="greenText">${pointer.rewardText[index]()}</span></p>`;
         } else if (level < pointer.max[index]) {
             const isActive = global.stageInfo.activeAll.includes(Math.min(stageIndex, 4));
-            text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}
-            <span class="blueText">${format(pointer.time[index] - (isActive ? player.time.stage : 0), { type: 'time' })}</span> ${isActive ? 'remains' : ''} to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
+            text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
+            <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive ? player.time.stage : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
             <p class="darkvioletText">Unlock: <span class="greenText">Main reward unlocked after ${pointer.max[index] - level} more completions.</span></p>`;
         } else { text = `<p class="darkvioletText">Reward: <span class="greenText">${pointer.rewardText[index]()}</span></p>`; }
 
@@ -1132,7 +1152,9 @@ export const getChallengeReward = (index: number) => {
     const level = player.challenges.void[index];
     let text = '';
     for (let i = 0; i < need.length; i++) {
-        text += `<div><p><span class="${level > i ? 'greenText' : 'redText'}">→</span> ${index === 2 && i === 1 ? need[i].replace('1e4', format(1e4)) : need[i]}</p>
+        const requirement = need[i]();
+        if (requirement === null) { continue; }
+        text += `<div><p><span class="${level > i ? 'greenText' : 'redText'}">→</span> ${requirement}</p>
         <p><span class="${level > i ? 'greenText' : 'redText'}">Reward:</span> ${level > i ? reward[i] : 'Not yet unlocked'}</p></div>`;
     }
 
@@ -1486,7 +1508,7 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
         }
         getId('strangenessEffect').textContent = 'Hover to see.';
         getId('strangenessCost').textContent = 'Strange quarks.';
-        getId('milestonesMultiline').innerHTML = `<p class="orchidText">Requirement: <span class="greenText">Hover to see.</span></p><p class="darkvioletText">${vacuum ? 'Effect' : 'Unlock'}: <span class="greenText">Hover to see.</span></p>`;
+        getId('milestonesMultiline').innerHTML = `<p class="orchidText">Requirement: <span class="greenText">Hover to see.</span></p><p class="blueText">Time limit: <span class="greenText">Hover to see.</span></p><p class="darkvioletText">${vacuum ? 'Effect' : 'Unlock'}: <span class="greenText">Hover to see.</span></p>`;
 
         if (challenge !== null) {
             getId('currentChallenge').style.display = '';

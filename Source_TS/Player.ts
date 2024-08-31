@@ -1,7 +1,7 @@
 import Overlimit from './Limit';
 import { getId } from './Main';
 import { specialHTML } from './Special';
-import { assignStrangeInfo, calculateMaxLevel, assignMilestoneInformation, assignPuddles, toggleConfirm, toggleSwap, calculateEffects, getDischargeScale, assignBuildingInformation, assignMaxRank, calculateTrueEnergy, calculateResearchCost } from './Stage';
+import { assignStrangeInfo, calculateMaxLevel, assignMilestoneInformation, assignPuddles, toggleConfirm, toggleSwap, calculateEffects, getDischargeScale, assignBuildingInformation, assignMaxRank, assignTrueEnergy, calculateResearchCost } from './Stage';
 import type { globalType, playerType } from './Types';
 import { format, visualUpdateInflation, visualUpdateResearches } from './Update';
 import { prepareVacuum } from './Vacuum';
@@ -338,6 +338,7 @@ export const global: globalType = { //For information that doesn't need to be sa
     },
     dischargeInfo: {
         energyType: [[]],
+        energyStage: [0],
         energyTrue: 0,
         tritium: new Overlimit('0'),
         base: 4,
@@ -369,7 +370,6 @@ export const global: globalType = { //For information that doesn't need to be sa
         unlockR: [0.18, 0.3, 0.8, 1.3, 40, 1000], //Researches
         newMass: 0,
         starCheck: [0, 0, 0],
-        trueProduction: new Overlimit('0'),
         trueStars: 0
     },
     mergeInfo: {
@@ -474,7 +474,10 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `${player.inflation.vacuum ? 'Atoms' : 'Particles'} will be 8 times cheaper.`,
                 () => `Atoms will produce ${player.inflation.vacuum ? 6 : 4} times more Particles.`,
                 () => 'Molecules will produce 4 times more Atoms.',
-                () => `Ability to regain spent Energy and if had enough Energy will also boost production for all ${player.inflation.vacuum ? 'Microworld ' : ''}Structures by ${format(global.dischargeInfo.base)}.`,
+                () => { //[5]
+                    const unlocked = player.stage.true >= 7 || player.stage.resets >= 1 || player.accretion.rank >= 6;
+                    return `Ability to regain spent Energy and if had enough Energy will also boost production for all ${player.inflation.vacuum ? 'Microworld ' : ''}Structures by ${format(global.dischargeInfo.base, { padding: true })}.${player.inflation.vacuum ? `\n(Resets Microworld Stage, ${unlocked || player.researchesExtra[1][2] >= 2 ? 'Drops' : '(unknown)'} and ${unlocked ? 'Elements' : '(Unknown)'} from other Stages, but also higher tier Structures from further Stages until can fully regain spent Energy)` : ''}`;
+                },
                 () => `Decrease Structures cost scaling by -${format(calculateEffects.S1Upgrade6() / 100)}.`,
                 () => { //[7]
                     const selfBoost = calculateEffects.S1Upgrade7();
@@ -501,7 +504,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => `Drops will ${player.inflation.vacuum ? 'improve Tritium' : 'produce Moles'} ${format(player.inflation.vacuum ? 1.02 : 1.04)} times ${player.inflation.vacuum ? 'more' : 'faster'} for every self-made Drop.${player.upgrades[2][0] !== 1 && player.buildings[2][1].true < 1 && player.buildings[2][2].true < 1 ? "\n(Can't be created due to not having any self-made Drops)" : ''}`,
                 () => `Spread water faster with every Puddle, current formula is ${format(1.02)} ^ effective Puddles.\nPuddles after 200 and non self-made ones are raised to the power of ${format(0.7)}.\n(Total effect: ${format(calculateEffects.S2Upgrade1(), { padding: true })})`,
-                () => `Gain ability to convert Drops into Clouds. Cloud gain formula is '(Clouds ^ (1 / softcap) + (Drops / ${format(calculateEffects.S2Upgrade2())})) ^ softcap - Clouds', softcap is ${format(player.challenges.active === 0 ? 0.4 : player.inflation.vacuum ? 0.5 : 0.6)}.`,
+                () => `Gain ability to convert Drops into Clouds. Cloud gain formula is '(Clouds ^ (1 / softcap) + (Drops / ${format(calculateEffects.S2Upgrade2())})) ^ softcap - Clouds', softcap is ${format(player.challenges.active === 0 ? 0.4 : player.inflation.vacuum ? 0.5 : 0.6)}.${player.inflation.vacuum ? '\n(Affects same stuff as Discharge, while also resetting Submerged Stage)' : ''}`,
                 () => { //[3]
                     const power = calculateEffects.S2Upgrade3();
                     return `Puddles will get a boost based on Moles ^${format(power)}.\n(Boost: ${format(new Overlimit(player.buildings[2][0].current).max('1').power(power), { padding: true })})`;
@@ -559,7 +562,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Nucleosynthesis'
             ],
             effectText: [
-                () => `As fuel runs out, every Star will boost production in its own special way. Solar mass ${player.inflation.vacuum ? 'is based on Mass from other Stages and ' : ''}will not decrease if to reset bellow current.\n(Hover over Remnants effects to see what it boosts)`,
+                () => `As fuel runs out, every Star will boost production in its own special way. Solar mass ${player.inflation.vacuum ? 'is based on Mass from other Stages and ' : ''}will not decrease if to reset bellow current.\n(${player.inflation.vacuum ? 'Affects same stuff as Rank increase, while also resetting Interstellar Stage, hover' : 'Hover'} over Remnants effects to see what it boosts)`,
                 () => "Fuse with Protium instead of Deuterium. Unlock 5 first Elements. ('Elements' subtab)",
                 () => 'Unlock CNO cycle which is a better source of Helium and Energy. Unlock 5 more Elements.',
                 () => 'Through Triple-alpha and then Alpha process unlock 2 more Elements.',
@@ -738,7 +741,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 },
                 () => { //[2]
                     const textUnlocked = player.stage.true >= 7 || player.stage.resets >= 1 || player.researchesExtra[1][2] >= 2;
-                    return `First level is to begin the Accretion, second level is to Submerge it.\nAll Structures produce Energy on creation and all resets affect all Stages${textUnlocked || player.researchesExtra[1][2] >= 1 ? '.\nAccretion Mass is Microworld Mass' : ''}${textUnlocked ? ' and Moles are Molecules' : ''}.`;
+                    return `First level is to begin the Accretion, second level is to Submerge it.\nAll Structures produce Energy on creation and all resets affect all Stages to some amount${textUnlocked || player.researchesExtra[1][2] >= 1 ? ', Accretion Mass is Microworld Mass' : ''}${textUnlocked ? ' and Moles are Molecules' : ''}.`;
                 },
                 () => { //[3]
                     const power = calculateEffects.S1Extra3();
@@ -1138,15 +1141,17 @@ export const global: globalType = { //For information that doesn't need to be sa
     ],
     inflationTreeInfo: {
         name: [
+            'Missing',
             'Missing'
         ],
         effectText: [
-            () => `Unspent Dark matter boost global speed by ${format(calculateEffects.inflation1(), { padding: true })} ⟶ ${format(calculateEffects.inflation1(player.inflation.tree[0] + 1), { padding: true })}.`
+            () => `Unspent Dark matter boost global speed by ${format(calculateEffects.inflation1(), { padding: true })} ⟶ ${format(calculateEffects.inflation1(player.inflation.tree[0] + 1), { padding: true })}.`,
+            () => "Increase effective (free) level of 'Strange gain' Strangeness by +1."
         ],
         cost: [],
-        startCost: [1],
-        scaling: [0.5],
-        max: [2]
+        startCost: [1, 1],
+        scaling: [0.75, 0.5],
+        max: [6, 4]
     },
     lastUpgrade: [[null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades']],
     lastElement: null,
@@ -1289,21 +1294,45 @@ export const global: globalType = { //For information that doesn't need to be sa
         needText: [
             [
                 [],
-                ['Perform Discharge', "Get first level of 'Accretion'", "Get second level of 'Accretion'"],
-                ['Have more than 1 Cloud', 'Have more than 1e4 Clouds'],
-                ["Reach 'Meteoroid' Rank", "Reach 'Asteroid' Rank", "Reach 'Planet' Rank", "Reach 'Jovian planet' Rank", "Reach 'Protostar' Rank"],
-                ['Cause the Collapse', 'Get first Red giant', 'Get first Neutron star', 'Get first Black hole'],
-                ['Unlock Intergalactic', 'Create a Galaxy']
+                [
+                    () => 'Perform Discharge',
+                    () => "Get first level of 'Accretion'",
+                    () => "Get second level of 'Accretion'"
+                ],
+                [
+                    () => 'Have more than 1 Cloud',
+                    () => `Have more than ${format(1e4)} Clouds`,
+                    () => global.milestonesInfoS6.active[0] ? 'Have more than Infinity Clouds' : null
+                ],
+                [
+                    () => "Reach 'Meteoroid' Rank",
+                    () => "Reach 'Asteroid' Rank",
+                    () => "Reach 'Planet' Rank",
+                    () => "Reach 'Jovian planet' Rank",
+                    () => "Reach 'Protostar' Rank",
+                    () => global.milestonesInfoS6.active[0] ? "Reach 'Protogalaxy' Rank" : null
+                ],
+                [
+                    () => 'Cause the Collapse',
+                    () => 'Get first Red giant',
+                    () => 'Get first Neutron star',
+                    () => 'Get first Black hole'
+                ],
+                [
+                    () => 'Unlock Intergalactic',
+                    () => 'Create a Galaxy',
+                    () => global.milestonesInfoS6.active[0] ? 'Create a Galaxy group' : null
+                ]
             ]
         ],
         rewardText: [
             [
                 [],
                 ["'Energy increase' (Microworld)", "'Conservation of Mass' (Microworld)", "'Improved flow' (Submerged)"],
-                ["'Mechanical spread' (Submerged)", "'Ocean world' (Submerged)"],
-                ['Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', "'Strange growth' (Intergalactic)"],
+                ["'Mechanical spread' (Submerged)", "'Ocean world' (Submerged)", 'Missing'],
+                ['Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', "'Strange growth' (Intergalactic)", 'Missing'],
                 ['Max level increased for Auto resets', "'Conservation of Energy' (Microworld)", "'Neutronium' (Interstellar)", "'Mass delay' (Accretion)"],
-                ["'Newer Upgrade' (Interstellar)", "'Rank raise' (Accretion)"]
+                ["'Newer Upgrade' (Interstellar)", "'Rank raise' (Accretion)", 'Missing']
             ]
         ],
         color: [
@@ -1784,7 +1813,7 @@ export const updatePlayer = (load: playerType): string => {
     assignStrangeInfo[0]();
     assignPuddles();
     assignMaxRank();
-    calculateTrueEnergy(); //Also assignEnergyArray();
+    assignTrueEnergy(); //Also assignEnergyArray();
 
     /* Finish visuals */
     (getId('saveFileNameInput') as HTMLInputElement).value = player.fileName;

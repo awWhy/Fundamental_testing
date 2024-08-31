@@ -1,9 +1,13 @@
 import { allowedToBeReset, checkTab } from './Check';
 import { cloneArray, global, player, playerStart } from './Player';
-import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignEnergyArray } from './Stage';
+import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignEnergyArray, assignPuddles } from './Stage';
 import { numbersUpdate, setRemnants, stageUpdate, switchTab, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
+/** Preferably stageIndex should be sorted smallest to highest (or at least last number be the highest) */
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
+    const { dischargeInfo } = global;
+    const { buildings, discharge } = player;
+
     if (type === 'galaxy') {
         const { elements } = player;
 
@@ -19,6 +23,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         player.collapse.stars = [0, 0, 0];
     }
 
+    let energyStage = 0;
     for (const s of stageIndex) {
         if (s === 2) {
             global.vaporizationInfo.trueResearch0 = 0;
@@ -28,15 +33,18 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             global.collapseInfo.trueStars = 0;
         }
 
-        const buildings = player.buildings[s];
-        buildings[0].current.setValue(playerStart.buildings[s][0].current);
-        buildings[0].total.setValue(playerStart.buildings[s][0].current);
-        for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
-            if (!allowedToBeReset(i, s, 'structures')) { continue; }
+        buildings[s][0].current.setValue(playerStart.buildings[s][0].current);
+        buildings[s][0].total.setValue(playerStart.buildings[s][0].current);
+        if (s !== 6) {
+            for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
+                if (!allowedToBeReset(i, s, 'structures')) { continue; }
 
-            buildings[i as 1].true = 0;
-            buildings[i].current.setValue('0');
-            buildings[i].total.setValue('0');
+                buildings[s][i as 1].true = 0;
+                buildings[s][i].current.setValue('0');
+                buildings[s][i].total.setValue('0');
+            }
+            energyStage += dischargeInfo.energyStage[s];
+            dischargeInfo.energyStage[s] = 0;
         }
 
         if (type === 'discharge') { continue; }
@@ -77,12 +85,54 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     }
 
     if (player.inflation.vacuum) {
-        const startEnergy = global.dischargeInfo.energyType[5][3] * player.buildings[5][3].true;
-        player.discharge.energy = startEnergy;
-        global.dischargeInfo.energyTrue = startEnergy;
+        if (!stageIndex.includes(2)) {
+            buildings[2][0].current.setValue('0');
+            buildings[2][0].total.setValue('0');
+            buildings[2][1].current.setValue(buildings[2][1].true);
+            buildings[2][1].total.setValue(buildings[2][1].true);
+        }
+        if (!stageIndex.includes(3)) {
+            buildings[3][0].current.setValue('9.76185667392e-36');
+            buildings[3][0].total.setValue('9.76185667392e-36');
+        }
+        if (!stageIndex.includes(4)) {
+            buildings[4][0].current.setValue('1');
+            buildings[4][0].total.setValue('1');
+        }
+
+        const energyTest = dischargeInfo.energyTrue - energyStage;
+        if (discharge.energy >= energyTest) {
+            discharge.energy = Math.max(energyTest, dischargeInfo.energyType[5][3] * buildings[5][3].true);
+            dischargeInfo.energyTrue = discharge.energy;
+        } else {
+            let deficit = energyTest - discharge.energy;
+            for (let s = stageIndex[stageIndex.length - 1]; s <= 5; s++) {
+                const energyType = dischargeInfo.energyType[s];
+                for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
+                    if (!allowedToBeReset(i, s, 'structures')) { continue; }
+
+                    const max = Math.min(Math.ceil(deficit / energyType[i]), buildings[s][i as 1].true);
+                    if (max <= 0) { continue; }
+                    buildings[s][i as 1].true -= max;
+                    buildings[s][i].current.minus(max);
+                    buildings[s][i].total.minus(max);
+                    deficit -= max * energyType[i];
+                    if (s === 4) { global.collapseInfo.trueStars -= max; }
+                    if (deficit <= 0) { break; }
+                }
+                if (s === 2) {
+                    global.vaporizationInfo.trueResearch0 = 0;
+                    global.vaporizationInfo.trueResearch1 = 0;
+                    global.vaporizationInfo.trueResearchRain = 0;
+                    assignPuddles();
+                }
+            }
+            discharge.energy += deficit;
+            dischargeInfo.energyTrue = discharge.energy;
+        }
     } else if (type === 'discharge') {
-        player.discharge.energy = 0;
-        global.dischargeInfo.energyTrue = 0;
+        discharge.energy = 0;
+        dischargeInfo.energyTrue = 0;
     }
 
     assignBuildingInformation();
@@ -92,11 +142,14 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     }
 };
 
+/** Default value for update is 'normal' */
 export const resetStage = (stageIndex: number[], update = 'normal' as false | 'normal' | 'soft') => {
     for (const s of stageIndex) {
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;
-
+        buildings[0].current.setValue(buildingResetValue);
+        buildings[0].total.setValue(buildingResetValue);
+        buildings[0].trueTotal.setValue(buildingResetValue);
         if (s !== 6) {
             for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
                 buildings[i as 1].true = 0;
@@ -104,10 +157,8 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
                 buildings[i].total.setValue('0');
                 buildings[i].trueTotal.setValue('0');
             }
+            global.dischargeInfo.energyStage[s] = 0;
         }
-        buildings[0].current.setValue(buildingResetValue);
-        buildings[0].total.setValue(buildingResetValue);
-        buildings[0].trueTotal.setValue(buildingResetValue);
 
         player.upgrades[s] = cloneArray(playerStart.upgrades[s]);
         player.researches[s] = cloneArray(playerStart.researches[s]);
@@ -175,7 +226,9 @@ export const resetVacuum = () => {
     for (let s = 1; s <= 6; s++) {
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;
-
+        buildings[0].current.setValue(buildingResetValue);
+        buildings[0].total.setValue(buildingResetValue);
+        buildings[0].trueTotal.setValue(buildingResetValue);
         if (s !== 6) {
             for (let i = 1; i < playerStart.buildings[s].length; i++) {
                 buildings[i as 1].true = 0;
@@ -183,10 +236,8 @@ export const resetVacuum = () => {
                 buildings[i].total.setValue('0');
                 buildings[i].trueTotal.setValue('0');
             }
+            global.dischargeInfo.energyStage[s] = 0;
         }
-        buildings[0].current.setValue(buildingResetValue);
-        buildings[0].total.setValue(buildingResetValue);
-        buildings[0].trueTotal.setValue(buildingResetValue);
 
         player.upgrades[s] = cloneArray(playerStart.upgrades[s]);
         player.researches[s] = cloneArray(playerStart.researches[s]);

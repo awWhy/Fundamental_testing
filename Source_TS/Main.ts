@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation } from './Update';
-import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
+import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings } from './Special';
 import { detectHotkey } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
@@ -182,6 +182,7 @@ const loadGame = (save: string) => {
         changeIntervals();
 
         void Alert(`Incorrect save file format\n${error}`);
+        throw error;
     }
 };
 const exportFileGame = async() => {
@@ -913,6 +914,7 @@ try { //Start everything
         }
         if (SR) { image.addEventListener('focus', hoverFunc); }
     }
+    getId('inflationRefund').addEventListener('click', inflationRefund);
     if (MD) {
         const button = getId('inflationActivate');
         const clickFunc = () => {
