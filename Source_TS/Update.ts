@@ -1696,5 +1696,9 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
 
     visualUpdate();
     numbersUpdate();
-    switchTheme();
+    try {
+        switchTheme();
+    } catch (error) {
+        Notify(`Failed to change theme due to error:\n${error}\n${(error as { stack: string }).stack}`);
+    }
 };

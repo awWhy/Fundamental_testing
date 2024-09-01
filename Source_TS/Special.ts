@@ -280,7 +280,11 @@ export const setTheme = (theme: number | null, noSwitch = false) => {
 
     globalSave.theme = theme;
     saveGlobalSettings();
-    if (!noSwitch) { switchTheme(); }
+    try {
+        if (!noSwitch) { switchTheme(); }
+    } catch (error) {
+        Notify(`Failed to change theme due to error:\n${error}\n${(error as { stack: string }).stack}`);
+    }
 };
 
 export const switchTheme = () => {
