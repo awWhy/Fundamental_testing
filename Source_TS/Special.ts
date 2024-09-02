@@ -1,4 +1,4 @@
-import { changeIntervals, getId, getQuery } from './Main';
+import { changeIntervals, getId } from './Main';
 import { global, player } from './Player';
 import type { globalSaveType } from './Types';
 import { format, numbersUpdate, visualUpdate } from './Update';
@@ -128,7 +128,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG1.png',
             'UpgradeG2.png',
             'UpgradeG3.png',
-            'Missing.png' //'UpgradeG4.png'
+            'Missing.png'
         ], []
     ],
     longestResearch: 9,
@@ -163,7 +163,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchS3.png', 'stage7borderImage'],
             ['ResearchS4.png', 'stage5borderImage'],
             ['ResearchS5.png', 'stage6borderImage'],
-            ['Missing.png', 'stage4borderImage'] //['ResearchS5.png', 'stage6borderImage']
+            ['Missing.png', 'stage4borderImage']
         ], [
             ['ResearchG1.png', 'stage1borderImage'],
             ['ResearchG2.png', 'stage6borderImage']
@@ -201,7 +201,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchCollapse1.png', 'stage6borderImage'],
             ['ResearchCollapse2.png', 'stage7borderImage'],
             ['ResearchCollapse3.png', 'stage1borderImage'],
-            ['Missing.png', 'stage5borderImage'] //['ResearchCollapse4.png', 'stage1borderImage']
+            ['Missing.png', 'stage5borderImage']
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage']
         ], []
@@ -225,7 +225,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Elements.png', 'stage4borderImage orangeText', 'Elements'],
             ['Stars.png', 'stage7borderImage redText', 'Stars']
         ], [
-            ['Missing.png', 'stage3borderImage grayText', 'Matter'],
+            ['Missing.png', 'stage3borderImage grayText', 'Matter'], //'Dark%20matter.png'
             ['Missing.png', 'stage6borderImage darkvioletText', 'Cosmon']
         ]
     ],
@@ -271,74 +271,61 @@ export const preventImageUnload = () => {
     specialHTML.cache.imagesDiv.innerHTML = images; //Saved just in case
 };
 
-export const setTheme = (theme: number | null, noSwitch = false) => {
+export const setTheme = (theme: number | null) => {
     if (theme !== null) {
         if (player.stage.true < theme) { theme = null; }
         if (theme === 6 && player.stage.true < 7) { theme = null; }
-        if (noSwitch && theme !== null) { return; }
     }
 
     globalSave.theme = theme;
     saveGlobalSettings();
-    try {
-        if (!noSwitch) { switchTheme(); }
-    } catch (error) {
-        Notify(`Failed to change theme due to error:\n${error}\n${(error as { stack: string }).stack}`);
-    }
+    switchTheme();
+    getId('currentTheme').textContent = globalSave.theme === null ? 'Default' : global.stageInfo.word[globalSave.theme];
 };
 
 export const switchTheme = () => {
-    const body = document.body.style;
-    const theme = globalSave.theme ?? player.stage.active;
-    getId('currentTheme').textContent = globalSave.theme === null ? 'Default' : global.stageInfo.word[theme];
-
-    let dropStatColor = '';
-    let waterStatColor = '';
     const upgradeTypes = ['upgrade', 'element', 'inflation'];
-    body.setProperty('--transition-all', '1s');
-    body.setProperty('--transition-buttons', '700ms');
+    const properties = {
+        '--background-color': '#030012',
+        '--window-color': '#12121c',
+        '--window-border': 'cornflowerblue',
+        '--footer-color': 'darkblue',
+        '--button-color': 'mediumblue',
+        '--button-border': 'darkcyan',
+        '--button-hover': '#2626ff',
+        '--building-afford': '#a90000',
+        '--tab-active': '#8b00c5',
+        '--tab-elements': '#9f6700',
+        '--tab-strangeness': '#00b100',
+        '--tab-inflation': '#6c1ad1',
+        '--hollow-hover': '#170089',
+        '--footerButton-hover': '#181818',
+        '--input-border': '#831aa5',
+        '--input-text': '#cf71ff',
+        '--button-text': '#e3e3e3',
+        '--main-text': 'var(--cyan-text)',
+        '--white-text': 'white',
+        //'--cyan-text': '#03d3d3',
+        '--blue-text': 'dodgerblue',
+        '--orange-text': 'darkorange',
+        '--gray-text': '#8f8f8f',
+        '--orchid-text': '#e14bdb',
+        '--darkorchid-text': '#bd24ef',
+        '--darkviolet-text': '#8635eb',
+        '--red-text': '#eb0000',
+        '--green-text': '#00e900',
+        '--yellow-text': '#fafa00'
+    };
 
-    /* Full reset, because better response from CSS (also easier) */
-    body.removeProperty('--background-color');
-    body.removeProperty('--window-color');
-    body.removeProperty('--window-border');
-    body.removeProperty('--footer-color');
-    body.removeProperty('--button-color');
-    body.removeProperty('--button-border');
-    body.removeProperty('--button-hover');
-    body.removeProperty('--building-afford');
-    body.removeProperty('--tab-active');
-    body.removeProperty('--tab-elements');
-    body.removeProperty('--tab-strangeness');
-    body.removeProperty('--tab-inflation');
-    body.removeProperty('--hollow-hover');
-    body.removeProperty('--footerButton-hover');
-    body.removeProperty('--input-border');
-    body.removeProperty('--input-text');
-    body.removeProperty('--button-text');
-    body.removeProperty('--main-text');
-    body.removeProperty('--white-text');
-    //body.removeProperty('--cyan-text');
-    body.removeProperty('--blue-text');
-    body.removeProperty('--orange-text');
-    body.removeProperty('--gray-text');
-    body.removeProperty('--orchid-text');
-    body.removeProperty('--darkorchid-text');
-    body.removeProperty('--darkviolet-text');
-    body.removeProperty('--red-text');
-    body.removeProperty('--green-text');
-    body.removeProperty('--yellow-text');
-    /* These colors will need to be changed in other places as well: (not just 2)
-        --window-color > '.stage2windowBackground';
-        --button-border > '.stage2borderButton' and 'global.stageInfo.buttonBorder[2]'; */
-    switch (theme) {
+    /* Many of these colors will need to be changed in other places (find them with quick search, there are too many of them) */
+    switch (globalSave.theme ?? player.stage.active) {
         case 1:
             for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = '';
                 getId(`${text}Effect`).style.color = '';
                 getId(`${text}Cost`).style.color = '';
             }
-            body.setProperty('--tab-inflation', 'var(--tab-active)');
+            properties['--tab-inflation'] = 'var(--tab-active)';
             break;
         case 2:
             for (const text of upgradeTypes) {
@@ -346,28 +333,24 @@ export const switchTheme = () => {
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--cyan-text)';
             }
-            body.setProperty('--background-color', '#070026');
-            body.setProperty('--window-color', '#000052');
-            body.setProperty('--window-border', 'blue');
-            body.setProperty('--footer-color', '#0000db');
-            body.setProperty('--button-color', '#0000eb');
-            body.setProperty('--button-border', '#386cc7');
-            body.setProperty('--button-hover', '#2929ff');
-            body.setProperty('--building-afford', '#b30000');
-            body.setProperty('--tab-active', '#990000');
-            body.setProperty('--hollow-hover', '#2400d7');
-            body.setProperty('--input-border', '#4747ff');
-            body.setProperty('--input-text', 'dodgerblue');
-            body.setProperty('--main-text', 'var(--blue-text)');
-            body.setProperty('--gray-text', '#9b9b9b');
-            body.setProperty('--darkorchid-text', '#c71bff');
-            body.setProperty('--darkviolet-text', '#8b6bff');
-            body.setProperty('--green-text', '#82cb3b');
-            body.setProperty('--red-text', '#f70000');
-            if (player.stage.active === 2) {
-                dropStatColor = '#3099ff';
-                waterStatColor = '#3099ff';
-            }
+            properties['--background-color'] = '#070026';
+            properties['--window-color'] = '#000052';
+            properties['--window-border'] = 'blue';
+            properties['--footer-color'] = '#0000db';
+            properties['--button-color'] = '#0000eb';
+            properties['--button-border'] = '#386cc7';
+            properties['--button-hover'] = '#2929ff';
+            properties['--building-afford'] = '#b30000';
+            properties['--tab-active'] = '#990000';
+            properties['--hollow-hover'] = '#2400d7';
+            properties['--input-border'] = '#4747ff';
+            properties['--input-text'] = 'dodgerblue';
+            properties['--main-text'] = 'var(--blue-text)';
+            properties['--gray-text'] = '#9b9b9b';
+            properties['--darkorchid-text'] = '#c71bff';
+            properties['--darkviolet-text'] = '#8b6bff';
+            properties['--green-text'] = '#82cb3b';
+            properties['--red-text'] = '#f70000';
             break;
         case 3:
             for (const text of upgradeTypes) {
@@ -375,28 +358,24 @@ export const switchTheme = () => {
                 getId(`${text}Effect`).style.color = '';
                 getId(`${text}Cost`).style.color = 'var(--green-text)';
             }
-            body.setProperty('--background-color', '#000804');
-            body.setProperty('--window-color', '#2e1200');
-            body.setProperty('--window-border', '#31373e');
-            body.setProperty('--footer-color', '#221a00');
-            body.setProperty('--button-color', '#291344');
-            body.setProperty('--button-border', '#424242');
-            body.setProperty('--button-hover', '#382055');
-            body.setProperty('--building-afford', '#9e0000');
-            body.setProperty('--tab-active', '#8d4c00');
-            body.setProperty('--tab-elements', 'var(--tab-active)');
-            body.setProperty('--hollow-hover', '#5a2100');
-            body.setProperty('--footerButton-hover', '#1a1a1a');
-            body.setProperty('--input-border', '#8b4a00');
-            body.setProperty('--input-text', '#e77e00');
-            body.setProperty('--main-text', 'var(--gray-text)');
-            body.setProperty('--white-text', '#dfdfdf');
-            body.setProperty('--orange-text', '#f58600');
-            body.setProperty('--green-text', '#00db00');
-            if (player.stage.active === 2) {
-                dropStatColor = '#3099ff';
-                waterStatColor = '#3099ff';
-            }
+            properties['--background-color'] = '#000804';
+            properties['--window-color'] = '#2e1200';
+            properties['--window-border'] = '#31373e';
+            properties['--footer-color'] = '#221a00';
+            properties['--button-color'] = '#291344';
+            properties['--button-border'] = '#424242';
+            properties['--button-hover'] = '#382055';
+            properties['--building-afford'] = '#9e0000';
+            properties['--tab-active'] = '#8d4c00';
+            properties['--tab-elements'] = 'var(--tab-active)';
+            properties['--hollow-hover'] = '#5a2100';
+            properties['--footerButton-hover'] = '#1a1a1a';
+            properties['--input-border'] = '#8b4a00';
+            properties['--input-text'] = '#e77e00';
+            properties['--main-text'] = 'var(--gray-text)';
+            properties['--white-text'] = '#dfdfdf';
+            properties['--orange-text'] = '#f58600';
+            properties['--green-text'] = '#00db00';
             break;
         case 4:
             for (const text of upgradeTypes) {
@@ -404,31 +383,31 @@ export const switchTheme = () => {
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--cyan-text)';
             }
-            body.setProperty('--background-color', '#140e04');
-            body.setProperty('--window-color', '#4e0000');
-            body.setProperty('--window-border', '#894800');
-            body.setProperty('--footer-color', '#4e0505');
-            body.setProperty('--button-color', '#6a3700');
-            body.setProperty('--button-border', '#a35700');
-            body.setProperty('--button-hover', '#8a4700');
-            body.setProperty('--building-afford', '#007f95');
-            body.setProperty('--tab-active', '#008297');
-            body.setProperty('--tab-elements', 'var(--tab-active)');
-            body.setProperty('--tab-strangeness', '#00a500');
-            body.setProperty('--hollow-hover', '#605100');
-            body.setProperty('--footerButton-hover', '#212121');
-            body.setProperty('--input-border', '#008399');
-            body.setProperty('--input-text', '#05c3c3');
-            body.setProperty('--button-text', '#d9d900');
-            body.setProperty('--main-text', 'var(--orange-text)');
-            body.setProperty('--white-text', '#e5e500');
-            body.setProperty('--blue-text', '#2e96ff');
-            body.setProperty('--gray-text', '#8b8b8b');
-            body.setProperty('--darkorchid-text', '#c71bff');
-            body.setProperty('--darkviolet-text', '#9457ff');
-            body.setProperty('--red-text', 'red');
-            body.setProperty('--green-text', '#00e600');
-            body.setProperty('--yellow-text', 'var(--green-text)');
+            properties['--background-color'] = '#140e04';
+            properties['--window-color'] = '#4e0000';
+            properties['--window-border'] = '#894800';
+            properties['--footer-color'] = '#4e0505';
+            properties['--button-color'] = '#6a3700';
+            properties['--button-border'] = '#a35700';
+            properties['--button-hover'] = '#8a4700';
+            properties['--building-afford'] = '#007f95';
+            properties['--tab-active'] = '#008297';
+            properties['--tab-elements'] = 'var(--tab-active)';
+            properties['--tab-strangeness'] = '#00a500';
+            properties['--hollow-hover'] = '#605100';
+            properties['--footerButton-hover'] = '#212121';
+            properties['--input-border'] = '#008399';
+            properties['--input-text'] = '#05c3c3';
+            properties['--button-text'] = '#d9d900';
+            properties['--main-text'] = 'var(--orange-text)';
+            properties['--white-text'] = '#e5e500';
+            properties['--blue-text'] = '#2e96ff';
+            properties['--gray-text'] = '#8b8b8b';
+            properties['--darkorchid-text'] = '#c71bff';
+            properties['--darkviolet-text'] = '#9457ff';
+            properties['--red-text'] = 'red';
+            properties['--green-text'] = '#00e600';
+            properties['--yellow-text'] = 'var(--green-text)';
             break;
         case 5:
             for (const text of upgradeTypes) {
@@ -436,62 +415,65 @@ export const switchTheme = () => {
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--red-text)';
             }
-            body.setProperty('--background-color', '#060010');
-            body.setProperty('--window-color', '#001d42');
-            body.setProperty('--window-border', '#35466e');
-            body.setProperty('--footer-color', '#2f005c');
-            body.setProperty('--button-color', '#4a008f');
-            body.setProperty('--button-border', '#8f004c');
-            body.setProperty('--button-hover', '#6800d6');
-            body.setProperty('--building-afford', '#8603ff');
-            body.setProperty('--tab-active', '#8500ff');
-            body.setProperty('--tab-inflation', 'var(--tab-active)');
-            body.setProperty('--hollow-hover', '#3b0080');
-            body.setProperty('--footerButton-hover', '#1a1a1a');
-            body.setProperty('--input-border', '#3656a1');
-            body.setProperty('--input-text', '#6a88cd');
-            body.setProperty('--button-text', '#fc9cfc');
-            body.setProperty('--main-text', 'var(--darkorchid-text)');
-            body.setProperty('--white-text', '#ff79ff');
-            body.setProperty('--orchid-text', '#ff00f4');
-            body.setProperty('--darkorchid-text', '#c000ff');
-            body.setProperty('--darkviolet-text', '#9f52ff');
-            body.setProperty('--yellow-text', 'var(--darkviolet-text)');
+            properties['--background-color'] = '#060010';
+            properties['--window-color'] = '#001d42';
+            properties['--window-border'] = '#35466e';
+            properties['--footer-color'] = '#2f005c';
+            properties['--button-color'] = '#4a008f';
+            properties['--button-border'] = '#8f004c';
+            properties['--button-hover'] = '#6800d6';
+            properties['--building-afford'] = '#8603ff';
+            properties['--tab-active'] = '#8500ff';
+            properties['--tab-inflation'] = 'var(--tab-active)';
+            properties['--hollow-hover'] = '#3b0080';
+            properties['--footerButton-hover'] = '#1a1a1a';
+            properties['--input-border'] = '#3656a1';
+            properties['--input-text'] = '#6a88cd';
+            properties['--button-text'] = '#fc9cfc';
+            properties['--main-text'] = 'var(--darkorchid-text)';
+            properties['--white-text'] = '#ff79ff';
+            properties['--orchid-text'] = '#ff00f4';
+            properties['--darkorchid-text'] = '#c000ff';
+            properties['--darkviolet-text'] = '#9f52ff';
+            properties['--yellow-text'] = 'var(--darkviolet-text)';
             break;
         case 6:
             for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = 'var(--orchid-text)';
-                getId(`${text}Effect`).style.color = 'var(--red-text)';
-                getId(`${text}Cost`).style.color = '';
+                getId(`${text}Effect`).style.color = 'var(--orange-text)';
+                getId(`${text}Cost`).style.color = 'var(--red-text)';
             }
-            body.setProperty('--background-color', 'black');
-            body.setProperty('--window-color', '#01003c');
-            body.setProperty('--window-border', '#7100ff');
-            body.setProperty('--footer-color', '#00007a');
-            body.setProperty('--button-color', '#2b0095');
-            body.setProperty('--button-border', '#6c1ad1');
-            body.setProperty('--button-hover', '#3d00d6');
-            body.setProperty('--building-afford', '#b30000');
-            body.setProperty('--tab-active', '#8d0000');
-            body.setProperty('--tab-inflation', 'var(--tab-active)');
-            body.setProperty('--hollow-hover', '#490070');
-            body.setProperty('--input-border', '#a50000');
-            body.setProperty('--input-text', 'red');
-            body.setProperty('--button-text', '#efe0ff');
-            body.setProperty('--main-text', 'var(--darkviolet-text)');
-            body.setProperty('--gray-text', '#9b9b9b');
-            body.setProperty('--darkviolet-text', '#8157ff');
-            body.setProperty('--white-text', '#f9f5ff');
-            body.setProperty('--red-text', 'red');
-            body.setProperty('--yellow-text', 'var(--green-text)');
+            properties['--background-color'] = 'black';
+            properties['--window-color'] = '#01003c';
+            properties['--window-border'] = '#7100ff';
+            properties['--footer-color'] = '#00007a';
+            properties['--button-color'] = '#2b0095';
+            properties['--button-border'] = '#6c1ad1';
+            properties['--button-hover'] = '#3d00d6';
+            properties['--building-afford'] = '#b30000';
+            properties['--tab-active'] = '#8d0000';
+            properties['--tab-inflation'] = 'var(--tab-active)';
+            properties['--hollow-hover'] = '#490070';
+            properties['--input-border'] = '#a50000';
+            properties['--input-text'] = 'red';
+            properties['--button-text'] = '#efe0ff';
+            properties['--main-text'] = 'var(--darkviolet-text)';
+            properties['--gray-text'] = '#9b9b9b';
+            properties['--darkviolet-text'] = '#8157ff';
+            properties['--white-text'] = '#f9f5ff';
+            properties['--red-text'] = 'red';
+            properties['--yellow-text'] = 'var(--green-text)';
     }
-    getQuery('#footerStat1 > p').style.color = dropStatColor;
-    getQuery('#footerStat2 > p').style.color = waterStatColor;
+
+    const body = document.body.style;
+    body.setProperty('--transition-all', '800ms');
+    body.setProperty('--transition-buttons', '600ms');
+    for (const property in properties) { body.setProperty(property, properties[property as '--main-text']); }
 
     setTimeout(() => {
-        body.removeProperty('--transition-all');
-        body.removeProperty('--transition-buttons');
-    }, 1000);
+        body.setProperty('--transition-all', '0ms');
+        body.setProperty('--transition-buttons', '100ms');
+    }, 800);
 };
 
 export const Alert = async(text: string, priority = 0): Promise<void> => {

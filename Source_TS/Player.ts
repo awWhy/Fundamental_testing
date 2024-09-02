@@ -3,7 +3,7 @@ import { getId } from './Main';
 import { specialHTML } from './Special';
 import { assignStrangeInfo, calculateMaxLevel, assignMilestoneInformation, assignPuddles, toggleConfirm, toggleSwap, calculateEffects, getDischargeScale, assignBuildingInformation, assignMaxRank, assignTrueEnergy, calculateResearchCost } from './Stage';
 import type { globalType, playerType } from './Types';
-import { format, visualUpdateInflation, visualUpdateResearches } from './Update';
+import { format, visualUpdateResearches } from './Update';
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = { //Only for information that need to be saved (cannot be calculated)
@@ -472,8 +472,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => 'Particles will produce 8 times more Quarks.',
                 () => 'Gluons will be able to bind Quarks into Particles, which will make Particles 16 times cheaper.',
                 () => `${player.inflation.vacuum ? 'Atoms' : 'Particles'} will be 8 times cheaper.`,
-                () => `Atoms will produce ${player.inflation.vacuum ? 6 : 4} times more Particles.`,
-                () => 'Molecules will produce 4 times more Atoms.',
+                () => `Atoms will produce ${player.inflation.vacuum ? 6 : 4} times more Particles.${player.upgrades[1][3] !== 1 && player.upgrades[1][5] !== 1 && player.buildings[1][player.inflation.vacuum ? 4 : 2].total.lessOrEqual('0') ? "\n(Can't be created due to not having any Atoms)" : ''}`,
+                () => `Molecules will produce 4 times more Atoms.${player.upgrades[1][4] !== 1 && player.upgrades[1][5] !== 1 && player.buildings[1][player.inflation.vacuum ? 5 : 3].total.lessOrEqual('0') ? "\n(Can't be created due to not having any Molecules)" : ''}`,
                 () => { //[5]
                     const unlocked = player.stage.true >= 7 || player.stage.resets >= 1 || player.accretion.rank >= 6;
                     return `Ability to regain spent Energy and if had enough Energy will also boost production for all ${player.inflation.vacuum ? 'Microworld ' : ''}Structures by ${format(global.dischargeInfo.base, { padding: true })}.${player.inflation.vacuum ? `\n(Resets Microworld Stage, ${unlocked || player.researchesExtra[1][2] >= 2 ? 'Drops' : '(unknown)'} and ${unlocked ? 'Elements' : '(Unknown)'} from other Stages, but also higher tier Structures from further Stages until can fully regain spent Energy)` : ''}`;
@@ -851,21 +851,25 @@ export const global: globalType = { //For information that doesn't need to be sa
     researchesAutoInfo: {
         name: [
             'Upgrade automatization',
-            'Element automatization'
+            'Element automatization',
+            'Reset automatization'
         ],
         effectText: [
             () => `Automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.researchesAuto[0], 2)]} from any Stage. (Need to be enabled in Settings)`,
-            () => 'Elements will no longer require Collapse for activation.\nSecond level will instead unlock auto creation of Elements. (Need to be enabled in settings)'
+            () => 'Elements will no longer require Collapse for activation.\nSecond level will instead unlock auto creation of Elements. (Need to be enabled in settings)',
+            () => `Unlock auto ${['Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge (WIP)'][player.inflation.vacuum ? Math.min(player.researchesAuto[2], 4) : Math.min(player.stage.active - 1, 3)]} level 1. (Need to be enabled in settings)`
         ],
         costRange: [
             [1e13, 2e34, 1e30],
-            [136000, 272000]
+            [136000, 272000],
+            [600, 1200, 3600, 14400, 72000]
         ],
         autoStage: [ //Stage to buy from (1 per level)
-            [2, 3, 4],
-            [1, 1]
+            [2, 3, 4, 4],
+            [1, 1],
+            [6, 6, 6, 6, 6]
         ],
-        max: [3, 2]
+        max: [3, 2, 1]
     },
     ASRInfo: { //Auto Structures Research
         name: 'Auto Structures',
@@ -1126,8 +1130,11 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `With higher density first two Intergalactic upgrades will be even stronger. Effects will be increased by ${format(player.inflation.vacuum ? 1.6 : 1.8)}.`,
                 () => `Gain ${format(1.4)} times more Strange quarks from any Stage reset.`,
                 () => player.inflation.vacuum ? 'Unlock Intergalactic Stage and increase Strange quarks from Stage resets by +1.' : "Will make Intergalactic Stage immune to Collapse reset and allow 'Upgrade automatization' to work within Intergalactic Stage.",
-                () => "Automatically Collapse if will be able to afford new Galaxy afterwards and auto Galaxy is enabled.\n(Also 'Auto Structures' Strangeness will make auto permanent for all Intergalactic Structures)",
-                () => `Make auto for ${player.strangeness[5][4] >= 1 ? 'all' : 'the first two'} Intergalactic Structures permanent${player.strangeness[5][4] < 1 ? ' and prevent rest from resetting' : ''}.`,
+                () => `Automatically Collapse if will be able to afford new Galaxy afterwards and auto Galaxy is enabled.${global.milestonesInfoS6.active[1] ? '' : "\n(Also 'Auto Structures' Strangeness will make auto permanent for all Intergalactic Structures)"}`,
+                () => { //[5]
+                    const all = global.milestonesInfoS6.active[1] || player.strangeness[5][4] >= 1;
+                    return `Make auto for ${all ? 'all' : 'the first two'} Intergalactic Structures permanent${!all ? ' and prevent rest from resetting' : ''}.`;
+                },
                 () => `Automatically trigger Stage reset${!player.inflation.vacuum ? " doesn't work for Interstellar Stage until second level" : ''}. (Need to be enabled in Settings)`,
                 () => `Unspent Strange quarks will boost Intergalactic by increasing Solar mass gain.\n(Current effect: ${format(global.strangeInfo.stageBoost[5], { padding: true })})`,
                 () => 'Unlock another Strange Structure.\n(Click on that Structure to see its effects)'
@@ -1142,16 +1149,22 @@ export const global: globalType = { //For information that doesn't need to be sa
     inflationTreeInfo: {
         name: [
             'Missing',
-            'Missing'
+            'Global boost',
+            'Strange gain',
+            'Stranger gain',
+            'Void Milestones'
         ],
         effectText: [
-            () => `Unspent Dark matter boost global speed by ${format(calculateEffects.inflation1(), { padding: true })} ⟶ ${format(calculateEffects.inflation1(player.inflation.tree[0] + 1), { padding: true })}.`,
-            () => "Increase effective (free) level of 'Strange gain' Strangeness by +1."
+            () => "Boost global speed by 2, but disable abbility to gain new Milestones (until refunded). Doesn't work while inside the Void.",
+            () => `Unspent Dark matter boost global speed by ${format(calculateEffects.inflation1(), { padding: true })} ⟶ ${format(calculateEffects.inflation1(player.inflation.tree[1] + 1), { padding: true })}.`,
+            () => `Increase effective (free) level of 'Strange gain' Strangeness by +1.\n(${format(1.4)} times more Strange quarks from Stage resets)`,
+            () => "Allows to create Strangelets without 'Strange growth' Strangeness, but after that Strangeness is created, then it will instead make 'Strange gain' Strangeness affect Strangelets.\nLevel 2 will allow free levels to also affect Strangelets (even without 'Strange growth' Strangeness).\n(WIP, can't be created)",
+            () => 'Allows to gain Milestones while in true Vacuum and inside Void (Milestones are kept on refund).\n(WIP, can\'t be created)'
         ],
         cost: [],
-        startCost: [1, 1],
-        scaling: [0.75, 0.5],
-        max: [6, 4]
+        startCost: [0, 1, 1, 2, 2],
+        scaling: [0, 0.75, 0.5, 0, 0],
+        max: [1, 6, 4, 2, 1]
     },
     lastUpgrade: [[null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades'], [null, 'upgrades']],
     lastElement: null,
@@ -1268,7 +1281,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         }
     ],
     milestonesInfoS6: {
-        requirement: [1],
+        requirement: [1, 2],
         active: []
     },
     challengesInfo: {
@@ -1761,20 +1774,18 @@ export const updatePlayer = (load: playerType): string => {
     researchesAuto[1] = Math.max(player.strangeness[4][6], researchesAuto[1]);
     global.strangeInfo.bestHistoryRate = stageHistory.best[1] / stageHistory.best[0];
 
-    for (let s = 1; s <= 6; s++) {
-        const strangeness = player.strangeness[s]; //Undefined at 6
-        if (s !== 6) {
-            const strangenessMax = global.strangenessInfo[s].max;
-            for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) {
-                calculateMaxLevel(i, s, 'strangeness');
-                if (strangeness[i] > strangenessMax[i]) {
-                    strangeness[i] = strangenessMax[i];
-                    visualUpdateResearches(i, s, 'strangeness');
-                }
+    for (let s = 1; s < 6; s++) {
+        const strangeness = player.strangeness[s];
+        const strangenessMax = global.strangenessInfo[s].max;
+        for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) {
+            calculateMaxLevel(i, s, 'strangeness');
+            if (strangeness[i] > strangenessMax[i]) {
+                strangeness[i] = strangenessMax[i];
+                visualUpdateResearches(i, s, 'strangeness');
             }
-            for (let i = 0; i < playerStart.milestones[s].length; i++) {
-                assignMilestoneInformation(i, s);
-            }
+        }
+        for (let i = 0; i < playerStart.milestones[s].length; i++) {
+            assignMilestoneInformation(i, s);
         }
 
         const extra = player.researchesExtra[s];
@@ -1794,19 +1805,24 @@ export const updatePlayer = (load: playerType): string => {
             }
         }
         calculateMaxLevel(0, s, 'ASR');
-        if (s !== 6 && strangeness[5] >= 1) { player.ASR[s] = s === 5 && strangeness[4] < 1 ? Math.max(2, player.ASR[5]) : global.ASRInfo.max[s]; }
+        if (strangeness[5] >= 1) { player.ASR[s] = s === 5 && strangeness[4] < 1 ? Math.max(2, player.ASR[5]) : global.ASRInfo.max[s]; }
     }
-    for (let i = 0; i < playerStart.researchesAuto.length; i++) {
-        visualUpdateResearches(i, 0, 'researchesAuto');
+    {
+        const autoMax = global.researchesAutoInfo.max;
+        for (let i = 0; i < playerStart.researchesAuto.length; i++) {
+            calculateMaxLevel(i, 0, 'researchesAuto');
+            if (i !== 2) { continue; }
+            if (researchesAuto[i] > autoMax[i]) {
+                researchesAuto[i] = autoMax[i];
+                visualUpdateResearches(i, 0, 'researchesAuto');
+            }
+        }
     }
     global.lastInflation = null;
     getId('inflationText').textContent = 'Hover to see.';
     getId('inflationEffect').textContent = 'Hover to see.';
     getId('inflationCost').textContent = 'Cosmon.';
-    for (let i = 0; i < playerStart.inflation.tree.length; i++) {
-        calculateResearchCost(i, 0, 'inflation');
-        visualUpdateInflation(i);
-    }
+    for (let i = 0; i < playerStart.inflation.tree.length; i++) { calculateResearchCost(i, 0, 'inflation'); }
 
     assignBuildingInformation();
     assignStrangeInfo[1]();

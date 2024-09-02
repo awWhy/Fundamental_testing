@@ -109,14 +109,6 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
     if (challenge === 0 && time.stage > 3600) { exitChallengeAuto(); }
     assignBuildingInformation();
     if (activeAll.includes(6)) {
-        /*if (!activeAll.includes(6)) {
-            if (autoU[6].length !== 0) { autoUpgradesBuy(6); }
-            if (autoR[6].length !== 0) { autoResearchesBuy('researches', 6); }
-            if (autoE[6].length !== 0) { autoResearchesBuy('researchesExtra', 6); }
-        }*/
-        /*for (let i = maxActive[6] - 1; i >= 1; i--) {
-            if (autoBuy[6][i] && ASR[6] >= i) { buyBuilding(i, 6, 0, true); }
-        }*/
         gainBuildings(0, 6, passedSeconds); //Dark matter
     }
     if (activeAll.includes(5)) {
@@ -439,11 +431,12 @@ export const numbersUpdate = () => {
         } else if (subtab.strangenessCurrent === 'Milestones') {
             const { milestonesInfo: info, lastMilestone: last } = global;
             const vacuum = player.inflation.vacuum;
+            const disabled = player.inflation.tree[0] >= 1;
             for (let s = 1; s < info.length; s++) {
                 for (let i = 0; i < info[s].need.length; i++) {
                     getId(`milestone${i + 1}Stage${s}Current`).textContent = format(milestoneGetValue(i, s), { padding: true });
                     getId(`milestone${i + 1}Stage${s}Required`).textContent = (!vacuum && player.milestones[s][i] >= info[s].max[i]) ?
-                        'Maxed' : (!vacuum && info[s].time[i] < player.time.stage) ? 'No time' : format(info[s].need[i], { padding: true });
+                        'Maxed' : !vacuum && (disabled || info[s].time[i] < player.time.stage) ? 'Failed' : format(info[s].need[i], { padding: true });
                 }
             }
 
@@ -876,12 +869,12 @@ export const visualUpdate = () => {
             getId('autoToggle6').style.display = researchesAuto[0] >= 2 ? '' : 'none';
             getId('autoToggle7').style.display = researchesAuto[0] >= 3 ? '' : 'none';
             getId('autoToggle8').style.display = researchesAuto[1] >= 2 ? '' : 'none';
-            getId('toggleAuto1').style.display = strangeness[1][4] >= 1 ? '' : 'none';
-            getId('toggleAuto2').style.display = strangeness[2][4] >= 1 ? '' : 'none';
-            getId('toggleAuto2Main').style.display = strangeness[2][4] >= 1 ? '' : 'none';
-            getId('toggleAuto3').style.display = strangeness[3][4] >= 1 ? '' : 'none';
-            getId('toggleAuto4').style.display = strangeness[4][4] >= 1 ? '' : 'none';
-            getId('toggleAuto4Main').style.display = strangeness[4][4] >= 1 ? '' : 'none';
+            getId('toggleAuto1').style.display = strangeness[1][4] >= 1 || researchesAuto[2] >= 1 ? '' : 'none';
+            getId('toggleAuto2').style.display = strangeness[2][4] >= 1 || researchesAuto[2] >= (vacuum ? 2 : 1) ? '' : 'none';
+            getId('toggleAuto2Main').style.display = strangeness[2][4] >= 1 || researchesAuto[2] >= (vacuum ? 2 : 1) ? '' : 'none';
+            getId('toggleAuto3').style.display = strangeness[3][4] >= 1 || researchesAuto[2] >= (vacuum ? 3 : 1) ? '' : 'none';
+            getId('toggleAuto4').style.display = strangeness[4][4] >= 1 || researchesAuto[2] >= (vacuum ? 4 : 1) ? '' : 'none';
+            getId('toggleAuto4Main').style.display = strangeness[4][4] >= 1 || researchesAuto[2] >= (vacuum ? 4 : 1) ? '' : 'none';
             if (highest < 2) {
                 getId('resetToggles').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
                 getId('dischargeHotkey').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
@@ -952,6 +945,7 @@ export const visualTrueStageUnlocks = () => {
     getId('stageRewardOld').style.display = highest < 5 ? '' : 'none';
     getId('stageRewardNew').style.display = highest >= 5 ? '' : 'none';
     getId('autoWaitMain').style.display = highest >= 3 ? '' : 'none';
+    getId('researchAuto3').style.display = highest >= 7 ? '' : 'none';
     getId(globalSave.MDSettings[0] ? 'toggleHover0' : 'researchToggles').style.display = highest >= 2 ? '' : 'none';
     getId('toggleMax0').style.display = highest >= 4 ? '' : 'none';
     getId('themeArea').style.display = highest >= 2 ? '' : 'none';
@@ -998,7 +992,7 @@ export const getUpgradeDescription = (index: number, type: 'upgrades' | 'researc
 
         getId('inflationText').textContent = `${pointer.name[index]}. (Level ${format(player.inflation.tree[index])} out of ${format(pointer.max[index])})`;
         getId('inflationEffect').textContent = pointer.effectText[index]();
-        getId('inflationCost').textContent = player.inflation.tree[index] >= pointer.max[index] ? 'Activated.' : `${format(pointer.cost[index])} Cosmon.`;
+        getId('inflationCost').textContent = player.inflation.tree[index] >= pointer.max[index] ? 'Fully activated.' : `${format(pointer.cost[index])} Cosmon.`;
         return;
     }
     if (type === 'elements') {
@@ -1255,6 +1249,7 @@ export const visualUpdateResearches = (index: number, stageIndex: number, type: 
 
 export const visualUpdateInflation = (index: number) => {
     const image = getId(`inflation${index + 1}`);
+    image.style.display = player.cosmon.total >= global.inflationTreeInfo.startCost[index] ? '' : 'none';
     if (player.inflation.tree[index] >= global.inflationTreeInfo.max[index]) {
         getId('inflationCreated').append(image);
         image.tabIndex = globalSave.SRSettings[0] && globalSave.SRSettings[1] ? 0 : -1;
@@ -1521,6 +1516,7 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
 
         global.trueActive = active;
         for (let i = 0; i < global.elementsInfo.startCost.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
+        for (let i = 0; i < global.inflationTreeInfo.startCost.length; i++) { visualUpdateInflation(i); }
 
         autoUpgradesSet('all');
         autoResearchesSet('researches', 'all');
@@ -1681,24 +1677,13 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
     }
 
     const body = document.body.style;
-    if (active === 1) {
-        body.removeProperty('--stage-text');
-        body.removeProperty('--stage-button-border');
-        body.removeProperty('--stage-image-borderColor');
-        body.removeProperty('--image-border');
-    } else {
-        body.setProperty('--stage-text', `var(--${stageInfo.textColor[active]}-text)`);
-        body.setProperty('--stage-button-border', stageInfo.buttonBorder[active]);
-        body.setProperty('--stage-image-borderColor', stageInfo.imageBorderColor[active]);
-        body.setProperty('--image-border', `url("Used_art/Stage${active} border.png")`);
-    }
+    body.setProperty('--stage-text', `var(--${stageInfo.textColor[active]}-text)`);
+    body.setProperty('--stage-button-border', stageInfo.buttonBorder[active]);
+    body.setProperty('--stage-image-borderColor', stageInfo.imageBorderColor[active]);
+    body.setProperty('--image-border', `url("Used_art/Stage${active} border.png")`);
     getId('currentSwitch').textContent = stageInfo.word[active];
 
     visualUpdate();
     numbersUpdate();
-    try {
-        switchTheme();
-    } catch (error) {
-        Notify(`Failed to change theme due to error:\n${error}\n${(error as { stack: string }).stack}`);
-    }
+    if (globalSave.theme === null) { switchTheme(); }
 };

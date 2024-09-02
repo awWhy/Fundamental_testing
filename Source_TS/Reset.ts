@@ -35,17 +35,15 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
         buildings[s][0].current.setValue(playerStart.buildings[s][0].current);
         buildings[s][0].total.setValue(playerStart.buildings[s][0].current);
-        if (s !== 6) {
-            for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
-                if (!allowedToBeReset(i, s, 'structures')) { continue; }
+        for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
+            if (!allowedToBeReset(i, s, 'structures')) { continue; }
 
-                buildings[s][i as 1].true = 0;
-                buildings[s][i].current.setValue('0');
-                buildings[s][i].total.setValue('0');
-            }
-            energyStage += dischargeInfo.energyStage[s];
-            dischargeInfo.energyStage[s] = 0;
+            buildings[s][i as 1].true = 0;
+            buildings[s][i].current.setValue('0');
+            buildings[s][i].total.setValue('0');
         }
+        energyStage += dischargeInfo.energyStage[s];
+        dischargeInfo.energyStage[s] = 0;
 
         if (type === 'discharge') { continue; }
         const upgrades = player.upgrades[s];
@@ -197,9 +195,12 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             player.merge.reward = [0];
         }
     }
-    player.researchesAuto[0] = player.strangeness[3][6];
-    player.researchesAuto[1] = player.strangeness[4][6];
-    for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
+    if (update !== false) {
+        player.researchesAuto[0] = player.strangeness[3][6];
+        player.researchesAuto[1] = player.strangeness[4][6];
+        player.researchesAuto[2] = player.inflation.vacuum ? (player.strangeness[1][4] < 1 ? 0 : player.strangeness[2][4] < 1 ? 1 : player.strangeness[3][4] < 1 ? 2 : player.strangeness[4][4] < 1 ? 3 : 4) : (player.strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0);
+        for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
+    }
     if (player.stage.active === 4) { setRemnants(); }
 
     for (const s of stageIndex) { //Less errors if do it separatly
@@ -250,8 +251,9 @@ export const resetVacuum = () => {
     }
     for (let i = 0; i < playerStart.researchesAuto.length; i++) {
         player.researchesAuto[i] = 0;
-        visualUpdateResearches(i, 0, 'researchesAuto');
+        calculateMaxLevel(i, 0, 'researchesAuto');
     }
+    global.researchesAutoInfo.costRange[1][1] = 272000;
 
     //Stage 1
     player.discharge.energy = 0;
@@ -280,7 +282,7 @@ export const resetVacuum = () => {
 
     //Stage 5 and Strangeness
     player.merge.reward = [0];
-    //if (!global.milestones2Info.active[0]) { player.challenges.void = cloneArray(playerStart.challenges.void); }
+    player.challenges.void = cloneArray(playerStart.challenges.void);
     player.challenges.active = null;
     global.historyStorage.stage = [];
     player.history.stage.best = [3.1556952e16, 0, 0, 0];
@@ -290,10 +292,11 @@ export const resetVacuum = () => {
     player.stage.peak = 0;
     player.stage.time = 0;
     player.time.stage = 0;
+    const startQuarks = player.buildings[6][1].current.toNumber(); //global.milestonesInfoS6.active[0]
     for (let i = 0; i < playerStart.strange.length; i++) {
         player.time.export[i + 1] = 0;
-        player.strange[i].current = 0;
-        player.strange[i].total = 0;
+        player.strange[i].current = i === 0 ? startQuarks : 0;
+        player.strange[i].total = i === 0 ? startQuarks : 0;
     }
 
     assignBuildingInformation();
@@ -301,13 +304,21 @@ export const resetVacuum = () => {
     assignStrangeInfo[0]();
     assignMaxRank();
     assignEnergyArray();
-    for (let s = 1; s <= 6; s++) {
+    for (let s = 1; s <= 5; s++) {
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
         calculateMaxLevel(0, s, 'ASR');
-        if (s === 6) { continue; }
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
         for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
+    }
+
+    if (global.milestonesInfoS6.active[1]) {
+        for (let s = 1; s <= 5; s++) {
+            player.ASR[s] = global.ASRInfo.max[s];
+            player.strangeness[s][4] = 1;
+            visualUpdateResearches(4, s, 'strangeness');
+            visualUpdateResearches(0, s, 'ASR');
+        }
     }
 
     stageUpdate('reload');

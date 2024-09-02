@@ -300,12 +300,14 @@ const replaceSaveFileSpecials = (): string => {
     }
 
     const special = [
+        '[version]',
         '[stage]',
         '[true]',
         '[strange]',
         '[vacuum]'
     ];
     const replaceWith = [
+        player.version,
         global.stageInfo.word[player.stage.active],
         player.stage.true === 6 ? 'Void' : global.stageInfo.word[player.stage.true >= 7 ? 6 : player.stage.true],
         `${player.strange[0].total}`,
@@ -1063,7 +1065,7 @@ try { //Start everything
 
     /* Post */
     document.head.append(specialHTML.styleSheet);
-    if (globalSave.theme !== null) { setTheme(globalSave.theme, true); } //Test if allowed to have current Theme
+    if (globalSave.theme !== null) { setTheme(globalSave.theme); }
     stageUpdate('reload');
     if (save !== null) {
         global.lastSave = handleOfflineTime();

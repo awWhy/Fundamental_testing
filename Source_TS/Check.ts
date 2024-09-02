@@ -14,10 +14,10 @@ export const checkTab = (tab: gameTab, subtab = null as null | string): boolean 
             return subtab === 'Upgrades' || subtab === null;
         case 'strangeness':
             if (player.stage.true < 7 && player.strange[0].total <= 0 && (!player.inflation.vacuum || player.stage.current < 5)) { return false; }
-            if (subtab === 'Milestones') { return global.milestonesInfoS6.active[0] || !player.inflation.vacuum; }
+            if (subtab === 'Milestones') { return !player.inflation.vacuum; } //player.stage.true >= 7
             return subtab === 'Matter' || subtab === null;
         case 'inflation':
-            if (player.stage.true < 7 || !global.stageInfo.activeAll.includes(6)) { return false; }
+            if (player.stage.true < 7) { return false; }
             return subtab === 'Researches' || subtab === 'Milestones' || subtab === null;
         case 'settings':
             if (subtab === 'History') { return player.stage.true >= 7 || player.strange[0].total > 0; }
@@ -66,6 +66,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             if (global.upgradesInfo[stageIndex].maxActive < upgrade + 1) { return false; }
             if (stageIndex === 1) {
                 if (upgrade === 0 || upgrade === 1) { return player.inflation.vacuum; }
+                if (upgrade === 3) { return player.upgrades[1][5] === 1 || player.buildings[1][player.inflation.vacuum ? 4 : 2].total.moreThan('0'); }
+                if (upgrade === 4) { return player.upgrades[1][5] === 1 || player.buildings[1][player.inflation.vacuum ? 5 : 3].total.moreThan('0'); }
                 if (upgrade > 5) { return player.upgrades[1][5] === 1; }
                 return true;
             } else if (stageIndex === 2) {
@@ -133,9 +135,10 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             }
             break;
         case 'researchesAuto': {
-            if (!player.inflation.vacuum) { return false; }
             const autoStage = global.researchesAutoInfo.autoStage[upgrade][player.researchesAuto[upgrade]]; //Can be undefined
-            return autoStage === stageIndex || (stageIndex === 5 && autoStage === 4);
+            if (!(autoStage === stageIndex || (autoStage === 4 && stageIndex === 5))) { return false; }
+            if (upgrade === 0 || upgrade === 1) { return player.inflation.vacuum; }
+            return true;
         }
         case 'ASR':
             if (stageIndex === 1) { return player.upgrades[1][5] >= 1; }
@@ -180,6 +183,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             }
             return true;
         case 'inflation':
+            if (upgrade === 3 || upgrade === 4) { return false; }
             return true;
     }
 
@@ -236,12 +240,13 @@ export const milestoneGetValue = (index: number, stageIndex: number): number | O
 export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     const pointer = global.milestonesInfo[stageIndex];
     if (player.inflation.vacuum) {
-        if (player.challenges.active !== 0 || !global.milestonesInfoS6.active[0]) { return false; }
-        return false;
-    } else if ((player.stage.true < 7 && player.stage.resets < 4) ||
-        (stageIndex === 5 && player.milestones[4][0] < 8) || //index === 0
-        pointer.max[index] <= player.milestones[stageIndex][index] ||
-        pointer.time[index] < player.time.stage
-    ) { return false; }
+        if (player.challenges.active !== 0) { return false; }
+        return false; //player.inflation.tree[4] >= 1
+    } else {
+        if (player.stage.true < 7 && player.stage.resets < 4) { return false; }
+        if (stageIndex === 5 && player.milestones[4][0] < 8 && index === 0) { return false; }
+        if (pointer.max[index] <= player.milestones[stageIndex][index]) { return false; }
+        if (pointer.time[index] < player.time.stage || player.inflation.tree[0] >= 1) { return false; }
+    }
     return pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
 };
