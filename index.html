@@ -349,6 +349,10 @@
                                     <input type="image" src="Used_art/Missing.png" alt="Element automatization" draggable="false" id="researchAuto2Image" class="interactiveImage" aria-labelledby="upgradeText upgradeCost upgradeEffect">
                                     <p class="whiteText stage4borderImage"><span id="researchAuto2Level" class="redText">0</span>/<span id="researchAuto2Max" class="greenText">1</span></p>
                                 </div>
+                                <div id="researchAuto3">
+                                    <input type="image" src="Used_art/Missing.png" alt="Reset automatization" draggable="false" id="researchAuto3Image" class="stageBorderImage interactiveImage" aria-labelledby="upgradeText upgradeCost upgradeEffect">
+                                    <p class="whiteText stageAllborderImage"><span id="researchAuto3Level" class="redText">0</span>/<span id="researchAuto3Max" class="greenText">1</span></p>
+                                </div>
                             </div>
                         </section>
                     </div>
@@ -714,7 +718,10 @@
                     <div id="inflationContainer">
                         <div id="inflationAvailable">
                             <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="inflation1" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
-                            <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="inflation2" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Missing.png" alt="Global boost" draggable="false" id="inflation2" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Missing.png" alt="Strange gain" draggable="false" id="inflation3" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Missing.png" alt="Stranger gain" draggable="false" id="inflation4" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/inflation5.png" alt="Void Milestones" draggable="false" id="inflation5" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                         </div>
                         <div id="inflationCreated"></div>
                     </div>
@@ -731,7 +738,8 @@
                 </section>
                 <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Milestones">
                     <div id="inflationMilestones">
-                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Void rewards persist through Vacuum resets, also unlock Milestones for true Vacuum and new Void rewards (WIP)</div>
+                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to Universe amount and unlock more Void rewards</div>
+                        <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all auto Structures Strangeness maxed and with auto Galaxies</div>
                     </div>
                 </section>
             </div>
@@ -836,21 +844,22 @@
                                     <div class="popUpMenu" role="dialog" aria-label="Save file name preview">
                                         <p id="saveFileNamePreview" class="mainText bigWord">Fundamental.txt</p>
                                         <p class="whiteText center">Any of these can be added for extra information of a save file</p>
+                                        <p class="mainText">[version] - <span class="whiteText">for current game version</span></p>
                                         <p class="stageText">[true] - <span class="whiteText">for current progress</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current active Stage</span></p>
                                         <p id="saveFileNameStrange" class="greenText">[strange] - <span class="whiteText">for total Strange quarks</span></p>
-                                        <p id="saveFileNameVacuum" class="darkvioletText">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
+                                        <p id="saveFileNameVacuum" class="orchidText">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
                                         <p class="cyanText">[date<span class="whiteText">Data</span>] - <span class="whiteText">for current date</span></p>
                                         <div class="dateGrid">
                                             <p class="cyanText">Y - <span class="whiteText">Year</span></p>
                                             <p class="cyanText">M - <span class="whiteText">Month</span></p>
                                             <p class="cyanText">D - <span class="whiteText">Day</span></p>
                                         </div>
-                                        <p class="cyanText">[time<span class="whiteText">Data</span>] - <span class="whiteText">for current time</span></p>
+                                        <p class="blueText">[time<span class="whiteText">Data</span>] - <span class="whiteText">for current time</span></p>
                                         <div class="dateGrid">
-                                            <p class="cyanText">H - <span class="whiteText">Hour</span></p>
-                                            <p class="cyanText">M - <span class="whiteText">Minute</span></p>
-                                            <p class="cyanText">S - <span class="whiteText">Second</span></p>
+                                            <p class="blueText">H - <span class="whiteText">Hour</span></p>
+                                            <p class="blueText">M - <span class="whiteText">Minute</span></p>
+                                            <p class="blueText">S - <span class="whiteText">Second</span></p>
                                         </div>
                                         <p class="whiteText center">'Data' will be replaced accordingly, example<br aria-hidden="true"><span class="cyanText">[dateD.M.Y]</span> ⟶ <span class="cyanText">02.02.2000</span></p>
                                         <p class="redText bigWord center">Case sensitive</p>

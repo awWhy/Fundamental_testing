@@ -27,6 +27,7 @@ body *, body {
 }
 
 body { /* Default color variables */
+    /* These are fallback values and only used during page load (due to some buggy browsers) */
     --background-color: #030012;
     --window-color: #12121c;
     --window-border: cornflowerblue;
@@ -57,9 +58,6 @@ body { /* Default color variables */
     --green-text: #00e900;
     --yellow-text: #fafa00; /* Rename into select-text, if consistent yellow text will be added */
 
-    /* These colors need to be changed in multiple places:
-        --window-color > ".stage1windowBackground";
-        --button-border > ".stage1borderButton" and "--stage-button-border", and "global.stageInfo.buttonBorder[1]"; */
     --transition-all: 0s;
     --transition-buttons: 100ms;
     --stage-text: var(--cyan-text);
@@ -398,7 +396,7 @@ input:-webkit-autofill { /* Chrome related pain */
     max-width: 90vw;
     padding: 0.5em 0.6em 0.6em;
     overflow-wrap: break-word;
-    z-index: 3;
+    z-index: 8;
 }
 
 .insideTab {
@@ -945,6 +943,12 @@ input:-webkit-autofill { /* Chrome related pain */
     box-sizing: content-box;
 }
 
+#inflationMilestones {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.6em;
+}
+
 #inflationMilestones > div {
     background-color: #4d0000;
     color: var(--red-text);
@@ -1255,7 +1259,7 @@ li .hollowButton {
     position: fixed;
     width: 100%;
     bottom: 0;
-    z-index: 8;
+    z-index: 6;
 }
 
 #footerMain {
