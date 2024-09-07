@@ -10,7 +10,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     let buildingsActive, upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
 
     if (state) {
-        getId('mergeResetText').innerHTML = '<span class="cyanText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
+        getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
         buildingsInfo.hoverText[2][0] = 'Tritium';
         buildingsInfo.hoverText[3][0] = 'Preons hardcap';
@@ -75,7 +75,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[4].maxActive = 10;
         strangenessInfo[5].maxActive = 9;
 
-        getId('milestonesWelcome').innerHTML = 'Milestones, can only be done when inside the <span class="darkvioletText">Void</span>';
         const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
         milestone1S1.src = milestone1S1.src.replace('Quarks.png', 'Preon.png');
         const milestone1S2 = getQuery('#milestone1Stage2Div > img') as HTMLImageElement;
@@ -169,7 +168,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[4].maxActive = 8;
         strangenessInfo[5].maxActive = 8;
 
-        getId('milestonesWelcome').innerHTML = 'Any reached Milestone will award 1 <span class="greenText">Strange quark</span>';
         const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
         milestone1S1.src = milestone1S1.src.replace('Preon.png', 'Quarks.png');
         const milestone1S2 = getQuery('#milestone1Stage2Div > img') as HTMLImageElement;
@@ -196,6 +194,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('submersionBoost').style.display = 'none';
         getId('mainCap').style.display = 'none';
         getId('solarMassCollapseMaxMain').style.display = 'none';
+        getId('mergeEffects').style.display = 'none';
         getId('researchAuto1').style.display = 'none';
         getId('researchAuto2').style.display = 'none';
         getId('collapseCapped').style.display = 'none';

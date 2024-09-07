@@ -14,7 +14,7 @@ export const checkTab = (tab: gameTab, subtab = null as null | string): boolean 
             return subtab === 'Upgrades' || subtab === null;
         case 'strangeness':
             if (player.stage.true < 7 && player.strange[0].total <= 0 && (!player.inflation.vacuum || player.stage.current < 5)) { return false; }
-            if (subtab === 'Milestones') { return !player.inflation.vacuum; } //player.stage.true >= 7
+            if (subtab === 'Milestones') { return player.cosmon.total >= 2 || !player.inflation.vacuum; }
             return subtab === 'Matter' || subtab === null;
         case 'inflation':
             if (player.stage.true < 7) { return false; }
@@ -183,7 +183,6 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             }
             return true;
         case 'inflation':
-            if (upgrade === 3 || upgrade === 4) { return false; }
             return true;
     }
 
@@ -240,13 +239,13 @@ export const milestoneGetValue = (index: number, stageIndex: number): number | O
 export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     const pointer = global.milestonesInfo[stageIndex];
     if (player.inflation.vacuum) {
-        if (player.challenges.active !== 0) { return false; }
-        return false; //player.inflation.tree[4] >= 1
+        if (player.challenges.active !== 0 || player.inflation.tree[4] < 1) { return false; }
+        return false;
     } else {
+        if (pointer.max[index] <= player.milestones[stageIndex][index]) { return false; }
         if (player.stage.true < 7 && player.stage.resets < 4) { return false; }
         if (stageIndex === 5 && player.milestones[4][0] < 8 && index === 0) { return false; }
-        if (pointer.max[index] <= player.milestones[stageIndex][index]) { return false; }
-        if (pointer.time[index] < player.time.stage || player.inflation.tree[0] >= 1) { return false; }
+        if (player.inflation.tree[4] < 1 && pointer.time[index] / (player.inflation.tree[0] >= 1 ? 4 : 1) < player.time.stage) { return false; }
     }
     return pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
 };

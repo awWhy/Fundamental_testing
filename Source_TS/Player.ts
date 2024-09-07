@@ -254,8 +254,7 @@ export const player: playerType = { //Only for information that need to be saved
         buildings: [], //Class 'toggleBuilding' ([0] everywhere, is toggle all)
         hover: [], //Class 'toggleHover'
         /* Upgrades/Researches/Elements[0] */
-        max: [], //Class 'toggleMax'
-        /* Researches[0] */
+        max: [], //Class 'toggleMax', same as hover toggles
         auto: [], //Class 'toggleAuto'
         /* Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
            Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9] */ //Toggle 9 is commented out
@@ -857,12 +856,12 @@ export const global: globalType = { //For information that doesn't need to be sa
         effectText: [
             () => `Automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.researchesAuto[0], 2)]} from any Stage. (Need to be enabled in Settings)`,
             () => 'Elements will no longer require Collapse for activation.\nSecond level will instead unlock auto creation of Elements. (Need to be enabled in settings)',
-            () => `Unlock auto ${['Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge (WIP)'][player.inflation.vacuum ? Math.min(player.researchesAuto[2], 4) : Math.min(player.stage.active - 1, 3)]} level 1. (Need to be enabled in settings)`
+            () => `Unlock auto ${['Discharge', 'Rank', 'Vaporization', 'Collapse', 'Merge (WIP)'][player.inflation.vacuum ? Math.min(player.researchesAuto[2], 4) : Math.min(player.stage.active - 1, 3)]} level 1. (Need to be enabled in settings)`
         ],
         costRange: [
             [1e13, 2e34, 1e30],
             [136000, 272000],
-            [600, 1200, 3600, 14400, 72000]
+            [1200, 2400, 7200, 28800, 144000]
         ],
         autoStage: [ //Stage to buy from (1 per level)
             [2, 3, 4, 4],
@@ -1148,18 +1147,18 @@ export const global: globalType = { //For information that doesn't need to be sa
     ],
     inflationTreeInfo: {
         name: [
-            'Missing',
+            'Overboost',
             'Global boost',
             'Strange gain',
             'Stranger gain',
             'Void Milestones'
         ],
         effectText: [
-            () => "Boost global speed by 2, but disable abbility to gain new Milestones (until refunded). Doesn't work while inside the Void.",
+            () => 'Boost global speed by 2, but reduce time limit on everything that has it by 4.',
             () => `Unspent Dark matter boost global speed by ${format(calculateEffects.inflation1(), { padding: true })} ⟶ ${format(calculateEffects.inflation1(player.inflation.tree[1] + 1), { padding: true })}.`,
-            () => `Increase effective (free) level of 'Strange gain' Strangeness by +1.\n(${format(1.4)} times more Strange quarks from Stage resets)`,
-            () => "Allows to create Strangelets without 'Strange growth' Strangeness, but after that Strangeness is created, then it will instead make 'Strange gain' Strangeness affect Strangelets.\nLevel 2 will allow free levels to also affect Strangelets (even without 'Strange growth' Strangeness).\n(WIP, can't be created)",
-            () => 'Allows to gain Milestones while in true Vacuum and inside Void (Milestones are kept on refund).\n(WIP, can\'t be created)'
+            () => `Gain ${format(1.4)} times more Strange quarks from any Stage reset.`,
+            () => "Allows to gain Strangelets until 'Strange growth' Strangeness is created, afterwards it will make 'Strange gain' Strangeness affect Strangelets gain.\nLevel 2 will make 'Strange gain' Inflation affect Strangelets gain, doesn't require 'Strange growth' Strangeness.",
+            () => 'Allows to gain Milestones while in true Vacuum and inside Void (Milestones are kept on refund).\nIn false Vacuum will instead remove time limit for Milestones.'
         ],
         cost: [],
         startCost: [0, 1, 1, 2, 2],
@@ -1281,7 +1280,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         }
     ],
     milestonesInfoS6: {
-        requirement: [1, 2],
+        requirement: [1, 2, 3],
         active: []
     },
     challengesInfo: {
@@ -1315,7 +1314,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 [
                     () => 'Have more than 1 Cloud',
                     () => `Have more than ${format(1e4)} Clouds`,
-                    () => global.milestonesInfoS6.active[0] ? 'Have more than Infinity Clouds' : null
+                    () => player.stage.true >= 7 ? 'Have more than Infinity Clouds' : null
                 ],
                 [
                     () => "Reach 'Meteoroid' Rank",
@@ -1323,7 +1322,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                     () => "Reach 'Planet' Rank",
                     () => "Reach 'Jovian planet' Rank",
                     () => "Reach 'Protostar' Rank",
-                    () => global.milestonesInfoS6.active[0] ? "Reach 'Protogalaxy' Rank" : null
+                    () => player.stage.true >= 7 ? "Reach 'Protogalaxy' Rank" : null
                 ],
                 [
                     () => 'Cause the Collapse',
@@ -1334,7 +1333,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 [
                     () => 'Unlock Intergalactic',
                     () => 'Create a Galaxy',
-                    () => global.milestonesInfoS6.active[0] ? 'Create a Galaxy group' : null
+                    () => player.stage.true >= 7 ? 'Create a Galaxy group' : null
                 ]
             ]
         ],
@@ -1818,6 +1817,8 @@ export const updatePlayer = (load: playerType): string => {
             }
         }
     }
+
+    global.lastChallenge = [player.challenges.active, null];
     global.lastInflation = null;
     getId('inflationText').textContent = 'Hover to see.';
     getId('inflationEffect').textContent = 'Hover to see.';
