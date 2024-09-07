@@ -212,7 +212,7 @@
                     </div>
                     <div id="timeInfo">
                         <p class="blueText">Stage time: <span id="stageTime" class="cyanText">1 seconds</span><span id="stageTimeReal"> (Real: <span id="stageTimeRealStat" class="cyanText">0 seconds</span>)</span></p>
-                        <p id="currentChallenge" class="redText">Currently inside the <span>Missing</span></p>
+                        <p id="currentChallengeMain" class="redText">Currently inside the <span id="currentChallenge">Missing</span></p>
                     </div>
                     <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpfull stuff</p>
                     <p id="MDMessage1" aria-hidden="true">If you are playing on Mobile device, then enabling support in Settings will add helpfull stuff, as well can fix some bugs</p>
@@ -667,7 +667,7 @@
                 <section id="strangenessSubtabMilestones" class="insideTab" style="display: none;" aria-label="Milestones">
                     <div class="fullWidth center">
                         <h2 class="stageText bigWord">Milestones</h2>
-                        <p id="milestonesWelcome" class="whiteText">Any reached Milestone will award 1 <span class="greenText">Strange quark</span></p>
+                        <p class="whiteText">Completing any tier will award 1 <span class="greenText">Strange quark</span></p>
                     </div>
                     <div id="milestones">
                         <div id="milestone1Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Quarks.png" alt="Fundamental Matter" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
@@ -738,8 +738,9 @@
                 </section>
                 <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Milestones">
                     <div id="inflationMilestones">
-                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to Universe amount and unlock more Void rewards</div>
-                        <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all auto Structures Strangeness maxed and with auto Galaxies</div>
+                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to Universe amount</div>
+                        <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all auto Structures Strangeness maxed, including auto Galaxies</div>
+                        <div id="inflationMilestone3"><p>Unlocked at 3 Universes:</p>Start Vacuum resets with auto Upgrades maxed and auto Elements Strangeness at level 2</div>
                     </div>
                 </section>
             </div>
@@ -889,7 +890,7 @@
                                         <p class="mainText">Numbers - <span class="whiteText">toggle auto Structure</span></p>
                                         <div class="hotkeysGrid">
                                             <p id="allStructuresHotkey" class="redText">A <span class="whiteText">or</span> 0 - <span class="whiteText">toggle all auto Structures</span></p>
-                                            <p id="mergeHotkey" class="cyanText stage5Include">M - <span class="whiteText">Merge</span></p>
+                                            <p id="mergeHotkey" class="darkvioletText stage5Include">M - <span class="whiteText">Merge</span></p>
                                             <p class="darkvioletText stage6Include">U - <span class="whiteText">Universe</span></p>
                                         </div>
                                         <p class="mainText center bigWord">Holding Enter on last selected button will repeatedly press it, also works with Mouse on some buttons</p>
