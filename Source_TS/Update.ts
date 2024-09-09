@@ -1509,9 +1509,9 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
 
         if (challenge !== null) {
             getId('currentChallengeMain').style.display = '';
-            const span = getQuery('currentChallenge');
-            span.textContent = global.challengesInfo.name[challenge];
-            span.style.color = `var(--${global.challengesInfo.color[challenge]}-text)`;
+            const currentID = getId('currentChallenge');
+            currentID.textContent = global.challengesInfo.name[challenge];
+            currentID.style.color = `var(--${global.challengesInfo.color[challenge]}-text)`;
         } else { getId('currentChallengeMain').style.display = 'none'; }
         getChallengeDescription(challenge);
 
