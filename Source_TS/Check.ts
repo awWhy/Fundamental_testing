@@ -145,11 +145,11 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             if (stageIndex === 3) { return player.accretion.rank !== 0; }
             return true;
         case 'elements':
-            if (upgrade >= 29) { return player.upgrades[4][4] === 1; }
+            if (upgrade >= 29) { return player.upgrades[4][4] === 1 && player.buildings[6][1].true >= upgrade - 29; }
             if (upgrade >= 27) { return player.upgrades[4][3] === 1; }
             if (upgrade >= 11) { return player.upgrades[4][2] === 1 && (player.collapse.stars[1] > 0 || player.researchesExtra[5][0] >= 1); }
             if (upgrade >= 6) { return player.upgrades[4][2] === 1; }
-            return player.upgrades[4][1] === 1; //&& upgrade !== 0;
+            return player.upgrades[4][1] === 1 && upgrade > 0;
         case 'strangeness':
             if (global.strangenessInfo[stageIndex].maxActive < upgrade + 1) { return false; }
             if (player.inflation.vacuum) {
@@ -183,7 +183,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             }
             return true;
         case 'inflation':
-            return true;
+            return player.stage.true >= 7;
     }
 
     return false;
@@ -211,7 +211,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             if (stageIndex === 5) { return check !== 0; }
             break;
         case 'elements':
-            return check !== 26 && check !== 29;
+            return ![26, 29, 30].includes(check);
     }
 
     return true;

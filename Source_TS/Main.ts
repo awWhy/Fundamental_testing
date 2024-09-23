@@ -243,7 +243,7 @@ const saveConsole = async() => {
         Notify(`Developer mode is ${globalSave.developerMode ? 'now' : 'no longer'} active`);
         saveGlobalSettings();
     } else if (lower === 'achievement') {
-        Notify('Unlocked a new Achievement');
+        Notify('Unlocked a new Achievement! (If there were any)');
     } else if (lower === 'slow' || lower === 'free') {
         Notify('Game speed was increased by 1x');
     } else {
@@ -303,16 +303,20 @@ const replaceSaveFileSpecials = (): string => {
     const special = [
         '[version]',
         '[stage]',
-        '[true]',
         '[strange]',
-        '[vacuum]'
+        '[cosmon]',
+        '[vacuum]',
+        '[galaxy]',
+        '[universe]'
     ];
     const replaceWith = [
         player.version,
         global.stageInfo.word[player.stage.active],
-        player.stage.true === 6 ? 'Void' : global.stageInfo.word[player.stage.true >= 7 ? 6 : player.stage.true],
         `${player.strange[0].total}`,
-        `${player.inflation.vacuum}`
+        `${player.cosmon.total}`,
+        `${player.inflation.vacuum}`,
+        `${player.buildings[5][3].true}`,
+        `${player.buildings[6][1].true}`
     ];
     for (let i = 0; i < special.length; i++) {
         realName = realName.replace(special[i], replaceWith[i]);
@@ -401,7 +405,7 @@ try { //Start everything
         (getId('visualInterval') as HTMLInputElement).value = `${globalSave.intervals.visual / 1000}`;
         (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
         for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'global'); }
-        if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also will set breakpoints for screen size
+        if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also sets breakpoints for screen size
         if (globalSave.toggles[2]) { body.style.userSelect = ''; }
         if (globalSave.toggles[1]) {
             const elementsArea = getId('upgradeSubtabElements');

@@ -3,9 +3,9 @@ import { cloneArray, global, player, playerStart } from './Player';
 import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignEnergyArray, assignPuddles } from './Stage';
 import { numbersUpdate, setRemnants, stageUpdate, switchTab, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
-/** Preferably stageIndex should be sorted smallest to highest (or at least last number be the highest) */
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
     const { dischargeInfo } = global;
+    const { energyStage, energyType } = dischargeInfo;
     const { buildings, discharge } = player;
 
     if (type === 'galaxy') {
@@ -23,7 +23,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         player.collapse.stars = [0, 0, 0];
     }
 
-    let energyStage = 0;
+    let energyRefund = 0;
     for (const s of stageIndex) {
         if (s === 2) {
             global.vaporizationInfo.trueResearch0 = 0;
@@ -32,18 +32,24 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         } else if (s === 4) {
             global.collapseInfo.trueStars = 0;
         }
+        energyRefund += energyStage[s];
+        energyStage[s] = 0;
 
-        buildings[s][0].current.setValue(playerStart.buildings[s][0].current);
-        buildings[s][0].total.setValue(playerStart.buildings[s][0].current);
+        const building = buildings[s];
+        building[0].current.setValue(playerStart.buildings[s][0].current);
+        building[0].total.setValue(playerStart.buildings[s][0].current);
         for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
-            if (!allowedToBeReset(i, s, 'structures')) { continue; }
+            if (!allowedToBeReset(i, s, 'structures')) {
+                const energy = energyType[s][i] * building[i as 1].true;
+                energyStage[s] += energy;
+                energyRefund -= energy;
+                continue;
+            }
 
-            buildings[s][i as 1].true = 0;
-            buildings[s][i].current.setValue('0');
-            buildings[s][i].total.setValue('0');
+            building[i as 1].true = 0;
+            building[i].current.setValue('0');
+            building[i].total.setValue('0');
         }
-        energyStage += dischargeInfo.energyStage[s];
-        dischargeInfo.energyStage[s] = 0;
 
         if (type === 'discharge') { continue; }
         const upgrades = player.upgrades[s];
@@ -83,52 +89,40 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     }
 
     if (player.inflation.vacuum) {
-        if (!stageIndex.includes(2)) {
-            buildings[2][0].current.setValue('0');
-            buildings[2][0].total.setValue('0');
-            buildings[2][1].current.setValue(buildings[2][1].true);
-            buildings[2][1].total.setValue(buildings[2][1].true);
-        }
-        if (!stageIndex.includes(3)) {
-            buildings[3][0].current.setValue('9.76185667392e-36');
-            buildings[3][0].total.setValue('9.76185667392e-36');
-        }
-        if (!stageIndex.includes(4)) {
-            buildings[4][0].current.setValue('1');
-            buildings[4][0].total.setValue('1');
-        }
+        let deficit = dischargeInfo.energyTrue - discharge.energy - energyRefund;
+        for (let s = 2; s <= 5; s++) {
+            if (stageIndex.includes(s)) { continue; }
+            const building = buildings[s];
+            for (let i = global.buildingsInfo.maxActive[s] - 1; i >= 1; i--) {
+                if (!allowedToBeReset(i, s, 'structures')) { continue; }
 
-        const energyTest = dischargeInfo.energyTrue - energyStage;
-        if (discharge.energy >= energyTest) {
-            discharge.energy = Math.max(energyTest, dischargeInfo.energyType[5][3] * buildings[5][3].true);
-            dischargeInfo.energyTrue = discharge.energy;
-        } else {
-            let deficit = energyTest - discharge.energy;
-            for (let s = stageIndex[stageIndex.length - 1]; s <= 5; s++) {
-                const energyType = dischargeInfo.energyType[s];
-                for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
-                    if (!allowedToBeReset(i, s, 'structures')) { continue; }
-
-                    const max = Math.min(Math.ceil(deficit / energyType[i]), buildings[s][i as 1].true);
-                    if (max <= 0) { continue; }
-                    buildings[s][i as 1].true -= max;
-                    buildings[s][i].current.minus(max);
-                    buildings[s][i].total.minus(max);
-                    deficit -= max * energyType[i];
-                    if (s === 4) { global.collapseInfo.trueStars -= max; }
-                    if (deficit <= 0) { break; }
+                if (deficit > 0) {
+                    const max = Math.min(Math.ceil(deficit / energyType[s][i]), building[i as 1].true);
+                    if (max > 0) {
+                        building[i as 1].true -= max;
+                        deficit -= max * energyType[s][i];
+                        energyStage[s] -= max * energyType[s][i];
+                        if (s === 4) { global.collapseInfo.trueStars -= max; }
+                    }
                 }
-                if (s === 2) {
-                    global.vaporizationInfo.trueResearch0 = 0;
-                    global.vaporizationInfo.trueResearch1 = 0;
-                    global.vaporizationInfo.trueResearchRain = 0;
-                    assignPuddles();
-                }
+                building[i].current.setValue(building[i as 1].true);
+                building[i].total.setValue(building[i as 1].true);
             }
-            discharge.energy += deficit;
-            dischargeInfo.energyTrue = discharge.energy;
+            if (s !== 5) { //Stage 5 need to use trueStars (not included because its a fake stat)
+                building[0].current.setValue(playerStart.buildings[s][0].current);
+                building[0].total.setValue(playerStart.buildings[s][0].current);
+            }
+            if (s === 2) {
+                global.vaporizationInfo.trueResearch0 = 0;
+                global.vaporizationInfo.trueResearch1 = 0;
+                global.vaporizationInfo.trueResearchRain = 0;
+                assignPuddles();
+            }
         }
-    } else if (type === 'discharge') {
+
+        discharge.energy += deficit;
+        dischargeInfo.energyTrue = discharge.energy;
+    } else if (type === 'discharge') { //stageIndex.includes(1)
         discharge.energy = 0;
         dischargeInfo.energyTrue = 0;
     }
@@ -193,6 +187,7 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
         } else if (s === 5) {
             if (player.strangeness[5][5] < 1) { player.ASR[5] = 0; }
             player.merge.reward = [0];
+            player.merge.resets = 0;
         }
     }
     if (update !== false) {
@@ -249,13 +244,6 @@ export const resetVacuum = () => {
         player.researchesExtra[s] = cloneArray(playerStart.researchesExtra[s]);
     }
     player.researchesAuto = cloneArray(playerStart.researchesAuto);
-    global.researchesAutoInfo.costRange[1][1] = 272000;
-    if (activeMilestone[2]) {
-        player.strangeness[3][6] = 3;
-        player.strangeness[4][6] = 2;
-        player.researchesAuto[0] = 3;
-        player.researchesAuto[1] = 2;
-    }
 
     //Stage 1
     player.discharge.energy = 0;
@@ -283,6 +271,7 @@ export const resetVacuum = () => {
     player.elements = cloneArray(playerStart.elements);
 
     //Stage 5 and Strangeness
+    player.merge.resets = 0;
     player.merge.reward = [0];
     player.challenges.void = cloneArray(playerStart.challenges.void);
     player.challenges.active = null;
@@ -294,11 +283,24 @@ export const resetVacuum = () => {
     player.stage.peak = 0;
     player.stage.time = 0;
     player.time.stage = 0;
-    const startQuarks = player.buildings[6][1].current.toNumber(); //activeMilestone[0]
     for (let i = 0; i < playerStart.strange.length; i++) {
         player.time.export[i + 1] = 0;
-        player.strange[i].current = i === 0 ? startQuarks : 0;
-        player.strange[i].total = i === 0 ? startQuarks : 0;
+        player.strange[i].current = 0;
+        player.strange[i].total = 0;
+    }
+
+    if (activeMilestone[0]) {
+        const startQuarks = player.buildings[6][1].current.toNumber();
+        player.strange[0].current = startQuarks;
+        player.strange[0].total = startQuarks;
+        player.strangeness[1][8] = 2;
+    }
+    if (activeMilestone[1]) { player.strangeness[5][4] = 1; }
+    if (activeMilestone[2]) {
+        player.strangeness[3][6] = 3;
+        player.strangeness[4][6] = 2;
+        player.researchesAuto[0] = 3;
+        player.researchesAuto[1] = 2;
     }
 
     assignBuildingInformation();
@@ -312,7 +314,7 @@ export const resetVacuum = () => {
         calculateMaxLevel(0, s, 'ASR');
         if (activeMilestone[1]) {
             player.ASR[s] = global.ASRInfo.max[s];
-            player.strangeness[s][4] = 1;
+            player.strangeness[s][5] = 1;
         }
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
         for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }

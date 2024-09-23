@@ -9,12 +9,6 @@
     unicode-range: U+0030-0039;
 }
 
-html {
-    /* width: 100vw; */
-    /* height: 100vh; */
-    font-size: 16px;
-}
-
 body *, body {
     font-family: Tight, Inter, serif;
     box-sizing: border-box;
@@ -26,7 +20,7 @@ body *, body {
     transition-duration: var(--transition-all);
 }
 
-body { /* Default color variables */
+html {
     /* These are fallback values and only used during page load (due to some buggy browsers) */
     --background-color: #030012;
     --window-color: #12121c;
@@ -66,9 +60,14 @@ body { /* Default color variables */
     --image-border: url("Used_art/Stage1 border.png");
     --elements-columns: 18;
 
-    /* Other */
     color: var(--main-text);
     background-color: var(--background-color);
+    min-width: 100vw;
+    min-height: 100vh;
+    font-size: 16px;
+}
+
+body {
     overscroll-behavior: none;
     overflow-y: overlay;
     overflow-anchor: none;
@@ -430,7 +429,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #resets button {
-    width: 15.5em;
+    width: 16em;
     height: 2.2em;
     font-size: 0.86em;
     margin-top: auto;
@@ -1439,7 +1438,7 @@ li .hollowButton {
 
 /* Everything bellow gets edited in changeFontSize function, because rem units are bugged and there isn't any better alternatives */
 @media screen and (max-width: 925px) {
-    body { --elements-columns-phone: min(var(--elements-columns), 9); }
+    html { --elements-columns-phone: min(var(--elements-columns), 9); }
 
     #MDMessage1 {
         display: block;

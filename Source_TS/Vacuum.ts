@@ -60,15 +60,15 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         global.ASRInfo.costRange[3][3] = 2.45576045e31;
 
         strangeness1Cost = [1, 1, 1, 2, 12, 2, 24];
-        strangeness1Scaling = [2.46, 2, 6, 6, 100, 1, 1];
+        strangeness1Scaling = [2.46, 2, 6, 6, 400, 1, 1];
         strangeness2Cost = [1, 1, 2, 2, 12, 4, 24];
         strangeness2Scaling = [2.46, 2, 3, 3.4, 800, 1, 1];
         strangeness3Cost = [1, 2, 2, 24, 12, 4, 4, 24];
-        strangeness3Scaling = [2, 3.4, 3, 1, 400, 1, 1.74, 1];
+        strangeness3Scaling = [2, 3.4, 3, 1, 100, 1, 1.74, 1];
         strangeness4Cost = [1, 2, 4, 2, 12, 6, 6, 24];
         strangeness4Scaling = [2, 3.4, 3, 6, 1900, 1, 1.74, 1];
         strangeness5Cost = [24, 36, 6, 24, 15600, 24, 96, 120];
-        strangeness5Scaling = [2, 2, 3.4, 1, 1, 1, 1, 1];
+        strangeness5Scaling = [2, 2, 3.4, 1, Infinity, 1, 1, 1];
         strangenessInfo[1].maxActive = 10;
         strangenessInfo[2].maxActive = 10;
         strangenessInfo[3].maxActive = 10;
@@ -238,7 +238,7 @@ export const switchVacuum = () => {
         player.collapse.show = 0;
         playEvent(6);
     }
-    if (player.toggles.normal[0] || player.stage.active !== 6) { player.stage.active = 1; }
+    if (player.stage.active !== 6) { player.stage.active = 1; }
     player.inflation.vacuum = true;
     player.inflation.resets++;
     prepareVacuum(true);

@@ -41,7 +41,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
                 toggles[number] = !toggles[number];
                 saveGlobalSettings();
                 window.location.reload();
-                return void Alert('Awaiting game reload');
+                void Alert('Awaiting game reload');
             })();
         } else {
             toggles[number] = !toggles[number];
@@ -465,7 +465,7 @@ export const switchTheme = () => {
             properties['--yellow-text'] = 'var(--green-text)';
     }
 
-    const body = document.body.style;
+    const body = document.documentElement.style;
     body.setProperty('--transition-all', '800ms');
     body.setProperty('--transition-buttons', '600ms');
     for (const property in properties) { body.setProperty(property, properties[property as '--main-text']); }
@@ -805,6 +805,6 @@ export const playEvent = (event: number, index = null as number | null) => {
         case 7:
             return void Alert("With Vacuum decaying remaining matter had rearranged itself in such way that lead to the formation of the 'Void'. Check it out in 'Advanced' subtab");
         case 8:
-            return void Alert("There is now enough matter to create the 'Universe', it can be done within new 'Abyss' Stage. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
+            return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require to get 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
     }
 };

@@ -34,6 +34,7 @@ export interface playerType {
     }
     merge: {
         reward: [number]
+        resets: number
     }
     inflation: {
         tree: number[]
@@ -81,6 +82,7 @@ export interface playerType {
     challenges: {
         active: number | null
         void: number[]
+        voidCheck: number[]
     }
     toggles: {
         normal: boolean[]
