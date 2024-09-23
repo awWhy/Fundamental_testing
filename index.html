@@ -205,7 +205,7 @@
                             <p class="orchidText">Total boost after Collapse: <span id="collapseBoostIntergalacticTotal" class="orangeText">1</span></p>
                             <div id="mergeEffects">
                                 <p class="cyanText bigWord">Current effects</p>
-                                <p class="grayText">Galaxy groups: <span id="merge1Current" class="greenText">1</span><span id="merge1Explanation" class="greenText">Not yet in game</span></p>
+                                <p class="grayText">Galaxy groups: <span id="merge1Current" class="greenText">1</span><span id="merge1Explanation" class="greenText">Boost to Galaxies</span></p>
                             </div>
                         </div>
                         <p class="darkvioletText stage6Only">Cosmon gain from current Vacuum reset: <span id="cosmonGainStat" class="greenText">1</span></p>
@@ -400,6 +400,7 @@
                         <input type="image" src="Used_art/Element27.png" alt="Cobalt" draggable="false" id="element27" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                         <input type="image" src="Used_art/Element28.png" alt="Nickel" draggable="false" id="element28" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                         <input type="image" src="Used_art/Element29.png" alt="Copper" draggable="false" id="element29" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
+                        <input type="image" src="Used_art/Element30.png" alt="Zinc" draggable="false" id="element30" class="interactiveImage elementType3" aria-labelledby="elementText elementCost elementEffect">
                     </div>
                     <div class="descriptionText">
                         <h3>Element: <span id="elementText" class="darkorchidText">Hover to see.</span></h3>
@@ -637,8 +638,8 @@
                                 <p class="whiteText stage6borderImage"><span id="strange4Stage5Level" class="redText">0</span>/<span id="strange4Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange5Stage5">
-                                <input type="image" src="Used_art/Missing.png" alt="Automatic Galaxy" draggable="false" id="strange5Stage5Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
-                                <p class="whiteText stage7borderImage"><span id="strange5Stage5Level" class="redText">0</span>/<span id="strange5Stage5Max" class="greenText">1</span></p>
+                                <input type="image" src="Used_art/Galaxy%20auto.png" alt="Automatic Galaxy" draggable="false" id="strange5Stage5Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
+                                <p class="whiteText stage3borderImage"><span id="strange5Stage5Level" class="redText">0</span>/<span id="strange5Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange6Stage5">
                                 <input type="image" src="Used_art/Auto%20S5.png" alt="Auto Structures" draggable="false" id="strange6Stage5Image" class="interactiveImage" aria-labelledby="strangenessText strangenessCost strangenessEffect">
@@ -719,7 +720,7 @@
                         <div id="inflationAvailable">
                             <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="inflation1" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                             <input type="image" src="Used_art/Missing.png" alt="Global boost" draggable="false" id="inflation2" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
-                            <input type="image" src="Used_art/Missing.png" alt="Strange gain" draggable="false" id="inflation3" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="Strange gain" draggable="false" id="inflation3" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                             <input type="image" src="Used_art/Missing.png" alt="Stranger gain" draggable="false" id="inflation4" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                             <input type="image" src="Used_art/inflation5.png" alt="Void Milestones" draggable="false" id="inflation5" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                         </div>
@@ -738,9 +739,9 @@
                 </section>
                 <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Milestones">
                     <div id="inflationMilestones">
-                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to Universe amount</div>
-                        <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all auto Structures Strangeness maxed, including auto Galaxies</div>
-                        <div id="inflationMilestone3"><p>Unlocked at 3 Universes:</p>Start Vacuum resets with auto Upgrades maxed and auto Elements Strangeness at level 2</div>
+                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with 'Conservation of Mass' Strangeness maxed and Strange quarks equal to Universes</div>
+                        <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1</div>
+                        <div id="inflationMilestone3"><p>Unlocked at 3 Universes:</p>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2</div>
                     </div>
                 </section>
             </div>
@@ -846,10 +847,12 @@
                                         <p id="saveFileNamePreview" class="mainText bigWord">Fundamental.txt</p>
                                         <p class="whiteText center">Any of these can be added for extra information of a save file</p>
                                         <p class="mainText">[version] - <span class="whiteText">for current game version</span></p>
-                                        <p class="stageText">[true] - <span class="whiteText">for current progress</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current active Stage</span></p>
                                         <p id="saveFileNameStrange" class="greenText">[strange] - <span class="whiteText">for total Strange quarks</span></p>
+                                        <p id="saveFileNameCosmon" class="darkvioletText">[cosmon] - <span class="whiteText">for total Cosmon</span></p>
                                         <p id="saveFileNameVacuum" class="orchidText">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
+                                        <p id="saveFileNameGalaxy" class="grayText">[galaxy] - <span class="whiteText">for current self-made Galaxies</span></p>
+                                        <p id="saveFileNameUniverse" class="darkvioletText">[universe] - <span class="whiteText">for current self-made Universes</span></p>
                                         <p class="cyanText">[date<span class="whiteText">Data</span>] - <span class="whiteText">for current date</span></p>
                                         <div class="dateGrid">
                                             <p class="cyanText">Y - <span class="whiteText">Year</span></p>
