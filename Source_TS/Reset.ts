@@ -40,6 +40,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         building[0].total.setValue(playerStart.buildings[s][0].current);
         for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
             if (!allowedToBeReset(i, s, 'structures')) {
+                if (!player.inflation.vacuum) { continue; }
                 const energy = energyType[s][i] * building[i as 1].true;
                 energyStage[s] += energy;
                 energyRefund -= energy;
