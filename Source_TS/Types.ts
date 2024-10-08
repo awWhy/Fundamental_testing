@@ -10,7 +10,7 @@ export interface playerType {
         resets: number
         time: number
         peak: number
-        input: number
+        input: [number, number]
     }
     discharge: {
         energy: number
@@ -102,6 +102,11 @@ export interface playerType {
             list: Array<[number, number, number, number]>
             input: [number, number]
         }
+        vacuum: {
+            best: [number, boolean, number]
+            list: Array<[number, boolean, number]>
+            input: [number, number]
+        }
     }
     events: boolean[]
 }
@@ -132,8 +137,10 @@ export interface globalType {
         errorID: boolean
         errorQuery: boolean
         errorGain: boolean
+        timeLimit: boolean
         rankUpdated: number | null
         historyStage: number | null
+        historyVacuum: number | null
     }
     trueActive: number
     lastSave: number
@@ -177,7 +184,7 @@ export interface globalType {
         rankImage: string[]
     }
     collapseInfo: {
-        starEffect1: number
+        neutronEffect: number
         unlockB: number[]
         unlockU: number[]
         unlockR: number[]
@@ -215,7 +222,7 @@ export interface globalType {
         maxActive: number[]
         name: string[][]
         hoverText: string[][]
-        type: Array<['', ...Array<'producing' | 'improving' | 'delaying'>]>
+        type: Array<Array<'producing' | 'improving' | 'delaying'>>
         startCost: number[][]
         increase: number[][]
         producing: Overlimit[][]
@@ -298,7 +305,6 @@ export interface globalType {
         rewardText: Array<() => string>
         need: Overlimit[]
         time: number[]
-        reward: number[]
         scaling: number[][]
         max: number[]
     }>
@@ -310,12 +316,13 @@ export interface globalType {
         name: string[]
         description: Array<() => string>
         effectText: Array<() => string>
-        needText: Array<Array<Array<() => string | null>>>
+        needText: Array<Array<Array<() => string>>>
         rewardText: string[][][]
         color: string[]
     }
     historyStorage: {
         stage: Array<[number, number, number, number]>
+        vacuum: Array<[number, boolean, number]>
     }
 }
 

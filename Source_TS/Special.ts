@@ -1,4 +1,4 @@
-import { changeIntervals, getId } from './Main';
+import { changeIntervals, getId, getQuery } from './Main';
 import { global, player } from './Player';
 import type { globalSaveType } from './Types';
 import { format, numbersUpdate, visualUpdate } from './Update';
@@ -690,7 +690,7 @@ export const hideFooter = () => {
         arrow.style.transform = '';
         footer.style.animation = 'hideY 800ms reverse';
         arrow.style.animation = 'rotate 800ms reverse';
-        getId('hideText').textContent = 'Hide';
+        getQuery('#hideToggle > p').textContent = 'Hide';
         getId('stageSelect').classList.add('active');
         setTimeout(animationReset, 800);
 
@@ -699,7 +699,7 @@ export const hideFooter = () => {
     } else {
         footer.style.animation = 'hideY 800ms backwards';
         arrow.style.animation = 'rotate 800ms backwards';
-        getId('hideText').textContent = 'Show';
+        getQuery('#hideToggle > p').textContent = 'Show';
         getId('stageSelect').classList.remove('active');
         setTimeout(() => {
             footerArea.style.display = 'none';
@@ -744,7 +744,8 @@ const adjustCSSRules = (initial: boolean) => {
 
 export const changeFormat = (point: boolean) => {
     const htmlInput = (point ? getId('decimalPoint') : getId('thousandSeparator')) as HTMLInputElement;
-    const allowed = ['.', '·', ',', ' ', '_', "'", '"', '`', '|'].includes(htmlInput.value);
+    if (htmlInput.value === ' ') { htmlInput.value = ' '; } //No break space
+    const allowed = ['.', '·', ',', ' ', '_', "'", '"', '`', '|'].includes(htmlInput.value);
     if (!allowed || globalSave.format[point ? 1 : 0] === htmlInput.value) {
         if (point && globalSave.format[1] === '.') {
             (getId('thousandSeparator') as HTMLInputElement).value = '';

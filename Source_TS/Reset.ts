@@ -191,12 +191,6 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             player.merge.resets = 0;
         }
     }
-    if (update !== false) {
-        player.researchesAuto[0] = player.strangeness[3][6];
-        player.researchesAuto[1] = player.strangeness[4][6];
-        player.researchesAuto[2] = player.inflation.vacuum ? (player.strangeness[1][4] < 1 ? 0 : player.strangeness[3][4] < 1 ? 1 : player.strangeness[2][4] < 1 ? 2 : player.strangeness[4][4] < 1 ? 3 : 4) : (player.strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0);
-        for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
-    }
     if (player.stage.active === 4) { setRemnants(); }
 
     for (const s of stageIndex) { //Less errors if do it separatly
@@ -216,6 +210,24 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             const active = player.stage.active;
             for (let i = 0; i < global.upgradesInfo[active].maxActive; i++) { visualUpdateUpgrades(i, active, 'upgrades'); }
         }
+    }
+};
+
+/** Stuff like time, automatization Researches and etc. */
+export const resetStageExtras = () => {
+    const { strangeness, researchesAuto } = player;
+    player.time.stage = 0;
+    player.stage.time = 0;
+    player.stage.peak = 0;
+    global.debug.timeLimit = false;
+    researchesAuto[0] = strangeness[3][6];
+    researchesAuto[1] = strangeness[4][6];
+    if (player.inflation.vacuum) {
+        researchesAuto[2] = strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4;
+        for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
+    } else {
+        researchesAuto[2] = strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0;
+        visualUpdateResearches(2, 0, 'researchesAuto');
     }
 };
 
@@ -291,9 +303,8 @@ export const resetVacuum = () => {
     }
 
     if (activeMilestone[0]) {
-        const startQuarks = player.buildings[6][1].current.toNumber();
-        player.strange[0].current = startQuarks;
-        player.strange[0].total = startQuarks;
+        player.strange[0].current = player.buildings[6][1].true;
+        player.strange[0].total = player.buildings[6][1].true;
         player.strangeness[1][8] = 2;
     }
     if (activeMilestone[1]) { player.strangeness[5][4] = 1; }

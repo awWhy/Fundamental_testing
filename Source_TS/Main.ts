@@ -149,6 +149,7 @@ const saveGame = async(noSaving = false): Promise<string | null> => {
     }
     try {
         player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
+        player.history.vacuum.list = global.historyStorage.vacuum.slice(0, player.history.vacuum.input[0]);
 
         const save = btoa(JSON.stringify(player));
         if (!noSaving) {
@@ -397,7 +398,12 @@ try { //Start everything
     const globalSaveStart = deepClone(globalSave); //For cases with incorrect length
     const globalSettings = localStorage.getItem('fundamentalSettings');
     if (globalSettings !== null) {
-        Object.assign(globalSave, JSON.parse(atob(globalSettings)));
+        try {
+            Object.assign(globalSave, JSON.parse(atob(globalSettings)));
+        } catch (error) {
+            Notify('Global settings failed to parse, default ones will be used instead');
+            console.log(`(Full parse error) ${error}`);
+        }
         (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0];
         (getId('thousandSeparator') as HTMLInputElement).value = globalSave.format[1];
         (getId('mainInterval') as HTMLInputElement).value = `${globalSave.intervals.main}`;
@@ -498,17 +504,19 @@ try { //Start everything
         }
         if (globalSave.SRSettings[0]) {
             (document.getElementById('SRMessage1') as HTMLElement).remove();
-            for (let i = 0; i < 3; i++) {
-                const effectID = getId(i === 0 ? 'solarMassExplanation' : `star${i}Explanation`);
+            for (let i = 0; i <= 3; i++) {
+                const effectID = getQuery(`#${i === 0 ? 'solarMass' : `star${i}`}Effect > span:last-of-type`);
                 effectID.textContent = ` (${effectID.textContent})`;
+                effectID.classList.remove('greenText');
             }
             for (let i = 1; i <= 1; i++) {
-                const effectID = getId(`merge${i}Explanation`);
+                const effectID = getQuery(`#merge${i}Effect > span:last-of-type`);
                 effectID.textContent = ` (${effectID.textContent})`;
+                effectID.classList.remove('greenText');
             }
 
             const SRMainDiv = document.createElement('article');
-            SRMainDiv.innerHTML = '<h3>Information for Screen reader</h3><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
+            SRMainDiv.innerHTML = '<h5>Information for Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
             SRMainDiv.className = 'reader';
             getId('fakeFooter').before(SRMainDiv);
 
@@ -970,8 +978,13 @@ try { //Start everything
     });
     getId('stageInput').addEventListener('change', () => {
         const input = getId('stageInput') as HTMLInputElement;
-        player.stage.input = Math.max(Number(input.value), 0);
-        input.value = format(player.stage.input, { type: 'input' });
+        player.stage.input[0] = Math.max(Number(input.value), 0);
+        input.value = format(player.stage.input[0], { type: 'input' });
+    });
+    getId('stage2Input').addEventListener('change', () => {
+        const input = getId('stage2Input') as HTMLInputElement;
+        player.stage.input[1] = Math.max(Number(input.value), 0);
+        input.value = format(player.stage.input[1], { type: 'input' });
     });
     getId('versionButton').addEventListener('click', () => {
         buildVersionInfo();
@@ -1047,16 +1060,28 @@ try { //Start everything
     getId('reviewEvents').addEventListener('click', replayEvent);
     getId('customFontSize').addEventListener('change', () => changeFontSize(false));
 
-    getId('stageResetsSave').addEventListener('change', () => {
-        const inputID = getId('stageResetsSave') as HTMLInputElement;
+    getId('stageHistorySave').addEventListener('change', () => {
+        const inputID = getId('stageHistorySave') as HTMLInputElement;
         player.history.stage.input[0] = Math.min(Math.max(Math.trunc(Number(inputID.value)), 0), 100);
         inputID.value = `${player.history.stage.input[0]}`;
     });
-    getId('stageResetsShow').addEventListener('change', () => {
-        const input = getId('stageResetsShow') as HTMLInputElement;
+    getId('stageHistoryShow').addEventListener('change', () => {
+        const input = getId('stageHistoryShow') as HTMLInputElement;
         player.history.stage.input[1] = Math.min(Math.max(Math.trunc(Number(input.value)), 4), 100);
         input.value = `${player.history.stage.input[1]}`;
         global.debug.historyStage = null;
+        visualUpdate();
+    });
+    getId('vacuumHistorySave').addEventListener('change', () => {
+        const inputID = getId('vacuumHistorySave') as HTMLInputElement;
+        player.history.vacuum.input[0] = Math.min(Math.max(Math.trunc(Number(inputID.value)), 0), 100);
+        inputID.value = `${player.history.vacuum.input[0]}`;
+    });
+    getId('vacuumHistoryShow').addEventListener('change', () => {
+        const input = getId('vacuumHistoryShow') as HTMLInputElement;
+        player.history.vacuum.input[1] = Math.min(Math.max(Math.trunc(Number(input.value)), 4), 100);
+        input.value = `${player.history.vacuum.input[1]}`;
+        global.debug.historyVacuum = null;
         visualUpdate();
     });
 
