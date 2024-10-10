@@ -86,16 +86,18 @@ export const simulateOffline = async(offline: number, autoAccept = !globalSave.d
     getId('offlineMain').style.display = '';
     calculateOffline(offline);
 
-    getId('offlineAccelerate').addEventListener('click', offlineAccelerate);
+    const accelerate = getId('offlineAccelerate');
+    accelerate.addEventListener('click', offlineAccelerate);
     getId('offlineCancel').addEventListener('click', offlineCancel);
-    document.body.addEventListener('keydown', offlineAccelerate);
+    document.body.addEventListener('keydown', offlineKey);
+    accelerate.focus();
 };
 const calculateOffline = (warpTime: number, start = warpTime) => {
     const rate = global.debug.offlineSpeed;
-    const time = Math.min(rate === 0 ? warpTime : 600 * rate, warpTime);
+    const time = rate === 0 ? warpTime : Math.min(600 * rate, warpTime);
     warpTime -= time;
     try {
-        timeUpdate(time, Math.max(time / 600, 1));
+        timeUpdate(time, Math.max(time / 600, 0.2));
     } catch (error) {
         offlineEnd();
         void Alert(`Offline calculation failed due to error:\n${error}`, 1);
@@ -103,13 +105,14 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
     }
     if (warpTime > 0) {
         setTimeout(calculateOffline, 0, warpTime, start);
+        getId('offlineTick').textContent = format(rate);
         getId('offlineRemains').textContent = format(warpTime, { type: 'time' });
         getId('offlinePercentage').textContent = format(100 - warpTime / start * 100, { padding: true });
         if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').ariaValueText = `${format(100 - warpTime / start * 100)}% done`; }
     } else { offlineEnd(); }
 };
 const offlineEnd = () => {
-    global.debug.offlineSpeed = 1;
+    global.debug.offlineSpeed = 0.2;
     global.paused = false;
     changeIntervals();
     getId('offlineMain').style.display = 'none';
@@ -118,14 +121,24 @@ const offlineEnd = () => {
 
     getId('offlineAccelerate').removeEventListener('click', offlineAccelerate);
     getId('offlineCancel').removeEventListener('click', offlineCancel);
-    document.body.removeEventListener('keydown', offlineAccelerate);
+    document.body.removeEventListener('keydown', offlineKey);
+};
+const offlineKey = (button: KeyboardEvent) => {
+    if (button.key === 'Escape') {
+        button.preventDefault();
+        offlineCancel();
+    } else if (button.key === 'Enter' || button.key === ' ') {
+        if (document.activeElement === getId('offlineCancel')) { return; }
+        button.preventDefault();
+        offlineAccelerate();
+    } else if (button.key === 'Tab') {
+        button.preventDefault();
+        const cancel = getId('offlineCancel');
+        (document.activeElement === cancel ? getId('offlineAccelerate') : cancel).focus();
+    }
 };
 const offlineCancel = () => (global.debug.offlineSpeed = 0);
-const offlineAccelerate = (event: KeyboardEvent | MouseEvent) => {
-    if (event instanceof KeyboardEvent && event.key !== 'Escape') { return; }
-    global.debug.offlineSpeed *= 2;
-    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Offline time will be calculated faster now'; }
-};
+const offlineAccelerate = () => (global.debug.offlineSpeed *= 2);
 
 export const changeIntervals = () => {
     const intervalsId = global.intervalsId;
@@ -1058,7 +1071,7 @@ try { //Start everything
     getId('MDToggle0').addEventListener('click', () => toggleSpecial(0, 'mobile', true, true));
     getId('SRToggle0').addEventListener('click', () => toggleSpecial(0, 'reader', true, true));
     getId('reviewEvents').addEventListener('click', replayEvent);
-    getId('customFontSize').addEventListener('change', () => changeFontSize(false));
+    getId('customFontSize').addEventListener('change', () => changeFontSize());
 
     getId('stageHistorySave').addEventListener('change', () => {
         const inputID = getId('stageHistorySave') as HTMLInputElement;
@@ -1128,7 +1141,6 @@ try { //Start everything
 } catch (error) {
     const stack = (error as { stack: string }).stack;
     void Alert(`Game failed to load\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 2);
-    document.body.style.userSelect = '';
     const buttonDiv = document.createElement('div');
     buttonDiv.innerHTML = '<button type="button" id="exportError" style="width: 7em;">Export save</button><button type="button" id="deleteError" style="width: 7em;">Delete save</button>';
     buttonDiv.style.cssText = 'display: flex; column-gap: 0.6em; margin-top: 0.4em;';

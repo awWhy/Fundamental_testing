@@ -14,7 +14,6 @@ export const detectHotkey = (check: KeyboardEvent) => {
         if (activeType === 'text' || activeType === 'number') { return; }
         document.body.classList.add('noFocusOutline');
     }
-    if (global.paused) { return; }
     const { key, code } = check;
     let { shiftKey } = check;
 

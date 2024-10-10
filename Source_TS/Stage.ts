@@ -451,7 +451,7 @@ export const assignBuildingInformation = () => {
 };
 
 export const buyBuilding = (index: number, stageIndex = player.stage.active, howMany: number | null = null, auto = false) => {
-    if (!checkBuilding(index, stageIndex)) { return; }
+    if (!checkBuilding(index, stageIndex) || (!auto && global.paused)) { return; }
     const building = player.buildings[stageIndex][index as 1];
 
     let pointer; //For cost
@@ -757,7 +757,7 @@ export const assignGlobalSpeed = () => {
 };
 
 export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements', auto = false): boolean => {
-    if (!auto && !checkUpgrade(upgrade, stageIndex, type)) { //Auto should already checked if allowed, also allows for delayed purchase of Elements
+    if (!auto && (!checkUpgrade(upgrade, stageIndex, type) || global.paused)) { //Auto should already checked if allowed, also allows for delayed purchase of Elements
         if (type === 'researchesAuto' && player.researchesAuto[upgrade] < global.researchesAutoInfo.max[upgrade]) {
             const autoStage = global.researchesAutoInfo.autoStage[upgrade][player.researchesAuto[upgrade]];
             if (!(autoStage === stageIndex || (autoStage === 4 && stageIndex === 5))) { switchStage(autoStage, stageIndex); }
@@ -962,7 +962,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
 };
 
 export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'strangeness' | 'inflation', auto = false): boolean => {
-    if (!auto && !checkUpgrade(upgrade, stageIndex, type)) { return false; }
+    if (!auto && (!checkUpgrade(upgrade, stageIndex, type) || global.paused)) { return false; }
 
     if (type === 'strangeness') {
         const pointer = global.strangenessInfo[stageIndex];
@@ -1411,6 +1411,7 @@ export const toggleSwap = (number: number, type: 'buildings' | 'normal' | 'hover
     const toggles = type === 'buildings' ? player.toggles.buildings[player.stage.active] : player.toggles[type];
 
     if (change) {
+        if (global.paused) { return; }
         if (type === 'buildings') {
             const maxLength = playerStart.buildings[player.stage.active].length;
             if (number === 0) {
@@ -1559,14 +1560,13 @@ const stageResetReward = (stageIndex: number, readerMessage = false) => {
     let update: false | 'normal' | 'soft' = 'normal';
     const resetThese = player.inflation.vacuum ? [1, 2, 3, 4, 5] : [stageIndex];
     if (player.inflation.vacuum) {
-        resetStageExtras();
         setActiveStage(1);
         stage.current = 1;
+        resetStageExtras();
         if (stage.true >= 7) {
             resetThese.push(6);
         } else if (stage.resets < 2) { playEvent(7); }
     } else if (stageIndex === stage.current) {
-        resetStageExtras();
         if (stageIndex < 4) {
             const check = stage.current === stage.active;
             stage.current++;
@@ -1587,6 +1587,7 @@ const stageResetReward = (stageIndex: number, readerMessage = false) => {
             } else { update = 'soft'; }
             resetThese.unshift(4);
         }
+        resetStageExtras();
         if (stage.true >= 7) { resetThese.push(6); }
     } else { update = stageIndex === stage.active ? 'soft' : false; }
 
@@ -1645,14 +1646,14 @@ const stageFullReset = () => {
     if (stageResetCheck(current)) {
         stageResetReward(current);
     } else {
-        resetStageExtras();
         const resetThese = vacuum ? [1, 2, 3, 4, 5] : [current];
         if (player.stage.true >= 7) { resetThese.push(6); }
         if (vacuum) {
             setActiveStage(1);
             player.stage.current = 1;
-            resetStage(resetThese);
-        } else { resetStage(resetThese, 'soft'); }
+        }
+        resetStageExtras();
+        resetStage(resetThese, vacuum ? 'normal' : 'soft');
     }
 };
 

@@ -63,7 +63,7 @@ export const switchTab = (tab: gameTab, subtab = null as null | string) => {
 };
 
 /** Normal game tick */
-export const timeUpdate = (timeWarp = 0, tick = 1) => {
+export const timeUpdate = (timeWarp = 0, tick = 0.2) => {
     const { time, ASR } = player;
     const { auto, buildings: autoBuy } = player.toggles;
     const { maxActive } = global.buildingsInfo;
@@ -82,10 +82,10 @@ export const timeUpdate = (timeWarp = 0, tick = 1) => {
         time.updated = currentTime;
         time.export[0] += passedSeconds;
         global.lastSave += passedSeconds;
-        if (passedSeconds > 1) {
+        if (passedSeconds > 0.2) {
             if (passedSeconds > 600) { return void simulateOffline(passedSeconds); }
-            timeWarp = passedSeconds - 1;
-            passedSeconds = 1;
+            timeWarp = passedSeconds - 0.2;
+            passedSeconds = 0.2;
         } else if (passedSeconds <= 0) {
             time.offline += passedSeconds;
             return;
@@ -966,6 +966,7 @@ export const visualUpdate = () => {
                     for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
                         const unlocked = player.buildings[s][i].trueTotal.moreThan('0');
                         if (!anyUnlocked) { anyUnlocked = unlocked; }
+                        getId(`energyGainStage${s}Build${i + (vacuum ? 0 : 2)}Name`).style.display = unlocked ? '' : 'none';
                         getId(`energyGainStage${s}Build${i + (vacuum ? 0 : 2)}`).style.display = unlocked ? '' : 'none';
                     }
                     getId(s === 1 ? 'energyGainStats' : `energyGainStage${s}`).style.display = anyUnlocked ? '' : 'none';

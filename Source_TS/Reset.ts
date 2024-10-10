@@ -213,7 +213,7 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
     }
 };
 
-/** Stuff like time, automatization Researches and etc. */
+/** Must be called after new Stage had been set; Resets everything that permanents Stages keep */
 export const resetStageExtras = () => {
     const { strangeness, researchesAuto } = player;
     player.time.stage = 0;

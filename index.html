@@ -16,21 +16,21 @@
         </aside>
         <aside id="versionInfo" style="display: none;"></aside>
         <div id="alertMain" style="display: none;">
-            <div role="alertdialog">
+            <div role="dialog" aria-modal="true">
                 <p id="alertText" aria-live="assertive">Welcome back</p>
                 <div>
-                    <input type="text" id="alertInput" tabindex="1" autocomplete="off" style="display: none;">
-                    <button type="button" id="alertConfirm" tabindex="1">Confirm</button>
-                    <button type="button" id="alertCancel" tabindex="1" style="display: none;">Cancel</button>
+                    <input type="text" id="alertInput" autocomplete="off" style="display: none;">
+                    <button type="button" id="alertConfirm">Confirm</button>
+                    <button type="button" id="alertCancel" style="display: none;">Cancel</button>
                 </div>
             </div>
         </div>
-        <div id="offlineMain" style="display: none;">
+        <div id="offlineMain" style="display: none;" role="alertdialog" aria-modal="true">
             <div role="progressbar" aria-valuetext="Missing">
-                <p>Calculating Offline time, remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage">100</span>% done)</p>
+                <p>Calculating Offline time by using <span id="offlineTick">1</span> seconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage">100</span>% done)</p>
                 <div>
-                    <button type="button" id="offlineAccelerate" tabindex="1">Accelerate</button>
-                    <button type="button" id="offlineCancel" tabindex="1">Finish now</button>
+                    <button type="button" id="offlineAccelerate">Accelerate by 2</button>
+                    <button type="button" id="offlineCancel">Finish now</button>
                 </div>
             </div>
         </div>
@@ -193,7 +193,7 @@
                             <p id="collapseBoostTotal" class="orchidText">Total boost after Collapse: <span class="cyanText">1</span></p>
                             <section id="starEffects">
                                 <h3 class="orangeText bigWord">Current effects</h3>
-                                <p id="solarMassEffect"class="cyanText">Solar mass: <span class="greenText">0</span><span class="greenText">Boost to all Stars</span></p>
+                                <p id="solarMassEffect" class="cyanText">Solar mass: <span class="greenText">0</span><span class="greenText">Boost to all Stars</span></p>
                                 <p id="star1Effect" class="redText">Red giants: <span class="greenText">0</span><span class="greenText">Boost to Main-sequence</span></p>
                                 <p id="star2Effect" class="darkvioletText">Neutron stars: <span class="greenText">0</span><span class="greenText">Boost to all Stars</span></p>
                                 <p id="star3Effect" class="grayText">Black holes: <span class="greenText">0</span><span class="greenText">Boost to Solar mass gain</span></p>
@@ -758,7 +758,7 @@
                                  --><div id="toggleAuto0Main" class="settingsMenu">
                                         <button type="button" class="hollowButton stageAllborderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                         <div class="popUpMenu" role="menu" aria-label="Settings menu">
-                                            <label>Perform <span>Interstellar Stage</span> reset when can get at least <input type="number" id="stageInput" value="0" step="any" inputmode="text"> Strange quarks and <input type="number" id="stage2Input" value="0" step="any" inputmode="text"> seconds have passed, doesn't reset if both are set to 0</label>
+                                            <p><label>Perform <span>Interstellar Stage</span> reset when can get at least <input type="number" id="stageInput" value="0" step="any" inputmode="text"> Strange quarks</label> and <label><input type="number" id="stage2Input" value="0" step="any" inputmode="text"> seconds have passed, doesn't reset if both are set to 0</label></p>
                                             <p id="stageInstant">(Other Stages will reset instanly)</p>
                                         </div>
                                     </div>
@@ -1070,7 +1070,7 @@
                                 </div>
                             </section>
                         </article>
-                        <article id="cosmonStat" class="statsWindows">
+                        <div id="cosmonStat" class="statsWindows">
                             <section>
                                 <h4 class="darkvioletText bigWord">Cosmon</h4>
                                 <div>
@@ -1078,45 +1078,89 @@
                                     <span id="cosmonStatTotal" class="whiteText">0</span>
                                 </div>
                             </section>
-                        </article>
+                        </div>
                         <div class="stats stage1Only">
                             <p id="dischargeStat" class="orangeText">Discharge goals: <span class="whiteText">0</span><span id="dischargeStatTrue" class="cyanText">[0]</span></p>
                             <section id="energyGainStats">
                                 <h3 class="orangeText">Energy gain from creating Structures:</h3>
-                                <div>
-                                    <section aria-label="In the Microworld Stage" class="cyanText stage1borderImage">
-                                        <p id="energyGainStage1Build1">Preons: <span class="greenText">0</span> (<span id="energyGainStage1Build1Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage1Build2">Quarks: <span class="greenText">0</span> (<span id="energyGainStage1Build2Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage1Build3">Particles: <span class="greenText">0</span> (<span id="energyGainStage1Build3Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage1Build4">Atoms: <span class="greenText">0</span> (<span id="energyGainStage1Build4Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage1Build5">Molecules: <span class="greenText">0</span> (<span id="energyGainStage1Build5Per" class="greenText">0</span> per)</p>
+                                <div> <!-- Temporary until can figure out better solution (without using table) -->
+                                    <section class="cyanText stage1borderImage" aria-label="Microworld Stage">
+                                        <div aria-hidden="true">
+                                            <p id="energyGainStage1Build1Name">Preons:</p>
+                                            <p id="energyGainStage1Build2Name">Quarks:</p>
+                                            <p id="energyGainStage1Build3Name">Particles:</p>
+                                            <p id="energyGainStage1Build4Name">Atoms:</p>
+                                            <p id="energyGainStage1Build5Name">Molecules:</p>
+                                        </div>
+                                        <div>
+                                            <p id="energyGainStage1Build1" aria-describedby="energyGainStage1Build1Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage1Build1Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage1Build2" aria-describedby="energyGainStage1Build2Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage1Build2Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage1Build3" aria-describedby="energyGainStage1Build3Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage1Build3Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage1Build4" aria-describedby="energyGainStage1Build4Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage1Build4Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage1Build5" aria-describedby="energyGainStage1Build5Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage1Build5Per" class="greenText">0</span> per)</p>
+                                        </div>
                                     </section>
-                                    <section id="energyGainStage2" class="blueText stage2borderImage" aria-label="In the Submerged Stage">
-                                        <p id="energyGainStage2Build1">Drops: <span class="greenText">0</span> (<span id="energyGainStage2Build1Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage2Build2">Puddles: <span class="greenText">0</span> (<span id="energyGainStage2Build2Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage2Build3">Ponds: <span class="greenText">0</span> (<span id="energyGainStage2Build3Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage2Build4">Lakes: <span class="greenText">0</span> (<span id="energyGainStage2Build4Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage2Build5">Seas: <span class="greenText">0</span> (<span id="energyGainStage2Build5Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage2Build6">Oceans: <span class="greenText">0</span> (<span id="energyGainStage2Build6Per" class="greenText">0</span> per)</p>
+                                    <section id="energyGainStage2" class="blueText stage2borderImage" aria-label="Submerged Stage">
+                                        <div aria-hidden="true">
+                                            <p id="energyGainStage2Build1Name">Drops:</p>
+                                            <p id="energyGainStage2Build2Name">Puddles:</p>
+                                            <p id="energyGainStage2Build3Name">Ponds:</p>
+                                            <p id="energyGainStage2Build4Name">Lakes:</p>
+                                            <p id="energyGainStage2Build5Name">Seas:</p>
+                                            <p id="energyGainStage2Build6Name">Oceans:</p>
+                                        </div>
+                                        <div>
+                                            <p id="energyGainStage2Build1" aria-describedby="energyGainStage2Build1Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage2Build1Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage2Build2" aria-describedby="energyGainStage2Build2Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage2Build2Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage2Build3" aria-describedby="energyGainStage2Build3Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage2Build3Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage2Build4" aria-describedby="energyGainStage2Build4Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage2Build4Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage2Build5" aria-describedby="energyGainStage2Build5Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage2Build5Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage2Build6" aria-describedby="energyGainStage2Build6Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage2Build6Per" class="greenText">0</span> per)</p>
+                                        </div>
                                     </section>
-                                    <section id="energyGainStage3" class="grayText stage3borderImage" aria-label="In the Accretion Stage">
-                                        <p id="energyGainStage3Build1">Cosmic dust: <span class="greenText">0</span> (<span id="energyGainStage3Build1Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage3Build2">Planetesimals: <span class="greenText">0</span> (<span id="energyGainStage3Build2Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage3Build3">Protoplanets: <span class="greenText">0</span> (<span id="energyGainStage3Build3Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage3Build4">Satellites: <span class="greenText">0</span> (<span id="energyGainStage3Build4Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage3Build5">Subsatellites: <span class="greenText">0</span> (<span id="energyGainStage3Build5Per" class="greenText">0</span> per)</p>
+                                    <section id="energyGainStage3" class="grayText stage3borderImage" aria-label="Accretion Stage">
+                                        <div aria-hidden="true">
+                                            <p id="energyGainStage3Build1Name">Cosmic dust:</p>
+                                            <p id="energyGainStage3Build2Name">Planetesimals:</p>
+                                            <p id="energyGainStage3Build3Name">Protoplanets:</p>
+                                            <p id="energyGainStage3Build4Name">Satellites:</p>
+                                            <p id="energyGainStage3Build5Name">Subsatellites:</p>
+                                        </div>
+                                        <div>
+                                            <p id="energyGainStage3Build1" aria-describedby="energyGainStage3Build1Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage3Build1Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage3Build2" aria-describedby="energyGainStage3Build2Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage3Build2Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage3Build3" aria-describedby="energyGainStage3Build3Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage3Build3Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage3Build4" aria-describedby="energyGainStage3Build4Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage3Build4Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage3Build5" aria-describedby="energyGainStage3Build5Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage3Build5Per" class="greenText">0</span> per)</p>
+                                        </div>
                                     </section>
-                                    <section id="energyGainStage4" class="orangeText stage4borderImage" aria-label="In the Interstellar Stage">
-                                        <p id="energyGainStage4Build1">Brown dwarfs: <span class="greenText">0</span> (<span id="energyGainStage4Build1Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage4Build2">Main sequence: <span class="greenText">0</span> (<span id="energyGainStage4Build2Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage4Build3">Red supergiants: <span class="greenText">0</span> (<span id="energyGainStage4Build3Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage4Build4">Blue hypergiants: <span class="greenText">0</span> (<span id="energyGainStage4Build4Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage4Build5">Quasi-stars: <span class="greenText">0</span> (<span id="energyGainStage4Build5Per" class="greenText">0</span> per)</p>
+                                    <section id="energyGainStage4" class="orangeText stage4borderImage" aria-label="Interstellar Stage">
+                                        <div aria-hidden="true">
+                                            <p id="energyGainStage4Build1Name">Brown dwarfs:</p>
+                                            <p id="energyGainStage4Build2Name">Main sequence:</p>
+                                            <p id="energyGainStage4Build3Name">Red supergiants:</p>
+                                            <p id="energyGainStage4Build4Name">Blue hypergiants:</p>
+                                            <p id="energyGainStage4Build5Name">Quasi-stars:</p>
+                                        </div>
+                                        <div>
+                                            <p id="energyGainStage4Build1" aria-describedby="energyGainStage4Build1Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage4Build1Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage4Build2" aria-describedby="energyGainStage4Build2Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage4Build2Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage4Build3" aria-describedby="energyGainStage4Build3Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage4Build3Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage4Build4" aria-describedby="energyGainStage4Build4Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage4Build4Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage4Build5" aria-describedby="energyGainStage4Build5Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage4Build5Per" class="greenText">0</span> per)</p>
+                                        </div>
                                     </section>
-                                    <section id="energyGainStage5" class="darkorchidText stage5borderImage" aria-label="In the Intergalactic Stage">
-                                        <p id="energyGainStage5Build1">Nebulas: <span class="greenText">0</span> (<span id="energyGainStage5Build1Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage5Build2">Star clusters: <span class="greenText">0</span> (<span id="energyGainStage5Build2Per" class="greenText">0</span> per)</p>
-                                        <p id="energyGainStage5Build3">Galaxies: <span class="greenText">0</span> (<span id="energyGainStage5Build3Per" class="greenText">0</span> per)</p>
+                                    <section id="energyGainStage5" class="darkorchidText stage5borderImage" aria-label="Intergalactic Stage">
+                                        <div aria-hidden="true">
+                                            <p id="energyGainStage5Build1Name">Nebulas:</p>
+                                            <p id="energyGainStage5Build2Name">Star clusters:</p>
+                                            <p id="energyGainStage5Build3Name">Galaxies:</p>
+                                        </div>
+                                        <div>
+                                            <p id="energyGainStage5Build1" aria-describedby="energyGainStage5Build1Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage5Build1Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage5Build2" aria-describedby="energyGainStage5Build2Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage5Build2Per" class="greenText">0</span> per)</p>
+                                            <p id="energyGainStage5Build3" aria-describedby="energyGainStage5Build3Name">&nbsp;<span class="greenText">0</span> (<span id="energyGainStage5Build3Per" class="greenText">0</span> per)</p>
+                                        </div>
                                     </section>
                                 </div>
                             </section>
@@ -1206,15 +1250,15 @@
                     <section id="footerStats" aria-label="Resources">
                         <div id="footerStat1">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
-                            <p class="stage7borderImage redText"><span>Missing</span>: <span id="footerStat1Span">0</span></p>
+                            <p class="stage7borderImage redText"><span>Missing</span>:&nbsp;<span id="footerStat1Span">0</span></p>
                         </div>
                         <div id="footerStat2">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
-                            <p class="stage7borderImage redText"><span>Missing</span>: <span id="footerStat2Span">0</span></p>
+                            <p class="stage7borderImage redText"><span>Missing</span>:&nbsp;<span id="footerStat2Span">0</span></p>
                         </div>
                         <div id="footerStat3">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
-                            <p class="stage7borderImage redText"><span>Missing</span>: <span id="footerStat3Span">0</span></p>
+                            <p class="stage7borderImage redText"><span>Missing</span>:&nbsp;<span id="footerStat3Span">0</span></p>
                         </div>
                     </section>
                     <nav aria-label="Tab list, Arrows left and right to change">

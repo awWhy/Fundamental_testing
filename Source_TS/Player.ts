@@ -262,7 +262,7 @@ export const player: playerType = { //Only for information that need to be saved
         /* Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
            Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8] */
         shop: {
-            input: 1,
+            input: 0,
             wait: [2]
         }
     },
@@ -299,7 +299,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         inflationSubtabs: ['Researches', 'Milestones']
     } as globalType['tabList'],
     debug: {
-        offlineSpeed: 1,
+        offlineSpeed: 0.2,
         errorID: true, //Notify about missing ID
         errorQuery: true, //About incorect Query
         errorGain: true, //About NaN or Infinity

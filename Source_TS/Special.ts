@@ -494,19 +494,26 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
         const blocker = getId('alertMain');
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
+        body.style.userSelect = '';
+        const oldFocus = document.activeElement as HTMLElement | null;
         confirm.focus();
 
         const key = async(button: KeyboardEvent) => {
             if (button.key === 'Escape' || button.key === 'Enter' || button.key === ' ') {
                 button.preventDefault();
                 close();
+            } else if (button.key === 'Tab') {
+                button.preventDefault();
+                confirm.focus();
             }
         };
         const close = () => {
+            body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
             blocker.style.display = 'none';
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', close);
             specialHTML.alert = [null, null];
+            oldFocus?.focus();
             resolve();
         };
         specialHTML.alert = [priority, close];
@@ -535,6 +542,8 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
         cancel.style.display = '';
+        body.style.userSelect = '';
+        const oldFocus = document.activeElement as HTMLElement | null;
         confirm.focus();
 
         const yes = () => { close(true); };
@@ -547,15 +556,20 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
                 if (document.activeElement === cancel) { return; }
                 button.preventDefault();
                 yes();
+            } else if (button.key === 'Tab') {
+                button.preventDefault();
+                (document.activeElement === cancel ? confirm : cancel).focus();
             }
         };
         const close = (result: boolean) => {
+            body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
             blocker.style.display = 'none';
             cancel.style.display = 'none';
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', yes);
             cancel.removeEventListener('click', no);
             specialHTML.alert = [null, null];
+            oldFocus?.focus();
             resolve(result);
         };
         specialHTML.alert = [priority, no];
@@ -587,8 +601,10 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
         blocker.style.display = '';
         cancel.style.display = '';
         input.style.display = '';
+        body.style.userSelect = '';
         input.placeholder = placeholder;
         input.value = '';
+        const oldFocus = document.activeElement as HTMLElement | null;
         input.focus();
 
         const yes = () => { close(input.value === '' ? input.placeholder : input.value); };
@@ -597,18 +613,27 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
             if (button.key === 'Escape') {
                 button.preventDefault();
                 no();
-            } else if (document.activeElement !== cancel) {
-                if (button.key === 'Enter') {
+            } else if (button.key === 'Enter') {
+                if (document.activeElement === cancel) { return; }
+                button.preventDefault();
+                yes();
+            } else if (button.key === ' ') {
+                const active = document.activeElement;
+                if (active === input || active === cancel) { return; }
+                button.preventDefault();
+                yes();
+            } else if (button.key === 'Tab') {
+                if (button.shiftKey && document.activeElement === input) {
                     button.preventDefault();
-                    yes();
-                } else if (button.key === ' ') {
-                    if (document.activeElement === input) { return; }
+                    cancel.focus();
+                } else if (!button.shiftKey && document.activeElement === cancel) {
                     button.preventDefault();
-                    yes();
+                    input.focus();
                 }
             }
         };
         const close = (result: string | null) => {
+            body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
             blocker.style.display = 'none';
             cancel.style.display = 'none';
             input.style.display = 'none';
@@ -616,6 +641,7 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
             confirm.removeEventListener('click', yes);
             cancel.removeEventListener('click', no);
             specialHTML.alert = [null, null];
+            oldFocus?.focus();
             resolve(result);
         };
         specialHTML.alert = [priority, no];
@@ -709,12 +735,14 @@ export const hideFooter = () => {
     }
 };
 
-export const changeFontSize = (initial: boolean) => {
+export const changeFontSize = (initial = false) => {
     const input = getId('customFontSize') as HTMLInputElement;
     const size = Math.min(Math.max(initial ? globalSave.fontSize : (input.value === '' ? 16 : Math.floor(Number(input.value) * 100) / 100), 12), 24);
     if (!initial) {
         globalSave.fontSize = size;
         saveGlobalSettings();
+
+        (getId('milestonesMultiline').parentElement as HTMLElement).style.minHeight = '';
     }
 
     document.documentElement.style.fontSize = size === 16 ? '' : `${size}px`;

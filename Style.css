@@ -1259,12 +1259,14 @@ li .hollowButton {
     margin: 0.2em 0;
 }
 
-#energyGainStats > div > section {
+#energyGainStats section {
+    display: flex;
+    flex-wrap: nowrap;
     border-left: 2px solid;
     padding: 0 0.4em;
 }
 
-#energyGainStats span:first-child.greenText {
+#energyGainStats p > span:first-of-type {
     display: inline-block;
     text-align: center;
     width: 4.6em;
@@ -1334,7 +1336,6 @@ li .hollowButton {
     margin-left: -3px;
     padding-left: calc(3px + 0.5em);
     padding-right: 0.25em;
-    white-space: pre;
     height: 32px;
     z-index: 1; /* Text color issue */
 }

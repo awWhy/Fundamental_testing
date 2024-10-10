@@ -186,6 +186,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
                 getId(`strange${i}Stage${s}`).style.display = 'none';
             }
         }
+        getId('energyGainStage1Build1Name').style.display = 'none';
+        getId('energyGainStage1Build2Name').style.display = 'none';
         getId('energyGainStage1Build1').style.display = 'none';
         getId('energyGainStage1Build2').style.display = 'none';
         for (let s = 2; s <= 5; s++) {
