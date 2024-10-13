@@ -910,12 +910,14 @@ export const visualUpdate = () => {
             getId('autoToggle6').style.display = researchesAuto[0] >= 2 ? '' : 'none';
             getId('autoToggle7').style.display = researchesAuto[0] >= 3 ? '' : 'none';
             getId('autoToggle8').style.display = researchesAuto[1] >= 2 ? '' : 'none';
-            getId('toggleAuto1').style.display = strangeness[1][4] >= 1 || researchesAuto[2] >= 1 ? '' : 'none';
-            getId('toggleAuto2').style.display = strangeness[2][4] >= 1 || researchesAuto[2] >= (vacuum ? 3 : 1) ? '' : 'none';
-            getId('toggleAuto2Main').style.display = strangeness[2][4] >= 1 || researchesAuto[2] >= (vacuum ? 3 : 1) ? '' : 'none';
-            getId('toggleAuto3').style.display = strangeness[3][4] >= 1 || researchesAuto[2] >= (vacuum ? 2 : 1) ? '' : 'none';
-            getId('toggleAuto4').style.display = strangeness[4][4] >= 1 || researchesAuto[2] >= (vacuum ? 4 : 1) ? '' : 'none';
-            getId('toggleAuto4Main').style.display = strangeness[4][4] >= 1 || researchesAuto[2] >= (vacuum ? 4 : 1) ? '' : 'none';
+            getId('toggleAuto1').style.display = strangeness[1][4] >= 1 || (researchesAuto[2] >= 1 && (vacuum || player.stage.current === 1)) ? '' : 'none';
+            const showAuto2 = strangeness[2][4] >= 1 || (vacuum ? researchesAuto[2] >= 3 : (researchesAuto[2] >= 1 && player.stage.current === 2));
+            getId('toggleAuto2').style.display = showAuto2 ? '' : 'none';
+            getId('toggleAuto2Main').style.display = showAuto2 ? '' : 'none';
+            getId('toggleAuto3').style.display = strangeness[3][4] >= 1 || (vacuum ? researchesAuto[2] >= 2 : (researchesAuto[2] >= 1 && player.stage.current === 3)) ? '' : 'none';
+            const showAuto4 = strangeness[4][4] >= 1 || (vacuum ? researchesAuto[2] >= 4 : (researchesAuto[2] >= 1 && player.stage.current >= 4));
+            getId('toggleAuto4').style.display = showAuto4 ? '' : 'none';
+            getId('toggleAuto4Main').style.display = showAuto4 ? '' : 'none';
             if (highest < 2) {
                 getId('resetToggles').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
                 getId('dischargeHotkey').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
@@ -1572,7 +1574,7 @@ export const stageUpdate = (extra = 'normal' as 'normal' | 'soft' | 'reload') =>
             getId(`building${i}`).ariaLabel = `${buildingsInfo.name[active][i]} (hotkey ${i})`;
         }
         getId('extraResearches').ariaLabel = `${['', 'Energy', 'Cloud', 'Rank', 'Collapse', 'Galaxy', ''][active]} Researches`;
-        getId('SRStage').textContent = `Current active Stage is '${stageInfo.word[active]}'${challenge !== null ? ` inside the '${global.challengesInfo.name[challenge]}'` : ''}`;
+        getId('SRStage').textContent = `Current active Stage is '${stageInfo.word[active]}'`;
     }
 
     for (const text of ['upgrade', 'element']) {

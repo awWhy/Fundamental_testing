@@ -71,7 +71,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade > 5) { return player.upgrades[1][5] === 1; }
                 return true;
             } else if (stageIndex === 2) {
-                if (upgrade === 0) { return player.buildings[2][1].true >= 1 || player.buildings[2][2].true >= 1; }
+                if (upgrade === 0) { return player.buildings[2][1].true >= 1 || player.buildings[2][2].current.moreOrEqual('1'); }
                 if (upgrade === 7) { return player.strangeness[2][2] >= 3; }
                 if (upgrade === 8) { return player.strangeness[2][8] >= 3; }
                 return true;

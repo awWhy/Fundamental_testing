@@ -28,7 +28,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         if (s === 2) {
             global.vaporizationInfo.trueResearch0 = 0;
             global.vaporizationInfo.trueResearch1 = 0;
-            global.vaporizationInfo.trueResearchRain = 0;
+            if (player.researchesExtra[2][2] < 1) { global.vaporizationInfo.trueResearchRain = 0; }
         } else if (s === 4) {
             global.collapseInfo.trueStars = 0;
         }
@@ -116,7 +116,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             if (s === 2) {
                 global.vaporizationInfo.trueResearch0 = 0;
                 global.vaporizationInfo.trueResearch1 = 0;
-                global.vaporizationInfo.trueResearchRain = 0;
+                if (player.researchesExtra[2][2] < 1) { global.vaporizationInfo.trueResearchRain = 0; }
                 assignPuddles();
             }
         }
@@ -135,8 +135,8 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     }
 };
 
-/** Default value for update is 'normal' */
-export const resetStage = (stageIndex: number[], update = 'normal' as false | 'normal' | 'soft') => {
+/** Default value for update is 'normal', default value for full is true and should be set to false only if Stage is permanent */
+export const resetStage = (stageIndex: number[], update = 'normal' as false | 'normal' | 'soft', full = true) => {
     for (const s of stageIndex) {
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;
@@ -201,6 +201,22 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
         autoResearchesSet('researches', s);
         autoResearchesSet('researchesExtra', s);
     }
+    if (full) {
+        const { strangeness, researchesAuto } = player;
+        player.time.stage = 0;
+        player.stage.time = 0;
+        player.stage.peak = 0;
+        global.debug.timeLimit = false;
+        researchesAuto[0] = strangeness[3][6];
+        researchesAuto[1] = strangeness[4][6];
+        if (player.inflation.vacuum) {
+            researchesAuto[2] = strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4;
+            for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
+        } else {
+            researchesAuto[2] = strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0;
+            visualUpdateResearches(2, 0, 'researchesAuto');
+        }
+    }
     switchTab(checkTab(global.tab) ? global.tab : 'stage'); //Update subtab list
 
     assignBuildingInformation();
@@ -210,24 +226,6 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             const active = player.stage.active;
             for (let i = 0; i < global.upgradesInfo[active].maxActive; i++) { visualUpdateUpgrades(i, active, 'upgrades'); }
         }
-    }
-};
-
-/** Must be called after new Stage had been set; Resets everything that permanents Stages keep */
-export const resetStageExtras = () => {
-    const { strangeness, researchesAuto } = player;
-    player.time.stage = 0;
-    player.stage.time = 0;
-    player.stage.peak = 0;
-    global.debug.timeLimit = false;
-    researchesAuto[0] = strangeness[3][6];
-    researchesAuto[1] = strangeness[4][6];
-    if (player.inflation.vacuum) {
-        researchesAuto[2] = strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4;
-        for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
-    } else {
-        researchesAuto[2] = strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0;
-        visualUpdateResearches(2, 0, 'researchesAuto');
     }
 };
 

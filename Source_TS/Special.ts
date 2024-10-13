@@ -834,6 +834,6 @@ export const playEvent = (event: number, index = null as number | null) => {
         case 7:
             return void Alert("With Vacuum decaying remaining matter had rearranged itself in such way that lead to the formation of the 'Void'. Check it out in 'Advanced' subtab");
         case 8:
-            return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require to get 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
+            return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require to get at least 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
     }
 };
