@@ -1565,16 +1565,16 @@ const stageResetReward = (stageIndex: number) => {
     const { stage } = player;
 
     stage.resets++;
-    let permanent = false;
+    let fullReset = true;
     let update: false | 'normal' | 'soft' = 'normal';
     const resetThese = player.inflation.vacuum ? [1, 2, 3, 4, 5] : [stageIndex];
     if (player.inflation.vacuum) {
+        if (stage.active === 1) { update = 'soft'; }
         setActiveStage(1);
         stage.current = 1;
         if (stage.true >= 7) {
             resetThese.push(6);
         } else if (stage.resets < 2) { playEvent(7); }
-        if (stage.active === 1) { update = 'soft'; }
     } else if (stageIndex === stage.current) {
         if (stageIndex < 4) {
             const check = stage.current === stage.active;
@@ -1599,7 +1599,7 @@ const stageResetReward = (stageIndex: number) => {
         if (stage.true >= 7) { resetThese.push(6); }
     } else {
         update = stageIndex === stage.active ? 'soft' : false;
-        permanent = true;
+        fullReset = false;
     }
 
     if (stage.true >= 5) {
@@ -1630,7 +1630,7 @@ const stageResetReward = (stageIndex: number) => {
         }
     }
 
-    resetStage(resetThese, update, permanent);
+    resetStage(resetThese, update, fullReset);
 };
 /* Export if required */
 const stageFullReset = () => {
