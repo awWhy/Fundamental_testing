@@ -527,6 +527,9 @@ try { //Start everything
                 effectID.textContent = ` (${effectID.textContent})`;
                 effectID.classList.remove('greenText');
             }
+            for (let i = 0; i < playerStart.strange.length; i++) {
+                getId(`strange${i}`).tabIndex = 0;
+            }
 
             const SRMainDiv = document.createElement('article');
             SRMainDiv.innerHTML = '<h5>Information for Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';

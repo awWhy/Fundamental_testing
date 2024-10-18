@@ -828,7 +828,7 @@ export const playEvent = (event: number, index = null as number | null) => {
         case 4:
             return void Alert('Last explosion not only created first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis');
         case 5:
-            return void Alert("There aren't any Structures in Intergalactic yet, but maybe new ones can be created within previous Stages. Any new Stage resets and exports from now on will award Strange quarks\n(Stars in Intergalactic are just Stars from Interstellar)");
+            return void Alert("There are no Structures in Intergalactic yet, but they can be created within previous Stages. Any new Stage reset and export from now on will award Strange quarks, also unlock new effect for '[26] Iron' Element\n(Stars in Intergalactic are just Stars from Interstellar)");
         case 6:
             return void Alert('As Galaxies started to Merge, their combined Gravity pushed Vacuum out of its local minimum into more stable global minimum. New forces and Structures are expected within this new and true Vacuum state');
         case 7:

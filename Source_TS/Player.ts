@@ -634,8 +634,8 @@ export const global: globalType = { //For information that doesn't need to be sa
                 'Distributary channel'
             ],
             effectText: [
-                () => `Drops will ${player.inflation.vacuum ? 'improve Tritium' : 'produce Moles'} 3 times more.\nEffective level ${global.vaporizationInfo.trueResearch0 !== player.researches[2][0] ? `is ${format(global.vaporizationInfo.trueResearch0, { padding: true })}, will be restored with more Drops` : 'will be set to 0 after any Reset'}.`,
-                () => `Puddles will produce 2 times more Drops.\nEffective level ${global.vaporizationInfo.trueResearch1 !== player.researches[2][1] ? `is ${format(global.vaporizationInfo.trueResearch1, { padding: true })}, will be restored with more Drops` : 'will be set to 0 after any Reset'}.`,
+                () => `Drops will ${player.inflation.vacuum ? 'improve Tritium' : 'produce Moles'} 3 times more.${player.upgrades[2][2] === 1 || player.inflation.vacuum ? `\nEffective level ${global.vaporizationInfo.trueResearch0 !== player.researches[2][0] ? `is ${format(global.vaporizationInfo.trueResearch0, { padding: true })}, will be restored with more Drops` : 'will be set to 0 after any Reset'}.` : ''}`,
+                () => `Puddles will produce 2 times more Drops.${player.upgrades[2][2] === 1 || player.inflation.vacuum ? `\nEffective level ${global.vaporizationInfo.trueResearch1 !== player.researches[2][1] ? `is ${format(global.vaporizationInfo.trueResearch1, { padding: true })}, will be restored with more Drops` : 'will be set to 0 after any Reset'}.` : ''}`,
                 () => `'Surface tension' base will be +${format(0.005)} stronger.\n(This is equal to ${format(new Overlimit(player.buildings[2][0].current).max('1').power(calculateEffects.S2Upgrade3(player.researches[2][2] + 1) - calculateEffects.S2Upgrade3()).toNumber(), { padding: true })}x boost improvement)`,
                 () => `'Surface stress' base will be +${format(0.005)} stronger.\n(This is equal to ${format(new Overlimit(player.buildings[2][1].current).max('1').power(calculateEffects.S2Upgrade4(player.researches[2][3] + 1) - calculateEffects.S2Upgrade4()).toNumber(), { padding: true })}x boost improvement)`,
                 () => 'With more streams, will be able to have even more extra Puddles. (+1 extra Puddles per Pond)',
@@ -861,7 +861,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         effectText: [
             () => `Automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.researchesAuto[0], 2)]} from any Stage. (Need to be enabled in Settings)`,
             () => 'Elements will no longer require Collapse for activation.\nSecond level will unlock auto creation of Elements. (Need to be enabled in settings)',
-            () => `Unlock auto ${['Discharge', 'Rank', 'Vaporization', 'Collapse'][player.inflation.vacuum ? Math.min(player.researchesAuto[2], 3) : Math.min(player.stage.current - 1, 3)]} level 1. (Need to be enabled in settings)`
+            () => `Unlock auto ${player.inflation.vacuum ? ['Discharge', 'Rank', 'Vaporization', 'Collapse'][Math.min(player.researchesAuto[2], 3)] : ['Discharge', 'Vaporization', 'Rank', 'Collapse'][Math.min(player.stage.current - 1, 3)]} level 1. (Need to be enabled in settings)`
         ],
         costRange: [
             [1e13, 2e34, 1e30],
@@ -970,7 +970,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             () => 'Stars are inside you, as well Neutron stars strength will be increased by log4.',
             () => 'Has a great affinity towards Oxygen and to decrease cost for all Stars by 100.',
             () => `Just another tetravalent metalloid, and so is another ${format(1.4)}x boost to all Stars${player.inflation.vacuum ? ' and Cosmic dust' : ''}.`,
-            () => `One of the Fundamentals of Life and to make all Stars boost Solar mass gain${player.inflation.vacuum ? ' and also delay Cosmic dust hardcap' : ''}.`,
+            () => `One of the Fundamentals for Life and to make all Stars boost Solar mass gain${player.inflation.vacuum ? ' and also delay Cosmic dust hardcap' : ''}.`,
             () => "From hot area to increase max level of 'Star system' by 1.",
             () => "Extremely reactive to extend max level of 'Planetary system' by another 24 levels.",
             () => 'Less noble, but Black holes effect will be a little stronger.',
@@ -984,14 +984,14 @@ export const global: globalType = { //For information that doesn't need to be sa
                 return `No corrosion, only boost to all Stars that is based on unspent Elements ^${format(power)}.\n(Boost to Stars: ${format(new Overlimit(player.buildings[4][0].current).power(power), { padding: true })})`;
             },
             () => "Brittle Element, but not the bonus ‒ 1 more level in 'Star system'.",
-            () => `Any further fusion will be an endothermic process. ${player.inflation.vacuum ? `Unlock a new Star type${player.strangeness[5][3] >= 1 ? ' and Intergalactic Stage' : ''}` : 'Enter Intergalactic space'}.\n(${player.stage.true >= 6 || player.strange[0].total >= 1 ? `Current base for Stage reset reward is ${format(calculateEffects.element26(), { padding: true })}, improve it further by producing more Elements this Stage` : 'Can change active Stage from footer'})`,
+            () => `Any further fusion will be an endothermic process. ${player.inflation.vacuum ? `Unlock a new Star type${player.strangeness[5][3] >= 1 ? ' and Intergalactic Stage' : ''}` : 'Enter Intergalactic space'}.\n(${player.stage.true >= 6 || player.strange[0].total >= 1 ? `Current base for Stage reset reward is ${format(calculateEffects.element26(), { padding: true })}, improve it further by producing more Elements this Stage` : 'Can change active Stage from footer, new effect will be added after another Stage reset'})`,
             () => `Combined and ready to make all self-made Red supergiants count as Red giants and improve '[24] Chromium' Element by +^${format(0.01)}.`,
             () => "Slow to react, but will increase max level of 'Star system' by +1.",
             () => `Does not need to be prepared to increase Stage reset reward base by Arithmetic progression with step of ${format(0.01)}.`,
             () => 'First of new Elements to come, increases max allowed Merge resets by current self-made Universes amount.',
             () => 'None.'
         ],
-        startCost: [
+        startCost: [ //New Element cost must be higher than previous one
             0, 1000, 4000, 2e4, 1e5, 1e8, 1e10, 4e11, 8e12, 6e13,
             1e15, 1e20, 1e22, 1e24, 1.4e26, 1e28, 1e30, 1e32, 2e36, 1e38,
             1e39, 1e41, 2e42, 3e43, 4e44, 5e45, 1e48, 1e54, 1e58, 1e140,
@@ -1015,7 +1015,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => `Boost all Microworld Structures by ${format(player.inflation.vacuum ? 2 : 1.8)}.`,
                 () => `Base for 'Improved Tritium' Research will be bigger by +${format(player.inflation.vacuum ? 1.5 : 1)}.`,
-                () => `Discharge goals requirement will scale slower. (-${format(0.5)})`,
+                () => `Discharge goals requirement will scale slower. (-${format(0.5)})${global.stageInfo.activeAll.includes(1) ? `\n(Creating this Strangeness will make next Discharge goal to be ${format((getDischargeScale() - 0.5) ** player.discharge.current)} Energy)` : ''}`,
                 () => `Obtain +${format(0.5)} bonus Discharge goals.`,
                 () => `Automatically Discharge upon reaching next goal or spending Energy. (Need to be enabled in Settings)${global.strangenessInfo[1].max[4] > 1 ? '\nSecond level will allow to gain Discharge goals based on current Energy instead of needing to reset.' : ''}`,
                 () => 'Make auto for all Microworld Structures permanent.',
@@ -1760,7 +1760,7 @@ export const updatePlayer = (load: playerType): string => {
 
     global.vaporizationInfo.trueResearch0 = 0;
     global.vaporizationInfo.trueResearch1 = 0;
-    global.vaporizationInfo.trueResearchRain = player.researchesExtra[2][2] >= 1 ? player.researchesExtra[2][1] : 0;
+    global.vaporizationInfo.trueResearchRain = 0;
     if (player.challenges.active === 0) { buildings[4][5].true = 0; }
     global.collapseInfo.trueStars = buildings[4][1].true + buildings[4][2].true + buildings[4][3].true + buildings[4][4].true + buildings[4][5].true;
     global.historyStorage.stage = stageHistory.list;

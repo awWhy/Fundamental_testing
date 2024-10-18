@@ -580,7 +580,10 @@ export const visualUpdate = () => {
 
     if (!player.events[0]) {
         if (highest === 5) {
-            if (active === 5) { playEvent(5, 0); }
+            if (active === 5) {
+                playEvent(5, 0);
+                stageUpdate('soft');
+            }
         } else if (highest === 4) {
             if (player.collapse.stars[1] >= 1) { playEvent(4, 0); }
         } else if (highest === 3) {
@@ -639,6 +642,7 @@ export const visualUpdate = () => {
             const ASR = player.ASR[active];
 
             getId('stageTimeReal').style.display = player.stage.time !== player.time.stage ? '' : 'none';
+            getId('exportMaxed').style.display = player.time.export[0] >= 86400 && (player.stage.true >= 7 || player.strange[0].total > 0) ? '' : 'none';
             if (highest < 2) { getId('toggleBuilding0').style.display = ASR >= 1 ? '' : 'none'; }
             for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
                 getId(`building${i}True`).style.display = buildings[i].current.notEqual(buildings[i as 1].true) ? '' : 'none';

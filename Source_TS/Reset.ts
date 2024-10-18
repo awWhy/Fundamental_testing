@@ -28,7 +28,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         if (s === 2) {
             global.vaporizationInfo.trueResearch0 = 0;
             global.vaporizationInfo.trueResearch1 = 0;
-            if (player.researchesExtra[2][2] < 1) { global.vaporizationInfo.trueResearchRain = 0; }
+            global.vaporizationInfo.trueResearchRain = 0;
         } else if (s === 4) {
             global.collapseInfo.trueStars = 0;
         }
@@ -116,7 +116,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             if (s === 2) {
                 global.vaporizationInfo.trueResearch0 = 0;
                 global.vaporizationInfo.trueResearch1 = 0;
-                if (player.researchesExtra[2][2] < 1) { global.vaporizationInfo.trueResearchRain = 0; }
+                global.vaporizationInfo.trueResearchRain = 0;
                 assignPuddles();
             }
         }
@@ -217,10 +217,10 @@ export const resetStage = (stageIndex: number[], update = 'normal' as false | 'n
             visualUpdateResearches(2, 0, 'researchesAuto');
         }
     }
-    switchTab(checkTab(global.tab) ? global.tab : 'stage'); //Update subtab list
 
     assignBuildingInformation();
     if (update !== false) {
+        switchTab(checkTab(global.tab) ? global.tab : 'stage'); //Update subtab list
         stageUpdate(update);
         if (update === 'soft') {
             const active = player.stage.active;

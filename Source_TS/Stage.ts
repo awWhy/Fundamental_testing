@@ -272,7 +272,7 @@ export const assignBuildingInformation = () => {
     }
     if (activeAll.includes(2)) {
         const { vaporizationInfo } = global;
-        if (vaporizationInfo.trueResearchRain !== researchesExtra[2][1]) { vaporizationInfo.trueResearchRain = Math.min(researchesExtra[2][1], new Overlimit(buildings[2][1].total).divide(1e12 / 999).plus('1').log(1e3).toNumber()); }
+        if (vaporizationInfo.trueResearchRain !== researchesExtra[2][1]) { vaporizationInfo.trueResearchRain = researchesExtra[2][2] >= 1 ? researchesExtra[2][1] : Math.min(researchesExtra[2][1], new Overlimit(buildings[2][1].total).divide(1e12 / 999).plus('1').log(1e3).toNumber()); }
         const rain = calculateEffects.S2Extra1(vaporizationInfo.trueResearchRain);
         const flow = 1.24 ** strangeness[2][7];
 
@@ -1377,15 +1377,13 @@ export const autoResearchesBuy = (type: 'researches' | 'researchesExtra', stageI
 
 export const autoElementsSet = () => {
     if (!player.toggles.auto[8]) { return; }
-    const auto = global.automatization.elements;
-    const startCost = global.elementsInfo.startCost;
+
+    const array = [];
     const elements = player.elements;
-
-    for (let i = 1; i < (player.inflation.vacuum ? startCost.length : 29); i++) {
-        if (elements[i] < 1) { auto.push(i); }
+    for (let i = 1; i < (player.inflation.vacuum ? global.elementsInfo.startCost.length : 29); i++) {
+        if (elements[i] < 1) { array.push(i); }
     }
-
-    auto.sort((a, b) => startCost[a] - startCost[b]);
+    global.automatization.elements = array;
 };
 
 export const autoElementsBuy = () => {
@@ -1399,7 +1397,7 @@ export const autoElementsBuy = () => {
         if (!checkUpgrade(index, 4, 'elements')) { break; }
         buyUpgrades(index, 4, 'elements', true);
 
-        if (elements[index] >= 1) {
+        if (elements[index] > 0) {
             auto.splice(i, 1);
             i--;
         } else { break; }
@@ -1569,8 +1567,11 @@ const stageResetReward = (stageIndex: number) => {
     let update: false | 'normal' | 'soft' = 'normal';
     const resetThese = player.inflation.vacuum ? [1, 2, 3, 4, 5] : [stageIndex];
     if (player.inflation.vacuum) {
-        if (stage.active === 1) { update = 'soft'; }
-        setActiveStage(1);
+        if (stage.active === 1) {
+            update = 'soft';
+        } else if (stage.active < 6) {
+            setActiveStage(1);
+        }
         stage.current = 1;
         if (stage.true >= 7) {
             resetThese.push(6);
@@ -1659,11 +1660,15 @@ const stageFullReset = () => {
     } else {
         const resetThese = vacuum ? [1, 2, 3, 4, 5] : [current];
         if (player.stage.true >= 7) { resetThese.push(6); }
+        let update = 'soft' as 'soft' | 'normal';
         if (vacuum) {
-            setActiveStage(1);
+            if (player.stage.active !== 1 && player.stage.active < 6) {
+                setActiveStage(1);
+                update = 'normal';
+            }
             player.stage.current = 1;
         }
-        resetStage(resetThese, vacuum ? 'normal' : 'soft');
+        resetStage(resetThese, update);
     }
 };
 
