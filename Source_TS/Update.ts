@@ -3,7 +3,7 @@ import Overlimit from './Limit';
 import { getClass, getId, getQuery, simulateOffline } from './Main';
 import { global, player } from './Player';
 import { MDStrangenessPage, Notify, globalSave, playEvent, specialHTML, switchTheme } from './Special';
-import { autoElementsBuy, autoElementsSet, autoResearchesBuy, autoResearchesSet, autoUpgradesBuy, autoUpgradesSet, buyBuilding, calculateBuildingsCost, gainBuildings, assignBuildingInformation, collapseResetCheck, dischargeResetCheck, rankResetCheck, stageResetCheck, toggleSwap, vaporizationResetCheck, assignNewMass, switchStage, setActiveStage, calculateEffects, assignNewClouds, awardMilestone, assignMergeReward, assignMaxRank, assignGlobalSpeed, calculateMergeMaxResets } from './Stage';
+import { autoElementsBuy, autoElementsSet, autoResearchesBuy, autoResearchesSet, autoUpgradesBuy, autoUpgradesSet, buyBuilding, calculateBuildingsCost, gainBuildings, assignBuildingInformation, collapseResetCheck, dischargeResetCheck, rankResetCheck, stageResetCheck, toggleSwap, vaporizationResetCheck, switchStage, setActiveStage, calculateEffects, assignNewClouds, awardMilestone, assignMergeReward, assignMaxRank, assignGlobalSpeed, calculateMergeMaxResets } from './Stage';
 import type { gameTab } from './Types';
 
 export const switchTab = (tab: gameTab, subtab = null as null | string) => {
@@ -133,9 +133,10 @@ export const timeUpdate = (timeWarp = 0, tick = 0.2) => {
             if (autoBuy[4][i] && ASR[4] >= i) { buyBuilding(i, 4, 0, true); }
             gainBuildings(i - 1, 4, passedSeconds); //Elements
         }
-        awardMilestone(0, 5); //It being here is more efficient if more than 2 star types made
-        awardMilestone(0, 4); //To remove the need to check for Stage 4 in gain
+        awardMilestone(0, 5);
+        awardMilestone(0, 4);
         collapseResetCheck(true);
+        awardMilestone(1, 4);
     }
     if (activeAll.includes(3)) {
         if (!vacuum && auto[0]) { stageResetCheck(3, 0); }
@@ -170,8 +171,8 @@ export const timeUpdate = (timeWarp = 0, tick = 0.2) => {
             gainBuildings(0, 2, passedSeconds); //Moles
             assignBuildingInformation();
         }
-        awardMilestone(1, 2); //Should be more efficient if more than 2 Puddle types made
-        awardMilestone(0, 2); //To remove the need to check for Stage 2 in gain
+        awardMilestone(1, 2);
+        awardMilestone(0, 2);
     }
     if (activeAll.includes(1)) {
         if (!vacuum && auto[0]) { stageResetCheck(1, 0); }
@@ -187,8 +188,8 @@ export const timeUpdate = (timeWarp = 0, tick = 0.2) => {
             gainBuildings(i - 1, 1, passedSeconds); //Rest of Microworld
             assignBuildingInformation();
         }
-        awardMilestone(1, 1); //Should be more efficient if more than 2 Structures made
-        awardMilestone(0, 1); //To remove the need to check for Stage 1 in gain
+        awardMilestone(1, 1);
+        awardMilestone(0, 1);
         dischargeResetCheck(true);
     }
 
@@ -359,12 +360,15 @@ export const numbersUpdate = () => {
                     getQuery('#submersionBoost > span').textContent = format(calculateEffects.submersion(), { padding: true });
                 }
             } else if (active === 4 || active === 5) {
-                assignNewMass();
                 const { collapseInfo } = global;
                 const massEffect = calculateEffects.mass();
                 const starEffect = [calculateEffects.star[0](), collapseInfo.neutronEffect, calculateEffects.star[2]()];
                 let total = (calculateEffects.mass(true) / massEffect) * (calculateEffects.S4Research4(true) / calculateEffects.S4Research4()) * ((1 + (calculateEffects.S5Upgrade2(true) - calculateEffects.S5Upgrade2()) / global.mergeInfo.galaxyBase) ** (player.buildings[5][3].true * 2));
-                if (player.strangeness[4][4] < 2) { total *= (calculateEffects.star[0](true) / starEffect[0]) * (calculateEffects.star[1](true) / starEffect[1]) * (calculateEffects.star[2](true) / starEffect[2]); }
+                if (player.strangeness[4][4] < 2) {
+                    const starProd = global.buildingsInfo.producing[4];
+                    const restProd = new Overlimit(starProd[1]).plus(starProd[3], starProd[4], starProd[5]);
+                    total *= new Overlimit(starProd[2]).multiply(calculateEffects.star[0](true) / calculateEffects.star[0]()).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN('1').toNumber() * (calculateEffects.star[1](true) / starEffect[1]) * (calculateEffects.star[2](true) / starEffect[2]);
+                }
 
                 if (active === 4) {
                     getId('reset1Button').textContent = `Collapse is at ${format(collapseInfo.newMass, { padding: true })} Mass`;
@@ -517,7 +521,6 @@ export const numbersUpdate = () => {
 
                 if (vacuum) {
                     const moles = player.buildings[1][5];
-
                     buildings[0].total.setValue(moles.total).divide('6.02214076e23');
                     buildings[0].trueTotal.setValue(moles.trueTotal).divide('6.02214076e23');
                 }
@@ -525,7 +528,6 @@ export const numbersUpdate = () => {
                 getId('currentRank').textContent = `${player.accretion.rank}`;
                 if (vacuum) {
                     const mass = player.buildings[1][0];
-
                     buildings[0].total.setValue(mass.total).multiply('1.78266192e-33');
                     buildings[0].trueTotal.setValue(mass.trueTotal).multiply('1.78266192e-33');
                 }
@@ -533,11 +535,14 @@ export const numbersUpdate = () => {
                 getQuery('#maxSolarMassStat > span').textContent = format(player.collapse.massMax, { padding: true });
                 if (active === 4) {
                     const auto2 = player.strangeness[4][4] >= 2;
-                    assignNewMass();
-
                     const mass = calculateEffects.mass(true) / calculateEffects.mass();
                     getQuery('#solarMassStat > span').textContent = format(mass, { padding: true });
-                    const star0 = auto2 ? 1 : calculateEffects.star[0](true) / calculateEffects.star[0]();
+                    let star0 = 1;
+                    if (!auto2) {
+                        const starProd = global.buildingsInfo.producing[4];
+                        const restProd = new Overlimit(starProd[1]).plus(starProd[3], starProd[4], starProd[5]);
+                        star0 = new Overlimit(starProd[2]).multiply(calculateEffects.star[0](true) / calculateEffects.star[0]()).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN('1').toNumber();
+                    }
                     const star1 = auto2 ? 1 : calculateEffects.star[1](true) / global.collapseInfo.neutronEffect;
                     const star2 = auto2 ? 1 : calculateEffects.star[2](true) / calculateEffects.star[2]();
                     if (!auto2) {
@@ -553,7 +558,6 @@ export const numbersUpdate = () => {
                 } else if (active === 5) {
                     getId('trueStarsStat').textContent = format(global.collapseInfo.trueStars, { padding: 'exponent' });
                     const stars = player.buildings[4];
-
                     buildings[0].current.setValue(stars[1].current).plus(stars[2].current, stars[3].current, stars[4].current, stars[5].current);
                     buildings[0].total.setValue(stars[1].total).plus(stars[2].total, stars[3].total, stars[4].total, stars[5].total);
                     buildings[0].trueTotal.setValue(stars[1].trueTotal).plus(stars[2].trueTotal, stars[3].trueTotal, stars[4].trueTotal, stars[5].trueTotal);
@@ -658,8 +662,10 @@ export const visualUpdate = () => {
                 }
                 getId('stageInfo').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
                 getId('tritiumEffect').style.display = player.upgrades[1][8] === 1 ? '' : 'none';
-                if (highest < 2) { getId('resetStage').style.display = player.upgrades[1][9] === 1 ? '' : 'none'; }
-                if (highest < 7) { getId('resets').style.display = player.stage.resets >= 1 || player.upgrades[1][5] === 1 ? '' : 'none'; }
+                if (highest < 7) {
+                    if (highest < 2) { getId('resetStage').style.display = player.upgrades[1][9] === 1 ? '' : 'none'; }
+                    getId('resets').style.display = player.stage.resets >= 1 || player.upgrades[1][5] === 1 ? '' : 'none';
+                }
             } else if (active === 2) {
                 getId('reset1Main').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
                 getId('building2').style.display = buildings[1].trueTotal.moreOrEqual('4e2') ? '' : 'none';
@@ -922,30 +928,33 @@ export const visualUpdate = () => {
             const showAuto4 = strangeness[4][4] >= 1 || (vacuum ? researchesAuto[2] >= 4 : (researchesAuto[2] >= 1 && player.stage.current >= 4));
             getId('toggleAuto4').style.display = showAuto4 ? '' : 'none';
             getId('toggleAuto4Main').style.display = showAuto4 ? '' : 'none';
-            if (highest < 2) {
-                getId('resetToggles').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
-                getId('dischargeHotkey').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
-                getId('stageToggleReset').style.display = player.upgrades[1][9] === 1 ? '' : 'none';
-                getId('stageHotkey').style.display = player.upgrades[1][9] === 1 ? '' : 'none';
-            }
-            if (highest < 3) {
-                getId('vaporizationToggleReset').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
-                getId('vaporizationHotkey').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
-            }
-            if (highest < 5) {
-                getId('collapseToggleReset').style.display = player.upgrades[4][0] === 1 ? '' : 'none';
-                getId('collapseHotkey').style.display = player.upgrades[4][0] === 1 ? '' : 'none';
-                getId('elementsAsTab').style.display = player.upgrades[4][1] === 1 ? '' : 'none';
-            }
-            if (highest < 6) {
-                getId('galaxyHotkey').style.display = player.milestones[4][1] >= 8 ? '' : 'none';
-                getId('saveFileNameGalaxy').style.display = player.milestones[4][1] >= 8 ? '' : 'none';
-            }
             if (highest < 7) {
+                const hotkeyTest = getId('stageHotkey', true);
+                if (highest < 2) {
+                    getId('resetToggles').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
+                    getId('stageToggleReset').style.display = player.upgrades[1][9] === 1 ? '' : 'none';
+                    if (hotkeyTest !== null) {
+                        hotkeyTest.style.display = player.upgrades[1][9] === 1 ? '' : 'none';
+                        getId('dischargeHotkey').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
+                    }
+                }
+                if (highest < 3) {
+                    getId('vaporizationToggleReset').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
+                    if (hotkeyTest !== null) { getId('vaporizationHotkey').style.display = player.upgrades[2][2] === 1 ? '' : 'none'; }
+                }
+                if (highest < 5) {
+                    getId('collapseToggleReset').style.display = player.upgrades[4][0] === 1 ? '' : 'none';
+                    getId('elementsAsTab').style.display = player.upgrades[4][1] === 1 ? '' : 'none';
+                    if (hotkeyTest !== null) { getId('collapseHotkey').style.display = player.upgrades[4][0] === 1 ? '' : 'none'; }
+                }
+                if (highest < 6) {
+                    getId('saveFileNameGalaxy').style.display = player.milestones[4][1] >= 8 ? '' : 'none';
+                    if (hotkeyTest !== null) { getId('galaxyHotkey').style.display = player.milestones[4][1] >= 8 ? '' : 'none'; }
+                }
                 getId('vaporizationExtra').style.display = player.challenges.void[4] >= 1 ? '' : 'none';
                 getId('exportReward').style.display = player.stage.resets >= (vacuum ? 1 : 4) ? '' : 'none';
                 getId('mergeToggleReset').style.display = vacuum && player.upgrades[5][3] === 1 ? '' : 'none';
-                getId('mergeHotkey').style.display = player.upgrades[5][3] === 1 ? '' : 'none';
+                if (hotkeyTest !== null) { getId('mergeHotkey').style.display = player.upgrades[5][3] === 1 ? '' : 'none'; }
             }
         } else if (subtab.settingsCurrent === 'History') {
             updateStageHistory();
@@ -1005,6 +1014,7 @@ export const visualUpdate = () => {
 };
 export const visualTrueStageUnlocks = () => {
     const highest = player.stage.true;
+    const hotkeyTest = getId('stageHotkey', true);
 
     if (!player.inflation.vacuum) { getId('mergeResetText').innerHTML = `Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together${highest >= 7 ? ', which will result in <span class="orchidText">Vacuum</span> decaying into its true state' : ' to create even bigger Structures. Might have severe consequences'}.`; }
     getId('stageRewardOld').style.display = highest < 5 ? '' : 'none';
@@ -1022,19 +1032,19 @@ export const visualTrueStageUnlocks = () => {
     getId('saveFileNameVacuum').style.display = highest >= 6 ? '' : 'none';
     getId('saveFileNameUniverse').style.display = highest >= 7 ? '' : 'none';
     getId('saveFileNameCosmon').style.display = highest >= 7 ? '' : 'none';
-    getId('stageChangeHotkey').style.display = highest >= 5 ? '' : 'none';
     getId('autoStageSwitch').style.display = highest >= 5 ? '' : 'none';
     getId('stageResets').style.display = highest >= 2 ? '' : 'none';
     getId('cosmonStat').style.display = highest >= 7 ? '' : 'none';
     getId('vacuumHistory').style.display = highest >= 7 ? '' : 'none';
+    if (hotkeyTest !== null) { getId('stageChangeHotkey').style.display = highest >= 5 ? '' : 'none'; }
     if (highest >= 2) {
         getId('resetStage').style.display = '';
         getId('toggleBuilding0').style.display = '';
         getId('resetToggles').style.display = '';
         getId('stageToggleReset').style.display = '';
-        getId('stageHotkey').style.display = '';
         getId('maxEnergyStat').style.display = '';
         getId('upgradeTabBtn').style.display = '';
+        if (hotkeyTest !== null) { hotkeyTest.style.display = ''; }
     }
     if (highest >= 5) {
         getId('elementsAsTab').style.display = '';

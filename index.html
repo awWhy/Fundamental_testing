@@ -14,7 +14,9 @@
             <h1 class="biggerWord">Fundamental</h1>
             <p class="whiteText">Game is loading. If it won't load (after trying to reload at least once), then can try to report it on <a href="https://discord.gg/JftTEJW83d" target="_blank" rel="noopener noreferrer">discord</a> or <a href="https://github.com/awWhy/Fundamental/issues" target="_blank" rel="noopener noreferrer">github</a></p>
         </aside>
-        <aside id="versionInfo" style="display: none;"></aside>
+        <div id="bigWindow" style="display: none;">
+            <button type="button" id="globalToggle0" style="display: none;">OFF</button>
+        </div>
         <div id="alertMain" style="display: none;">
             <div role="dialog" aria-modal="true">
                 <p id="alertText" aria-live="assertive">Welcome back</p>
@@ -211,9 +213,9 @@
                         <p id="cosmonGain" class="darkvioletText stage6Only">Cosmon gain from current Vacuum reset: <span class="greenText">1</span></p>
                     </div>
                     <div id="timeInfo">
+                        <p id="exportMaxed" class="redText">Time for a reward from exporting save file is at max value</p>
                         <p id="stageTime" class="blueText">Stage time: <span class="cyanText">1 seconds</span><span id="stageTimeReal"> (Real: <span class="cyanText">0 seconds</span>)</span></p>
                         <p id="currentChallenge" class="redText">Currently inside the <span>Missing</span></p>
-                        <p id="exportMaxed" class="redText">Export time is maxed</p>
                     </div>
                     <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpfull stuff</p>
                     <p id="MDMessage1" aria-hidden="true">If you are playing on Mobile device, then enabling support in Settings will add helpfull stuff, as well can fix some bugs</p>
@@ -420,7 +422,7 @@
                         <p>Stage time: <span id="stageTimeStrangeness" class="whiteText">0 seconds</span> (From the best reset: <span id="stageTimeBestReset" class="whiteText">1 seconds</span>)</p>
                     </div>
                     <section id="strangeStructures" class="greenText" aria-label="Strange Structures">
-                        <div id="strange0" class="noFocusOutline" aria-haspopup="dialog">
+                        <div id="strange0" class="noFocusOutline" tabindex="0" aria-haspopup="dialog"> <!-- Tabindex here is to make window close easier -->
                             <p>Strange quarks</p>
                             <div>
                                 <img src="Used_art/Strange%20Quarks.png" alt="" loading="lazy" draggable="false">
@@ -437,7 +439,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div id="strange1" class="noFocusOutline" aria-haspopup="dialog">
+                        <div id="strange1" class="noFocusOutline" tabindex="0" aria-haspopup="dialog">
                             <p>Strangelets</p>
                             <div>
                                 <img src="Used_art/Strangelets.png" alt="" loading="lazy" draggable="false">
@@ -820,6 +822,10 @@
                             <img src="Used_art/SVG/Discord.svg" alt="" loading="lazy" draggable="false">
                             Discord
                         </a>
+                        <button id="hotkeysButton" aria-label="List of hotkeys">
+                            <img src="Used_art/SVG/Keyboard.svg" alt="" loading="lazy">
+                            Hotkeys
+                        </button>
                         <button type="button" id="versionButton" aria-label="Version change log">
                             <img src="Used_art/SVG/Files.svg" alt="" loading="lazy" draggable="false">
                             Version
@@ -871,38 +877,8 @@
                                     </div>
                                 </div>
                             </li>
-                            <li><label title="Turn ON, if using non QWERTY layout keyboard">Language dependant hotkeys<button type="button" id="globalToggle0" class="specialToggle">OFF</button></label><!--
-                                --><div class="settingsMenu">
-                                    <button type="button" class="hollowButton" aria-label="Check hotkey list" aria-haspopup="dialog">Hotkeys</button>
-                                    <div class="popUpMenu" role="dialog" aria-label="Hotkeys list">
-                                        <p class="mainText">Arrows left and right - <span class="whiteText">change tab</span></p>
-                                        <p class="mainText">Arrows up and down - <span class="whiteText">change subtab</span></p>
-                                        <p class="mainText">Numbers - <span class="whiteText">make a new Structure</span></p>
-                                        <p class="mainText">Enter <span class="whiteText">or</span> Space - <span class="whiteText">confirm close Alert</span></p>
-                                        <p class="mainText">Escape - <span class="whiteText">cancel close Alert</span></p>
-                                        <div class="hotkeysGrid">
-                                            <p id="makeAllHotkey" class="redText">M - <span class="whiteText">Make all Structures</span></p>
-                                            <p id="stageHotkey" class="stageText">S - <span class="whiteText">Stage reset</span></p>
-                                            <p id="dischargeHotkey" class="orangeText stage1Include">D - <span class="whiteText">Discharge</span></p>
-                                            <p id="vaporizationHotkey" class="grayText stage2Include">V - <span class="whiteText">Vaporization</span></p>
-                                            <p class="darkorchidText stage3Include">R - <span class="whiteText">Rank</span></p>
-                                            <p id="collapseHotkey" class="orchidText stage4Include">C - <span class="whiteText">Collapse</span></p>
-                                            <p id="galaxyHotkey" class="grayText stage5Include">G - <span class="whiteText">Galaxy</span></p>
-                                        </div>
-                                        <p class="center bigWord mainText">When holding Shift:</p>
-                                        <p id="stageChangeHotkey" class="mainText">Arrows left and right - <span class="whiteText">change active Stage</span></p>
-                                        <p class="mainText">Numbers - <span class="whiteText">toggle auto Structure</span></p>
-                                        <div class="hotkeysGrid">
-                                            <p id="allStructuresHotkey" class="redText">A <span class="whiteText">or</span> 0 - <span class="whiteText">toggle all auto Structures</span></p>
-                                            <p id="mergeHotkey" class="darkvioletText stage5Include">M - <span class="whiteText">Merge</span></p>
-                                            <p class="darkvioletText stage6Include">U - <span class="whiteText">Universe</span></p>
-                                        </div>
-                                        <p class="mainText center bigWord">Holding Enter on last selected button will repeatedly press it, also works with Mouse on some buttons</p>
-                                    </div>
-                                </div>
-                            </li>
-                            <li title="Set as low as device can handle"><label>Automatization speed interval <input type="number" id="mainInterval" min="20" max="100" value="20" step="1"> ms</label></li>
-                            <li id="numbersLi"><label>Numbers update interval <input type="number" id="numbersInterval" min="40" max="200" value="80" step="1"> ms</label></li>
+                            <li id="mainLi" title="Set as low as device can handle"><label>Automatization speed interval <input type="number" id="mainInterval" min="20" max="100" value="20" step="1"> ms</label></li>
+                            <li><label>Numbers update interval <input type="number" id="numbersInterval" min="40" max="200" value="80" step="1"> ms</label><button type="button" id="showHints" class="hollowButton" aria-label="Show game hints">Hints</button></li>
                             <li><label>Visual update interval <input type="number" id="visualInterval" min="0.2" max="4" value="1" step="any"> s</label><button type="button" id="reviewEvents" class="hollowButton" aria-label="Replay event">Events</button></li>
                             <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="4" max="1800" value="20" step="1"> s</label></li>
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" value="." maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" value="" maxlength="1" autocomplete="off"></label></li>
@@ -1083,7 +1059,7 @@
                         <div class="stats stage1Only">
                             <p id="dischargeStat" class="orangeText">Discharge goals: <span class="whiteText">0</span><span id="dischargeStatTrue" class="cyanText">[0]</span></p>
                             <section id="energyGainStats">
-                                <h3 class="orangeText">Energy gain from creating Structures:</h3>
+                                <h3 class="orangeText">Energy gained from creating Structures:</h3>
                                 <div> <!-- Temporary until can figure out better solution (without using table) -->
                                     <section class="cyanText stage1borderImage" aria-label="Microworld Stage">
                                         <div aria-hidden="true">

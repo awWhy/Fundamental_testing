@@ -4,6 +4,61 @@ import { switchTab } from './Update';
 import { buyBuilding, collapseResetUser, dischargeResetUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGame } from './Main';
 import { globalSave } from './Special';
+import type { hotkeysList } from './Types';
+
+export const hotkeys = {} as Record<string, hotkeysList>;
+const hotkeyFunction = {
+    makeAll: () => buyAll(),
+    stage: (event) => {
+        if (event.repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return; }
+        void stageResetUser();
+    },
+    discharge: () => void dischargeResetUser(),
+    vaporization: (event) => {
+        if (event.repeat) { return; }
+        void vaporizationResetUser();
+    },
+    rank: () => void rankResetUser(),
+    collapse: (event) => {
+        if (event.repeat) { return; }
+        void collapseResetUser();
+    },
+    galaxy: () => buyBuilding(3, 5),
+    pause: (event) => {
+        if (event.repeat || !globalSave.developerMode) { return; }
+        void pauseGame();
+    },
+    toggleAll: (event) => {
+        if (event.repeat) { return; }
+        toggleSwap(0, 'buildings', true);
+    },
+    merge: (event) => {
+        if (event.repeat) { return; }
+        void mergeResetUser();
+    },
+    universe: () => buyBuilding(1, 6)
+} as Record<hotkeysList, (event: KeyboardEvent) => void>;
+
+/** Will remove identical hotkeys from globalSave */
+export const assignHotkeys = () => {
+    for (const key in hotkeys) { delete hotkeys[key]; } //Don't know better way for now
+    const index = globalSave.toggles[0] ? 0 : 1;
+    for (const key in globalSave.hotkeys) {
+        const hotkey = globalSave.hotkeys[key as hotkeysList][index];
+        if (hotkey === '' || hotkey == null) { continue; }
+        if (hotkeys[hotkey] !== undefined) {
+            globalSave.hotkeys[key as hotkeysList] = [];
+        } else { hotkeys[hotkey] = key as hotkeysList; }
+    }
+};
+
+/** Removes hotkey if exist, returns name of removed hotkey */
+export const removeHotkey = (remove: string): string | null => {
+    const test = hotkeys[remove];
+    if (test === undefined) { return null; }
+    globalSave.hotkeys[test] = [];
+    return test;
+};
 
 export const detectHotkey = (check: KeyboardEvent) => {
     if (check.code === 'Tab') {
@@ -14,16 +69,17 @@ export const detectHotkey = (check: KeyboardEvent) => {
         if (activeType === 'text' || activeType === 'number') { return; }
         document.body.classList.add('noFocusOutline');
     }
+    if (global.hotkeys.disabled) { return; }
     const { key, code } = check;
     let { shiftKey } = check;
 
     //Can be undefined on Safari
     if (shiftKey) { global.hotkeys.shift = true; }
-    if (check.ctrlKey) { return void (global.hotkeys.ctrl = true); }
-    if (check.altKey) { return; }
+    if (check.ctrlKey) { global.hotkeys.ctrl = true; }
 
     const numberKey = Number(code.slice(-1));
     if (!isNaN(numberKey)) {
+        if (check.ctrlKey || check.altKey) { return; }
         if (isNaN(Number(key))) {
             if (code === '' || code[0] === 'F') { return; }
             if (!shiftKey) { //Numpad
@@ -37,42 +93,17 @@ export const detectHotkey = (check: KeyboardEvent) => {
             toggleSwap(numberKey, 'buildings', true);
         } else { buyBuilding(numberKey); }
     } else if (key.length === 1) {
-        const stringKey = (globalSave.toggles[0] ? key : code.replace('Key', '')).toLowerCase();
-        if (shiftKey) {
-            if (stringKey === 'a') {
-                if (check.repeat) { return; }
-                toggleSwap(0, 'buildings', true);
-            } else if (stringKey === 'm') {
-                if (check.repeat) { return; }
-                void mergeResetUser();
-            } else if (stringKey === 'u') {
-                buyBuilding(1, 6);
-            }
-        } else {
-            if (stringKey === 'm') {
-                buyAll();
-            } else if (stringKey === 's') {
-                if (check.repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return; }
-                void stageResetUser();
-            } else if (stringKey === 'd') {
-                void dischargeResetUser();
-            } else if (stringKey === 'v') {
-                if (check.repeat) { return; }
-                void vaporizationResetUser();
-            } else if (stringKey === 'r') {
-                void rankResetUser();
-            } else if (stringKey === 'c') {
-                if (check.repeat) { return; }
-                void collapseResetUser();
-            } else if (stringKey === 'g') {
-                buyBuilding(3, 5);
-            } else if (stringKey === 'p') {
-                if (check.repeat || !globalSave.developerMode) { return; }
-                void pauseGame();
-            }
+        let name = check.ctrlKey ? 'Ctrl ' : '';
+        if (shiftKey) { name += 'Shift '; }
+        if (check.altKey) { name += 'Alt '; }
+        name += globalSave.toggles[0] ? key.toUpperCase() : code.replace('Key', '');
+        const functionTest = hotkeyFunction[hotkeys[name]];
+        if (functionTest !== undefined) {
+            functionTest(check);
+            check.preventDefault();
         }
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
-        if (check.repeat) { return; }
+        if (check.repeat || check.ctrlKey || check.altKey) { return; }
         if (shiftKey) {
             const activeAll = global.stageInfo.activeAll;
             if (activeAll.length === 1) { return; }

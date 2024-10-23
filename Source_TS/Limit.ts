@@ -1,11 +1,12 @@
 import { globalSave } from './Special';
 
+type allowedTypes = string | number | bigint | [number, number] | Overlimit;
 /* This is version has all settings (and other stuff) removed (for better speed) */
 /** To test number for being Overlimit can use: typeof number === 'object'; Array.isArray(number); number instanceof Overlimit
- * @param number Exponent must be truncted, also if Array is used, then must not contain any mistakes (example and proper way: [11, 0] > [1.1, 1]; [1, NaN] > [NaN, NaN]; [1, 1.4] > [1, 1]). BigInt is allowed, but TS doesn't know about it
+ * @param number allowed types are string, number, bigint, Overlimit and [number, number]; If Array is used, then must not contain any mistakes (example and proper way: [11, 0] > [1.1, 1]; [1, NaN] > [NaN, NaN]; [1, 1.4] > [1, 1])
  */
 export default class Overlimit extends Array<number> {
-    constructor(number: string | number | [number, number] | Overlimit) {
+    constructor(number: allowedTypes) {
         const post = technical.convert(number);
         super(post[0], post[1]);
     }
@@ -14,7 +15,7 @@ export default class Overlimit extends Array<number> {
 
     /** Creates new Overlimit */
     clone(): Overlimit { return new Overlimit(this); }
-    setValue(newValue: string | number | [number, number] | Overlimit) { return this.#privateSet(technical.convert(newValue)); }
+    setValue(newValue: allowedTypes) { return this.#privateSet(technical.convert(newValue)); }
     #privateSet(newValue: [number, number] | Overlimit) {
         this[0] = newValue[0];
         this[1] = newValue[1];
@@ -22,7 +23,7 @@ export default class Overlimit extends Array<number> {
     }
 
     /** Can take any amount of arquments */
-    plus(...numbers: Array<string | number | [number, number] | Overlimit>) {
+    plus(...numbers: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
         for (let i = 0; i < numbers.length; i++) {
             result = technical.add(result, technical.convert(numbers[i]));
@@ -31,7 +32,7 @@ export default class Overlimit extends Array<number> {
         return this.#privateSet(result);
     }
     /** Can take any amount of arquments */
-    minus(...numbers: Array<string | number | [number, number] | Overlimit>) {
+    minus(...numbers: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
         for (let i = 0; i < numbers.length; i++) {
             result = technical.sub(result, technical.convert(numbers[i]));
@@ -40,7 +41,7 @@ export default class Overlimit extends Array<number> {
         return this.#privateSet(result);
     }
     /** Can take any amount of arquments */
-    multiply(...numbers: Array<string | number | [number, number] | Overlimit>) {
+    multiply(...numbers: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
         for (let i = 0; i < numbers.length; i++) {
             result = technical.mult(result, technical.convert(numbers[i]));
@@ -49,7 +50,7 @@ export default class Overlimit extends Array<number> {
         return this.#privateSet(result);
     }
     /** Can take any amount of arquments */
-    divide(...numbers: Array<string | number | [number, number] | Overlimit>) {
+    divide(...numbers: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
         for (let i = 0; i < numbers.length; i++) {
             result = technical.div(result, technical.convert(numbers[i]));
@@ -76,17 +77,19 @@ export default class Overlimit extends Array<number> {
 
     /** Doesn't check exponent, since exponent being NaN while mantissa isn't would be a bug */
     isNaN(): boolean { return isNaN(this[0])/* || isNaN(this[1])*/; }
+    /** Will set new value to provided, but only if current one is NaN */
+    replaceNaN(replaceWith: allowedTypes): Overlimit { return isNaN(this[0]) ? this.#privateSet(technical.convert(replaceWith)) : this; }
     /** Doesn't check exponent, since exponent being Infinity while mantissa isn't would be a bug */
     isFinite(): boolean { return isFinite(this[0])/* && isFinite(this[1])*/; }
 
-    lessThan(compare: string | number | [number, number] | Overlimit): boolean { return technical.less(this, technical.convert(compare)); }
-    lessOrEqual(compare: string | number | [number, number] | Overlimit): boolean { return technical.lessOrEqual(this, technical.convert(compare)); }
-    moreThan(compare: string | number | [number, number] | Overlimit): boolean { return technical.more(this, technical.convert(compare)); }
-    moreOrEqual(compare: string | number | [number, number] | Overlimit): boolean { return technical.moreOrEqual(this, technical.convert(compare)); }
-    notEqual(compare: string | number | [number, number] | Overlimit): boolean { return technical.notEqual(this, technical.convert(compare)); }
-    equal(compare: string | number | [number, number] | Overlimit): boolean { return !technical.notEqual(this, technical.convert(compare)); }
+    lessThan(compare: allowedTypes): boolean { return technical.less(this, technical.convert(compare)); }
+    lessOrEqual(compare: allowedTypes): boolean { return technical.lessOrEqual(this, technical.convert(compare)); }
+    moreThan(compare: allowedTypes): boolean { return technical.more(this, technical.convert(compare)); }
+    moreOrEqual(compare: allowedTypes): boolean { return technical.moreOrEqual(this, technical.convert(compare)); }
+    notEqual(compare: allowedTypes): boolean { return technical.notEqual(this, technical.convert(compare)); }
+    equal(compare: allowedTypes): boolean { return !technical.notEqual(this, technical.convert(compare)); }
     /** Can take any amount of arquments; Returns true if no arquments provided */
-    allEqual(...compare: Array<string | number | [number, number] | Overlimit>): boolean {
+    allEqual(...compare: allowedTypes[]): boolean {
         let previous: [number, number] | Overlimit = this;
         for (let i = 0; i < compare.length; i++) {
             const next = technical.convert(compare[i]);
@@ -98,9 +101,8 @@ export default class Overlimit extends Array<number> {
     }
 
     /** Set original number to biggest of provided arguments */
-    max(...compare: Array<string | number | [number, number] | Overlimit>) {
+    max(...compare: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
-
         for (let i = 0; i < compare.length; i++) {
             const after = technical.convert(compare[i]);
             if (isNaN(after[0])) { return this.#privateSet([NaN, NaN]); }
@@ -111,9 +113,8 @@ export default class Overlimit extends Array<number> {
         return this.#privateSet(result);
     }
     /** Set original number to smallest of provided arguments */
-    min(...compare: Array<string | number | [number, number] | Overlimit>) {
+    min(...compare: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
-
         for (let i = 0; i < compare.length; i++) {
             const after = technical.convert(compare[i]);
             if (isNaN(after[0])) { return this.#privateSet([NaN, NaN]); }
@@ -131,6 +132,12 @@ export default class Overlimit extends Array<number> {
     format(settings = {} as { type?: 'number' | 'input', padding?: boolean | 'exponent' }): string { return technical.format(this, settings); }
     /** Returns value as Number, doesn't change original number */
     toNumber(): number { return Number(technical.turnString(this)); }
+    /** Same as .toNumber, but also converts Infinity (and NaN; can use replaceNaN before calling this function) to Number.MAX_VALUE */
+    toSafeNumber(): number {
+        const result = Number(technical.turnString(this));
+        if (isFinite(result)) { return result; }
+        return Number.MAX_VALUE * (result < 0 ? -1 : 1);
+    }
     /** Returns value as String, doesn't change original number */
     toString(): string { return technical.turnString(this); }
     /** Returns value as Array, doesn't change original number */
@@ -140,7 +147,7 @@ export default class Overlimit extends Array<number> {
 }
 
 const technical = {
-    convert: (number: string | number | [number, number] | Overlimit): [number, number] | Overlimit => {
+    convert: (number: allowedTypes): [number, number] | Overlimit => {
         if (typeof number === 'object' && number !== null) { return number; } //Readonly Array
         if (typeof number !== 'string') { number = `${number}`; } //Using log10 could cause floating point error
         const index = number.indexOf('e');
@@ -343,7 +350,7 @@ const technical = {
 
         if (base < 0 || negative) { //Special test for negative numbers
             if (left[1] < 0) { return [NaN, NaN]; }
-            //Due to floats (1.1 * 100 !== 110), test is done in this way
+            //Due to floats (1.1 * 100 !== 110), test is done in this way (also we assume that big numbers are never uneven)
             const test = left[1] < 16 ? Math.abs(Math.round(left[0] * 1e14) / 10 ** (14 - left[1])) % 2 : 0;
             if (base < 0 && !negative) {
                 if (test !== 0) { return [NaN, NaN]; } //Result must be even

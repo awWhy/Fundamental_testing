@@ -1,7 +1,8 @@
-import { changeIntervals, getId, getQuery } from './Main';
-import { global, player } from './Player';
-import type { globalSaveType } from './Types';
-import { format, numbersUpdate, visualUpdate } from './Update';
+import { assignHotkeys, removeHotkey } from './Hotkeys';
+import { changeIntervals, getId, getQuery, globalSaveStart } from './Main';
+import { deepClone, global, player } from './Player';
+import type { globalSaveType, hotkeysList } from './Types';
+import { format, numbersUpdate, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -9,6 +10,19 @@ export const globalSave: globalSaveType = {
         numbers: 80,
         visual: 1000,
         autoSave: 20000
+    },
+    hotkeys: { //hotkeyFunction: [key, code]
+        makeAll: ['M', 'M'],
+        stage: ['S', 'S'],
+        discharge: ['D', 'D'],
+        vaporization: ['V', 'V'],
+        rank: ['R', 'R'],
+        collapse: ['C', 'C'],
+        galaxy: ['G', 'G'],
+        pause: ['P', 'P'],
+        toggleAll: ['Shift A', 'Shift A'],
+        merge: ['Shift M', 'Shift M'],
+        universe: ['Shift U', 'Shift U']
     },
     toggles: [false, false, false],
     //Hotkeys type[0]; Elements as tab[1]; Allow text selection[2]
@@ -20,7 +34,19 @@ export const globalSave: globalSaveType = {
     developerMode: false
 };
 
-export const saveGlobalSettings = () => localStorage.setItem('fundamentalSettings', btoa(JSON.stringify(globalSave)));
+export const saveGlobalSettings = () => {
+    const hotkeysClone = deepClone(globalSave.hotkeys);
+    const encoder = new TextEncoder();
+    for (const key in hotkeysClone) {
+        const array = hotkeysClone[key as hotkeysList];
+        for (let i = 0; i < array.length; i++) {
+            array[i] = String.fromCharCode(...encoder.encode(array[i]));
+        }
+    }
+    const clone = { ...globalSave };
+    clone.hotkeys = hotkeysClone;
+    localStorage.setItem('fundamentalSettings', btoa(JSON.stringify(clone)));
+};
 
 export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reader', change = false, reload = false) => {
     let toggles;
@@ -36,6 +62,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
         if (reload) {
             return void (async() => {
                 if (!await Confirm('Changing this setting will reload game, confirm?\n(Game will not autosave)')) { return; }
+                global.hotkeys.disabled = true;
                 global.paused = true;
                 changeIntervals();
                 toggles[number] = !toggles[number];
@@ -498,12 +525,13 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
         const oldFocus = document.activeElement as HTMLElement | null;
         confirm.focus();
 
-        const key = async(button: KeyboardEvent) => {
-            if (button.key === 'Escape' || button.key === 'Enter' || button.key === ' ') {
-                button.preventDefault();
+        const key = async(event: KeyboardEvent) => {
+            const code = event.code;
+            if (code === 'Escape' || code === 'Enter' || code === 'Space') {
+                event.preventDefault();
                 close();
-            } else if (button.key === 'Tab') {
-                button.preventDefault();
+            } else if (code === 'Tab') {
+                event.preventDefault();
                 confirm.focus();
             }
         };
@@ -546,36 +574,40 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
         const oldFocus = document.activeElement as HTMLElement | null;
         confirm.focus();
 
-        const yes = () => { close(true); };
-        const no = () => { close(false); };
-        const key = (button: KeyboardEvent) => {
-            if (button.key === 'Escape') {
-                button.preventDefault();
-                no();
-            } else if (button.key === 'Enter' || button.key === ' ') {
+        let result = false;
+        const yes = () => {
+            result = true;
+            close();
+        };
+        const key = (event: KeyboardEvent) => {
+            const code = event.code;
+            if (code === 'Escape') {
+                event.preventDefault();
+                close();
+            } else if (code === 'Enter' || code === 'Space') {
                 if (document.activeElement === cancel) { return; }
-                button.preventDefault();
+                event.preventDefault();
                 yes();
-            } else if (button.key === 'Tab') {
-                button.preventDefault();
+            } else if (code === 'Tab') {
+                event.preventDefault();
                 (document.activeElement === cancel ? confirm : cancel).focus();
             }
         };
-        const close = (result: boolean) => {
+        const close = () => {
             body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
             blocker.style.display = 'none';
             cancel.style.display = 'none';
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', yes);
-            cancel.removeEventListener('click', no);
+            cancel.removeEventListener('click', close);
             specialHTML.alert = [null, null];
             oldFocus?.focus();
             resolve(result);
         };
-        specialHTML.alert = [priority, no];
+        specialHTML.alert = [priority, close];
         body.addEventListener('keydown', key);
         confirm.addEventListener('click', yes);
-        cancel.addEventListener('click', no);
+        cancel.addEventListener('click', close);
     });
 };
 
@@ -607,47 +639,47 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
         const oldFocus = document.activeElement as HTMLElement | null;
         input.focus();
 
-        const yes = () => { close(input.value === '' ? input.placeholder : input.value); };
-        const no = () => { close(null); };
-        const key = (button: KeyboardEvent) => {
-            if (button.key === 'Escape') {
-                button.preventDefault();
-                no();
-            } else if (button.key === 'Enter') {
-                if (document.activeElement === cancel) { return; }
-                button.preventDefault();
-                yes();
-            } else if (button.key === ' ') {
+        let result: null | string = null;
+        const yes = () => {
+            result = input.value === '' ? input.placeholder : input.value;
+            close();
+        };
+        const key = (event: KeyboardEvent) => {
+            const code = event.code;
+            if (code === 'Escape') {
+                event.preventDefault();
+                close();
+            } else if (code === 'Enter' || code === 'Space') {
                 const active = document.activeElement;
-                if (active === input || active === cancel) { return; }
-                button.preventDefault();
+                if ((code === 'Space' && active === input) || active === cancel) { return; }
+                event.preventDefault();
                 yes();
-            } else if (button.key === 'Tab') {
-                if (button.shiftKey && document.activeElement === input) {
-                    button.preventDefault();
+            } else if (code === 'Tab') {
+                if (event.shiftKey && document.activeElement === input) {
+                    event.preventDefault();
                     cancel.focus();
-                } else if (!button.shiftKey && document.activeElement === cancel) {
-                    button.preventDefault();
+                } else if (!event.shiftKey && document.activeElement === cancel) {
+                    event.preventDefault();
                     input.focus();
                 }
             }
         };
-        const close = (result: string | null) => {
+        const close = () => {
             body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
             blocker.style.display = 'none';
             cancel.style.display = 'none';
             input.style.display = 'none';
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', yes);
-            cancel.removeEventListener('click', no);
+            cancel.removeEventListener('click', close);
             specialHTML.alert = [null, null];
             oldFocus?.focus();
             resolve(result);
         };
-        specialHTML.alert = [priority, no];
+        specialHTML.alert = [priority, close];
         body.addEventListener('keydown', key);
         confirm.addEventListener('click', yes);
-        cancel.addEventListener('click', no);
+        cancel.addEventListener('click', close);
     });
 };
 
@@ -772,16 +804,18 @@ const adjustCSSRules = (initial: boolean) => {
 
 export const changeFormat = (point: boolean) => {
     const htmlInput = (point ? getId('decimalPoint') : getId('thousandSeparator')) as HTMLInputElement;
-    if (htmlInput.value === ' ') { htmlInput.value = ' '; } //No break space
-    const allowed = ['.', '·', ',', ' ', '_', "'", '"', '`', '|'].includes(htmlInput.value);
-    if (!allowed || globalSave.format[point ? 1 : 0] === htmlInput.value) {
+    let value = htmlInput.value;
+    if (value === ' ') { value = ' '; } //No break space
+    const allowed = ['.', '·', ',', ' ', '_', "'", '"', '`', '|'].includes(value);
+    if (!allowed || globalSave.format[point ? 1 : 0] === value) {
         if (point && globalSave.format[1] === '.') {
             (getId('thousandSeparator') as HTMLInputElement).value = '';
             globalSave.format[1] = '';
         }
-        htmlInput.value = point ? '.' : '';
+        value = point ? '.' : '';
+        htmlInput.value = value;
     }
-    globalSave.format[point ? 0 : 1] = htmlInput.value;
+    globalSave.format[point ? 0 : 1] = value;
     saveGlobalSettings();
 };
 
@@ -836,4 +870,204 @@ export const playEvent = (event: number, index = null as number | null) => {
         case 8:
             return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require to get at least 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
     }
+};
+
+const buildBigWindow = () => {
+    if (getId('closeBigWindow', true) !== null) { return; }
+    getId('bigWindow').innerHTML = '<div role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></div>';
+    specialHTML.styleSheet.textContent += '#bigWindow > div { display: flex; flex-direction: column; align-items: center; width: clamp(42vw, 36em, 80vw); height: clamp(26vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }';
+    specialHTML.styleSheet.textContent += '#bigWindow > div > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; margin-top: auto; } #bigWindow > div > div { width: 100%; overflow-y: auto; }';
+};
+
+export const getVersionInfoHTML = () => {
+    buildBigWindow();
+    if (getId('versionHTML', true) === null) {
+        const mainHTML = document.createElement('div');
+        mainHTML.innerHTML = `<label>v0.2.1</label><p>- Missing</p>
+        <label>v0.2.0</label><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
+        <label>v0.1.9</label><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>
+        <label>v0.1.8</label><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Added copy to clipboard, load from string save file options</p>
+        <label>v0.1.7</label><p>- New content (Void)\n- Further balance changes</p>
+        <label>v0.1.6</label><p>- Massive rebalance and reworks for all Stages</p>
+        <label>v0.1.5</label><p>- True Vacuum minor balance\n- Images no longer unload\n- Screen reader support reworked</p>
+        <label>v0.1.4</label><p>- Custom scrolls\n- Notifications</p>
+        <label>v0.1.3</label><p>- True Vacuum balance changes\n- Submerged Stage minor balance\n- Replay event button\n\n- History for Stage resets</p>
+        <label>v0.1.2</label><p>- New content (Vacuum)\n- Offline time reworked\n- Added version window (removed change log on game load)\n- Permanently removed text movement</p>
+        <label>v0.1.1</label><p>- More balance changes for late game</p>
+        <label>v0.1.0</label><p>- New content (Intergalactic)\n- Balance changes for late game</p>
+        <label>v0.0.9</label><p>- New content (Milestones)\n- More Interstellar and late game balance</p>
+        <label>v0.0.8</label><p>- Minor speed up to all Stages past Microworld</p>
+        <label>v0.0.7</label><p>- New content (Strangeness)\n- Microworld Stage rework\n\n- Added stats for Save file name</p>
+        <label>v0.0.6</label><p>- Added hotkeys list\n\n- Option to remove text movement\n- Ability to rename save file</p>
+        <label>v0.0.5</label><p>- New content (Interstellar)\n- Basic loading screen\n\n- Added hotkeys</p>
+        <label>v0.0.4</label><p>- Speed up to all Stages\n- Added events\n\n- Added numbers format</p>
+        <label>v0.0.3</label><p>- New content (Accretion)\n- Submerged Stage extended\n- Offline time calculated better</p>
+        <label>v0.0.2</label><p>- Stats subtab</p>
+        <label>v0.0.1</label><p>- Submerged Stage rework\n- Added change log on game load\n\n- Mobile device support</p>
+        <label>v0.0.0</label><p>- First published version\n\n- Submerged Stage placeholder</p>`;
+        getQuery('#bigWindow > div').prepend(mainHTML);
+        mainHTML.id = 'versionHTML';
+        specialHTML.styleSheet.textContent += '#versionHTML label { font-size: 1.18em; } #versionHTML p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; } #versionHTML p:last-of-type { margin-bottom: 0; }';
+    }
+
+    const key = (event: KeyboardEvent) => {
+        const code = event.code;
+        if (code === 'Escape' || code === 'Enter' || code === 'Space') {
+            event.preventDefault();
+            close();
+        }
+    };
+    const body = document.body;
+    const closeButton = getId('closeBigWindow');
+    const mainHTML = getId('versionHTML');
+    const windowHMTL = getId('bigWindow');
+    const close = () => {
+        windowHMTL.style.display = 'none';
+        mainHTML.style.display = 'none';
+        body.removeEventListener('keydown', key);
+        closeButton.removeEventListener('click', close);
+    };
+    body.addEventListener('keydown', key);
+    closeButton.addEventListener('click', close);
+    mainHTML.style.display = '';
+    windowHMTL.style.display = '';
+    closeButton.focus();
+};
+
+export const getHotkeysHTML = () => {
+    buildBigWindow();
+    if (getId('hotkeysHTML', true) === null) {
+        const mainHTML = document.createElement('div');
+        mainHTML.innerHTML = `<p id="hotkeysMessage" class="mainText bigWord" aria-live="assertive">Some hotkeys can be changed by clicking on them</p>
+        <p class="mainText">Arrows left and right ‒ <span class="whiteText">change tab</span></p>
+        <p id="stageChangeHotkey" class="mainText">Shift arrows left and right ‒ <span class="whiteText">change active Stage</span></p>
+        <p class="mainText">Arrows up and down ‒ <span class="whiteText">change subtab</span></p>
+        <p class="mainText">Numbers ‒ <span class="whiteText">make a new Structure</span></p>
+        <p class="mainText">Shift numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
+        <label id="toggleAllHotkey" class="mainText">Shift 0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">toggle all auto Structures</span></label>
+        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">confirm close Alert</span></p>
+        <p class="mainText">Escape ‒ <span class="whiteText">cancel close Alert</span></p>
+        <div>
+            <label id="makeAllHotkey" class="redText"><button></button> ‒ <span class="whiteText">make all Structures</span></label>
+            <label id="stageHotkey" class="stageText"><button></button> ‒ <span class="whiteText">Stage reset</span></label>
+            <label id="dischargeHotkey" class="orangeText stage1Include"><button></button> ‒ <span class="whiteText">Discharge</span></label>
+            <label id="vaporizationHotkey" class="grayText stage2Include"><button></button> ‒ <span class="whiteText">Vaporization</span></label>
+            <label id="rankHotkey" class="darkorchidText stage3Include"><button></button> ‒ <span class="whiteText">Rank</span></label>
+            <label id="collapseHotkey" class="orchidText stage4Include"><button></button> ‒ <span class="whiteText">Collapse</span></label>
+            <label id="galaxyHotkey" class="grayText stage5Include"><button></button> ‒ <span class="whiteText">Galaxy</span></label>
+            <label id="mergeHotkey" class="darkvioletText stage5Include"><button></button> ‒ <span class="whiteText">Merge</span></label>
+            <label id="universeHotkey" class="darkvioletText stage6Include"><button></button> ‒ <span class="whiteText">Universe</span></label>
+            <label id="pauseHotkey" class="grayText"><button></button> ‒ <span class="whiteText">pause</span></label>
+        </div>
+        <p class="mainText">Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
+        <label id="hotkeysToggleLabel" title="Turn ON, if using non QWERTY layout keyboard">Language dependant hotkeys </label>
+        <button id="restoreHotkeys" type="button">Restore default hotkeys values</button>`;
+        getQuery('#bigWindow > div').prepend(mainHTML);
+        mainHTML.id = 'hotkeysHTML';
+        const toggle = getId('globalToggle0');
+        toggle.className = 'specialToggle';
+        toggle.style.display = '';
+        getId('hotkeysToggleLabel').append(toggle);
+        specialHTML.styleSheet.textContent += '#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; } #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; } #hotkeysHTML > div label { min-width: max-content; } #makeAllHotkey { grid-column: 1 / 3; }';
+        specialHTML.styleSheet.textContent += '#hotkeysHTML button:not(.specialToggle) { width: max-content; color: inherit; background-color: unset; border-width: 1px; border-color: inherit; border-right: none; border-left: none; border-top: none; font-size: inherit; height: unset; }';
+
+        const changeHotkey = async(disableFirstUp = false): Promise<string[] | null> => {
+            return await new Promise((resolve) => {
+                getId('hotkeysMessage').textContent = 'Awaiting new value for the hotkey';
+                const body = document.body;
+                let result: null | string[] = null;
+                const prevent = (event: KeyboardEvent) => {
+                    const code = event.code;
+                    if (code === 'Tab') { return; }
+                    event.preventDefault();
+                    if (code === 'Escape' || ((code === 'Enter' || code === 'Space') && document.activeElement === getId('closeBigWindow'))) {
+                        finish();
+                    }
+                };
+                const detect = async(event: KeyboardEvent) => {
+                    if (disableFirstUp) { return void (disableFirstUp = false); }
+                    const code = event.code;
+                    if (code === 'Tab' || code === 'Escape') { return; }
+                    let prefix = event.ctrlKey ? 'Ctrl ' : '';
+                    if (event.shiftKey) { prefix += 'Shift '; }
+                    if (event.altKey) { prefix += 'Alt '; }
+                    if (!isNaN(Number(code.slice(-1))) || event.key.length !== 1 || code === 'Space') {
+                        getId('hotkeysMessage').textContent = `Value '${prefix}${globalSave.toggles[0] ? event.key : code}' for hotkeys isn't allowed`;
+                        return;
+                    }
+                    result = [`${prefix}${event.key.toUpperCase()}`, `${prefix}${code.replace('Key', '')}`];
+                    finish();
+                };
+                const finish = () => {
+                    body.removeEventListener('keydown', prevent);
+                    body.removeEventListener('keyup', detect);
+                    body.removeEventListener('click', finish);
+                    global.hotkeys.disabled = false;
+                    resolve(result);
+                };
+                global.hotkeys.disabled = true;
+                body.addEventListener('keydown', prevent);
+                body.addEventListener('keyup', detect);
+                body.addEventListener('click', finish);
+            });
+        };
+        const index = globalSave.toggles[0] ? 0 : 1;
+        for (const key in globalSaveStart.hotkeys) {
+            const button = getQuery(`#${key}Hotkey > button`) as HTMLButtonElement;
+            const hotkeyTest = globalSave.hotkeys[key as hotkeysList][index];
+            button.textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
+            button.type = 'button';
+            button.addEventListener('click', async(event) => {
+                event.stopPropagation();
+                const newHotkey = await changeHotkey(event.clientX <= 0); //Check if click was caused by pressing Enter
+                if (newHotkey !== null) {
+                    const index = globalSave.toggles[0] ? 0 : 1;
+                    const removed = removeHotkey(newHotkey[index]);
+                    if (removed !== null && removed !== key) { getQuery(`#${removed}Hotkey > button`).textContent = 'None'; }
+                    getQuery(`#${key}Hotkey > button`).textContent = newHotkey[index];
+                    globalSave.hotkeys[key as hotkeysList] = newHotkey;
+                    assignHotkeys();
+                    saveGlobalSettings();
+                }
+                getId('hotkeysMessage').textContent = 'Some hotkeys can be changed by clicking on them';
+            });
+        }
+        getId('restoreHotkeys').addEventListener('click', () => {
+            globalSave.hotkeys = deepClone(globalSaveStart.hotkeys);
+            const index = globalSave.toggles[0] ? 0 : 1;
+            for (const key in globalSave.hotkeys) {
+                const hotkeyTest = globalSave.hotkeys[key as hotkeysList][index];
+                getQuery(`#${key}Hotkey > button`).textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
+            }
+            assignHotkeys();
+            saveGlobalSettings();
+        });
+        stageUpdate('soft');
+        visualTrueStageUnlocks();
+    }
+
+    const body = document.body;
+    const closeButton = getId('closeBigWindow');
+    const mainHTML = getId('hotkeysHTML');
+    const windowHMTL = getId('bigWindow');
+    const key = (event: KeyboardEvent) => {
+        if (global.hotkeys.disabled) { return; }
+        const code = event.code;
+        if (code === 'Escape' || ((code === 'Enter' || code === 'Space') && document.activeElement === closeButton)) {
+            event.preventDefault();
+            close();
+        }
+    };
+    const close = () => {
+        windowHMTL.style.display = 'none';
+        mainHTML.style.display = 'none';
+        body.removeEventListener('keydown', key);
+        closeButton.removeEventListener('click', close);
+    };
+    body.addEventListener('keydown', key);
+    closeButton.addEventListener('click', close);
+    getId('pauseHotkey').style.display = globalSave.developerMode ? '' : 'none';
+    mainHTML.style.display = '';
+    windowHMTL.style.display = '';
+    getQuery('#makeAllHotkey > button').focus();
 };

@@ -147,6 +147,7 @@ export interface globalType {
     paused: boolean
     footer: boolean
     hotkeys: {
+        disabled: boolean
         shift: boolean
         ctrl: boolean
     }
@@ -327,7 +328,6 @@ export interface globalType {
 }
 
 /* Because I am lazy to deal with missing types right now */
-export type nullableBoolean = boolean | undefined | null;
 export interface globalSaveType {
     intervals: {
         main: number
@@ -335,11 +335,14 @@ export interface globalSaveType {
         visual: number
         autoSave: number
     }
-    toggles: [boolean, boolean, ...nullableBoolean[]]
+    hotkeys: Record<hotkeysList, Array<string | undefined>>
+    toggles: boolean[]
     format: [string, string]
     theme: null | number
     fontSize: number
-    MDSettings: [boolean, boolean, ...nullableBoolean[]]
-    SRSettings: [boolean, boolean, boolean, ...nullableBoolean[]]
+    MDSettings: boolean[]
+    SRSettings: boolean[]
     developerMode: boolean
 }
+
+export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe';

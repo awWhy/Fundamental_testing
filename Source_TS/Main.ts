@@ -1,10 +1,11 @@
-import { player, global, playerStart, updatePlayer, buildVersionInfo, deepClone } from './Player';
+import { player, global, playerStart, updatePlayer, deepClone } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation } from './Update';
 import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
-import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings } from './Special';
-import { detectHotkey } from './Hotkeys';
+import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
+import { assignHotkeys, detectHotkey } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
+import type { hotkeysList } from './Types';
 
 /** Only for static HTML, by default (false) throws error if id is null */
 export const getId = (id: string, noError = false): HTMLElement => {
@@ -20,10 +21,10 @@ export const getId = (id: string, noError = false): HTMLElement => {
     if (noError) { return null as unknown as HTMLElement; }
     if (global.debug.errorID) {
         global.debug.errorID = false;
-        Notify(`Error encountered, ID - '${id}' doesn't exist`);
+        Notify(`Error encountered, ID ‒ '${id}' doesn't exist`);
         setTimeout(() => { global.debug.errorID = true; }, 6e4);
     }
-    throw new ReferenceError(`ID - '${id}' doesn't exist`);
+    throw new ReferenceError(`ID ‒ '${id}' doesn't exist`);
 };
 
 /** Id collection will be auto updated by browser */
@@ -48,10 +49,10 @@ export const getQuery = (query: string): HTMLElement => {
 
     if (global.debug.errorQuery) {
         global.debug.errorQuery = false;
-        Notify(`Error encountered, Query - '${query}' failed to find anything`);
+        Notify(`Error encountered, Query ‒ '${query}' failed to find anything`);
         setTimeout(() => { global.debug.errorQuery = true; }, 6e4);
     }
-    throw new ReferenceError(`Query - '${query}' failed`);
+    throw new ReferenceError(`Query ‒ '${query}' failed`);
 };
 
 const handleOfflineTime = (): number => {
@@ -78,7 +79,7 @@ export const simulateOffline = async(offline: number, autoAccept = !globalSave.d
         global.paused = false;
         return changeIntervals();
     }
-    if (!autoAccept && !(await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?\nWill be lost if not accepted`, 2))) {
+    if (!autoAccept && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?\nWill be lost if not accepted`, 2)) {
         global.lastSave += handleOfflineTime();
         global.paused = false;
         return changeIntervals();
@@ -164,7 +165,9 @@ const saveGame = async(noSaving = false): Promise<string | null> => {
         player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
         player.history.vacuum.list = global.historyStorage.vacuum.slice(0, player.history.vacuum.input[0]);
 
-        const save = btoa(JSON.stringify(player));
+        const clone = { ...player };
+        clone.fileName = String.fromCharCode(...new TextEncoder().encode(clone.fileName));
+        const save = btoa(JSON.stringify(clone));
         if (!noSaving) {
             localStorage.setItem('testing_save', save);
             clearInterval(global.intervalsId.autoSave);
@@ -181,6 +184,7 @@ const saveGame = async(noSaving = false): Promise<string | null> => {
 };
 const loadGame = (save: string) => {
     if (global.paused) { return Notify('No loading while game is paused'); }
+    global.hotkeys.disabled = true;
     global.paused = true;
     changeIntervals();
     try {
@@ -191,8 +195,10 @@ const loadGame = (save: string) => {
         stageUpdate('reload');
 
         void simulateOffline(global.lastSave);
+        global.hotkeys.disabled = false;
     } catch (error) {
         prepareVacuum(Boolean(player.inflation.vacuum)); //Fix vacuum state
+        global.hotkeys.disabled = false;
         global.paused = false;
         changeIntervals();
 
@@ -201,8 +207,7 @@ const loadGame = (save: string) => {
     }
 };
 const exportFileGame = async() => {
-    if ((player.stage.true >= 7 || player.stage.resets >= (player.inflation.vacuum ? 1 : 4)) &&
-        (!globalSave.developerMode || await Confirm('Claim export reward? Export storage will not be reduced if to refuse'))) {
+    if (player.stage.true >= 7 || player.stage.resets >= (player.inflation.vacuum ? 1 : 4)) {
         awardExport();
     }
 
@@ -235,7 +240,7 @@ const awardExport = () => {
 };
 
 const saveConsole = async() => {
-    const value = await Prompt("Available options:\n'Copy' - copy save file to clipboard\n'Delete' - delete your save file\n'Reset' - reset game global settings\n'Clear' - clear all domain data\nOr insert save file string here to load it");
+    const value = await Prompt("Available options:\n'Copy' ‒ copy save file to clipboard\n'Delete' ‒ delete your save file\n'Reset' ‒ reset game global settings\n'Clear' ‒ clear all domain data\nOr insert save file string here to load it");
     if (value === null || value === '') { return; }
     const lower = value.toLowerCase();
 
@@ -243,6 +248,7 @@ const saveConsole = async() => {
         const save = await saveGame(true);
         if (save !== null) { void navigator.clipboard.writeText(save); }
     } else if (lower === 'delete' || lower === 'reset' || lower === 'clear') {
+        global.hotkeys.disabled = true;
         global.paused = true;
         changeIntervals();
         if (lower === 'delete') {
@@ -404,21 +410,42 @@ export const pauseGame = async() => {
     }
 };
 
+export const globalSaveStart = deepClone(globalSave);
 try { //Start everything
     preventImageUnload();
     const body = document.body;
 
-    const globalSaveStart = deepClone(globalSave); //For cases with incorrect length
     const globalSettings = localStorage.getItem('fundamentalSettings');
     if (globalSettings !== null) {
         try {
             Object.assign(globalSave, JSON.parse(atob(globalSettings)));
+            const decoder = new TextDecoder();
+            for (const key in globalSave.hotkeys) { //Restore decoded data
+                const array = globalSave.hotkeys[key as hotkeysList] as string[];
+                for (let i = 0; i < array.length; i++) {
+                    array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
+                }
+            }
+            for (let i = globalSave.toggles.length; i < globalSaveStart.toggles.length; i++) {
+                globalSave.toggles[i] = false;
+            }
+            for (let i = globalSave.MDSettings.length; i < globalSaveStart.MDSettings.length; i++) {
+                globalSave.MDSettings[i] = false;
+            }
+            for (let i = globalSave.SRSettings.length; i < globalSaveStart.SRSettings.length; i++) {
+                globalSave.SRSettings[i] = false;
+            }
+            for (const key in globalSaveStart.hotkeys) {
+                if (globalSave.hotkeys[key as hotkeysList] === undefined) {
+                    globalSave.hotkeys[key as hotkeysList] = [];
+                }
+            }
         } catch (error) {
             Notify('Global settings failed to parse, default ones will be used instead');
             console.log(`(Full parse error) ${error}`);
         }
-        (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0];
-        (getId('thousandSeparator') as HTMLInputElement).value = globalSave.format[1];
+        (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0].replace(' ', ' ');
+        (getId('thousandSeparator') as HTMLInputElement).value = globalSave.format[1].replace(' ', ' ');
         (getId('mainInterval') as HTMLInputElement).value = `${globalSave.intervals.main}`;
         (getId('numbersInterval') as HTMLInputElement).value = `${globalSave.intervals.numbers}`;
         (getId('visualInterval') as HTMLInputElement).value = `${globalSave.intervals.visual / 1000}`;
@@ -527,9 +554,6 @@ try { //Start everything
                 effectID.textContent = ` (${effectID.textContent})`;
                 effectID.classList.remove('greenText');
             }
-            for (let i = 0; i < playerStart.strange.length; i++) {
-                getId(`strange${i}`).tabIndex = 0;
-            }
 
             const SRMainDiv = document.createElement('article');
             SRMainDiv.innerHTML = '<h5>Information for Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
@@ -584,7 +608,7 @@ try { //Start everything
             pauseButton.classList.add('hollowButton');
             pauseButton.textContent = 'Pause';
             pauseButton.type = 'button';
-            getId('numbersLi').append(pauseButton);
+            getId('mainLi').append(pauseButton);
             pauseButton.addEventListener('click', pauseGame);
         }
     }
@@ -599,6 +623,7 @@ try { //Start everything
     }
 
     /* Global */
+    assignHotkeys();
     const MD = globalSave.MDSettings[0];
     const SR = globalSave.SRSettings[0];
     const PC = !MD || globalSave.MDSettings[1];
@@ -628,7 +653,14 @@ try { //Start everything
     for (let i = 0; i < globalSaveStart.toggles.length; i++) {
         getId(`globalToggle${i}`).addEventListener('click', () => {
             toggleSpecial(i, 'global', true, i === 1);
-            if (i === 2) {
+            if (i === 0) {
+                assignHotkeys();
+                const index = globalSave.toggles[0] ? 0 : 1;
+                for (const key in globalSaveStart.hotkeys) {
+                    const hotkeyTest = globalSave.hotkeys[key as hotkeysList][index];
+                    getQuery(`#${key}Hotkey > button`).textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
+                }
+            } else if (i === 2) {
                 document.body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
             }
         });
@@ -1002,10 +1034,8 @@ try { //Start everything
         player.stage.input[1] = Math.max(Number(input.value), 0);
         input.value = format(player.stage.input[1], { type: 'input' });
     });
-    getId('versionButton').addEventListener('click', () => {
-        buildVersionInfo();
-        getId('versionInfo').style.display = '';
-    });
+    getId('versionButton').addEventListener('click', getVersionInfoHTML);
+    getId('hotkeysButton').addEventListener('click', getHotkeysHTML);
     getId('save').addEventListener('click', () => { void saveGame(); });
     getId('file').addEventListener('change', async() => {
         const id = getId('file') as HTMLInputElement;
@@ -1024,13 +1054,12 @@ try { //Start everything
     }
     getId('saveFileNameInput').addEventListener('change', () => {
         const input = getId('saveFileNameInput') as HTMLInputElement;
-        const testValue = input.value; //.replaceAll(/[\\/:*?"<>|]/g, '_');
+        const testValue = input.value;
         if (testValue.length < 1) { return void (input.value = playerStart.fileName); }
 
         try {
-            btoa(testValue); //Test for any illegal characters
+            btoa(String.fromCharCode(...new TextEncoder().encode(testValue))); //Test for any illegal characters
             player.fileName = testValue;
-            //input.value = testValue;
         } catch (error) {
             void Alert(`Save file name is not allowed\n${error}`);
         }
@@ -1074,6 +1103,7 @@ try { //Start everything
     getId('MDToggle0').addEventListener('click', () => toggleSpecial(0, 'mobile', true, true));
     getId('SRToggle0').addEventListener('click', () => toggleSpecial(0, 'reader', true, true));
     getId('reviewEvents').addEventListener('click', replayEvent);
+    getId('showHints').addEventListener('click', () => Notify('Not implemented'));
     getId('customFontSize').addEventListener('change', () => changeFontSize());
 
     getId('stageHistorySave').addEventListener('change', () => {
@@ -1138,6 +1168,7 @@ try { //Start everything
         global.paused = false;
         changeIntervals();
     }
+    global.hotkeys.disabled = false;
     getId('body').style.display = '';
     getId('loading').style.display = 'none';
     document.title = `Fundamental ${playerStart.version}`;

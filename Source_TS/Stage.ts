@@ -1940,7 +1940,7 @@ const calculateMassGain = (): number => {
     return massGain;
 };
 
-export const assignNewMass = () => {
+const assignNewMass = () => {
     global.collapseInfo.newMass = !player.inflation.vacuum ? calculateMassGain() :
         Math.min(new Overlimit(player.buildings[1][0].current).multiply('8.96499278339628e-67').toNumber(), global.inflationInfo.massCap); //1.78266192e-33 / 1.98847e33
 };
@@ -1955,6 +1955,7 @@ const assignNewRemnants = () => {
 
 export const collapseResetCheck = (remnants = false): boolean => {
     assignNewRemnants(); //Also visually updates numbers
+    assignNewMass(); //Required for Milestones
     if (player.upgrades[4][0] < 1) { return false; }
     const info = global.collapseInfo;
     const level = player.strangeness[4][4];
@@ -1966,8 +1967,8 @@ export const collapseResetCheck = (remnants = false): boolean => {
             info.starCheck[0] = 0;
             info.starCheck[1] = 0;
             info.starCheck[2] = 0;
+            assignNewMass();
         } else if (!player.toggles.auto[4] || (level < 1 && (player.inflation.vacuum ? player.researchesAuto[2] < 4 : (player.researchesAuto[2] < 1 || player.stage.current < 4)))) { return false; }
-        assignNewMass();
 
         if (player.strangeness[5][4] >= 1 && player.toggles.buildings[5][3] && player.ASR[5] >= 3 && player.researchesExtra[5][0] >= 1 && calculateBuildingsCost(3, 5).lessOrEqual(info.newMass)) {
             collapseReset();
@@ -1981,14 +1982,14 @@ export const collapseResetCheck = (remnants = false): boolean => {
         if (massBoost >= player.collapse.input[0]) {
             collapseReset();
             return true;
-        }
+        } else if (level >= 2) { return false; }
         const calculateStar = calculateEffects.star;
-        if (level >= 2 || massBoost * (calculateStar[0](true) / calculateStar[0]()) * (calculateStar[1](true) / calculateStar[1]()) * (calculateStar[2](true) / calculateStar[2]()) < player.collapse.input[0]) { return false; }
+        const starProd = global.buildingsInfo.producing[4];
+        const restProd = new Overlimit(starProd[1]).plus(starProd[3], starProd[4], starProd[5]);
+        if (massBoost * new Overlimit(starProd[2]).multiply(calculateStar[0](true) / calculateStar[0]()).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN('1').toNumber() * (calculateStar[1](true) / calculateStar[1]()) * (calculateStar[2](true) / calculateStar[2]()) < player.collapse.input[0]) { return false; }
         collapseReset();
         return true;
     }
-
-    assignNewMass();
     return info.newMass > player.collapse.mass || (level < 2 && (info.starCheck[0] > 0 || info.starCheck[1] > 0 || info.starCheck[2] > 0)) || player.elements.includes(0.5, 1);
 };
 export const collapseResetUser = async() => {
@@ -2060,7 +2061,6 @@ const collapseReset = (noReset = false) => {
         calculateMaxLevel(0, 4, 'researches');
         calculateMaxLevel(1, 4, 'researches');
     }
-    awardMilestone(1, 4);
     awardVoidReward(4);
 };
 

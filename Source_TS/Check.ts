@@ -229,7 +229,7 @@ export const milestoneGetValue = (index: number, stageIndex: number): number | O
         if (index === 1) { return player.buildings[3][4].true; }
     } else if (stageIndex === 4) {
         if (index === 0) { return player.buildings[4][0].total; }
-        if (index === 1) { return player.collapse.mass; }
+        if (index === 1) { return global.collapseInfo.newMass; }
     } else if (stageIndex === 5) {
         if (index === 0) { return global.collapseInfo.trueStars; }
         if (index === 1) { return player.buildings[5][3].true; }

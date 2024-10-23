@@ -1,6 +1,5 @@
 import Overlimit from './Limit';
 import { getId } from './Main';
-import { specialHTML } from './Special';
 import { assignStrangeInfo, calculateMaxLevel, assignMilestoneInformation, assignPuddles, toggleConfirm, toggleSwap, calculateEffects, getDischargeScale, assignBuildingInformation, assignMaxRank, assignTrueEnergy, calculateResearchCost } from './Stage';
 import type { globalType, playerType } from './Types';
 import { format, visualUpdateResearches } from './Update';
@@ -313,6 +312,7 @@ export const global: globalType = { //For information that doesn't need to be sa
     paused: true,
     footer: true,
     hotkeys: {
+        disabled: true,
         shift: false,
         ctrl: false
     },
@@ -1273,7 +1273,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             ],
             needText: [
                 () => `Produce at least ${format(global.milestonesInfo[4].need[0])} Elements this reset.`,
-                () => `Collapse to ${format(global.milestonesInfo[4].need[1])} Solar mass or more.`
+                () => `Have Solar mass after Collapse reach ${format(global.milestonesInfo[4].need[1])} or more.`
             ],
             rewardText: [
                 () => "New Intergalactic themed Strangeness, Milestone and second level of 'Element automatization'.",
@@ -1677,7 +1677,9 @@ export const updatePlayer = (load: playerType): string => {
         for (let i = load.toggles.buildings[s].length; i < playerStart.toggles.buildings[s].length; i++) {
             load.toggles.buildings[s][i] = false;
         }
-        if (isNaN(load.toggles.shop.wait[s])) { load.toggles.shop.wait[s] = 2; }
+        if (isNaN(load.toggles.shop.wait[s])) {
+            load.toggles.shop.wait[s] = 2;
+        }
 
         for (let i = load.upgrades[s].length; i < playerStart.upgrades[s].length; i++) {
             load.upgrades[s][i] = 0;
@@ -1731,6 +1733,7 @@ export const updatePlayer = (load: playerType): string => {
     }
 
     /* Restore data post JSON parse */
+    load.fileName = new TextDecoder().decode(Uint8Array.from(load.fileName, (c) => c.codePointAt(0) as number));
     load.vaporization.clouds = new Overlimit(load.vaporization.clouds);
     load.vaporization.cloudsMax = new Overlimit(load.vaporization.cloudsMax);
     for (let s = 1; s < load.buildings.length; s++) {
@@ -1866,39 +1869,4 @@ export const updatePlayer = (load: playerType): string => {
     (getId('buyAnyInput') as HTMLInputElement).value = format(player.toggles.shop.input, { type: 'input' });
 
     return oldVersion;
-};
-
-export const buildVersionInfo = () => {
-    if (getId('closeVersionInfo', true) !== null) { return; }
-
-    getId('versionInfo').innerHTML = `<div>
-        <div id="versionText">
-            <label>v0.2.1</label><p>- Missing</p>
-            <label>v0.2.0</label><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
-            <label>v0.1.9</label><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>
-            <label>v0.1.8</label><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Added copy to clipboard, load from string save file options</p>
-            <label>v0.1.7</label><p>- New content (Void)\n- Further balance changes</p>
-            <label>v0.1.6</label><p>- Massive rebalance and reworks for all Stages</p>
-            <label>v0.1.5</label><p>- True Vacuum minor balance\n- Images no longer unload\n- Screen reader support reworked</p>
-            <label>v0.1.4</label><p>- Custom scrolls\n- Notifications</p>
-            <label>v0.1.3</label><p>- True Vacuum balance changes\n- Submerged Stage minor balance\n- Replay event button\n\n- History for Stage resets</p>
-            <label>v0.1.2</label><p>- New content (Vacuum)\n- Offline time reworked\n- Added version window (removed change log on game load)\n- Permanently removed text movement</p>
-            <label>v0.1.1</label><p>- More balance changes for late game</p>
-            <label>v0.1.0</label><p>- New content (Intergalactic)\n- Balance changes for late game</p>
-            <label>v0.0.9</label><p>- New content (Milestones)\n- More Interstellar and late game balance</p>
-            <label>v0.0.8</label><p>- Minor speed up to all Stages past Microworld</p>
-            <label>v0.0.7</label><p>- New content (Strangeness)\n- Microworld Stage rework\n\n- Added stats for Save file name</p>
-            <label>v0.0.6</label><p>- Added hotkeys list\n\n- Option to remove text movement\n- Ability to rename save file</p>
-            <label>v0.0.5</label><p>- New content (Interstellar)\n- Basic loading screen\n\n- Added hotkeys</p>
-            <label>v0.0.4</label><p>- Speed up to all Stages\n- Added events\n\n- Added numbers format</p>
-            <label>v0.0.3</label><p>- New content (Accretion)\n- Submerged Stage extended\n- Offline time calculated better</p>
-            <label>v0.0.2</label><p>- Stats subtab</p>
-            <label>v0.0.1</label><p>- Submerged Stage rework\n- Added change log on game load\n\n- Mobile device support</p>
-            <label>v0.0.0</label><p>- First published version\n\n- Submerged Stage placeholder</p>
-        </div>
-        <button type="button" id="closeVersionInfo">Close</button>
-    </div>`;
-
-    specialHTML.styleSheet.textContent += '#versionInfo > div { display: flex; flex-direction: column; justify-content: space-between; align-items: center; width: clamp(42vw, 36em, 80vw); height: clamp(26vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; } #versionInfo button { flex-shrink: 0; width: 6em; border-radius: 4px; font-size: 0.92em; } #versionText { width: 100%; overflow-y: auto; } #versionText label { font-size: 1.18em; } #versionText p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; } #versionText p:last-of-type { margin-bottom: 0; }';
-    getId('closeVersionInfo').addEventListener('click', () => { getId('versionInfo').style.display = 'none'; });
 };
