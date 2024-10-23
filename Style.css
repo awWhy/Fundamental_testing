@@ -206,7 +206,7 @@ h1, h2, h3, h4, h5, h6 {
 
 #loading > p { padding: 0.5em 2vw; }
 
-#loading, #alertMain, #offlineMain, #versionInfo {
+#loading, #alertMain, #offlineMain, #bigWindow {
     position: fixed;
     width: 100%;
     height: 100%;
@@ -218,7 +218,7 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
 }
 
-#alertMain, #offlineMain, #versionInfo {
+#alertMain, #offlineMain, #bigWindow {
     z-index: 10;
     background-color: #00000050;
 }
@@ -1007,8 +1007,8 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #logoLinks {
     display: flex;
-    align-items: end;
     column-gap: 0.6em;
+    align-self: end;
 }
 
 #logoLinks > * {
@@ -1031,6 +1031,11 @@ input:-webkit-autofill { /* Chrome related pain */
     object-fit: scale-down;
     height: 25px;
     width: initial;
+}
+
+#hotkeysButton img {
+    height: 19px;
+    margin: 3px 0;
 }
 
 #logoLinks > *:hover, #logoLinks > *:hover img { background-color: var(--hollow-hover); }
@@ -1137,16 +1142,6 @@ li .hollowButton {
     text-align: center;
     gap: 0.3em;
 }
-
-.hotkeysGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    text-align: center;
-    gap: 0.3em;
-}
-
-#makeAllHotkey,
-#allStructuresHotkey { grid-column: 1 / 3; }
 
 #autoTogglesUpgrades {
     display: flex;
@@ -1539,6 +1534,7 @@ li .hollowButton {
         margin-bottom: -0.3em;
     }
 
+    #logoLinks { align-self: unset; }
     #themeArea > div > div { width: 80vw; }
 
     #fakeFooter { height: calc(32px + min(3.9vh, 2.4em) + 9.6744em + 3.6vw); }
