@@ -3,7 +3,7 @@ import { checkTab } from './Check';
 import { switchTab } from './Update';
 import { buyBuilding, collapseResetUser, dischargeResetUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGame } from './Main';
-import { globalSave } from './Special';
+import { globalSave, specialHTML } from './Special';
 import type { hotkeysList } from './Types';
 
 export const hotkeys = {} as Record<string, hotkeysList>;
@@ -36,7 +36,31 @@ const hotkeyFunction = {
         if (event.repeat) { return; }
         void mergeResetUser();
     },
-    universe: () => buyBuilding(1, 6)
+    universe: () => buyBuilding(1, 6),
+    tabRight: (event) => {
+        if (event.repeat) { return; }
+        changeTab('Right');
+    },
+    tabLeft: (event) => {
+        if (event.repeat) { return; }
+        changeTab('Left');
+    },
+    subtabUp: (event) => {
+        if (event.repeat) { return; }
+        changeSubtab('Up');
+    },
+    subtabDown: (event) => {
+        if (event.repeat) { return; }
+        changeSubtab('Down');
+    },
+    stageRight: (event) => {
+        if (event.repeat) { return; }
+        changeStage('Right');
+    },
+    stageLeft: (event) => {
+        if (event.repeat) { return; }
+        changeStage('Left');
+    }
 } as Record<hotkeysList, (event: KeyboardEvent) => void>;
 
 /** Will remove identical hotkeys from globalSave */
@@ -73,15 +97,21 @@ export const detectHotkey = (check: KeyboardEvent) => {
     const { key, code } = check;
     let { shiftKey } = check;
 
-    //Can be undefined on Safari
     if (shiftKey) { global.hotkeys.shift = true; }
     if (check.ctrlKey) { global.hotkeys.ctrl = true; }
 
-    const numberKey = Number(code.slice(-1));
-    if (!isNaN(numberKey)) {
-        if (check.ctrlKey || check.altKey) { return; }
+    if (code === 'Escape') {
+        if (check.metaKey || check.ctrlKey || shiftKey || check.altKey ||
+            specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
+        const notification = specialHTML.notifications[0];
+        if (notification !== undefined) { notification[1](true); }
+        return;
+    }
+
+    const numberKey = Number(code.replace('Digit', '').replace('Numpad', ''));
+    if (!isNaN(numberKey) && code !== '') {
+        if (check.metaKey || check.ctrlKey || check.altKey) { return; }
         if (isNaN(Number(key))) {
-            if (code === '' || code[0] === 'F') { return; }
             if (!shiftKey) { //Numpad
                 shiftKey = true;
                 check.preventDefault();
@@ -91,76 +121,83 @@ export const detectHotkey = (check: KeyboardEvent) => {
         if (shiftKey) {
             if (check.repeat) { return; }
             toggleSwap(numberKey, 'buildings', true);
-        } else { buyBuilding(numberKey); }
-    } else if (key.length === 1) {
-        let name = check.ctrlKey ? 'Ctrl ' : '';
+        } else if (numberKey !== 0) {
+            buyBuilding(numberKey);
+        } else { buyAll(); }
+    } else {
+        let name = check.metaKey ? 'Meta ' : '';
+        if (check.ctrlKey) { name += 'Ctrl '; }
         if (shiftKey) { name += 'Shift '; }
         if (check.altKey) { name += 'Alt '; }
-        name += globalSave.toggles[0] ? key.toUpperCase() : code.replace('Key', '');
+        name += globalSave.toggles[0] ?
+            (key.length === 1 ? key.toUpperCase() : key.replace('Arrow', 'Arrow ')) :
+            (key.length === 1 ? code.replace('Key', '') : code.replace('Arrow', 'Arrow '));
         const functionTest = hotkeyFunction[hotkeys[name]];
         if (functionTest !== undefined) {
             functionTest(check);
             check.preventDefault();
         }
-    } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
-        if (check.repeat || check.ctrlKey || check.altKey) { return; }
-        if (shiftKey) {
-            const activeAll = global.stageInfo.activeAll;
-            if (activeAll.length === 1) { return; }
-            let index = activeAll.indexOf(player.stage.active);
+    }
+};
 
-            if (key === 'ArrowLeft') {
-                if (index <= 0) {
-                    index = activeAll.length - 1;
-                } else { index--; }
-                switchStage(activeAll[index]);
-            } else {
-                if (index >= activeAll.length - 1) {
-                    index = 0;
-                } else { index++; }
-                switchStage(activeAll[index]);
-            }
-        } else {
-            const tabs = global.tabList.tabs;
-            let index = tabs.indexOf(global.tab);
+const changeTab = (direction: 'Left' | 'Right') => {
+    const tabs = global.tabList.tabs;
+    let index = tabs.indexOf(global.tab);
 
-            if (key === 'ArrowLeft') {
-                do {
-                    if (index <= 0) {
-                        index = tabs.length - 1;
-                    } else { index--; }
-                } while (!checkTab(tabs[index]));
-                switchTab(tabs[index]);
-            } else {
-                do {
-                    if (index >= tabs.length - 1) {
-                        index = 0;
-                    } else { index++; }
-                } while (!checkTab(tabs[index]));
-                switchTab(tabs[index]);
-            }
-        }
-    } else if (key === 'ArrowDown' || key === 'ArrowUp') {
-        if (shiftKey || check.repeat) { return; }
-        const tab = global.tab;
-        const subtabs = global.tabList[`${tab}Subtabs`] as string[];
-        if (subtabs.length < 2) { return; } //To remove never[]
-        let index = subtabs.indexOf(global.subtab[`${tab}Current`]);
+    if (direction === 'Left') {
+        do {
+            if (index <= 0) {
+                index = tabs.length - 1;
+            } else { index--; }
+        } while (!checkTab(tabs[index]));
+        switchTab(tabs[index]);
+    } else {
+        do {
+            if (index >= tabs.length - 1) {
+                index = 0;
+            } else { index++; }
+        } while (!checkTab(tabs[index]));
+        switchTab(tabs[index]);
+    }
+};
 
-        if (key === 'ArrowDown') {
-            do {
-                if (index <= 0) {
-                    index = subtabs.length - 1;
-                } else { index--; }
-            } while (!checkTab(tab, subtabs[index]));
-            switchTab(tab, subtabs[index]);
-        } else {
-            do {
-                if (index >= subtabs.length - 1) {
-                    index = 0;
-                } else { index++; }
-            } while (!checkTab(tab, subtabs[index]));
-            switchTab(tab, subtabs[index]);
-        }
+const changeSubtab = (direction: 'Down' | 'Up') => {
+    const tab = global.tab;
+    const subtabs = global.tabList[`${tab}Subtabs`] as string[];
+    if (subtabs.length < 2) { return; } //To remove never[]
+    let index = subtabs.indexOf(global.subtab[`${tab}Current`]);
+
+    if (direction === 'Down') {
+        do {
+            if (index <= 0) {
+                index = subtabs.length - 1;
+            } else { index--; }
+        } while (!checkTab(tab, subtabs[index]));
+        switchTab(tab, subtabs[index]);
+    } else {
+        do {
+            if (index >= subtabs.length - 1) {
+                index = 0;
+            } else { index++; }
+        } while (!checkTab(tab, subtabs[index]));
+        switchTab(tab, subtabs[index]);
+    }
+};
+
+const changeStage = (direction: 'Left' | 'Right') => {
+    const activeAll = global.stageInfo.activeAll;
+    if (activeAll.length === 1) { return; }
+    let index = activeAll.indexOf(player.stage.active);
+
+    if (direction === 'Left') {
+        if (index <= 0) {
+            index = activeAll.length - 1;
+        } else { index--; }
+        switchStage(activeAll[index]);
+    } else {
+        if (index >= activeAll.length - 1) {
+            index = 0;
+        } else { index++; }
+        switchStage(activeAll[index]);
     }
 };

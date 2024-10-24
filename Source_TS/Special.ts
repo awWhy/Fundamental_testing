@@ -22,7 +22,13 @@ export const globalSave: globalSaveType = {
         pause: ['P', 'P'],
         toggleAll: ['Shift A', 'Shift A'],
         merge: ['Shift M', 'Shift M'],
-        universe: ['Shift U', 'Shift U']
+        universe: ['Shift U', 'Shift U'],
+        tabRight: ['Arrow Right', 'Arrow Right'],
+        tabLeft: ['Arrow Left', 'Arrow Left'],
+        subtabUp: ['Arrow Up', 'Arrow Up'],
+        subtabDown: ['Arrow Down', 'Arrow Down'],
+        stageRight: ['Shift Arrow Right', 'Shift Arrow Right'],
+        stageLeft: ['Shift Arrow Left', 'Shift Arrow Left']
     },
     toggles: [false, false, false],
     //Hotkeys type[0]; Elements as tab[1]; Allow text selection[2]
@@ -262,8 +268,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         classMap: new Map<string, HTMLCollectionOf<HTMLElement>>(),
         queryMap: new Map<string, HTMLElement>()
     },
-    notifications: [] as Array<[string, () => void]>,
-    alert: [null, null] as [number | null, (() => void) | null],
+    notifications: [] as Array<[string, (instantClose?: boolean) => void]>, //[text, true ? incrementFunc : closeFunc]
+    alert: [null, null] as [number | null, (() => void) | null], //[priority, closeFunc]
+    bigWindow: null as string | null,
     styleSheet: document.createElement('style') //Secondary
 };
 
@@ -684,7 +691,6 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
 };
 
 export const Notify = (text: string) => {
-    /* [0] is for identification; [1] is for html manipulation */
     const { notifications } = specialHTML;
 
     let index;
@@ -706,7 +712,8 @@ export const Notify = (text: string) => {
         if (globalSave.SRSettings[0]) { html.role = 'alert'; }
         getId('notifications').append(html);
 
-        const pointer = notifications[notifications.push([text, () => {
+        const pointer = notifications[notifications.push([text, (instantClose = false) => {
+            if (instantClose) { return remove(); }
             html.textContent = `${text} | x${++count}`;
             clearTimeout(timeout);
             timeout = setTimeout(remove, 7200);
@@ -872,14 +879,43 @@ export const playEvent = (event: number, index = null as number | null) => {
     }
 };
 
+export const showHints = async() => {
+    let mainText = "These hints can explain some parts of the game, write hint of interest into the input bellow\n'Safe reset'";
+    if (player.stage.true >= 5) {
+        mainText += ", 'Intergalactic Stage', 'Export reward'";
+    }
+    if (player.stage.true >= 6) {
+        if (player.stage.true >= 7 || player.stage.resets >= 1 || player.researchesExtra[1][2] >= 2) {
+            mainText += ", 'Submerged Stage'";
+        }
+    }
+    const hint = await Prompt(mainText);
+    if (hint === null || hint === '') { return; }
+
+    let hintText = `Hint about '${hint}' doesn't exist`;
+    const lower = hint.replaceAll(' ', '').toLowerCase();
+    if (lower === 'safereset') {
+        hintText = "'Safe' setting for confirmation toggles causes warning to pop up if game considers action to be unwanted. After progressing further, some of them might start getting in a way";
+    } else if (lower === 'exportreward') {
+        hintText = `Export reward is based on highest Stage reset reward, after collecting it timer will reset to 0 and value will decrease by collected amount\nCurrent value for the Strange quarks is ${format(player.time.export[1])} +1${player.strangeness[5][8] >= 1 || player.inflation.tree[3] >= 1 ? `, Strangelets is ${format(player.time.export[2])}` : ''}`;
+    } else if (lower === 'intergalacticstage') {
+        hintText = 'Intergalactic Stage is a direct continuation of Interstellar Stage. Structures for it are unlocked by completing Milestones';
+    } else if (lower === 'submergedstage') {
+        hintText = 'Submerged Stage in true Vacuum acts like a bonus Stage, its not required for progression, but it will speed it up. Because of it you will not be able to get far into until enough Strangeness is created';
+    }
+
+    if (await Confirm(`${hintText}\nView another one?`)) { void showHints(); }
+};
+
 const buildBigWindow = () => {
     if (getId('closeBigWindow', true) !== null) { return; }
     getId('bigWindow').innerHTML = '<div role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></div>';
-    specialHTML.styleSheet.textContent += '#bigWindow > div { display: flex; flex-direction: column; align-items: center; width: clamp(42vw, 36em, 80vw); height: clamp(26vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }';
-    specialHTML.styleSheet.textContent += '#bigWindow > div > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; margin-top: auto; } #bigWindow > div > div { width: 100%; overflow-y: auto; }';
+    specialHTML.styleSheet.textContent += '#bigWindow > div { display: flex; flex-direction: column; align-items: center; width: clamp(20vw, 38em, 80vw); height: clamp(18vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }';
+    specialHTML.styleSheet.textContent += '#bigWindow > div > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; margin-top: auto; } #bigWindow > div > div { width: 100%; overflow-y: auto; overscroll-behavior-y: none; }';
 };
 
 export const getVersionInfoHTML = () => {
+    if (specialHTML.bigWindow !== null) { return; }
     buildBigWindow();
     if (getId('versionHTML', true) === null) {
         const mainHTML = document.createElement('div');
@@ -910,18 +946,21 @@ export const getVersionInfoHTML = () => {
         specialHTML.styleSheet.textContent += '#versionHTML label { font-size: 1.18em; } #versionHTML p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; } #versionHTML p:last-of-type { margin-bottom: 0; }';
     }
 
+    specialHTML.bigWindow = 'version';
+    const body = document.body;
+    const closeButton = getId('closeBigWindow');
+    const mainHTML = getId('versionHTML');
+    const windowHMTL = getId('bigWindow');
     const key = (event: KeyboardEvent) => {
+        if (specialHTML.alert[0] !== null) { return; }
         const code = event.code;
         if (code === 'Escape' || code === 'Enter' || code === 'Space') {
             event.preventDefault();
             close();
         }
     };
-    const body = document.body;
-    const closeButton = getId('closeBigWindow');
-    const mainHTML = getId('versionHTML');
-    const windowHMTL = getId('bigWindow');
     const close = () => {
+        specialHTML.bigWindow = null;
         windowHMTL.style.display = 'none';
         mainHTML.style.display = 'none';
         body.removeEventListener('keydown', key);
@@ -935,20 +974,25 @@ export const getVersionInfoHTML = () => {
 };
 
 export const getHotkeysHTML = () => {
+    if (specialHTML.bigWindow !== null) { return; }
     buildBigWindow();
     if (getId('hotkeysHTML', true) === null) {
         const mainHTML = document.createElement('div');
         mainHTML.innerHTML = `<p id="hotkeysMessage" class="mainText bigWord" aria-live="assertive">Some hotkeys can be changed by clicking on them</p>
-        <p class="mainText">Arrows left and right ‒ <span class="whiteText">change tab</span></p>
-        <p id="stageChangeHotkey" class="mainText">Shift arrows left and right ‒ <span class="whiteText">change active Stage</span></p>
-        <p class="mainText">Arrows up and down ‒ <span class="whiteText">change subtab</span></p>
+        <label id="tabRightHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change tab to the next one</span></label>
+        <label id="tabLeftHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change tab to the previous one</span></label>
+        <label id="subtabUpHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change subtab to the next one</span></label>
+        <label id="subtabDownHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change subtab to the previous one</span></label>
+        <label id="stageRightHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change active Stage to the next one</span></label>
+        <label id="stageLeftHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change active Stage to the previous one</span></label>
         <p class="mainText">Numbers ‒ <span class="whiteText">make a new Structure</span></p>
-        <p class="mainText">Shift numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
+        <label id="makeAllHotkey" class="mainText">0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">make all Structures</span></label>
+        <p class="mainText">Shift Numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
         <label id="toggleAllHotkey" class="mainText">Shift 0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">toggle all auto Structures</span></label>
-        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">confirm close Alert</span></p>
-        <p class="mainText">Escape ‒ <span class="whiteText">cancel close Alert</span></p>
+        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click on the selected HTML Element or confirm Alert</span></p>
+        <p class="mainText">Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
+        <p class="mainText">Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
         <div>
-            <label id="makeAllHotkey" class="redText"><button></button> ‒ <span class="whiteText">make all Structures</span></label>
             <label id="stageHotkey" class="stageText"><button></button> ‒ <span class="whiteText">Stage reset</span></label>
             <label id="dischargeHotkey" class="orangeText stage1Include"><button></button> ‒ <span class="whiteText">Discharge</span></label>
             <label id="vaporizationHotkey" class="grayText stage2Include"><button></button> ‒ <span class="whiteText">Vaporization</span></label>
@@ -968,7 +1012,7 @@ export const getHotkeysHTML = () => {
         toggle.className = 'specialToggle';
         toggle.style.display = '';
         getId('hotkeysToggleLabel').append(toggle);
-        specialHTML.styleSheet.textContent += '#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; } #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; } #hotkeysHTML > div label { min-width: max-content; } #makeAllHotkey { grid-column: 1 / 3; }';
+        specialHTML.styleSheet.textContent += '#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; } #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; } #hotkeysHTML > div label { min-width: max-content; }';
         specialHTML.styleSheet.textContent += '#hotkeysHTML button:not(.specialToggle) { width: max-content; color: inherit; background-color: unset; border-width: 1px; border-color: inherit; border-right: none; border-left: none; border-top: none; font-size: inherit; height: unset; }';
 
         const changeHotkey = async(disableFirstUp = false): Promise<string[] | null> => {
@@ -986,16 +1030,19 @@ export const getHotkeysHTML = () => {
                 };
                 const detect = async(event: KeyboardEvent) => {
                     if (disableFirstUp) { return void (disableFirstUp = false); }
-                    const code = event.code;
+                    const { key, code } = event;
                     if (code === 'Tab' || code === 'Escape') { return; }
-                    let prefix = event.ctrlKey ? 'Ctrl ' : '';
+                    let prefix = event.metaKey ? 'Meta ' : '';
+                    if (event.ctrlKey) { prefix += 'Ctrl '; }
                     if (event.shiftKey) { prefix += 'Shift '; }
                     if (event.altKey) { prefix += 'Alt '; }
-                    if (!isNaN(Number(code.slice(-1))) || event.key.length !== 1 || code === 'Space') {
-                        getId('hotkeysMessage').textContent = `Value '${prefix}${globalSave.toggles[0] ? event.key : code}' for hotkeys isn't allowed`;
+                    if ((!isNaN(Number(code.replace('Digit', '').replace('Numpad', ''))) && code !== '') ||
+                        key === 'Meta' || key === 'Control' || key === 'Shift' || key === 'Alt' || code === 'Enter' || code === 'Space') {
+                        getId('hotkeysMessage').textContent = `Value '${prefix}${globalSave.toggles[0] ? key : code}' for hotkeys isn't allowed`;
                         return;
                     }
-                    result = [`${prefix}${event.key.toUpperCase()}`, `${prefix}${code.replace('Key', '')}`];
+                    result = [`${prefix}${key.length === 1 ? key.toUpperCase() : key.replace('Arrow', 'Arrow ')}`,
+                        `${prefix}${key.length === 1 ? code.replace('Key', '') : code.replace('Arrow', 'Arrow ')}`];
                     finish();
                 };
                 const finish = () => {
@@ -1046,19 +1093,21 @@ export const getHotkeysHTML = () => {
         visualTrueStageUnlocks();
     }
 
+    specialHTML.bigWindow = 'hotkeys';
     const body = document.body;
     const closeButton = getId('closeBigWindow');
     const mainHTML = getId('hotkeysHTML');
     const windowHMTL = getId('bigWindow');
     const key = (event: KeyboardEvent) => {
-        if (global.hotkeys.disabled) { return; }
+        if (specialHTML.alert[0] !== null) { return; }
         const code = event.code;
-        if (code === 'Escape' || ((code === 'Enter' || code === 'Space') && document.activeElement === closeButton)) {
+        if ((!global.hotkeys.disabled && code === 'Escape') || ((code === 'Enter' || code === 'Space') && document.activeElement === closeButton)) {
             event.preventDefault();
             close();
         }
     };
     const close = () => {
+        specialHTML.bigWindow = null;
         windowHMTL.style.display = 'none';
         mainHTML.style.display = 'none';
         body.removeEventListener('keydown', key);
@@ -1069,5 +1118,5 @@ export const getHotkeysHTML = () => {
     getId('pauseHotkey').style.display = globalSave.developerMode ? '' : 'none';
     mainHTML.style.display = '';
     windowHMTL.style.display = '';
-    getQuery('#makeAllHotkey > button').focus();
+    getQuery('#tabRightHotkey > button').focus();
 };

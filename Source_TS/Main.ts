@@ -1,7 +1,7 @@
-import { player, global, playerStart, updatePlayer, deepClone } from './Player';
+import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation } from './Update';
 import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
-import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
+import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML, showHints } from './Special';
 import { assignHotkeys, detectHotkey } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
@@ -84,13 +84,13 @@ export const simulateOffline = async(offline: number, autoAccept = !globalSave.d
         global.paused = false;
         return changeIntervals();
     }
-    getId('offlineMain').style.display = '';
-    calculateOffline(offline);
 
     const accelerate = getId('offlineAccelerate');
     accelerate.addEventListener('click', offlineAccelerate);
     getId('offlineCancel').addEventListener('click', offlineCancel);
     document.body.addEventListener('keydown', offlineKey);
+    getId('offlineMain').style.display = '';
+    calculateOffline(offline);
     accelerate.focus();
 };
 const calculateOffline = (warpTime: number, start = warpTime) => {
@@ -124,16 +124,17 @@ const offlineEnd = () => {
     getId('offlineCancel').removeEventListener('click', offlineCancel);
     document.body.removeEventListener('keydown', offlineKey);
 };
-const offlineKey = (button: KeyboardEvent) => {
-    if (button.key === 'Escape') {
-        button.preventDefault();
+const offlineKey = (event: KeyboardEvent) => {
+    const key = event.key;
+    if (key === 'Escape') {
+        event.preventDefault();
         offlineCancel();
-    } else if (button.key === 'Enter' || button.key === ' ') {
+    } else if (key === 'Enter' || key === ' ') {
         if (document.activeElement === getId('offlineCancel')) { return; }
-        button.preventDefault();
+        event.preventDefault();
         offlineAccelerate();
-    } else if (button.key === 'Tab') {
-        button.preventDefault();
+    } else if (key === 'Tab') {
+        event.preventDefault();
         const cancel = getId('offlineCancel');
         (document.activeElement === cancel ? getId('offlineAccelerate') : cancel).focus();
     }
@@ -240,7 +241,7 @@ const awardExport = () => {
 };
 
 const saveConsole = async() => {
-    const value = await Prompt("Available options:\n'Copy' ‒ copy save file to clipboard\n'Delete' ‒ delete your save file\n'Reset' ‒ reset game global settings\n'Clear' ‒ clear all domain data\nOr insert save file string here to load it");
+    const value = await Prompt("Available options:\n'Copy' ‒ copy save file to clipboard\n'Delete' ‒ delete your save file\n'Reset' ‒ reset global settings\n'Clear' ‒ clear all domain data\nOr insert save file string here to load it");
     if (value === null || value === '') { return; }
     const lower = value.toLowerCase();
 
@@ -437,7 +438,7 @@ try { //Start everything
             }
             for (const key in globalSaveStart.hotkeys) {
                 if (globalSave.hotkeys[key as hotkeysList] === undefined) {
-                    globalSave.hotkeys[key as hotkeysList] = [];
+                    globalSave.hotkeys[key as hotkeysList] = cloneArray(globalSaveStart.hotkeys[key as hotkeysList]);
                 }
             }
         } catch (error) {
@@ -632,7 +633,7 @@ try { //Start everything
         if (global.hotkeys.shift && !event.shiftKey) { global.hotkeys.shift = false; }
         if (global.hotkeys.ctrl && !event.ctrlKey) { global.hotkeys.ctrl = false; }
     };
-    body.addEventListener('keyup', releaseHotkey);
+    body.addEventListener('keyup', releaseHotkey, { passive: true });
     body.addEventListener('contextmenu', (event) => {
         const activeType = (document.activeElement as HTMLInputElement)?.type;
         if (activeType !== 'text' && activeType !== 'number' && !globalSave.developerMode) { event.preventDefault(); }
@@ -641,12 +642,12 @@ try { //Start everything
         body.addEventListener('mouseup', (event) => {
             cancelRepeat();
             releaseHotkey(event);
-        });
-        body.addEventListener('mouseleave', cancelRepeat);
+        }, { passive: true });
+        body.addEventListener('mouseleave', cancelRepeat, { passive: true });
     }
     if (MD) {
-        body.addEventListener('touchend', cancelRepeat);
-        body.addEventListener('touchcancel', cancelRepeat);
+        body.addEventListener('touchend', cancelRepeat, { passive: true });
+        body.addEventListener('touchcancel', cancelRepeat, { passive: true });
     }
 
     /* Toggles */
@@ -1103,7 +1104,7 @@ try { //Start everything
     getId('MDToggle0').addEventListener('click', () => toggleSpecial(0, 'mobile', true, true));
     getId('SRToggle0').addEventListener('click', () => toggleSpecial(0, 'reader', true, true));
     getId('reviewEvents').addEventListener('click', replayEvent);
-    getId('showHints').addEventListener('click', () => Notify('Not implemented'));
+    getId('showHints').addEventListener('click', showHints);
     getId('customFontSize').addEventListener('change', () => changeFontSize());
 
     getId('stageHistorySave').addEventListener('change', () => {

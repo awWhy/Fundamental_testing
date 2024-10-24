@@ -1036,7 +1036,10 @@ export const visualTrueStageUnlocks = () => {
     getId('stageResets').style.display = highest >= 2 ? '' : 'none';
     getId('cosmonStat').style.display = highest >= 7 ? '' : 'none';
     getId('vacuumHistory').style.display = highest >= 7 ? '' : 'none';
-    if (hotkeyTest !== null) { getId('stageChangeHotkey').style.display = highest >= 5 ? '' : 'none'; }
+    if (hotkeyTest !== null) {
+        getId('stageRightHotkey').style.display = highest >= 5 ? '' : 'none';
+        getId('stageLeftHotkey').style.display = highest >= 5 ? '' : 'none';
+    }
     if (highest >= 2) {
         getId('resetStage').style.display = '';
         getId('toggleBuilding0').style.display = '';
