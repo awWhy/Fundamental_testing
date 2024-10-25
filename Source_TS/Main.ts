@@ -476,6 +476,7 @@ try { //Start everything
             (document.getElementById('MDMessage1') as HTMLElement).remove();
             specialHTML.styleSheet.textContent += 'input[type = "image"], img { -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu
             specialHTML.styleSheet.textContent += '#themeArea.windowOpen > div > div { display: flex; } #themeArea.windowOpen > div > button { clip-path: circle(0); }'; //More Safari junk to make windows work without focus
+            if (!globalSave.toggles[2]) { body.style.userSelect = 'none'; } //Safari doesn't support it, but I still need value
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
 
             const arrowStage = document.createElement('button');
@@ -646,6 +647,9 @@ try { //Start everything
         body.addEventListener('mouseleave', cancelRepeat, { passive: true });
     }
     if (MD) {
+        body.addEventListener('touchstart', (event) => {
+            if (document.body.style.userSelect === 'none') { event.preventDefault(); }
+        });
         body.addEventListener('touchend', cancelRepeat, { passive: true });
         body.addEventListener('touchcancel', cancelRepeat, { passive: true });
     }
