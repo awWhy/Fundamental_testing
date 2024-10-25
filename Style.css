@@ -50,7 +50,7 @@ html {
     --darkviolet-text: #8635eb;
     --red-text: #eb0000;
     --green-text: #00e900;
-    --yellow-text: #fafa00; /* Rename into select-text, if consistent yellow text will be added */
+    --yellow-text: #fafa00;
 
     --transition-all: 0s;
     --transition-buttons: 100ms;
@@ -119,6 +119,7 @@ body {
 /* Right now it works only with keyboard tab button */
 body.noFocusOutline button, body.noFocusOutline .noFocusOutline,
 body.noFocusOutline input:not(input[type = "text"], input[type = "number"]) { outline: none; }
+body.noTextSelection { user-select: none; }
 
 ::-webkit-scrollbar {
     width: 1.2vh;
