@@ -2,7 +2,7 @@ import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation } from './Update';
 import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML, showHints } from './Special';
-import { assignHotkeys, detectHotkey } from './Hotkeys';
+import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
@@ -157,7 +157,7 @@ export const changeIntervals = () => {
     intervalsId.autoSave = paused ? undefined : setInterval(saveGame, intervals.autoSave);
 };
 
-const saveGame = async(noSaving = false): Promise<string | null> => {
+const saveGame = (noSaving = false): string | null => {
     if (global.paused) {
         Notify('No saving while game is paused');
         return null;
@@ -207,12 +207,12 @@ const loadGame = (save: string) => {
         throw error;
     }
 };
-const exportFileGame = async() => {
+const exportFileGame = () => {
     if (player.stage.true >= 7 || player.stage.resets >= (player.inflation.vacuum ? 1 : 4)) {
         awardExport();
     }
 
-    const save = await saveGame(globalSave.developerMode);
+    const save = saveGame(globalSave.developerMode);
     if (save === null) { return; }
     const a = document.createElement('a');
     a.href = `data:text/plain,${save}`;
@@ -241,20 +241,25 @@ const awardExport = () => {
 };
 
 const saveConsole = async() => {
-    const value = await Prompt("Available options:\n'Copy' ‒ copy save file to clipboard\n'Delete' ‒ delete your save file\n'Reset' ‒ reset global settings\n'Clear' ‒ clear all domain data\nOr insert save file string here to load it");
+    let value = await Prompt("Available options:\n'Copy' ‒ copy save file to clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file string here to load it");
     if (value === null || value === '') { return; }
-    const lower = value.toLowerCase();
+    let lower = value.toLowerCase();
+    if (lower === 'global') {
+        value = await Prompt("Available options:\n'Reset' ‒ reset global settings\n'Copy' ‒ copy global settings to clipboard\nOr insert global settings string here to load it\n(this will overwrite current ones and require page reload)");
+        if (value === null || value === '') { return; }
+        lower = `global_${value.toLowerCase()}`;
+    }
 
-    if (lower === 'copy') {
-        const save = await saveGame(true);
+    if (lower === 'copy' || lower === 'global_copy') {
+        const save = lower === 'global_copy' ? saveGlobalSettings(true) : saveGame(true);
         if (save !== null) { void navigator.clipboard.writeText(save); }
-    } else if (lower === 'delete' || lower === 'reset' || lower === 'clear') {
+    } else if (lower === 'delete' || lower === 'clear' || lower === 'global_reset') {
         global.hotkeys.disabled = true;
         global.paused = true;
         changeIntervals();
         if (lower === 'delete') {
             localStorage.removeItem('testing_save');
-        } else if (lower === 'reset') {
+        } else if (lower === 'global_reset') {
             localStorage.removeItem('fundamentalSettings');
         } else { localStorage.clear(); }
         window.location.reload();
@@ -265,12 +270,23 @@ const saveConsole = async() => {
         saveGlobalSettings();
     } else if (lower === 'achievement') {
         Notify('Unlocked a new Achievement! (If there were any)');
-    } else if (lower === 'slow' || lower === 'free') {
+    } else if (lower === 'slow' || lower === 'free' || lower === 'boost') {
         Notify('Game speed was increased by 1x');
+    } else if (lower === 'secret' || lower === 'global_secret' || lower === 'secret_secret') {
+        Notify(`Found a ${lower === 'secret_secret' ? "ultra rare secret, but it doesn't proof anything" : `${lower === 'global_secret' ? 'global' : 'rare'} secret, don't share it with anybody`}`);
+    } else if (lower === 'secret_proof') {
+        Notify('Found a proof that you were looking for!');
     } else {
         if (value.length < 20) { return void Alert(`Input '${value}' doesn't match anything`); }
-        if (!await Confirm("Press 'Confirm' to load input as a save file\n(Input is too long to be displayed)")) { return; }
-        loadGame(value);
+        if (lower.includes('global_')) {
+            if (!await Confirm("Press 'Confirm' to load input as a new global settings, this will reload page\n(Input is too long to be displayed)")) { return; }
+            localStorage.setItem('fundamentalSettings', value[6] === '_' ? value.substring(7) : value);
+            window.location.reload();
+            void Alert('Awaiting game reload');
+        } else {
+            if (!await Confirm("Press 'Confirm' to load input as a save file\n(Input is too long to be displayed)")) { return; }
+            loadGame(value);
+        }
     }
 };
 
@@ -453,7 +469,7 @@ try { //Start everything
         (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
         for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'global'); }
         if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also sets breakpoints for screen size
-        if (globalSave.toggles[2]) { body.style.userSelect = ''; }
+        if (globalSave.toggles[2]) { body.classList.remove('noTextSelection'); }
         if (globalSave.toggles[1]) {
             const elementsArea = getId('upgradeSubtabElements');
             elementsArea.id = 'ElementsTab';
@@ -474,10 +490,10 @@ try { //Start everything
 
         if (globalSave.MDSettings[0]) {
             (document.getElementById('MDMessage1') as HTMLElement).remove();
-            specialHTML.styleSheet.textContent += 'input[type = "image"], img { -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu
+            specialHTML.styleSheet.textContent += 'body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #hideToggle { -webkit-user-select: none; -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu and text selection
             specialHTML.styleSheet.textContent += '#themeArea.windowOpen > div > div { display: flex; } #themeArea.windowOpen > div > button { clip-path: circle(0); }'; //More Safari junk to make windows work without focus
-            if (!globalSave.toggles[2]) { body.style.userSelect = 'none'; } //Safari doesn't support it, but I still need value
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
+            specialHTML.mobileDevice.dimensions = [document.documentElement.clientWidth, document.documentElement.clientHeight];
 
             const arrowStage = document.createElement('button');
             arrowStage.append(document.createElement('div'));
@@ -648,9 +664,12 @@ try { //Start everything
     }
     if (MD) {
         body.addEventListener('touchstart', (event) => {
-            if (document.body.style.userSelect === 'none') { event.preventDefault(); }
-        });
-        body.addEventListener('touchend', cancelRepeat, { passive: true });
+            specialHTML.mobileDevice.start = [event.touches[0].clientX, event.touches[0].clientY];
+        }, { passive: true });
+        body.addEventListener('touchend', (event) => {
+            cancelRepeat();
+            handleTouchHotkeys(event);
+        }, { passive: true });
         body.addEventListener('touchcancel', cancelRepeat, { passive: true });
     }
 
@@ -666,7 +685,7 @@ try { //Start everything
                     getQuery(`#${key}Hotkey > button`).textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
                 }
             } else if (i === 2) {
-                document.body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
+                body.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
             }
         });
     }
@@ -936,13 +955,11 @@ try { //Start everything
             getId(`${type}EffectsMain`).style.display = '';
             numbersUpdate();
         };
-        strange.addEventListener('click', openFunction);
+        const closeFunc = () => (getId(`${type}EffectsMain`).style.display = 'none');
+        strange.addEventListener('click', openFunction, { capture: true }); //Clicking on window does unnessary call, before closing
         if (SR) { strange.addEventListener('focus', openFunction); }
-        strange.addEventListener('blur', () => (getId(`${type}EffectsMain`).style.display = 'none'));
-        getId(`${type}EffectsMain`).addEventListener('click', (event: Event) => {
-            getId(`${type}EffectsMain`).style.display = 'none';
-            event.stopPropagation();
-        });
+        strange.addEventListener('blur', closeFunc);
+        getId(`${type}EffectsMain`).addEventListener('click', closeFunc);
     }
     for (let s = 1; s < global.strangenessInfo.length; s++) {
         if (MD) { getId(`strangenessPage${s}`).addEventListener('click', () => MDStrangenessPage(s)); }
@@ -1041,7 +1058,7 @@ try { //Start everything
     });
     getId('versionButton').addEventListener('click', getVersionInfoHTML);
     getId('hotkeysButton').addEventListener('click', getHotkeysHTML);
-    getId('save').addEventListener('click', () => { void saveGame(); });
+    getId('save').addEventListener('click', () => { saveGame(); });
     getId('file').addEventListener('change', async() => {
         const id = getId('file') as HTMLInputElement;
         loadGame(await (id.files as FileList)[0].text());

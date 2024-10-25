@@ -22,7 +22,7 @@ export const calculateEffects = {
         if (preons) { base *= 1.6; }
         return (base + 100) / 100;
     },
-    S1Research2: (): number => 20 + (player.strangeness[1][1] * (player.inflation.vacuum ? 1.5 : 1)),
+    S1Research2: (level = player.strangeness[1][1]): number => 20 + (level * (player.inflation.vacuum ? 1.5 : 1)),
     S1Research5: (): number => {
         const discharges = global.dischargeInfo.total;
         if (!player.inflation.vacuum) { return discharges > 5 ? discharges + 15 : discharges * 4; }

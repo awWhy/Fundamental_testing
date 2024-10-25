@@ -201,3 +201,21 @@ const changeStage = (direction: 'Left' | 'Right') => {
         switchStage(activeAll[index]);
     }
 };
+
+/* preventDefault should not be used here */
+export const handleTouchHotkeys = (event: TouchEvent) => {
+    const touches = event.changedTouches;
+    if (touches.length > 1) { return; }
+    const { mobileDevice } = specialHTML;
+    const change = [
+        (touches[0].clientX - mobileDevice.start[0]) / mobileDevice.dimensions[0],
+        (touches[0].clientY - mobileDevice.start[1]) / mobileDevice.dimensions[1]
+    ];
+
+    if (Math.abs(change[1]) > 0.2) {
+        if (Math.abs(change[1]) < 0.8 || Math.abs(change[0]) > 0.2) { return; }
+        changeSubtab(change[1] > 0 ? 'Down' : 'Up');
+        return;
+    } else if (Math.abs(change[0]) < 0.6) { return; }
+    changeTab(change[0] > 0 ? 'Right' : 'Left');
+};

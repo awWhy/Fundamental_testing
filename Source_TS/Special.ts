@@ -40,7 +40,7 @@ export const globalSave: globalSaveType = {
     developerMode: false
 };
 
-export const saveGlobalSettings = () => {
+export const saveGlobalSettings = (noSaving = false): string => {
     const hotkeysClone = deepClone(globalSave.hotkeys);
     const encoder = new TextEncoder();
     for (const key in hotkeysClone) {
@@ -51,7 +51,9 @@ export const saveGlobalSettings = () => {
     }
     const clone = { ...globalSave };
     clone.hotkeys = hotkeysClone;
-    localStorage.setItem('fundamentalSettings', btoa(JSON.stringify(clone)));
+    const save = btoa(JSON.stringify(clone));
+    if (!noSaving) { localStorage.setItem('fundamentalSettings', save); }
+    return save;
 };
 
 export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reader', change = false, reload = false) => {
@@ -262,6 +264,10 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Missing.png', 'stage6borderImage darkvioletText', 'Cosmon']
         ]
     ],
+    mobileDevice: {
+        dimensions: [0, 0], //[X, Y]
+        start: [0, 0] //All browsers that I tested didn't properly detected more than 1 touch
+    },
     cache: {
         imagesDiv: document.createElement('div'),
         idMap: new Map<string, HTMLElement>(),
@@ -490,11 +496,11 @@ export const switchTheme = () => {
             properties['--hollow-hover'] = '#490070';
             properties['--input-border'] = '#a50000';
             properties['--input-text'] = 'red';
-            properties['--button-text'] = '#efe0ff';
+            properties['--button-text'] = '#bfbdff';
             properties['--main-text'] = 'var(--darkviolet-text)';
+            properties['--white-text'] = '#aba8ff';
             properties['--gray-text'] = '#9b9b9b';
             properties['--darkviolet-text'] = '#8157ff';
-            properties['--white-text'] = '#f9f5ff';
             properties['--red-text'] = 'red';
             properties['--yellow-text'] = 'var(--green-text)';
     }
@@ -528,7 +534,7 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
         const blocker = getId('alertMain');
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
-        body.style.userSelect = '';
+        body.classList.remove('noTextSelection');
         const oldFocus = document.activeElement as HTMLElement | null;
         confirm.focus();
 
@@ -543,7 +549,7 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
             }
         };
         const close = () => {
-            body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
+            if (!globalSave.toggles[2]) { body.classList.add('noTextSelection'); }
             blocker.style.display = 'none';
             body.removeEventListener('keydown', key);
             confirm.removeEventListener('click', close);
@@ -577,7 +583,7 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
         cancel.style.display = '';
-        body.style.userSelect = '';
+        body.classList.remove('noTextSelection');
         const oldFocus = document.activeElement as HTMLElement | null;
         confirm.focus();
 
@@ -601,7 +607,7 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
             }
         };
         const close = () => {
-            body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
+            if (!globalSave.toggles[2]) { body.classList.add('noTextSelection'); }
             blocker.style.display = 'none';
             cancel.style.display = 'none';
             body.removeEventListener('keydown', key);
@@ -640,7 +646,7 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
         blocker.style.display = '';
         cancel.style.display = '';
         input.style.display = '';
-        body.style.userSelect = '';
+        body.classList.remove('noTextSelection');
         input.placeholder = placeholder;
         input.value = '';
         const oldFocus = document.activeElement as HTMLElement | null;
@@ -672,7 +678,7 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
             }
         };
         const close = () => {
-            body.style.userSelect = globalSave.toggles[2] ? '' : 'none';
+            if (!globalSave.toggles[2]) { body.classList.add('noTextSelection'); }
             blocker.style.display = 'none';
             cancel.style.display = 'none';
             input.style.display = 'none';
@@ -713,7 +719,7 @@ export const Notify = (text: string) => {
         getId('notifications').append(html);
 
         const pointer = notifications[notifications.push([text, (instantClose = false) => {
-            if (instantClose) { return remove(); }
+            if (instantClose) { return html.style.animation !== '' ? undefined : remove(); }
             html.textContent = `${text} | x${++count}`;
             clearTimeout(timeout);
             timeout = setTimeout(remove, 7200);
@@ -811,8 +817,7 @@ const adjustCSSRules = (initial: boolean) => {
 
 export const changeFormat = (point: boolean) => {
     const htmlInput = (point ? getId('decimalPoint') : getId('thousandSeparator')) as HTMLInputElement;
-    let value = htmlInput.value;
-    if (value === ' ') { value = ' '; } //No break space
+    let value = htmlInput.value.replace(' ', ' '); //No break space
     const allowed = ['.', '·', ',', ' ', '_', "'", '"', '`', '|'].includes(value);
     if (!allowed || globalSave.format[point ? 1 : 0] === value) {
         if (point && globalSave.format[1] === '.') {
@@ -985,13 +990,10 @@ export const getHotkeysHTML = () => {
         <label id="subtabDownHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change subtab to the previous one</span></label>
         <label id="stageRightHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change active Stage to the next one</span></label>
         <label id="stageLeftHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change active Stage to the previous one</span></label>
-        <p class="mainText">Numbers ‒ <span class="whiteText">make a new Structure</span></p>
+        <p class="mainText">Numbers ‒ <span class="whiteText">make a Structure</span></p>
         <label id="makeAllHotkey" class="mainText">0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">make all Structures</span></label>
         <p class="mainText">Shift Numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
         <label id="toggleAllHotkey" class="mainText">Shift 0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">toggle all auto Structures</span></label>
-        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click on the selected HTML Element or confirm Alert</span></p>
-        <p class="mainText">Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
-        <p class="mainText">Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
         <div>
             <label id="stageHotkey" class="stageText"><button></button> ‒ <span class="whiteText">Stage reset</span></label>
             <label id="dischargeHotkey" class="orangeText stage1Include"><button></button> ‒ <span class="whiteText">Discharge</span></label>
@@ -1003,6 +1005,9 @@ export const getHotkeysHTML = () => {
             <label id="universeHotkey" class="darkvioletText stage6Include"><button></button> ‒ <span class="whiteText">Universe</span></label>
             <label id="pauseHotkey" class="grayText"><button></button> ‒ <span class="whiteText">pause</span></label>
         </div>
+        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click on the selected HTML Element or confirm Alert</span></p>
+        <p class="mainText">Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
+        <p class="mainText">Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
         <p class="mainText">Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
         <label id="hotkeysToggleLabel" title="Turn ON, if using non QWERTY layout keyboard">Language dependant hotkeys </label>
         <button id="restoreHotkeys" type="button">Restore default hotkeys values</button>`;
@@ -1012,8 +1017,8 @@ export const getHotkeysHTML = () => {
         toggle.className = 'specialToggle';
         toggle.style.display = '';
         getId('hotkeysToggleLabel').append(toggle);
-        specialHTML.styleSheet.textContent += '#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; } #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; } #hotkeysHTML > div label { min-width: max-content; }';
-        specialHTML.styleSheet.textContent += '#hotkeysHTML button:not(.specialToggle) { width: max-content; color: inherit; background-color: unset; border-width: 1px; border-color: inherit; border-right: none; border-left: none; border-top: none; font-size: inherit; height: unset; }';
+        specialHTML.styleSheet.textContent += '#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; } #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; } #hotkeysHTML > div label { justify-self: center; width: max-content; }';
+        specialHTML.styleSheet.textContent += '#hotkeysHTML button:not(.specialToggle) { color: inherit; background-color: unset; border-width: 1px; border-color: inherit; border-right: none; border-left: none; border-top: none; font-size: inherit; height: unset; }';
 
         const changeHotkey = async(disableFirstUp = false): Promise<string[] | null> => {
             return await new Promise((resolve) => {
@@ -1048,14 +1053,14 @@ export const getHotkeysHTML = () => {
                 const finish = () => {
                     body.removeEventListener('keydown', prevent);
                     body.removeEventListener('keyup', detect);
-                    body.removeEventListener('click', finish);
+                    body.removeEventListener('click', finish, { capture: true });
                     global.hotkeys.disabled = false;
                     resolve(result);
                 };
                 global.hotkeys.disabled = true;
                 body.addEventListener('keydown', prevent);
                 body.addEventListener('keyup', detect);
-                body.addEventListener('click', finish);
+                body.addEventListener('click', finish, { capture: true });
             });
         };
         const index = globalSave.toggles[0] ? 0 : 1;
@@ -1065,17 +1070,19 @@ export const getHotkeysHTML = () => {
             button.textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
             button.type = 'button';
             button.addEventListener('click', async(event) => {
-                event.stopPropagation();
+                const button = getQuery(`#${key}Hotkey > button`);
+                button.style.borderBottomStyle = 'dashed';
                 const newHotkey = await changeHotkey(event.clientX <= 0); //Check if click was caused by pressing Enter
                 if (newHotkey !== null) {
                     const index = globalSave.toggles[0] ? 0 : 1;
                     const removed = removeHotkey(newHotkey[index]);
                     if (removed !== null && removed !== key) { getQuery(`#${removed}Hotkey > button`).textContent = 'None'; }
-                    getQuery(`#${key}Hotkey > button`).textContent = newHotkey[index];
+                    button.textContent = newHotkey[index];
                     globalSave.hotkeys[key as hotkeysList] = newHotkey;
                     assignHotkeys();
                     saveGlobalSettings();
                 }
+                button.style.borderBottomStyle = '';
                 getId('hotkeysMessage').textContent = 'Some hotkeys can be changed by clicking on them';
             });
         }
