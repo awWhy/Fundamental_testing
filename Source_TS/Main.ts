@@ -185,6 +185,7 @@ const saveGame = (noSaving = false): string | null => {
 };
 const loadGame = (save: string) => {
     if (global.paused) { return Notify('No loading while game is paused'); }
+    if (!global.paused) { return Notify('Importing is disabled, please change website to main from Stage tab'); } //Just to get around eslint errors
     global.hotkeys.disabled = true;
     global.paused = true;
     changeIntervals();
