@@ -137,12 +137,13 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
         case 'researchesAuto': {
             const autoStage = global.researchesAutoInfo.autoStage[upgrade][player.researchesAuto[upgrade]]; //Can be undefined
             if (!(autoStage === stageIndex || (autoStage === 4 && stageIndex === 5))) { return false; }
-            if (upgrade === 0 || upgrade === 1) { return player.inflation.vacuum; }
+            if (upgrade === 0) { return player.inflation.vacuum; }
+            if (upgrade === 1) { return player.inflation.vacuum && player.accretion.rank >= 6; }
             return true;
         }
         case 'ASR':
             if (stageIndex === 1) { return player.upgrades[1][5] >= 1; }
-            if (stageIndex === 3) { return player.accretion.rank !== 0; }
+            if (stageIndex === 3) { return player.accretion.rank >= 1; }
             return true;
         case 'elements':
             if (upgrade >= 29) { return player.upgrades[4][4] === 1 && player.buildings[6][1].true >= upgrade - 29; }
@@ -243,7 +244,7 @@ export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     } else if (pointer.max[index] <= player.milestones[stageIndex][index] ||
         (player.stage.true < 7 && player.stage.resets < 4) ||
         (stageIndex === 5 && player.milestones[4][index] < 8) ||
-        (player.inflation.tree[4] < 1 && pointer.time[index] / (player.inflation.tree[0] >= 1 ? 4 : 1) < player.time.stage)
+        (player.inflation.tree[4] < 1 && pointer.time[index] < player.time.stage)
     ) { return false; }
     return pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
 };

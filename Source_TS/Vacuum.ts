@@ -3,6 +3,7 @@ import { global, player, playerStart } from './Player';
 import { resetVacuum } from './Reset';
 import { globalSave, playEvent, specialHTML } from './Special';
 import { setActiveStage } from './Stage';
+import { visualTrueStageUnlocks, visualUpdateInflation } from './Update';
 
 export const prepareVacuum = (state: boolean) => { //Must not use direct player values
     const { buildings } = playerStart;
@@ -68,7 +69,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangeness3Scaling = [2, 3.4, 3, 1, 100, 1, 1.74, 1];
         strangeness4Cost = [1, 2, 4, 2, 12, 6, 6, 24];
         strangeness4Scaling = [2, 3.4, 3, 6, 1900, 1, 1.74, 1];
-        strangeness5Cost = [24, 36, 6, 24, 15600, 24, 96, 120];
+        strangeness5Cost = [24, 36, 6, 24, 15600, 24, 240, 120];
         strangeness5Scaling = [2, 2, 3.4, 1, 1, 1, 1, 1];
         strangenessInfo[1].maxActive = 10;
         strangenessInfo[2].maxActive = 10;
@@ -85,17 +86,20 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('dustCap').style.display = '';
         getId('mainCapS5').style.display = '';
         getId('element0').style.display = '';
-        getId('strangeletsEffect1Allowed').style.display = '';
+        getId('strange1Effect1Allowed').style.display = '';
         getId('strange7Stage1').style.display = '';
         getId('strange7Stage2').style.display = '';
         getId('strange8Stage3').style.display = '';
         getId('strange8Stage4').style.display = '';
         getId('strange3Stage5').style.display = '';
         getId('strange4Stage5').style.display = '';
+        getId('stageAutoInterstellar').style.display = '';
+        getId('stageAutoVoid').style.display = '';
+        getId('vaporizationLimit').style.display = '';
         getId('collapseCapped').style.display = '';
 
-        getId('strangeletsEffect1Disabled').style.display = 'none';
-        getId('stageInstant').style.display = 'none';
+        getId('strange1Effect1Disabled').style.display = 'none';
+        getId('stageAutoElse').style.display = 'none';
     } else {
         specialHTML.footerStatsHTML[1][0] = ['Quarks.png', 'stage1borderImage cyanText', 'Quarks'];
         buildingsInfo.hoverText[2][0] = 'Moles';
@@ -166,7 +170,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
         getId('strange8Stage5').style.display = '';
         getId('milestonesProgressArea').style.display = '';
-        getId('stageInstant').style.display = '';
+        getId('stageAutoElse').style.display = '';
         getId('rankStat0').style.display = '';
 
         getId('preonCap').style.display = 'none';
@@ -179,6 +183,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('mergeEffects').style.display = 'none';
         getId('researchAuto1').style.display = 'none';
         getId('researchAuto2').style.display = 'none';
+        getId('stageAutoVoid').style.display = 'none';
+        getId('vaporizationLimit').style.display = 'none';
         getId('collapseCapped').style.display = 'none';
         getId('element0').style.display = 'none';
         for (let s = 1; s < strangenessInfo.length; s++) {
@@ -194,6 +200,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
             getId(`energyGainStage${s}`).style.display = 'none';
         }
     }
+    const stateId = getId('vacuumState');
+    stateId.textContent = state ? 'True' : 'False';
+    const color = `var(--${state ? 'green' : 'red'}-text)`;
+    if (stateId.style.color !== color) { stateId.style.color = color; }
 
     buildingsInfo.maxActive.splice(1, buildingsActive.length, ...buildingsActive);
     upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
@@ -219,23 +229,34 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
 export const switchVacuum = () => {
     if (player.inflation.vacuum) { return; }
+    let income = 0;
     if (player.stage.true >= 7) {
-        player.cosmon.current += 1;
-        player.cosmon.total += 1;
-
-        global.historyStorage.vacuum.unshift([player.time.universe, false, 1]);
-        if (global.historyStorage.vacuum.length > 100) { global.historyStorage.vacuum.length = 100; }
-        if (1 / player.time.universe > player.history.vacuum.best[2] / player.history.vacuum.best[0]) {
-            player.history.vacuum.best = [player.time.universe, false, 1];
-        }
+        income = 1;
+        player.cosmon.current += income;
+        player.cosmon.total += income;
     } else {
         player.stage.true = 6;
         player.collapse.show = 0;
+        player.event = false;
         playEvent(6);
     }
-    if ((player.toggles.normal[0] && global.tab !== 'inflation') || player.stage.active !== 6) { setActiveStage(1); }
+
+    const history = player.history.vacuum;
+    const storage = global.historyStorage.vacuum;
+    const realTime = player.time.universe;
+    storage.unshift([realTime, false, income]);
+    if (storage.length > 100) { storage.length = 100; }
+    if (income / realTime > history.best[2] / history.best[0]) {
+        history.best = [realTime, false, income];
+    }
+
+    if ((player.toggles.normal[0] && global.tab !== 'inflation') || player.stage.active < 6) { setActiveStage(1); }
     player.inflation.vacuum = true;
     player.inflation.resets++;
+    player.clone = {};
+    player.challenges.active = null;
     prepareVacuum(true);
+    visualUpdateInflation();
+    visualTrueStageUnlocks();
     resetVacuum();
 };

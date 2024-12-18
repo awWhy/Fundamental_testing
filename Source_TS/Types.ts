@@ -31,9 +31,10 @@ export interface playerType {
         stars: [number, number, number]
         show: number
         input: [number, number]
+        points: number[]
     }
     merge: {
-        reward: [number]
+        reward: [number, number, number, number]
         resets: number
     }
     inflation: {
@@ -81,7 +82,9 @@ export interface playerType {
     milestones: number[][]
     challenges: {
         active: number | null
+        super: boolean
         void: number[]
+        superVoid: number[]
         voidCheck: number[]
     }
     toggles: {
@@ -108,7 +111,11 @@ export interface playerType {
             input: [number, number]
         }
     }
-    events: boolean[]
+    event: boolean
+    clone: {
+        depth?: 'stage' | 'vacuum'
+        [key: string]: any
+    }
 }
 
 export type gameTab = 'stage' | 'upgrade' | 'Elements' | 'strangeness' | 'inflation' | 'settings';
@@ -134,6 +141,7 @@ export interface globalType {
     }
     debug: {
         offlineSpeed: number
+        offlineUpdate: null | boolean
         errorID: boolean
         errorQuery: boolean
         errorGain: boolean
@@ -192,6 +200,7 @@ export interface globalType {
         newMass: number
         starCheck: [number, number, number]
         trueStars: number
+        pointsLoop: number
     }
     mergeInfo: {
         galaxyBase: number
@@ -217,6 +226,7 @@ export interface globalType {
         textColor: string[]
         buttonBorder: string[]
         imageBorderColor: string[]
+        costName: string[]
         activeAll: number[]
     }
     buildingsInfo: {
@@ -233,7 +243,6 @@ export interface globalType {
         stageBoost: number[]
         strangeletsInfo: [number, number]
         quarksGain: number
-        bestHistoryRate: number
     }
     upgradesInfo: Array<{
         name: string[]
@@ -299,7 +308,7 @@ export interface globalType {
     lastStrangeness: [number | null, number]
     lastInflation: number | null
     lastMilestone: [number | null, number]
-    lastChallenge: [number | null, number | null]
+    lastChallenge: [number, number | null]
     milestonesInfo: Array<{
         name: string[]
         needText: Array<() => string>
@@ -319,8 +328,11 @@ export interface globalType {
         effectText: Array<() => string>
         needText: Array<Array<Array<() => string>>>
         rewardText: string[][][]
+        reset: Array<'stage' | 'vacuum'>
+        time: number[]
         color: string[]
     }
+    voidRewards: [string[][], string[][]]
     historyStorage: {
         stage: Array<[number, number, number, number]>
         vacuum: Array<[number, boolean, number]>

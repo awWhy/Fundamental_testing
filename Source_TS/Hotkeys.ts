@@ -2,8 +2,8 @@ import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
 import { buyBuilding, collapseResetUser, dischargeResetUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
-import { buyAll, pauseGame } from './Main';
-import { globalSave, specialHTML } from './Special';
+import { buyAll, pauseGameUser } from './Main';
+import { SRHotkeysInfo, globalSave, specialHTML } from './Special';
 import type { hotkeysList } from './Types';
 
 export const hotkeys = {} as Record<string, hotkeysList>;
@@ -26,7 +26,7 @@ const hotkeyFunction = {
     galaxy: () => buyBuilding(3, 5),
     pause: (event) => {
         if (event.repeat || !globalSave.developerMode) { return; }
-        void pauseGame();
+        void pauseGameUser();
     },
     toggleAll: (event) => {
         if (event.repeat) { return; }
@@ -74,6 +74,7 @@ export const assignHotkeys = () => {
             globalSave.hotkeys[key as hotkeysList] = [];
         } else { hotkeys[hotkey] = key as hotkeysList; }
     }
+    if (globalSave.SRSettings[0]) { SRHotkeysInfo(); }
 };
 
 /** Removes hotkey if exist, returns name of removed hotkey */
@@ -86,6 +87,7 @@ export const removeHotkey = (remove: string): string | null => {
 
 export const detectHotkey = (check: KeyboardEvent) => {
     if (check.code === 'Tab') {
+        if (check.metaKey || check.ctrlKey || check.altKey) { return; }
         document.body.classList.remove('noFocusOutline');
         return;
     } else {
@@ -122,7 +124,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
             if (check.repeat) { return; }
             toggleSwap(numberKey, 'buildings', true);
         } else if (numberKey !== 0) {
-            buyBuilding(numberKey);
+            buyBuilding(numberKey, player.stage.active);
         } else { buyAll(); }
     } else {
         let name = check.metaKey ? 'Meta ' : '';
@@ -206,16 +208,16 @@ const changeStage = (direction: 'Left' | 'Right') => {
 export const handleTouchHotkeys = (event: TouchEvent) => {
     const touches = event.changedTouches;
     if (touches.length > 1) { return; }
-    const { mobileDevice } = specialHTML;
-    const change = [
-        (touches[0].clientX - mobileDevice.start[0]) / mobileDevice.dimensions[0],
-        (touches[0].clientY - mobileDevice.start[1]) / mobileDevice.dimensions[1]
+    const mainHTML = document.documentElement;
+    const change = [ //Too lazy to detect changes in screen size, so no caching
+        (touches[0].clientX - specialHTML.mobileDevice.start[0]) / mainHTML.clientWidth,
+        (touches[0].clientY - specialHTML.mobileDevice.start[1]) / mainHTML.clientHeight
     ];
 
     if (Math.abs(change[1]) > 0.2) {
         if (Math.abs(change[1]) < 0.8 || Math.abs(change[0]) > 0.2) { return; }
-        changeSubtab(change[1] > 0 ? 'Down' : 'Up');
+        changeSubtab(change[1] > 0 ? 'Up' : 'Down');
         return;
     } else if (Math.abs(change[0]) < 0.6) { return; }
-    changeTab(change[0] > 0 ? 'Right' : 'Left');
+    changeTab(change[0] > 0 ? 'Left' : 'Right');
 };

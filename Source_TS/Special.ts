@@ -1,6 +1,7 @@
 import { assignHotkeys, removeHotkey } from './Hotkeys';
-import { changeIntervals, getId, getQuery, globalSaveStart } from './Main';
+import { getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { deepClone, global, player } from './Player';
+import { assignMaxRank } from './Stage';
 import type { globalSaveType, hotkeysList } from './Types';
 import { format, numbersUpdate, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
 
@@ -12,7 +13,6 @@ export const globalSave: globalSaveType = {
         autoSave: 20000
     },
     hotkeys: { //hotkeyFunction: [key, code]
-        makeAll: ['M', 'M'],
         stage: ['S', 'S'],
         discharge: ['D', 'D'],
         vaporization: ['V', 'V'],
@@ -20,6 +20,7 @@ export const globalSave: globalSaveType = {
         collapse: ['C', 'C'],
         galaxy: ['G', 'G'],
         pause: ['P', 'P'],
+        makeAll: ['M', 'M'],
         toggleAll: ['Shift A', 'Shift A'],
         merge: ['Shift M', 'Shift M'],
         universe: ['Shift U', 'Shift U'],
@@ -30,8 +31,8 @@ export const globalSave: globalSaveType = {
         stageRight: ['Shift Arrow Right', 'Shift Arrow Right'],
         stageLeft: ['Shift Arrow Left', 'Shift Arrow Left']
     },
-    toggles: [false, false, false],
-    //Hotkeys type[0]; Elements as tab[1]; Allow text selection[2]
+    toggles: [false, false, false, false],
+    //Hotkeys type[0]; Elements as tab[1]; Allow text selection[2]; Footer on top[3]
     format: ['.', ''], //Point[0]; Separator[1]
     theme: null,
     fontSize: 16,
@@ -70,9 +71,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
         if (reload) {
             return void (async() => {
                 if (!await Confirm('Changing this setting will reload game, confirm?\n(Game will not autosave)')) { return; }
-                global.hotkeys.disabled = true;
-                global.paused = true;
-                changeIntervals();
+                pauseGame();
                 toggles[number] = !toggles[number];
                 saveGlobalSettings();
                 window.location.reload();
@@ -105,7 +104,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 };
 
 export const specialHTML = { //Images here are from true vacuum for easier cache
-    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge'], //[0] === textContent
+    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', ''], //[0] === textContent
     longestBuilding: 7, //+1
     buildingHTML: [ //outerHTML is slow
         [],
@@ -163,7 +162,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG1.png',
             'UpgradeG2.png',
             'UpgradeG3.png',
-            'Missing.png'
+            'UpgradeG4.png'
         ], []
     ],
     longestResearch: 9,
@@ -198,7 +197,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchS3.png', 'stage7borderImage'],
             ['ResearchS4.png', 'stage5borderImage'],
             ['ResearchS5.png', 'stage6borderImage'],
-            ['Missing.png', 'stage4borderImage']
+            ['ResearchS6.png', 'stage4borderImage']
         ], [
             ['ResearchG1.png', 'stage1borderImage'],
             ['ResearchG2.png', 'stage6borderImage']
@@ -236,7 +235,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchCollapse1.png', 'stage6borderImage'],
             ['ResearchCollapse2.png', 'stage7borderImage'],
             ['ResearchCollapse3.png', 'stage1borderImage'],
-            ['Missing.png', 'stage5borderImage']
+            ['ResearchCollapse1.png', 'stage6borderImage']
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage']
         ], []
@@ -260,13 +259,12 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Elements.png', 'stage4borderImage orangeText', 'Elements'],
             ['Stars.png', 'stage7borderImage redText', 'Stars']
         ], [
-            ['Missing.png', 'stage3borderImage grayText', 'Matter'], //'Dark%20matter.png'
-            ['Missing.png', 'stage6borderImage darkvioletText', 'Cosmon']
+            ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter'],
+            ['Cosmon.png', 'stage6borderImage darkvioletText', 'Cosmon']
         ]
     ],
-    mobileDevice: {
-        dimensions: [0, 0], //[X, Y]
-        start: [0, 0] //All browsers that I tested didn't properly detected more than 1 touch
+    mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
+        start: [0, 0] //[X, Y]
     },
     cache: {
         imagesDiv: document.createElement('div'),
@@ -282,11 +280,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
 
 export const preventImageUnload = () => {
     const { footerStatsHTML: footer, buildingHTML: build, upgradeHTML: upgrade, researchHTML: research, researchExtraHTML: extra, researchExtraDivHTML: extraDiv } = specialHTML;
-    //Duplicates are ignored, unless they are from Strangeness, because duplicates from there could become unique in future
 
     let images = '<img src="Used_art/Red%20giant.png" loading="lazy"><img src="Used_art/White%20dwarf.png" loading="lazy">';
-    images += '<img src="Used_art/Neutron%20star.png" loading="lazy"><img src="Used_art/Missing.png" loading="lazy">'; //Quark%20star.png
-    for (let s = 1; s <= 6; s++) { //6
+    for (let s = 1; s <= 6; s++) {
         for (let i = 0; i < footer[s].length; i++) {
             if (s === 2) {
                 if (i === 2) { continue; } //Drops
@@ -311,19 +307,19 @@ export const preventImageUnload = () => {
     specialHTML.cache.imagesDiv.innerHTML = images; //Saved just in case
 };
 
-export const setTheme = (theme: number | null) => {
-    if (theme !== null) {
-        if (player.stage.true < theme) { theme = null; }
-        if (theme === 6 && player.stage.true < 7) { theme = null; }
-    }
+/** Not providing value for 'theme' will make it use one from globalSave and remove all checks */
+export const setTheme = (theme = 'current' as 'current' | number | null) => {
+    if (theme !== 'current') {
+        if (theme !== null) {
+            if (player.stage.true < theme) { theme = null; }
+            if (theme === 6 && player.stage.true < 7) { theme = null; }
+        }
 
-    globalSave.theme = theme;
-    saveGlobalSettings();
-    switchTheme();
-    getId('currentTheme').textContent = globalSave.theme === null ? 'Default' : global.stageInfo.word[globalSave.theme];
-};
+        globalSave.theme = theme;
+        saveGlobalSettings();
+        getId('currentTheme').textContent = theme === null ? 'Default' : global.stageInfo.word[theme];
+    } else { theme = globalSave.theme; }
 
-export const switchTheme = () => {
     const upgradeTypes = ['upgrade', 'element', 'inflation'];
     const properties = {
         '--background-color': '#030012',
@@ -355,10 +351,11 @@ export const switchTheme = () => {
         '--red-text': '#eb0000',
         '--green-text': '#00e900',
         '--yellow-text': '#fafa00'
+        //'--brown-text': '#9b7346'
     };
 
     /* Many of these colors will need to be changed in other places (find them with quick search, there are too many of them) */
-    switch (globalSave.theme ?? player.stage.active) {
+    switch (theme ?? player.stage.active) {
         case 1:
             for (const text of upgradeTypes) {
                 getId(`${text}Text`).style.color = '';
@@ -539,8 +536,10 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
         confirm.focus();
 
         const key = async(event: KeyboardEvent) => {
+            if (event.metaKey || event.ctrlKey || event.altKey) { return; }
             const code = event.code;
             if (code === 'Escape' || code === 'Enter' || code === 'Space') {
+                if (event.shiftKey) { return; }
                 event.preventDefault();
                 close();
             } else if (code === 'Tab') {
@@ -593,12 +592,14 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
             close();
         };
         const key = (event: KeyboardEvent) => {
+            if (event.metaKey || event.ctrlKey || event.altKey) { return; }
             const code = event.code;
             if (code === 'Escape') {
+                if (event.shiftKey) { return; }
                 event.preventDefault();
                 close();
             } else if (code === 'Enter' || code === 'Space') {
-                if (document.activeElement === cancel) { return; }
+                if (event.shiftKey || document.activeElement === cancel) { return; }
                 event.preventDefault();
                 yes();
             } else if (code === 'Tab') {
@@ -658,13 +659,15 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
             close();
         };
         const key = (event: KeyboardEvent) => {
+            if (event.metaKey || event.ctrlKey || event.altKey) { return; }
             const code = event.code;
             if (code === 'Escape') {
+                if (event.shiftKey) { return; }
                 event.preventDefault();
                 close();
             } else if (code === 'Enter' || code === 'Space') {
                 const active = document.activeElement;
-                if ((code === 'Space' && active === input) || active === cancel) { return; }
+                if (event.shiftKey || (code === 'Space' && active === input) || active === cancel) { return; }
                 event.preventDefault();
                 yes();
             } else if (code === 'Tab') {
@@ -719,8 +722,12 @@ export const Notify = (text: string) => {
         getId('notifications').append(html);
 
         const pointer = notifications[notifications.push([text, (instantClose = false) => {
-            if (instantClose) { return html.style.animation !== '' ? undefined : remove(); }
+            if (instantClose) {
+                if (html.style.animation === '') { remove(); }
+                return;
+            }
             html.textContent = `${text} | x${++count}`;
+            if (timeout === undefined) { return; } //Required to make it work properly if call happened too early
             clearTimeout(timeout);
             timeout = setTimeout(remove, 7200);
         }]) - 1];
@@ -831,6 +838,35 @@ export const changeFormat = (point: boolean) => {
     saveGlobalSettings();
 };
 
+/** Short is only for hotkeys that can change */
+export const SRHotkeysInfo = (short = false) => {
+    const index = globalSave.toggles[0] ? 0 : 1;
+    const resetName = specialHTML.resetHTML[player.stage.active];
+    const resetHotkey = globalSave.hotkeys[resetName.toLowerCase() as hotkeysList];
+    const list = [resetHotkey !== undefined ? resetHotkey[index] : ''];
+    if (!short) {
+        list.push(
+            globalSave.hotkeys.tabLeft[index], globalSave.hotkeys.tabRight[index],
+            globalSave.hotkeys.subtabDown[index], globalSave.hotkeys.subtabUp[index],
+            globalSave.hotkeys.stageLeft[index], globalSave.hotkeys.stageRight[index],
+            globalSave.hotkeys.stage[index],
+            globalSave.hotkeys.makeAll[index],
+            globalSave.hotkeys.toggleAll[index]
+        );
+    }
+    for (let i = 0; i < list.length; i++) {
+        if (list[i] == null || list[i] === '') { list[i] = 'None'; }
+    }
+    getId('reset1Main').ariaLabel = `${resetName} reset, hotkey is ${list[0]}`;
+    if (short) { return; }
+    getQuery('#footerMain > nav').ariaLabel = `Tab list, hotkeys are ${list[1]} and ${list[2]}`;
+    getId('subtabs').ariaLabel = `Subtab list, hotkeys are ${list[3]} and ${list[4]}`;
+    getId('stageSelect').ariaLabel = `Active Stages list, hotkeys are ${list[5]} and ${list[6]}`;
+    getId('resetStage').ariaLabel = `Stage reset, hotkey is ${list[7]}`;
+    getId('makeAllStructures').ariaLabel = `Make all Structures, hotkey is ${list[8]}`;
+    getId('toggleBuilding0').ariaLabel = `Toggle all Structures, hotkey is ${list[9]}`;
+};
+
 export const MDStrangenessPage = (stageIndex: number) => {
     for (let s = 1; s <= 5; s++) { getId(`strangenessSection${s}`).style.display = 'none'; }
     getId(`strangenessSection${stageIndex}`).style.display = '';
@@ -839,9 +875,9 @@ export const MDStrangenessPage = (stageIndex: number) => {
 export const replayEvent = async() => {
     let last;
     if (player.stage.true >= 6) {
-        last = player.events[1] ? 8 : player.stage.resets >= 1 ? 7 : 6;
+        last = player.event ? 8 : player.stage.resets >= 1 ? 7 : 6;
     } else {
-        last = player.stage.true - (player.events[0] ? 0 : 1);
+        last = player.stage.true - (player.event ? 0 : 1);
         if (last < 1) { return void Alert('There are no unlocked events'); }
     }
 
@@ -859,10 +895,10 @@ export const replayEvent = async() => {
     playEvent(event);
 };
 
-/** Sets player.events[index] to true if provided */
-export const playEvent = (event: number, index = null as number | null) => {
+/** Sets player.event to true if replay is false */
+export const playEvent = (event: number, replay = true) => {
     if (specialHTML.alert[0] !== null) { return Notify(`Missed Event ${event}, you can replay it from options`); }
-    if (index !== null) { player.events[index] = true; }
+    if (!replay) { player.event = true; }
 
     switch (event) {
         case 1:
@@ -870,45 +906,53 @@ export const playEvent = (event: number, index = null as number | null) => {
         case 2:
             return void Alert(`Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to softcap`);
         case 3:
+            if (!replay) {
+                assignMaxRank();
+                global.debug.rankUpdated = null;
+            }
             return void Alert("Can't gain any more Mass with current Rank. New one has been unlocked, but reaching it will softcap the Mass production");
         case 4:
             return void Alert('Last explosion not only created first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis');
         case 5:
+            if (!replay) { stageUpdate(false); }
             return void Alert("There are no Structures in Intergalactic yet, but they can be created within previous Stages. Any new Stage reset and export from now on will award Strange quarks, also unlock new effect for '[26] Iron' Element\n(Stars in Intergalactic are just Stars from Interstellar)");
         case 6:
             return void Alert('As Galaxies started to Merge, their combined Gravity pushed Vacuum out of its local minimum into more stable global minimum. New forces and Structures are expected within this new and true Vacuum state');
         case 7:
             return void Alert("With Vacuum decaying remaining matter had rearranged itself in such way that lead to the formation of the 'Void'. Check it out in 'Advanced' subtab");
         case 8:
-            return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require to get at least 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
+            if (!replay) { stageUpdate(false); }
+            return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require getting at least 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
     }
 };
 
 export const showHints = async() => {
-    let mainText = "These hints can explain some parts of the game, write hint of interest into the input bellow\n'Safe reset'";
+    let mainText = "These hints can explain some parts of the game, write hint of interest into the input below\n'Mobile device', 'Screen reader', 'Safe reset'";
     if (player.stage.true >= 5) {
         mainText += ", 'Intergalactic Stage', 'Export reward'";
     }
     if (player.stage.true >= 6) {
-        if (player.stage.true >= 7 || player.stage.resets >= 1 || player.researchesExtra[1][2] >= 2) {
-            mainText += ", 'Submerged Stage'";
-        }
+        mainText += ", 'True Vacuum'";
     }
     const hint = await Prompt(mainText);
     if (hint === null || hint === '') { return; }
 
     let hintText = `Hint about '${hint}' doesn't exist`;
     const lower = hint.replaceAll(' ', '').toLowerCase();
-    if (lower === 'safereset') {
+    if (lower === 'mobiledevice') {
+        hintText = 'Example of changes that this support does:\n- Replaces mouse events with touch events\n- Adds abbility to change tab/subtab by swiping\n- Makes creation of Upgrades require usage of new special button, but some will require holding down instead\n- Adds buttons accross all tabs to be used as hotkeys\n- Disables unwanted browser behaviours and can fix bugs related to poor browser support (will need to disable forced zoom in browser settings if footer moves on its own)';
+    } else if (lower === 'screenreader') {
+        hintText = 'Example of changes that this support does:\n- Adds events based on focus changing\n- Adds more information for Aria, like more text based on performed actions';
+    } if (lower === 'safereset') {
         hintText = "'Safe' setting for confirmation toggles causes warning to pop up if game considers action to be unwanted. After progressing further, some of them might start getting in a way";
     } else if (lower === 'exportreward') {
-        hintText = `Export reward is based on highest Stage reset reward, after collecting it timer will reset to 0 and value will decrease by collected amount\nCurrent value for the Strange quarks is ${format(player.time.export[1])} +1${player.strangeness[5][8] >= 1 || player.inflation.tree[3] >= 1 ? `, Strangelets is ${format(player.time.export[2])}` : ''}`;
+        hintText = 'Export reward is based on highest Stage reset reward, after collecting it timer will reset to 0 and storage will decrease by collected amount\nStrange quarks storage is always increased by +1';
     } else if (lower === 'intergalacticstage') {
-        hintText = 'Intergalactic Stage is a direct continuation of Interstellar Stage. Structures for it are unlocked by completing Milestones';
-    } else if (lower === 'submergedstage') {
-        hintText = 'Submerged Stage in true Vacuum acts like a bonus Stage, its not required for progression, but it will speed it up. Because of it you will not be able to get far into until enough Strangeness is created';
+        hintText = `Intergalactic Stage is a direct continuation of Interstellar Stage. ${player.stage.true >= 6 ? 'In false Vacuum ' : ''}Structures for it are unlocked by completing Milestones, Collapse also resets Intergalactic Stage`;
+    } else if (lower === 'truevacuum') {
+        const allUnlocked = player.stage.true >= 7 || player.stage.resets >= 1;
+        hintText = `In true Vacuum all Stages are combined\n${allUnlocked || player.researchesExtra[1][2] >= 1 ? 'Since Accretion Stage shares Mass with Microworld, turning off auto Preons after reaching hardcap will speed up Mass accumulation' : 'More information after unlocking Accretion Stage'}\n${allUnlocked || player.researchesExtra[1][2] >= 2 ? 'Submerged Stage acts like a bonus Stage, its not required for progression and will only speed up other Stages' : 'More information after unlocking Submerged Stage'}\n${allUnlocked || player.accretion.rank >= 6 ? "Since Interstellar Stage also shares Mass with Accretion, turning off all related auto's will speed up reaching Solar mass hardcap" : 'More information after unlocking Intestellar Stage'}`;
     }
-
     if (await Confirm(`${hintText}\nView another one?`)) { void showHints(); }
 };
 
@@ -924,7 +968,7 @@ export const getVersionInfoHTML = () => {
     buildBigWindow();
     if (getId('versionHTML', true) === null) {
         const mainHTML = document.createElement('div');
-        mainHTML.innerHTML = `<label>v0.2.1</label><p>- Missing</p>
+        mainHTML.innerHTML = `<label>v0.2.1</label><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions\n<a href="https://docs.google.com/document/d/1o6rk6mG-fCG7Xi1BpA4w4g_5_h9A87wrCv7bODweBWA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <label>v0.2.0</label><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
         <label>v0.1.9</label><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>
         <label>v0.1.8</label><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Added copy to clipboard, load from string save file options</p>
@@ -957,7 +1001,7 @@ export const getVersionInfoHTML = () => {
     const mainHTML = getId('versionHTML');
     const windowHMTL = getId('bigWindow');
     const key = (event: KeyboardEvent) => {
-        if (specialHTML.alert[0] !== null) { return; }
+        if (specialHTML.alert[0] !== null || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
         const code = event.code;
         if (code === 'Escape' || code === 'Enter' || code === 'Space') {
             event.preventDefault();
@@ -997,7 +1041,7 @@ export const getHotkeysHTML = () => {
         <div>
             <label id="stageHotkey" class="stageText"><button></button> ‒ <span class="whiteText">Stage reset</span></label>
             <label id="dischargeHotkey" class="orangeText stage1Include"><button></button> ‒ <span class="whiteText">Discharge</span></label>
-            <label id="vaporizationHotkey" class="grayText stage2Include"><button></button> ‒ <span class="whiteText">Vaporization</span></label>
+            <label id="vaporizationHotkey" class="blueText stage2Include"><button></button> ‒ <span class="whiteText">Vaporization</span></label>
             <label id="rankHotkey" class="darkorchidText stage3Include"><button></button> ‒ <span class="whiteText">Rank</span></label>
             <label id="collapseHotkey" class="orchidText stage4Include"><button></button> ‒ <span class="whiteText">Collapse</span></label>
             <label id="galaxyHotkey" class="grayText stage5Include"><button></button> ‒ <span class="whiteText">Galaxy</span></label>
@@ -1005,7 +1049,7 @@ export const getHotkeysHTML = () => {
             <label id="universeHotkey" class="darkvioletText stage6Include"><button></button> ‒ <span class="whiteText">Universe</span></label>
             <label id="pauseHotkey" class="grayText"><button></button> ‒ <span class="whiteText">pause</span></label>
         </div>
-        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click on the selected HTML Element or confirm Alert</span></p>
+        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click selected HTML Element or confirm Alert</span></p>
         <p class="mainText">Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
         <p class="mainText">Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
         <p class="mainText">Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
@@ -1090,13 +1134,12 @@ export const getHotkeysHTML = () => {
             globalSave.hotkeys = deepClone(globalSaveStart.hotkeys);
             const index = globalSave.toggles[0] ? 0 : 1;
             for (const key in globalSave.hotkeys) {
-                const hotkeyTest = globalSave.hotkeys[key as hotkeysList][index];
-                getQuery(`#${key}Hotkey > button`).textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
+                getQuery(`#${key}Hotkey > button`).textContent = globalSave.hotkeys[key as hotkeysList][index] as string;
             }
             assignHotkeys();
             saveGlobalSettings();
         });
-        stageUpdate('soft');
+        stageUpdate(false);
         visualTrueStageUnlocks();
     }
 
@@ -1106,7 +1149,7 @@ export const getHotkeysHTML = () => {
     const mainHTML = getId('hotkeysHTML');
     const windowHMTL = getId('bigWindow');
     const key = (event: KeyboardEvent) => {
-        if (specialHTML.alert[0] !== null) { return; }
+        if (specialHTML.alert[0] !== null || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
         const code = event.code;
         if ((!global.hotkeys.disabled && code === 'Escape') || ((code === 'Enter' || code === 'Space') && document.activeElement === closeButton)) {
             event.preventDefault();
