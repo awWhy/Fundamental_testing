@@ -319,6 +319,7 @@ h1, h2, h3, h4, h5, h6 {
 #notifications > p:not(:first-of-type) { margin-top: -1px; }
 
 label { cursor: pointer; }
+label:has(input[type = "number"], input[type = "text"]) { cursor: text; }
 button, input { appearance: none; }
 
 #load, button {
@@ -967,8 +968,6 @@ input:-webkit-autofill { /* Chrome related pain */
     border-color: darkgreen;
 }
 
-#resetToggles > h3 { text-align: center; }
-
 #resetToggles > div {
     display: flex;
     flex-wrap: wrap;
@@ -1468,7 +1467,7 @@ li .hollowButton {
     body { scrollbar-color: var(--input-border) black; }
 }
 
-/* Everything bellow gets edited in changeFontSize function, because rem units are bugged and there isn't any better alternatives */
+/* Everything below gets edited in changeFontSize function, because rem units are bugged and there isn't any better alternatives */
 @media screen and (max-width: 925px) {
     html { --elements-columns-phone: min(var(--elements-columns), 9); }
 
