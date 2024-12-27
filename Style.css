@@ -637,7 +637,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #voidRewards { position: relative; }
-#voidRewards:focus-within > #voidRewardsDiv { display: block; }
+#voidRewardsExtraText { white-space: pre-line; }
 
 #voidRewardsDivText {
     display: flex;
@@ -652,6 +652,11 @@ input:-webkit-autofill { /* Chrome related pain */
     text-align: center;
     row-gap: 0.3em;
     width: 100%;
+}
+
+#advancedInfo > label {
+    width: fit-content;
+    align-self: center;
 }
 
 #upgrades, #researches {
