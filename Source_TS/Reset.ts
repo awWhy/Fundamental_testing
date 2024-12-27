@@ -1,7 +1,7 @@
 import { allowedToBeReset, checkTab } from './Check';
 import { cloneArray, global, player, playerStart } from './Player';
 import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignPuddles, assignTrueEnergy } from './Stage';
-import { numbersUpdate, setRemnants, stageUpdate, switchTab, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { setRemnants, stageUpdate, switchTab, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
     const { dischargeInfo } = global;
@@ -130,10 +130,6 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     }
 
     assignBuildingInformation();
-    if (!global.paused && stageIndex.includes(player.stage.active)) {
-        visualUpdate();
-        numbersUpdate();
-    }
 };
 
 /** Default value for update is 'normal', default value for full is true and should be set to false only if Stage is permanent */
@@ -157,7 +153,6 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         player.upgrades[s] = cloneArray(playerStart.upgrades[s]);
         player.researches[s] = cloneArray(playerStart.researches[s]);
         player.researchesExtra[s] = cloneArray(playerStart.researchesExtra[s]);
-        autoUpgradesSet(s);
 
         global.lastUpgrade[s][0] = null;
         if (s === 1) {
@@ -196,15 +191,6 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
             player.merge.resets = 0;
         }
     }
-
-    for (const s of stageIndex) { //Less errors if do it separatly
-        for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
-        for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
-        calculateMaxLevel(0, s, 'ASR');
-
-        autoResearchesSet('researches', s);
-        autoResearchesSet('researchesExtra', s);
-    }
     if (full) {
         const { strangeness, researchesAuto } = player;
         player.time.stage = 0;
@@ -223,6 +209,15 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     }
 
     assignBuildingInformation();
+    for (const s of stageIndex) { //Less errors if do it separatly
+        for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
+        for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
+        calculateMaxLevel(0, s, 'ASR');
+
+        autoUpgradesSet(s);
+        autoResearchesSet('researches', s);
+        autoResearchesSet('researchesExtra', s);
+    }
     if (update !== null) {
         switchTab(checkTab(global.tab) ? global.tab : 'stage');
         stageUpdate(update, true);

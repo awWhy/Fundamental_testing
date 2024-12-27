@@ -60,7 +60,6 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
 };
 
 export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'strangeness' | 'inflation'): boolean => {
-    if (upgrade < 0) { return false; }
     switch (type) { //Some cases are handled by max level being 0
         case 'upgrades':
             if (global.upgradesInfo[stageIndex].maxActive < upgrade + 1) { return false; }
@@ -244,7 +243,7 @@ export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     } else if (pointer.max[index] <= player.milestones[stageIndex][index] ||
         (player.stage.true < 7 && player.stage.resets < 4) ||
         (stageIndex === 5 && player.milestones[4][index] < 8) ||
-        (player.inflation.tree[4] < 1 && pointer.time[index] < player.time.stage)
+        pointer.time[index] < player.time.stage
     ) { return false; }
     return pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
 };

@@ -1,7 +1,7 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
 import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation, visualUpdateUpgrades } from './Update';
 import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSuperVoid, toggleSwap, vaporizationResetUser } from './Stage';
-import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML, showHints } from './Special';
+import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
@@ -63,7 +63,7 @@ const handleOfflineTime = (): number => {
     time.export[0] += offlineTime;
     return offlineTime;
 };
-export const simulateOffline = async(offline: number, autoAccept = !globalSave.developerMode) => {
+export const simulateOffline = async(offline: number, autoAccept = player.toggles.normal[4] && !globalSave.developerMode) => {
     if (!global.paused) { pauseGame(); }
     if (player.time.offline < 0) {
         offline += player.time.offline;
@@ -75,12 +75,13 @@ export const simulateOffline = async(offline: number, autoAccept = !globalSave.d
         player.time.offline += offline;
         return pauseGame(false);
     }
-    if (!autoAccept && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?\nWill be lost if not accepted`, 2)) {
+    if (!autoAccept && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?`, 2) &&
+        (globalSave.developerMode || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"))) {
         global.lastSave += handleOfflineTime();
         return pauseGame(false);
     }
     global.debug.offlineUpdate = null;
-    global.debug.offlineSpeed = 0.1;
+    global.debug.offlineSpeed = globalSave.intervals.offline / 1000;
 
     const accelerate = getId('offlineAccelerate');
     accelerate.addEventListener('click', offlineAccelerate);
@@ -95,7 +96,7 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
     const time = rate <= 0 ? warpTime : Math.min(600 * rate, warpTime);
     warpTime -= time;
     try {
-        timeUpdate(time, Math.max(time / 600, 0.2));
+        timeUpdate(time, Math.max(time / 600, rate));
     } catch (error) {
         offlineEnd();
         void Alert(`Offline calculation failed due to error:\n${error}`, 1);
@@ -166,8 +167,8 @@ export const pauseGame = (pause = true) => {
 export const pauseGameUser = async() => {
     if (global.paused) { return; }
     pauseGame();
-    const claim = await Confirm("Game is currently paused. Any button below will unpause, press 'Confirm' to keep Offline time");
-
+    const claim = await Confirm("Game is currently paused. Any button below will unpause, press 'Confirm' to keep Offline time") ||
+        (!globalSave.developerMode && await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"));
     const offline = handleOfflineTime();
     global.lastSave += offline;
     if (claim) {
@@ -244,7 +245,7 @@ const awardExport = () => {
     strange[0].current += quarks;
     strange[0].total += quarks;
     exportReward[1] = Math.max(exportReward[1] - quarks, 0);
-    if (player.strangeness[5][8] >= 1 || player.inflation.tree[3] >= 1) {
+    if (player.strangeness[5][8] >= 1 || player.inflation.tree[4] >= 1) {
         const strangelets = exportReward[2] / 2.5 * conversion;
         strange[1].current += strangelets;
         strange[1].total += strangelets;
@@ -392,7 +393,7 @@ const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researc
     if (type === 'inflation') {
         global.lastInflation = index;
     } else {
-        if (player.toggles.hover[0] && player.stage.true >= 2 && (type !== 'researchesAuto' || checkUpgrade(index, player.stage.active, 'researchesAuto'))) {
+        if (player.toggles.hover[0] && player.stage.true >= 2) {
             buyUpgrades(index, player.stage.active, type);
         }
         if (type === 'elements') {
@@ -411,6 +412,16 @@ const hoverChallenge = (index: number) => {
     global.lastChallenge[0] = index;
     getChallengeDescription(index);
     visualUpdate(); //Lazy way to update unlocked buttons
+};
+/** Handles requirement to switch Stage, returns true if can safely return early */
+const handleAutoSwitch = (index: number, type = 'researchesAuto'): boolean => {
+    const stageIndex = player.stage.active;
+    if (type === 'researchesAuto' && !checkUpgrade(index, stageIndex, type)) {
+        const autoStage = global.researchesAutoInfo.autoStage[index][player.researchesAuto[index]];
+        if (autoStage !== undefined && !(autoStage === stageIndex || (autoStage === 4 && stageIndex === 5))) { switchStage(autoStage, stageIndex); }
+        return true;
+    }
+    return false;
 };
 
 export const buyAll = () => {
@@ -445,6 +456,9 @@ try { //Start everything
                     array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
                 }
             }
+            if (!(globalSave.intervals.offline >= globalSave.intervals.main * 2)) {
+                globalSave.intervals.offline = globalSave.intervals.main * 2;
+            }
             for (let i = globalSave.toggles.length; i < globalSaveStart.toggles.length; i++) {
                 globalSave.toggles[i] = false;
             }
@@ -466,8 +480,9 @@ try { //Start everything
         (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0];
         (getId('thousandSeparator') as HTMLInputElement).value = globalSave.format[1];
         (getId('mainInterval') as HTMLInputElement).value = `${globalSave.intervals.main}`;
+        (getId('offlineInterval') as HTMLInputElement).value = `${globalSave.intervals.offline}`;
         (getId('numbersInterval') as HTMLInputElement).value = `${globalSave.intervals.numbers}`;
-        (getId('visualInterval') as HTMLInputElement).value = `${globalSave.intervals.visual / 1000}`;
+        (getId('visualInterval') as HTMLInputElement).value = `${globalSave.intervals.visual}`;
         (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
         for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'global'); }
         if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also sets breakpoints for screen size
@@ -651,14 +666,14 @@ try { //Start everything
             if (globalSave.SRSettings[2]) { primaryIndex(true); }
             for (let i = 0; i < globalSaveStart.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
             specialHTML.styleSheet.textContent += '#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }';
-        }
-        if (globalSave.developerMode) {
-            const pauseButton = document.createElement('button');
-            pauseButton.className = 'hollowButton';
-            pauseButton.textContent = 'Pause';
-            pauseButton.type = 'button';
-            getId('mainLi').append(pauseButton);
-            pauseButton.addEventListener('click', pauseGameUser);
+        } else {
+            const index = globalSave.toggles[0] ? 0 : 1;
+            const list = [globalSave.hotkeys.tabLeft[index], globalSave.hotkeys.tabRight[index], globalSave.hotkeys.subtabDown[index], globalSave.hotkeys.subtabUp[index]];
+            for (let i = 0; i < list.length; i++) {
+                if (list[i] == null || list[i] === '') { list[i] = 'None'; }
+            }
+            getQuery('#SRMessage1 span').textContent = `${list[0]} and ${list[1]}`;
+            getQuery('#SRMessage1 span:last-of-type').textContent = `${list[2]} and ${list[3]}`;
         }
     }
 
@@ -843,22 +858,25 @@ try { //Start everything
         if (PC) { image.addEventListener('mouseover', () => hoverChallenge(i)); }
         if (MD) { image.addEventListener('touchstart', () => hoverChallenge(i)); }
         if (SR) { image.addEventListener('focus', () => hoverChallenge(i)); }
-        image.addEventListener('click', () => { void enterExitChallengeUser(i); });
+        image.addEventListener('click', () => { enterExitChallengeUser(i); });
     }
-    for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
-        const image = getId(`voidReward${i}`);
-        image.addEventListener('click', () => {
-            global.lastChallenge[1] = i;
-            getChallengeReward(i);
-        });
-        if (MD) { image.addEventListener('click', () => (getId('voidRewardsDiv').style.display = 'block')); } //Safari bugs with no focus events
+    getId('superVoidToggle').addEventListener('click', () => { toggleSuperVoid(true); });
+    {
+        const close = () => {
+            getId('voidRewardsDiv').style.display = '';
+            global.lastChallenge[1] = null;
+        };
+        for (let i = 1; i < global.challengesInfo.rewardText[0].length; i++) {
+            const image = getId(`voidReward${i}`);
+            image.addEventListener('click', () => {
+                global.lastChallenge[1] = i;
+                getChallengeReward(i);
+                getId('voidRewardsDiv').style.display = 'block';
+            });
+            image.addEventListener('blur', close);
+        }
+        if (MD) { getId('voidRewardsDiv').addEventListener('click', close); }
     }
-    getId('superVoidToggle').addEventListener('click', () => {
-        const last = global.lastChallenge;
-        if (last[0] === 0 && last[1] !== null) { getChallengeReward(last[1]); }
-        toggleSuperVoid(true);
-    });
-    if (MD) { getId('voidRewardsDiv').addEventListener('click', () => (getId('voidRewardsDiv').style.display = '')); }
 
     /* Upgrade tab */
     for (let i = 0; i < specialHTML.longestUpgrade; i++) {
@@ -908,7 +926,10 @@ try { //Start everything
             image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
         } else {
             const clickFunc = () => buyUpgrades(i, player.stage.active, 'researchesAuto');
-            image.addEventListener('click', clickFunc);
+            image.addEventListener('click', () => {
+                if (handleAutoSwitch(i)) { return; }
+                clickFunc();
+            });
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
         if (SR) { image.addEventListener('focus', hoverFunc); }
@@ -931,7 +952,10 @@ try { //Start everything
         const clickFunc = () => {
             const active = player.stage.active;
             const last = global.lastUpgrade[active];
-            if (last[0] !== null) { buyUpgrades(last[0], active, last[1]); }
+            if (last[0] !== null) {
+                if (handleAutoSwitch(last[0], last[1])) { return; }
+                buyUpgrades(last[0], active, last[1]);
+            }
         };
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
@@ -941,7 +965,7 @@ try { //Start everything
     {
         const button = getId('element0');
         const dblclickFunc = () => {
-            global.lastElement = null;
+            global.lastElement = 0;
             getUpgradeDescription(0, 'elements');
         };
         if (SR) {
@@ -982,7 +1006,7 @@ try { //Start everything
             });
         }
         if (SR) { image.addEventListener('focus', () => hoverUpgrades(i, 'elements')); }
-        if (PC || SR) { image.addEventListener('click', clickFunc); }
+        if (!MD || SR) { image.addEventListener('click', clickFunc); }
     }
 
     /* Strangeness tab */
@@ -1156,30 +1180,40 @@ try { //Start everything
         if (SR) { button.addEventListener('focus', hoverFunc); }
     }
     getId('mainInterval').addEventListener('change', () => {
-        const mainInput = getId('mainInterval') as HTMLInputElement;
-        globalSave.intervals.main = Math.min(Math.max(Math.trunc(Number(mainInput.value)), 20), 200);
-        mainInput.value = `${globalSave.intervals.main}`;
+        const input = getId('mainInterval') as HTMLInputElement;
+        globalSave.intervals.main = Math.min(Math.max(Math.trunc(Number(input.value)), 20), 200);
+        if (globalSave.intervals.offline < globalSave.intervals.main * 2) {
+            globalSave.intervals.offline = globalSave.intervals.main * 2;
+            (getId('offlineInterval') as HTMLInputElement).value = `${globalSave.intervals.offline}`;
+        }
+        input.value = `${globalSave.intervals.main}`;
         saveGlobalSettings();
         changeIntervals();
     });
+    getId('offlineInterval').addEventListener('change', () => {
+        const input = getId('offlineInterval') as HTMLInputElement;
+        globalSave.intervals.offline = Math.min(Math.max(Math.trunc(Number(input.value)), globalSave.intervals.main * 2), 6000);
+        input.value = `${globalSave.intervals.offline}`;
+        saveGlobalSettings();
+    });
     getId('numbersInterval').addEventListener('change', () => {
-        const numberInput = getId('numbersInterval') as HTMLInputElement;
-        globalSave.intervals.numbers = Math.min(Math.max(Math.trunc(Number(numberInput.value)), 40), 200);
-        numberInput.value = `${globalSave.intervals.numbers}`;
+        const input = getId('numbersInterval') as HTMLInputElement;
+        globalSave.intervals.numbers = Math.min(Math.max(Math.trunc(Number(input.value)), 40), 200);
+        input.value = `${globalSave.intervals.numbers}`;
         saveGlobalSettings();
         changeIntervals();
     });
     getId('visualInterval').addEventListener('change', () => {
-        const visualInput = getId('visualInterval') as HTMLInputElement;
-        globalSave.intervals.visual = Math.min(Math.max(Math.trunc(Number(visualInput.value) * 100), 20), 200) * 10;
-        visualInput.value = `${globalSave.intervals.visual / 1000}`;
+        const input = getId('visualInterval') as HTMLInputElement;
+        globalSave.intervals.visual = Math.min(Math.max(Math.trunc(Number(input.value)), 200), 2000);
+        input.value = `${globalSave.intervals.visual}`;
         saveGlobalSettings();
         changeIntervals();
     });
     getId('autoSaveInterval').addEventListener('change', () => {
-        const autoSaveInput = getId('autoSaveInterval') as HTMLInputElement;
-        globalSave.intervals.autoSave = Math.min(Math.max(Math.trunc(Number(autoSaveInput.value)), 4), 1800) * 1000;
-        autoSaveInput.value = `${globalSave.intervals.autoSave / 1000}`;
+        const input = getId('autoSaveInterval') as HTMLInputElement;
+        globalSave.intervals.autoSave = Math.min(Math.max(Math.trunc(Number(input.value)), 4), 1800) * 1000;
+        input.value = `${globalSave.intervals.autoSave / 1000}`;
         saveGlobalSettings();
         changeIntervals();
     });
@@ -1187,8 +1221,8 @@ try { //Start everything
     getId('decimalPoint').addEventListener('change', () => changeFormat(true));
     getId('MDToggle0').addEventListener('click', () => toggleSpecial(0, 'mobile', true, true));
     getId('SRToggle0').addEventListener('click', () => toggleSpecial(0, 'reader', true, true));
+    getId('pauseButton').addEventListener('click', pauseGameUser);
     getId('reviewEvents').addEventListener('click', replayEvent);
-    getId('showHints').addEventListener('click', showHints);
     getId('customFontSize').addEventListener('change', () => changeFontSize());
 
     getId('stageHistorySave').addEventListener('change', () => {

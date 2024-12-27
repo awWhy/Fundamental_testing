@@ -173,6 +173,7 @@ export interface globalType {
         base: number
         total: number
         next: number
+        scaling: number
     }
     vaporizationInfo: {
         trueResearch0: number
@@ -343,6 +344,7 @@ export interface globalType {
 export interface globalSaveType {
     intervals: {
         main: number
+        offline: number
         numbers: number
         visual: number
         autoSave: number
@@ -357,4 +359,4 @@ export interface globalSaveType {
     developerMode: boolean
 }
 
-export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';

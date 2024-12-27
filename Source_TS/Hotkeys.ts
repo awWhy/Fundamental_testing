@@ -1,7 +1,7 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
-import { buyBuilding, collapseResetUser, dischargeResetUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
+import { buyBuilding, collapseResetUser, dischargeResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGameUser } from './Main';
 import { SRHotkeysInfo, globalSave, specialHTML } from './Special';
 import type { hotkeysList } from './Types';
@@ -25,7 +25,7 @@ const hotkeyFunction = {
     },
     galaxy: () => buyBuilding(3, 5),
     pause: (event) => {
-        if (event.repeat || !globalSave.developerMode) { return; }
+        if (event.repeat) { return; }
         void pauseGameUser();
     },
     toggleAll: (event) => {
@@ -37,6 +37,7 @@ const hotkeyFunction = {
         void mergeResetUser();
     },
     universe: () => buyBuilding(1, 6),
+    exitChallenge: () => enterExitChallengeUser(null),
     tabRight: (event) => {
         if (event.repeat) { return; }
         changeTab('Right');

@@ -94,7 +94,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('strange3Stage5').style.display = '';
         getId('strange4Stage5').style.display = '';
         getId('stageAutoInterstellar').style.display = '';
-        getId('stageAutoVoid').style.display = '';
         getId('vaporizationLimit').style.display = '';
         getId('collapseCapped').style.display = '';
 
@@ -183,7 +182,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('mergeEffects').style.display = 'none';
         getId('researchAuto1').style.display = 'none';
         getId('researchAuto2').style.display = 'none';
-        getId('stageAutoVoid').style.display = 'none';
         getId('vaporizationLimit').style.display = 'none';
         getId('collapseCapped').style.display = 'none';
         getId('element0').style.display = 'none';

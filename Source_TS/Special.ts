@@ -8,6 +8,7 @@ import { format, numbersUpdate, stageUpdate, visualTrueStageUnlocks, visualUpdat
 export const globalSave: globalSaveType = {
     intervals: {
         main: 20,
+        offline: 40,
         numbers: 80,
         visual: 1000,
         autoSave: 20000
@@ -24,6 +25,7 @@ export const globalSave: globalSaveType = {
         toggleAll: ['Shift A', 'Shift A'],
         merge: ['Shift M', 'Shift M'],
         universe: ['Shift U', 'Shift U'],
+        exitChallenge: ['Shift E', 'Shift E'],
         tabRight: ['Arrow Right', 'Arrow Right'],
         tabLeft: ['Arrow Left', 'Arrow Left'],
         subtabUp: ['Arrow Up', 'Arrow Up'],
@@ -915,7 +917,7 @@ export const playEvent = (event: number, replay = true) => {
             return void Alert('Last explosion not only created first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis');
         case 5:
             if (!replay) { stageUpdate(false); }
-            return void Alert("There are no Structures in Intergalactic yet, but they can be created within previous Stages. Any new Stage reset and export from now on will award Strange quarks, also unlock new effect for '[26] Iron' Element\n(Stars in Intergalactic are just Stars from Interstellar)");
+            return void Alert("There are no Structures in Intergalactic yet, but they can be created within previous Stages. Stage resets and exports will now award Strange quarks, '[26] Iron' Element will use new effect to improve reward.\n(Stars in Intergalactic are just Stars from Interstellar)");
         case 6:
             return void Alert('As Galaxies started to Merge, their combined Gravity pushed Vacuum out of its local minimum into more stable global minimum. New forces and Structures are expected within this new and true Vacuum state');
         case 7:
@@ -924,36 +926,6 @@ export const playEvent = (event: number, replay = true) => {
             if (!replay) { stageUpdate(false); }
             return void Alert("Soon there will be enough matter to create first 'Universe' within 'Abyss' Stage. Doing it will require getting at least 40 Galaxies before Merge reset. Creating it will do a Vacuum reset, while also resetting Vacuum state back to false");
     }
-};
-
-export const showHints = async() => {
-    let mainText = "These hints can explain some parts of the game, write hint of interest into the input below\n'Mobile device', 'Screen reader', 'Safe reset'";
-    if (player.stage.true >= 5) {
-        mainText += ", 'Intergalactic Stage', 'Export reward'";
-    }
-    if (player.stage.true >= 6) {
-        mainText += ", 'True Vacuum'";
-    }
-    const hint = await Prompt(mainText);
-    if (hint === null || hint === '') { return; }
-
-    let hintText = `Hint about '${hint}' doesn't exist`;
-    const lower = hint.replaceAll(' ', '').toLowerCase();
-    if (lower === 'mobiledevice') {
-        hintText = 'Example of changes that this support does:\n- Replaces mouse events with touch events\n- Adds abbility to change tab/subtab by swiping\n- Makes creation of Upgrades require usage of new special button, but some will require holding down instead\n- Adds buttons accross all tabs to be used as hotkeys\n- Disables unwanted browser behaviours and can fix bugs related to poor browser support (will need to disable forced zoom in browser settings if footer moves on its own)';
-    } else if (lower === 'screenreader') {
-        hintText = 'Example of changes that this support does:\n- Adds events based on focus changing\n- Adds more information for Aria, like more text based on performed actions';
-    } if (lower === 'safereset') {
-        hintText = "'Safe' setting for confirmation toggles causes warning to pop up if game considers action to be unwanted. After progressing further, some of them might start getting in a way";
-    } else if (lower === 'exportreward') {
-        hintText = 'Export reward is based on highest Stage reset reward, after collecting it timer will reset to 0 and storage will decrease by collected amount\nStrange quarks storage is always increased by +1';
-    } else if (lower === 'intergalacticstage') {
-        hintText = `Intergalactic Stage is a direct continuation of Interstellar Stage. ${player.stage.true >= 6 ? 'In false Vacuum ' : ''}Structures for it are unlocked by completing Milestones, Collapse also resets Intergalactic Stage`;
-    } else if (lower === 'truevacuum') {
-        const allUnlocked = player.stage.true >= 7 || player.stage.resets >= 1;
-        hintText = `In true Vacuum all Stages are combined\n${allUnlocked || player.researchesExtra[1][2] >= 1 ? 'Since Accretion Stage shares Mass with Microworld, turning off auto Preons after reaching hardcap will speed up Mass accumulation' : 'More information after unlocking Accretion Stage'}\n${allUnlocked || player.researchesExtra[1][2] >= 2 ? 'Submerged Stage acts like a bonus Stage, its not required for progression and will only speed up other Stages' : 'More information after unlocking Submerged Stage'}\n${allUnlocked || player.accretion.rank >= 6 ? "Since Interstellar Stage also shares Mass with Accretion, turning off all related auto's will speed up reaching Solar mass hardcap" : 'More information after unlocking Intestellar Stage'}`;
-    }
-    if (await Confirm(`${hintText}\nView another one?`)) { void showHints(); }
 };
 
 const buildBigWindow = () => {
@@ -1027,17 +999,20 @@ export const getHotkeysHTML = () => {
     buildBigWindow();
     if (getId('hotkeysHTML', true) === null) {
         const mainHTML = document.createElement('div');
-        mainHTML.innerHTML = `<p id="hotkeysMessage" class="mainText bigWord" aria-live="assertive">Some hotkeys can be changed by clicking on them</p>
-        <label id="tabRightHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change tab to the next one</span></label>
-        <label id="tabLeftHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change tab to the previous one</span></label>
-        <label id="subtabUpHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change subtab to the next one</span></label>
-        <label id="subtabDownHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change subtab to the previous one</span></label>
-        <label id="stageRightHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change active Stage to the next one</span></label>
-        <label id="stageLeftHotkey" class="mainText"><button></button> ‒ <span class="whiteText">change active Stage to the previous one</span></label>
-        <p class="mainText">Numbers ‒ <span class="whiteText">make a Structure</span></p>
-        <label id="makeAllHotkey" class="mainText">0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">make all Structures</span></label>
-        <p class="mainText">Shift Numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
-        <label id="toggleAllHotkey" class="mainText">Shift 0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">toggle all auto Structures</span></label>
+        mainHTML.innerHTML = `<p id="hotkeysMessage" class="bigWord" aria-live="assertive">Some hotkeys can be changed by clicking on them</p>
+        ${globalSave.MDSettings[0] ? `<p>Swipe Left or Right ‒ <span class="whiteText">change current tab</span></p>
+        <p>Swipe Down or Up ‒ <span class="whiteText">change current subtab</span></p>` : ''}
+        <label id="tabRightHotkey"><button></button> ‒ <span class="whiteText">change tab to the next one</span></label>
+        <label id="tabLeftHotkey"><button></button> ‒ <span class="whiteText">change tab to the previous one</span></label>
+        <label id="subtabUpHotkey"><button></button> ‒ <span class="whiteText">change subtab to the next one</span></label>
+        <label id="subtabDownHotkey"><button></button> ‒ <span class="whiteText">change subtab to the previous one</span></label>
+        <label id="stageRightHotkey"><button></button> ‒ <span class="whiteText">change active Stage to the next one</span></label>
+        <label id="stageLeftHotkey"><button></button> ‒ <span class="whiteText">change active Stage to the previous one</span></label>
+        <p>Numbers ‒ <span class="whiteText">make a Structure</span></p>
+        <label id="makeAllHotkey">0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">make all Structures</span></label>
+        <p>Shift Numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
+        <label id="toggleAllHotkey">Shift 0 <span class="whiteText">or</span> <button></button> ‒ <span class="whiteText">toggle all auto Structures</span></label>
+        <label id="exitChallengeHotkey"><button></button> ‒ <span class="whiteText">Exit out of current Challenge</span></label>
         <div>
             <label id="stageHotkey" class="stageText"><button></button> ‒ <span class="whiteText">Stage reset</span></label>
             <label id="dischargeHotkey" class="orangeText stage1Include"><button></button> ‒ <span class="whiteText">Discharge</span></label>
@@ -1049,10 +1024,10 @@ export const getHotkeysHTML = () => {
             <label id="universeHotkey" class="darkvioletText stage6Include"><button></button> ‒ <span class="whiteText">Universe</span></label>
             <label id="pauseHotkey" class="grayText"><button></button> ‒ <span class="whiteText">pause</span></label>
         </div>
-        <p class="mainText">Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click selected HTML Element or confirm Alert</span></p>
-        <p class="mainText">Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
-        <p class="mainText">Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
-        <p class="mainText">Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
+        <p>Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click selected HTML Element or confirm Alert</span></p>
+        <p>Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
+        <p>Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
+        <p>Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
         <label id="hotkeysToggleLabel" title="Turn ON, if using non QWERTY layout keyboard">Language dependant hotkeys </label>
         <button id="restoreHotkeys" type="button">Restore default hotkeys values</button>`;
         getQuery('#bigWindow > div').prepend(mainHTML);
@@ -1165,7 +1140,6 @@ export const getHotkeysHTML = () => {
     };
     body.addEventListener('keydown', key);
     closeButton.addEventListener('click', close);
-    getId('pauseHotkey').style.display = globalSave.developerMode ? '' : 'none';
     mainHTML.style.display = '';
     windowHMTL.style.display = '';
     getQuery('#tabRightHotkey > button').focus();

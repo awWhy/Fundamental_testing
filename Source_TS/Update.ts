@@ -69,7 +69,7 @@ export const switchTab = (tab: gameTab, subtab = null as null | string) => {
 };
 
 /** Normal game tick */
-export const timeUpdate = (timeWarp = 0, tick = 0.2) => {
+export const timeUpdate = (timeWarp = 0, tick = globalSave.intervals.offline / 1000) => {
     const { time, ASR } = player;
     const { auto, buildings: autoBuy } = player.toggles;
     const { maxActive } = global.buildingsInfo;
@@ -88,10 +88,10 @@ export const timeUpdate = (timeWarp = 0, tick = 0.2) => {
         time.updated = currentTime;
         time.export[0] += passedSeconds;
         global.lastSave += passedSeconds;
-        if (passedSeconds > 0.2) {
-            if (passedSeconds > 600) { return void simulateOffline(passedSeconds); }
-            timeWarp = passedSeconds - 0.2;
-            passedSeconds = 0.2;
+        if (passedSeconds > tick) {
+            if (passedSeconds > tick * 600) { return void simulateOffline(passedSeconds); }
+            timeWarp = passedSeconds - tick;
+            passedSeconds = tick;
         } else if (passedSeconds <= 0) {
             time.offline += passedSeconds;
             return;
@@ -214,7 +214,7 @@ export const numbersUpdate = () => {
         let timeLimit = 0;
         if (vacuum) {
             if (challenge !== null) { timeLimit = global.challengesInfo.time[challenge]; }
-        } else if (player.inflation.tree[4] < 1 && (player.stage.true >= 7 || player.stage.resets >= 4)) {
+        } else if (player.stage.true >= 7 || player.stage.resets >= 4) {
             const s = Math.min(player.stage.current, 4);
             const info = global.milestonesInfo;
             for (let i = 0; i < info[s].need.length; i++) {
@@ -424,13 +424,14 @@ export const numbersUpdate = () => {
             getQuery('#universeTime > span').textContent = format(player.inflation.age, { type: 'time' });
             getQuery('#universeTimeReal > span').textContent = format(player.time.universe, { type: 'time' });
             getChallengeDescription(global.lastChallenge[0]);
+            getChallengeReward(global.lastChallenge[1]);
         }
     } else if (tab === 'upgrade' || tab === 'Elements') {
         const trueSubtab = tab === 'Elements' ? tab : subtab.upgradeCurrent;
         if (trueSubtab === 'Upgrades') {
             getUpgradeDescription(global.lastUpgrade[active][0], global.lastUpgrade[active][1]);
         } else if (trueSubtab === 'Elements') {
-            getUpgradeDescription(global.lastElement, 'elements');
+            if (global.lastElement !== 0) { getUpgradeDescription(global.lastElement, 'elements'); }
         }
     } else if (tab === 'strangeness') {
         if (subtab.strangenessCurrent === 'Matter') {
@@ -468,8 +469,7 @@ export const numbersUpdate = () => {
                 for (let i = 0; i < info[s].need.length; i++) {
                     getId(`milestone${i + 1}Stage${s}Current`).textContent = format(milestoneGetValue(i, s), { padding: true });
                     getId(`milestone${i + 1}Stage${s}Required`).textContent = player.milestones[s][i] >= info[s].max[i] ? 'Maxed' :
-                        player.inflation.tree[4] < 1 && time > info[s].time[i] ? 'No time' :
-                        format(info[s].need[i], { padding: true });
+                        time > info[s].time[i] ? 'No time' : format(info[s].need[i], { padding: true });
                 }
             }
             getStrangenessDescription(global.lastMilestone[0], global.lastMilestone[1], 'milestones');
@@ -499,6 +499,7 @@ export const numbersUpdate = () => {
             if (active === 1) {
                 getQuery('#dischargeStat > span').textContent = format(global.dischargeInfo.total, { padding: 'exponent' });
                 getId('dischargeStatTrue').textContent = ` [${format(player.discharge.current, { padding: 'exponent' })}]`;
+                getQuery('#dischargeScaleStat > span').textContent = format(global.dischargeInfo.scaling);
                 for (let s = 1; s <= (vacuum ? 5 : 1); s++) {
                     const buildings = player.buildings[s];
                     const energyType = global.dischargeInfo.energyType[s];
@@ -861,7 +862,7 @@ export const visualUpdate = () => {
     } else if (tab === 'strangeness') {
         if (subtab.strangenessCurrent === 'Matter') {
             getId('strange1').style.display = player.strangeness[5][8] >= 1 || player.cosmon.total >= 2 ? '' : 'none';
-            getId('strange1Unlocked').style.display = player.strangeness[5][8] >= 1 || player.inflation.tree[3] >= 1 ? '' : 'none';
+            getId('strange1Unlocked').style.display = player.strangeness[5][8] >= 1 || player.inflation.tree[4] >= 1 ? '' : 'none';
             if (vacuum) {
                 const bound = player.strangeness[5][3] >= 1;
                 const voidProgress = player.challenges.void;
@@ -920,7 +921,7 @@ export const visualUpdate = () => {
             const { researchesAuto, strangeness } = player;
 
             getId('collapsePointsMax').textContent = strangeness[5][4] >= 1 ? 'There is no maximum value' : 'Maximum value is 40';
-            getId('exportStrangeletsUnlocked').style.display = strangeness[5][8] >= 1 || player.inflation.tree[3] >= 1 ? '' : 'none';
+            getId('exportStrangeletsUnlocked').style.display = strangeness[5][8] >= 1 || player.inflation.tree[4] >= 1 ? '' : 'none';
             getId('toggleAuto0').style.display = strangeness[5][6] >= 1 ? '' : 'none';
             getId('toggleAuto0Main').style.display = strangeness[5][6] >= 1 ? '' : 'none';
             if (!vacuum) { getId('stageAutoInterstellar').style.display = strangeness[5][6] >= 2 ? '' : 'none'; }
@@ -963,7 +964,10 @@ export const visualUpdate = () => {
                 getId('vaporizationExtra').style.display = player.challenges.void[4] >= 1 ? '' : 'none';
                 getId('exportReward').style.display = player.strange[0].total > 0 ? '' : 'none';
                 getId('mergeToggleReset').style.display = vacuum && player.upgrades[5][3] === 1 ? '' : 'none';
-                if (hotkeyTest !== null) { getId('mergeHotkey').style.display = player.upgrades[5][3] === 1 ? '' : 'none'; }
+                if (hotkeyTest !== null) {
+                    getId('exitChallengeHotkey').style.display = highest >= 6 && player.stage.resets >= 1 ? '' : 'none';
+                    getId('mergeHotkey').style.display = player.upgrades[5][3] === 1 ? '' : 'none';
+                }
             }
         } else if (subtab.settingsCurrent === 'History') {
             updateStageHistory();
@@ -988,6 +992,7 @@ export const visualUpdate = () => {
             if (active === 1) {
                 getId('dischargeStat').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
                 getId('dischargeStatTrue').style.display = player.discharge.current !== global.dischargeInfo.total ? '' : 'none';
+                getId('dischargeScaleStat').style.display = player.upgrades[1][5] === 1 ? '' : 'none';
                 for (let s = 1; s <= (vacuum ? 5 : 1); s++) {
                     let anyUnlocked = false;
                     for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
@@ -1083,6 +1088,7 @@ export const visualTrueStageUnlocks = () => {
         getId('stageResets').style.display = '';
         getId('exportReward').style.display = '';
         getId('exportStats').style.display = '';
+        if (hotkeyTest !== null) { getId('exitChallengeHotkey').style.display = ''; }
     }
 };
 
@@ -1114,7 +1120,7 @@ export const getUpgradeDescription = (index: number | null, type: 'upgrades' | '
         getId('elementEffect').textContent = player.elements[index] >= 1 || (player.collapse.show >= index && index !== 0) ? pointer.effectText[index]() : 'Effect is not yet known.';
         getId('elementCost').textContent = player.elements[index] >= 1 ? 'Obtained.' :
             player.elements[index] > 0 ? 'Awaiting Collapse.' :
-            index === 0 ? 'Unknown.' : `${format(pointer.startCost[index])} Elements.`;
+            index === 0 ? 'Unknown.' : `${format(pointer.startCost[index])} Elements.${globalSave.MDSettings[0] ? ' (Hold to create)' : ''}`;
         return;
     }
 
@@ -1226,7 +1232,7 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
             if (level < pointer.max[index]) {
                 const isActive = global.stageInfo.activeAll.includes(Math.min(stageIndex, 4));
                 text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
-                <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive && player.inflation.tree[4] < 1 ? player.time.stage : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
+                <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive ? player.time.stage : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
                 <p class="darkvioletText">Unlock: <span class="greenText">Main reward unlocked after ${pointer.max[index] - level} more completions.</span></p>`;
             } else { text = `<p class="darkvioletText">Reward: <span class="greenText">${pointer.rewardText[index]()}</span></p>`; }
         }
@@ -1252,7 +1258,8 @@ export const getChallengeDescription = (index: number) => {
 };
 
 /** Void only at the moment */
-export const getChallengeReward = (index: number) => {
+export const getChallengeReward = (index: number | null) => {
+    if (index === null) { return; }
     const need = global.challengesInfo.needText[0][index];
     const current = player.challenges[player.challenges.super ? 'superVoid' : 'void'][index];
     const best = player.challenges.super ? current : player.challenges.voidCheck[index];
@@ -1260,11 +1267,12 @@ export const getChallengeReward = (index: number) => {
     let text = '';
     for (let i = 0; i < need.length; i++) {
         const unlocked = current > i;
-        text += `<div><p><span class="${unlocked ? 'greenText' : 'redText'}">→</span> ${need[i]()}${!unlocked && !(best > i && player.inflation.tree[4] >= 1) && noTime && player.challenges.active === 0 ? ' <span class="redText">(Failed)</span>' : ''}</p>
+        text += `<div><p><span class="${unlocked ? 'greenText' : 'redText'}">→</span> ${need[i]()}${!unlocked && player.challenges.active === 0 && noTime ? ' <span class="redText">(Failed)</span>' : ''}</p>
         <p><span class="${unlocked ? 'greenText' : 'redText'}">Reward:</span> ${best > i ? `${global.challengesInfo.rewardText[0][index][i]}${!unlocked && globalSave.SRSettings[0] ? ' (not unlocked)' : ''}` : 'Not yet unlocked'}</p></div>`;
     }
 
-    getId('voidRewardsDivText').innerHTML = text;
+    const textHTML = getId('voidRewardsDivText');
+    if (textHTML.innerHTML !== text) { textHTML.innerHTML = text; }
 };
 
 export const visualUpdateUpgrades = (index: number, stageIndex: number, type: 'upgrades' | 'elements') => {
