@@ -1,6 +1,6 @@
 import { allowedToBeReset, checkTab } from './Check';
 import { cloneArray, global, player, playerStart } from './Player';
-import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, assignBuildingInformation, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignPuddles, assignTrueEnergy } from './Stage';
+import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, autoElementsSet, assignMilestoneInformation, assignStrangeInfo, assignMaxRank, assignPuddles, assignTrueEnergy, assignSubmergedLevels, assignBuildingsProduction } from './Stage';
 import { setRemnants, stageUpdate, switchTab, visualUpdateResearches, visualUpdateUpgrades } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
@@ -27,9 +27,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     let energyRefund = 0;
     for (const s of stageIndex) {
         if (s === 2) {
-            global.vaporizationInfo.trueResearch0 = 0;
-            global.vaporizationInfo.trueResearch1 = 0;
-            global.vaporizationInfo.trueResearchRain = 0;
+            assignSubmergedLevels(true);
         } else if (s === 4) {
             global.collapseInfo.trueStars = 0;
         }
@@ -115,9 +113,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
                 building[0].total.setValue(playerStart.buildings[s][0].current);
             }
             if (s === 2) {
-                global.vaporizationInfo.trueResearch0 = 0;
-                global.vaporizationInfo.trueResearch1 = 0;
-                global.vaporizationInfo.trueResearchRain = 0;
+                assignSubmergedLevels();
                 assignPuddles();
             }
         }
@@ -128,8 +124,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
         discharge.energy = 0;
         dischargeInfo.energyTrue = 0;
     }
-
-    assignBuildingInformation();
+    assignBuildingsProduction.multipliersAll();
 };
 
 /** Default value for update is 'normal', default value for full is true and should be set to false only if Stage is permanent */
@@ -162,10 +157,8 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
             global.dischargeInfo.energyTrue = 0;
         } else if (s === 2) {
             if (player.strangeness[2][5] < 1) { player.ASR[2] = 0; }
-            global.vaporizationInfo.trueResearch0 = 0;
-            global.vaporizationInfo.trueResearch1 = 0;
-            global.vaporizationInfo.trueResearchRain = 0;
             player.vaporization.clouds.setValue('0');
+            assignSubmergedLevels(true);
         } else if (s === 3) {
             if (player.strangeness[3][5] < 1) { player.ASR[3] = 0; }
             if (player.inflation.vacuum) {
@@ -208,7 +201,6 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         }
     }
 
-    assignBuildingInformation();
     for (const s of stageIndex) { //Less errors if do it separatly
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
@@ -218,13 +210,14 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         autoResearchesSet('researches', s);
         autoResearchesSet('researchesExtra', s);
     }
+    assignBuildingsProduction.multipliersAll();
     if (update !== null) {
         switchTab(checkTab(global.tab) ? global.tab : 'stage');
         stageUpdate(update, true);
         if (!update) {
             const active = player.stage.active;
             for (let i = 0; i < global.upgradesInfo[active].maxActive; i++) { visualUpdateUpgrades(i, active, 'upgrades'); }
-            if (player.stage.active === 4) { setRemnants(); }
+            if (active === 4) { setRemnants(); }
         }
     }
 };
@@ -246,6 +239,7 @@ export const resetVacuum = () => {
             }
             player.strangeness[s] = cloneArray(playerStart.strangeness[s]);
             player.milestones[s] = cloneArray(playerStart.milestones[s]);
+            for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
             player.ASR[s] = 0;
         }
 
@@ -255,6 +249,12 @@ export const resetVacuum = () => {
         global.lastUpgrade[s][0] = null;
     }
     player.researchesAuto = cloneArray(playerStart.researchesAuto);
+    player.stage.current = 1;
+    player.stage.resets = 0;
+    player.stage.peak = 0;
+    player.stage.time = 0;
+    player.time.stage = 0;
+    global.debug.timeLimit = false;
 
     //Stage 1
     player.discharge.energy = 0;
@@ -262,11 +262,9 @@ export const resetVacuum = () => {
     player.discharge.current = 0;
 
     //Stage 2
-    global.vaporizationInfo.trueResearch0 = 0;
-    global.vaporizationInfo.trueResearch1 = 0;
-    global.vaporizationInfo.trueResearchRain = 0;
     player.vaporization.clouds.setValue('0');
     player.vaporization.cloudsMax.setValue('0');
+    assignSubmergedLevels(true);
 
     //Stage 3
     if (player.inflation.vacuum) {
@@ -291,12 +289,6 @@ export const resetVacuum = () => {
     player.challenges.void = cloneArray(player.challenges.superVoid);
     global.historyStorage.stage = [];
     player.history.stage.best = [3.1556952e16, 0, 0, 0];
-    player.stage.current = 1;
-    player.stage.resets = 0;
-    player.stage.peak = 0;
-    player.stage.time = 0;
-    player.time.stage = 0;
-    global.debug.timeLimit = false;
     global.lastStrangeness = [null, 0];
     global.lastMilestone = [null, 0];
     for (let i = 0; i < playerStart.strange.length; i++) {
@@ -306,7 +298,7 @@ export const resetVacuum = () => {
     }
 
     if (activeMilestone[0]) {
-        const start = player.buildings[6][1].true;
+        const start = player.buildings[6][1].true ** 2;
         player.strange[0].current = start;
         player.strange[0].total = start;
         player.strangeness[1][8] = 2;
@@ -319,11 +311,7 @@ export const resetVacuum = () => {
         player.researchesAuto[1] = 2;
     }
 
-    assignBuildingInformation();
-    assignStrangeInfo[1]();
-    assignStrangeInfo[0]();
-    assignMaxRank();
-    assignTrueEnergy();
+    for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 5; s++) {
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
@@ -333,14 +321,18 @@ export const resetVacuum = () => {
             player.strangeness[s][5] = 1;
         }
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
-        for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
+        autoUpgradesSet(s);
+        autoResearchesSet('researches', s);
+        autoResearchesSet('researchesExtra', s);
     }
-    for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
-    for (let i = 0; i < playerStart.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
-    autoUpgradesSet('all');
-    autoResearchesSet('researches', 'all');
-    autoResearchesSet('researchesExtra', 'all');
     autoElementsSet();
+
+    assignBuildingsProduction.multipliersAll();
+    assignStrangeInfo[1]();
+    assignStrangeInfo[0]();
+    assignMaxRank();
+    assignTrueEnergy();
+    for (let i = 0; i < playerStart.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
 
     switchTab(checkTab(global.tab) ? global.tab : 'stage');
     stageUpdate(true, true);
@@ -466,6 +458,7 @@ export const loadFromClone = () => {
             if (depth !== 'stage') {
                 player.strangeness[s] = clone.strangeness[s];
                 player.milestones[s] = clone.milestones[s];
+                for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
             }
         }
 
@@ -483,11 +476,9 @@ export const loadFromClone = () => {
 
     player.discharge.current = clone.discharge.current;
     player.discharge.energy = clone.discharge.energy;
-    global.vaporizationInfo.trueResearch0 = 0;
-    global.vaporizationInfo.trueResearch1 = 0;
-    global.vaporizationInfo.trueResearchRain = 0;
     player.vaporization.clouds.setValue(clone.vaporization.clouds);
     player.accretion.rank = clone.accretion.rank;
+    assignSubmergedLevels();
     const trueStars = clone.buildings[4];
     global.collapseInfo.trueStars = trueStars[1].true + trueStars[2].true + trueStars[3].true + trueStars[4].true + trueStars[5].true;
     global.collapseInfo.pointsLoop = 0;
@@ -518,29 +509,28 @@ export const loadFromClone = () => {
         global.lastMilestone = [null, 0];
     }
 
-    assignBuildingInformation();
-    assignTrueEnergy();
-    if (depth !== 'stage') {
-        assignStrangeInfo[1]();
-        assignStrangeInfo[0]();
-        assignMaxRank();
-    }
+    for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 5; s++) {
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
         calculateMaxLevel(0, s, 'ASR');
         if (depth !== 'stage') {
             for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
-            for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
         }
+        autoUpgradesSet(s);
+        autoResearchesSet('researches', s);
+        autoResearchesSet('researchesExtra', s);
     }
-    for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
     for (let i = 0; i < playerStart.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
-
-    autoUpgradesSet('all');
-    autoResearchesSet('researches', 'all');
-    autoResearchesSet('researchesExtra', 'all');
     autoElementsSet();
+
+    assignBuildingsProduction.multipliersAll();
+    assignTrueEnergy();
+    if (depth !== 'stage') {
+        assignStrangeInfo[1]();
+        assignStrangeInfo[0]();
+        assignMaxRank();
+    }
 
     switchTab(checkTab(global.tab) ? global.tab : 'stage');
     stageUpdate(true, true);

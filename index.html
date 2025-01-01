@@ -205,6 +205,7 @@
                             <p id="mainCapCurrentS5" class="cyanText">Solar mass after Collapse: <span class="orangeText">0</span><span id="mainCapS5"> | Hardcap: <span class="orangeText">0</span></span></p>
                             <p id="elementsProductionS5" class="redText">Total production of Elements: <span class="orangeText">0</span></p>
                             <p id="collapseBoostTotalS5" class="orchidText">Total boost after Collapse: <span class="orangeText">1</span></p>
+                            <p id="mergeBoostTotal" class="darkvioletText">Total boost after Merge: <span class="grayText">1</span></p>
                             <section id="mergeEffects">
                                 <h3 class="cyanText bigWord">Current effects</h3>
                                 <p id="merge1Effect" class="grayText">Groups: <span class="greenText">1</span><span class="greenText">Boost to Galaxies</span></p>
@@ -703,20 +704,20 @@
                             <p><span>Energized</span> ⟶ <span id="milestone2Stage1Current" class="greenText">0</span> / <span id="milestone2Stage1Required" class="greenText">0</span></p>
                         </div>
                         <div class="stage2Include stage2borderImage stage2windowBackground blueText">
-                            <p><span>A Nebula of Drops</span> ⟶ <span id="milestone1Stage2Current" class="greenText">0</span> / <span id="milestone1Stage2Required" class="greenText">0</span></p>
+                            <p id="milestone1Stage2Main"><span>A Nebula of Drops</span> ⟶ <span id="milestone1Stage2Current" class="greenText">0</span> / <span id="milestone1Stage2Required" class="greenText">0</span></p>
                             <p><span>Just a bigger Puddle</span> ⟶ <span id="milestone2Stage2Current" class="greenText">0</span> / <span id="milestone2Stage2Required" class="greenText">0</span></p>
                         </div>
                         <div class="stage3Include stage3borderImage stage3windowBackground grayText">
-                            <p><span>Cluster of Mass</span> ⟶ <span id="milestone1Stage3Current" class="greenText">0</span> / <span id="milestone1Stage3Required" class="greenText">0</span></p>
+                            <p id="milestone1Stage3Main"><span>Cluster of Mass</span> ⟶ <span id="milestone1Stage3Current" class="greenText">0</span> / <span id="milestone1Stage3Required" class="greenText">0</span></p>
                             <p><span>Satellites of Satellites</span> ⟶ <span id="milestone2Stage3Current" class="greenText">0</span> / <span id="milestone2Stage3Required" class="greenText">0</span></p>
                         </div>
                         <div class="stage4Include stage4borderImage stage4windowBackground orangeText">
                             <p><span>Remnants of past</span> ⟶ <span id="milestone1Stage4Current" class="greenText">0</span> / <span id="milestone1Stage4Required" class="greenText">0</span></p>
                             <p><span>Supermassive</span> ⟶ <span id="milestone2Stage4Current" class="greenText">0</span> / <span id="milestone2Stage4Required" class="greenText">0</span></p>
                         </div>
-                        <div id="milestonesStage5Progress" class="stage4Include stage5borderImage stage5windowBackground darkorchidText">
+                        <div id="milestonesStage5Main" class="stage4Include stage5borderImage stage5windowBackground darkorchidText">
                             <p><span>Light in the dark</span> ⟶ <span id="milestone1Stage5Current" class="greenText">0</span> / <span id="milestone1Stage5Required" class="greenText">0</span></p>
-                            <p id="milestone2Stage5Progress" class="stage5Include"><span>End of Greatness</span> ⟶ <span id="milestone2Stage5Current" class="greenText">0</span> / <span id="milestone2Stage5Required" class="greenText">0</span></p>
+                            <p id="milestone2Stage5Main" class="stage5Include"><span>End of Greatness</span> ⟶ <span id="milestone2Stage5Current" class="greenText">0</span> / <span id="milestone2Stage5Required" class="greenText">0</span></p>
                         </div>
                     </div>
                 </section>
@@ -725,11 +726,11 @@
                 <section id="inflationSubtabResearches" class="insideTab" aria-label="Current tab">
                     <div id="inflationContainer">
                         <div id="inflationAvailable">
-                            <input type="image" src="Used_art/Brown%20dwarf%20time%20hot.png" alt="Overboost" draggable="false" id="inflation1" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
-                            <input type="image" src="Used_art/Brown%20dwarf%20time.png" alt="Global boost" draggable="false" id="inflation2" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Time%20fast.png" alt="Overboost" draggable="false" id="inflation1" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Time.png" alt="Global boost" draggable="false" id="inflation2" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                             <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="Strange gain" draggable="false" id="inflation3" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                             <input type="image" src="Used_art/Missing.png" alt="Instability" draggable="false" id="inflation4" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
-                            <input type="image" src="Used_art/Strangelets%20many.png" alt="Stranger gain" draggable="false" id="inflation5" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
+                            <input type="image" src="Used_art/Milestones.png" alt="More Milestones" draggable="false" id="inflation5" class="interactiveImage" aria-labelledby="inflationText inflationCost inflationEffect">
                         </div>
                         <div id="inflationCreated"></div>
                     </div>
@@ -746,7 +747,7 @@
                 </section>
                 <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Current tab">
                     <div id="inflationMilestones">
-                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to self-made Universes and 'Conservation of Mass' Strangeness maxed</div>
+                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to self-made Universes ^2 and 'Conservation of Mass' Strangeness maxed</div>
                         <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1</div>
                         <div id="inflationMilestone3"><p>Unlocked at 3 Universes:</p>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</div>
                     </div>
@@ -1065,7 +1066,7 @@
                         </div>
                         <div class="stats stage1Only">
                             <p id="dischargeStat" class="orangeText">Discharge goals: <span class="whiteText">0</span><span id="dischargeStatTrue" class="cyanText">[0]</span></p>
-                            <p id="dischargeScaleStat" class="orangeText">Discharge cost scaling: <span class="whiteText">0</span></p>
+                            <p id="dischargeScaleStat" class="orangeText">Discharge goal requirement scaling: <span class="whiteText">0</span></p>
                             <section id="energyGainStats">
                                 <h3 class="orangeText">Energy gained from creating Structures:</h3>
                                 <div> <!-- Temporary until can figure out better solution (without using table) -->
@@ -1149,6 +1150,7 @@
                                     </section>
                                 </div>
                             </section>
+                            <p id="effectiveEnergyStat" class="orangeText">Effective Energy: <span class="whiteText">0</span></p>
                             <p id="maxEnergyStat" class="orangeText">Most Energy at once: <span class="whiteText">0</span></p>
                         </div>
                         <div class="stats stage2Only">
@@ -1162,7 +1164,7 @@
                             <p id="maxCloudStat" class="grayText">Most Clouds at once: <span class="blueText">0</span></p>
                         </div>
                         <div class="stats stage3Only">
-                            <p class="grayText">Current Rank: <span id="currentRank" class="darkorchidText">0</span></p>
+                            <p class="grayText">Current Rank: <span id="currentRank" class="darkorchidText">0</span><span id="currentRankTrue" class="orchidText">[0]</span></p>
                             <div class="imageList">
                                 <img src="Used_art/Ocean%20world.png" alt="Ocean world" loading="lazy" draggable="false" title="Ocean world" id="rankStat0">
                                 <img src="Used_art/Dust.png" alt="Cosmic dust" loading="lazy" draggable="false" title="Cosmic dust" id="rankStat1">
@@ -1186,7 +1188,15 @@
                                 <h4 class="orchidText">Total: <span id="starTotal" class="greenText">1</span></h4>
                             </section>
                         </div>
-                        <p class="redText stage5Only">Self-made Stars: <span id="trueStarsStat" class="orangeText">0</span></p>
+                        <div class="stats stage5Only">
+                            <section id="mergeBoost">
+                                <h3 class="cyanText">Boost after Merge</h3>
+                                <p id="mergeBaseStat" class="grayText">Galaxies: <span class="greenText">1</span></p>
+                                <p id="merge1Stat" class="grayText">Groups: <span class="greenText">1</span></p>
+                                <h4 class="darkvioletText">Total: <span id="mergeTotal" class="greenText">1</span></h4>
+                            </section>
+                            <p class="redText">Self-made Stars: <span id="trueStarsStat" class="orangeText">0</span></p>
+                        </div>
                         <div class="stats stage6Only">
                             <p class="orchidText">Vacuum state: <span id="vacuumState">False</span></p>
                             <p class="orchidText">Vacuum resets: <span id="vacuumResets" class="darkorchidText">0</span></p>

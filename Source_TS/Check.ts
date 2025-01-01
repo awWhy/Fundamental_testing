@@ -1,4 +1,4 @@
-import type Overlimit from './Limit';
+import Overlimit from './Limit';
 import { global, player } from './Player';
 import type { gameTab } from './Types';
 
@@ -14,7 +14,7 @@ export const checkTab = (tab: gameTab, subtab = null as null | string): boolean 
             return subtab === 'Upgrades' || subtab === null;
         case 'strangeness':
             if (player.stage.true < 7 && player.strange[0].total <= 0 && (!player.inflation.vacuum || player.stage.current < 5)) { return false; }
-            if (subtab === 'Milestones') { return !player.inflation.vacuum; }
+            if (subtab === 'Milestones') { return player.stage.true >= 7 || !player.inflation.vacuum; }
             return subtab === 'Matter' || subtab === null;
         case 'inflation':
             if (player.stage.true < 7) { return false; }
@@ -47,7 +47,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.researchesExtra[4][0] >= 1; }
         if (index === 3) { return player.researchesExtra[4][0] >= 2; }
         if (index === 4) { return player.researchesExtra[4][0] >= 3; }
-        if (index === 5) { return player.elements[26] >= 1 && player.challenges.active !== 0; }
+        if (index === 5) { return player.elements[26] >= 1 && (player.challenges.active !== 0 || player.inflation.tree[3] >= 1); }
     } else if (stageIndex === 5) {
         if (index === 1) { return player.inflation.vacuum || player.milestones[2][0] >= 7; }
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
@@ -219,19 +219,23 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
 
 export const milestoneGetValue = (index: number, stageIndex: number): number | Overlimit => {
     if (stageIndex === 1) {
-        if (index === 0) { return player.buildings[1][0].total; }
+        if (index === 0) { return player.buildings[1][player.inflation.vacuum ? 1 : 0].total; }
         if (index === 1) { return player.discharge.energy; }
     } else if (stageIndex === 2) {
-        if (index === 0) { return player.buildings[2][1].total; }
-        if (index === 1) { return player.buildings[2][2].current; }
+        if (index === 0) { return player.inflation.vacuum ? player.vaporization.clouds : player.buildings[2][1].total; }
+        if (index === 1) { return player.inflation.vacuum ? player.buildings[2][1].total : player.buildings[2][2].current; }
     } else if (stageIndex === 3) {
         if (index === 0) { return player.buildings[3][0].total; }
-        if (index === 1) { return player.buildings[3][4].true; }
+        if (index === 1) { return player.buildings[3][4].true + player.buildings[3][5].true; }
     } else if (stageIndex === 4) {
         if (index === 0) { return player.buildings[4][0].total; }
-        if (index === 1) { return global.collapseInfo.newMass; }
+        if (index === 1) { return player.inflation.vacuum ? player.collapse.stars[2] : global.collapseInfo.newMass; }
     } else if (stageIndex === 5) {
-        if (index === 0) { return global.collapseInfo.trueStars; }
+        if (index === 0) {
+            if (!player.inflation.vacuum) { return global.collapseInfo.trueStars; }
+            const stars = player.buildings[4];
+            return new Overlimit(stars[1].total).plus(stars[2].total, stars[3].total, stars[4].total, stars[5].total);
+        }
         if (index === 1) { return player.buildings[5][3].true; }
     }
     throw new TypeError(`Milestone s${stageIndex}-i${index} doesn't exist`);
@@ -239,11 +243,10 @@ export const milestoneGetValue = (index: number, stageIndex: number): number | O
 export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     const pointer = global.milestonesInfo[stageIndex];
     if (player.inflation.vacuum) {
-        return false;
+        if (player.challenges.active !== 0 || player.inflation.tree[4] < 1) { return false; }
     } else if (pointer.max[index] <= player.milestones[stageIndex][index] ||
         (player.stage.true < 7 && player.stage.resets < 4) ||
-        (stageIndex === 5 && player.milestones[4][index] < 8) ||
-        pointer.time[index] < player.time.stage
+        (stageIndex === 5 && player.milestones[4][index] < 8)
     ) { return false; }
-    return pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
+    return pointer.time[index] >= player.time.stage && pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
 };

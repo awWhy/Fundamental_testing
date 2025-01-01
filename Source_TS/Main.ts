@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
-import { getUpgradeDescription, timeUpdate, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation, visualUpdateUpgrades } from './Update';
-import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleConfirm, toggleSuperVoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation, visualUpdateUpgrades } from './Update';
+import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSuperVoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
@@ -245,7 +245,7 @@ const awardExport = () => {
     strange[0].current += quarks;
     strange[0].total += quarks;
     exportReward[1] = Math.max(exportReward[1] - quarks, 0);
-    if (player.strangeness[5][8] >= 1 || player.inflation.tree[4] >= 1) {
+    if (player.strangeness[5][8] >= 1) {
         const strangelets = exportReward[2] / 2.5 * conversion;
         strange[1].current += strangelets;
         strange[1].total += strangelets;
@@ -754,11 +754,11 @@ try { //Start everything
         getId(`toggleAuto${i}`).addEventListener('click', () => {
             toggleSwap(i, 'auto', true);
             if (i === 5) {
-                autoUpgradesSet('all');
+                for (let s = 1; s <= 6; s++) { autoUpgradesSet(s); }
             } else if (i === 6) {
-                autoResearchesSet('researches', 'all');
+                for (let s = 1; s <= 6; s++) { autoResearchesSet('researches', s); }
             } else if (i === 7) {
-                autoResearchesSet('researchesExtra', 'all');
+                for (let s = 1; s <= 6; s++) { autoResearchesSet('researchesExtra', s); }
             } else if (i === 8) {
                 autoElementsSet();
             }

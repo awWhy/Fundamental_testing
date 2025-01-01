@@ -170,6 +170,8 @@ export interface globalType {
         energyStage: number[]
         energyTrue: number
         tritium: Overlimit
+        miltiplier: number
+        selfBoost: number
         base: number
         total: number
         next: number
@@ -180,40 +182,49 @@ export interface globalType {
         trueResearch1: number
         trueResearchRain: number
         get: Overlimit
+        tension: number
+        stress: number
     }
     accretionInfo: {
         unlockA: number[]
         rankU: number[]
         rankR: number[]
         rankE: number[]
-        dustSoft: number
-        maxRank: number
         rankCost: number[]
         rankColor: string[]
         rankName: string[]
         rankImage: string[]
+        maxRank: number
+        effective: number
+        multiplier: number
+        satellites: Overlimit
+        disableAuto: boolean
+        dustSoft: number
     }
     collapseInfo: {
-        neutronEffect: number
         unlockB: number[]
         unlockU: number[]
         unlockR: number[]
         newMass: number
         starCheck: [number, number, number]
+        multiplier: number
+        massEffect: number
+        neutronEffect: number
         trueStars: number
         pointsLoop: number
     }
     mergeInfo: {
-        galaxyBase: number
         checkReward: [number]
+        galaxyBase: number
+        multiplier: Overlimit
     }
     inflationInfo: {
         globalSpeed: number
         preonCap: Overlimit
         dustCap: Overlimit
+        microworld: number
+        accretion: number
         massCap: number
-        preonTrue: Overlimit
-        dustTrue: Overlimit
     }
     intervalsId: {
         main: number | undefined
@@ -316,6 +327,7 @@ export interface globalType {
         rewardText: Array<() => string>
         need: Overlimit[]
         time: number[]
+        reward: number[]
         scaling: number[][]
         max: number[]
     }>

@@ -77,6 +77,20 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[4].maxActive = 10;
         strangenessInfo[5].maxActive = 9;
 
+        const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
+        milestone1S1.src = milestone1S1.src.replace('Quarks.png', 'Preon.png');
+        const milestone1S2 = getQuery('#milestone1Stage2Div > img') as HTMLImageElement;
+        global.milestonesInfo[2].name[0] = 'Distant Clouds';
+        getQuery('#milestone1Stage2Main > span').textContent = 'Distant Clouds';
+        milestone1S2.src = milestone1S2.src.replace('Drop.png', 'Clouds.png');
+        milestone1S2.alt = 'Distant Clouds';
+        const milestone2S2 = getQuery('#milestone2Stage2Div > img') as HTMLImageElement;
+        milestone2S2.src = milestone2S2.src.replace('Drop.png', 'Puddle.png');
+        (getQuery('#milestone1Stage3Div > img') as HTMLImageElement).alt = 'Center of gravity';
+        global.milestonesInfo[3].name[0] = 'Center of gravity';
+        getQuery('#milestone1Stage3Main > span').textContent = 'Center of gravity';
+        const milestone1S4 = getQuery('#milestone1Stage4Div > img') as HTMLImageElement;
+        milestone1S4.src = milestone1S4.src.replace('Main_sequence%20mass.png', 'Black%20hole.png');
         getQuery('#toggleAuto0Main label > span').textContent = 'Stage';
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
 
@@ -164,6 +178,20 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[4].maxActive = 8;
         strangenessInfo[5].maxActive = 8;
 
+        const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
+        milestone1S1.src = milestone1S1.src.replace('Preon.png', 'Quarks.png');
+        const milestone1S2 = getQuery('#milestone1Stage2Div > img') as HTMLImageElement;
+        global.milestonesInfo[2].name[0] = 'A Nebula of Drops';
+        getQuery('#milestone1Stage2Main > span').textContent = 'A Nebula of Drops';
+        milestone1S2.src = milestone1S2.src.replace('Clouds.png', 'Drop.png');
+        milestone1S2.alt = 'A Nebula of Drops';
+        const milestone2S2 = getQuery('#milestone2Stage2Div > img') as HTMLImageElement;
+        milestone2S2.src = milestone2S2.src.replace('Puddle.png', 'Drop.png');
+        (getQuery('#milestone1Stage3Div > img') as HTMLImageElement).alt = 'Cluster of Mass';
+        global.milestonesInfo[3].name[0] = 'Cluster of Mass';
+        getQuery('#milestone1Stage3Main > span').textContent = 'Cluster of Mass';
+        const milestone1S4 = getQuery('#milestone1Stage4Div img') as HTMLImageElement;
+        milestone1S4.src = milestone1S4.src.replace('Black%20hole.png', 'Main_sequence%20mass.png');
         getQuery('#toggleAuto0Main label > span').textContent = 'Interstellar Stage';
         getQuery('#stageHistory > h3').textContent = 'Interstellar Stage resets:';
 
@@ -179,7 +207,9 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('submersionBoost').style.display = 'none';
         getId('mainCap').style.display = 'none';
         getId('mainCapS5').style.display = 'none';
+        getId('mergeBoost').style.display = 'none';
         getId('mergeEffects').style.display = 'none';
+        getId('mergeBoostTotal').style.display = 'none';
         getId('researchAuto1').style.display = 'none';
         getId('researchAuto2').style.display = 'none';
         getId('vaporizationLimit').style.display = 'none';
