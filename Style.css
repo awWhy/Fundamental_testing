@@ -401,6 +401,7 @@ input:-webkit-autofill { /* Chrome related pain */
     padding: 0.5em 0.6em 0.6em;
     overflow-wrap: break-word;
     z-index: 8;
+    cursor: default;
 }
 
 .insideTab {
@@ -699,6 +700,10 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--window-color);
 }
 
+#strangenessResearch section > div,
+#researches div > div { display: flex; }
+
+#strangenessResearch p,
 #researches p {
     display: flex;
     align-items: center;
@@ -712,10 +717,7 @@ input:-webkit-autofill { /* Chrome related pain */
     height: 32px;
 }
 
-#researches div > div { display: flex; }
-
-#inflationBottomDiv,
-#researchBottomDiv {
+.descriptionTextMain {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -736,15 +738,13 @@ input:-webkit-autofill { /* Chrome related pain */
 .descriptionText > h3,
 .descriptionText > p { max-width: 80%; }
 
-#inflationToggles,
-#researchToggles {
+.descriptionTextMain > div:first-of-type {
     display: flex;
     align-items: center;
     column-gap: 0.4em;
 }
 
-#inflationToggles > .hollowButton,
-#researchToggles > .hollowButton {
+.descriptionTextMain .hollowButton {
     height: 1.76em;
     padding: 0 0.44em;
     border-radius: 2px;
@@ -798,21 +798,21 @@ input:-webkit-autofill { /* Chrome related pain */
     margin-bottom: -0.4em;
 }
 
-#strangeStructures > div {
+#strangeStructures section {
     display: flex;
     flex-direction: column;
     text-align: center;
     row-gap: 0.2em;
 }
 
-#strangeStructures > div > div { display: flex; }
+#strangeStructures div { display: flex; }
 
 #strangeStructures img {
     background-color: black;
     border-radius: 0;
 }
 
-#strangeStructures > div > div:first-of-type > p {
+#strangeStructures p {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -864,20 +864,6 @@ input:-webkit-autofill { /* Chrome related pain */
     gap: 0.5em;
 }
 
-#strangenessResearch > section > div { display: flex; }
-
-#strangenessResearch p {
-    display: flex;
-    align-items: center;
-    border: 2px solid;
-    border-left: none;
-    padding-left: calc(3px + 0.25em);
-    padding-right: 0.25em;
-    background-color: var(--background-color);
-    margin-left: -3px;
-    height: 32px;
-}
-
 #milestones {
     display: flex;
     flex-wrap: wrap;
@@ -900,6 +886,8 @@ input:-webkit-autofill { /* Chrome related pain */
     cursor: help;
     border-radius: 3px;
 }
+
+#milestonesMultiline { display: contents; }
 
 #milestonesProgressArea {
     display: flex;
