@@ -63,8 +63,8 @@ const handleOfflineTime = (): number => {
     time.export[0] += offlineTime;
     return offlineTime;
 };
-export const simulateOffline = async(offline: number, autoAccept = player.toggles.normal[4] && !globalSave.developerMode) => {
-    if (!global.paused) { pauseGame(); }
+export const simulateOffline = async(offline: number) => {
+    if (!global.offline.active) { pauseGame(); }
     if (player.time.offline < 0) {
         offline += player.time.offline;
         player.time.offline = 0;
@@ -75,13 +75,13 @@ export const simulateOffline = async(offline: number, autoAccept = player.toggle
         player.time.offline += offline;
         return pauseGame(false);
     }
-    if (!autoAccept && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?`, 2) &&
+    if (!player.toggles.normal[4] && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?`, 2) &&
         (globalSave.developerMode || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"))) {
         global.lastSave += handleOfflineTime();
         return pauseGame(false);
     }
-    global.debug.offlineUpdate = null;
-    global.debug.offlineSpeed = globalSave.intervals.offline / 1000;
+    global.offline.stageUpdate = null;
+    global.offline.speed = globalSave.intervals.offline / 1000;
 
     const accelerate = getId('offlineAccelerate');
     accelerate.addEventListener('click', offlineAccelerate);
@@ -92,7 +92,7 @@ export const simulateOffline = async(offline: number, autoAccept = player.toggle
     calculateOffline(offline);
 };
 const calculateOffline = (warpTime: number, start = warpTime) => {
-    const rate = global.debug.offlineSpeed;
+    const rate = global.offline.speed;
     const time = rate <= 0 ? warpTime : Math.min(600 * rate, warpTime);
     warpTime -= time;
     try {
@@ -111,8 +111,8 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
     } else { offlineEnd(); }
 };
 const offlineEnd = () => {
-    if (global.debug.offlineUpdate !== null) {
-        stageUpdate(global.debug.offlineUpdate);
+    if (global.offline.stageUpdate !== null) {
+        stageUpdate(global.offline.stageUpdate);
     } else {
         visualUpdate();
         numbersUpdate();
@@ -141,13 +141,13 @@ const offlineKey = (event: KeyboardEvent) => {
         (document.activeElement === cancel ? getId('offlineAccelerate') : cancel).focus();
     }
 };
-const offlineCancel = () => (global.debug.offlineSpeed = 0);
-const offlineAccelerate = () => (global.debug.offlineSpeed *= 2);
+const offlineCancel = () => (global.offline.speed = 0);
+const offlineAccelerate = () => (global.offline.speed *= 2);
 
 const changeIntervals = () => {
     const intervalsId = global.intervalsId;
     const intervals = globalSave.intervals;
-    const paused = global.paused;
+    const paused = global.offline.active || global.paused;
 
     clearInterval(intervalsId.main);
     clearInterval(intervalsId.numbers);
@@ -160,29 +160,35 @@ const changeIntervals = () => {
 };
 /** Pauses and unpauses game based on 'pause' value */
 export const pauseGame = (pause = true) => {
+    if (!pause && global.paused) {
+        const button = getId('pauseButton');
+        button.style.borderColor = '';
+        button.style.color = '';
+        getId('gamePaused').style.display = 'none';
+        global.paused = false;
+    }
     global.hotkeys.disabled = pause;
-    global.paused = pause;
+    global.offline.active = pause;
     changeIntervals();
 };
-export const pauseGameUser = async() => {
-    if (global.paused) { return; }
-    pauseGame();
-    const claim = await Confirm("Game is currently paused. Any button below will unpause, press 'Confirm' to keep Offline time") ||
-        (!globalSave.developerMode && await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"));
+export const pauseGameUser = () => {
+    if (global.offline.active) { return; }
+    if (!global.paused) {
+        const button = getId('pauseButton');
+        button.style.borderColor = 'forestgreen';
+        button.style.color = 'var(--green-text)';
+        getId('gamePaused').style.display = '';
+        global.paused = true;
+        changeIntervals();
+        return;
+    }
     const offline = handleOfflineTime();
     global.lastSave += offline;
-    if (claim) {
-        void simulateOffline(offline, true);
-    } else {
-        pauseGame(false);
-    }
+    void simulateOffline(offline);
 };
 
 const saveGame = (noSaving = false): string | null => {
-    if (global.paused) {
-        Notify('No saving while game is paused');
-        return null;
-    }
+    if (global.offline.active) { return null; }
     try {
         player.history.stage.list = global.historyStorage.stage.slice(0, player.history.stage.input[0]);
         player.history.vacuum.list = global.historyStorage.vacuum.slice(0, player.history.vacuum.input[0]);
@@ -205,7 +211,7 @@ const saveGame = (noSaving = false): string | null => {
     }
 };
 const loadGame = (save: string) => {
-    if (global.paused) { return Notify('No loading while game is paused'); }
+    if (global.offline.active) { return; }
     pauseGame();
     try {
         const versionCheck = updatePlayer(JSON.parse(atob(save)));
@@ -393,9 +399,7 @@ const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researc
     if (type === 'inflation') {
         global.lastInflation = index;
     } else {
-        if (player.toggles.hover[0] && player.stage.true >= 2) {
-            buyUpgrades(index, player.stage.active, type);
-        }
+        if (player.toggles.hover[0]) { buyUpgrades(index, player.stage.active, type); }
         if (type === 'elements') {
             global.lastElement = index;
         } else { global.lastUpgrade[player.stage.active] = [index, type]; }
@@ -456,6 +460,7 @@ try { //Start everything
                     array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
                 }
             }
+            if (!(globalSave.intervals.main >= 20)) { globalSave.intervals.main = 20; }
             if (!(globalSave.intervals.offline >= globalSave.intervals.main * 2)) {
                 globalSave.intervals.offline = globalSave.intervals.main * 2;
             }
@@ -1013,7 +1018,7 @@ try { //Start everything
     for (let i = 0; i < 2; i++) {
         const strange = getId(`strange${i}`);
         const openFunction = () => {
-            if (i === 0 && !player.inflation.vacuum && player.milestones[4][0] < 8) { return; }
+            if (i === 0 && player.stage.true < 6 && player.milestones[4][0] < 8) { return; }
             getId(`strange${i}EffectsMain`).style.display = '';
             numbersUpdate();
         };
@@ -1049,6 +1054,7 @@ try { //Start everything
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
     }
+
     for (let s = 1; s < playerStart.milestones.length; s++) {
         for (let i = 0; i < playerStart.milestones[s].length; i++) {
             const image = getQuery(`#milestone${i + 1}Stage${s}Div > img`);
@@ -1131,6 +1137,11 @@ try { //Start everything
         input.value = '';
         global.collapseInfo.pointsLoop = 0;
         updateCollapsePointsText();
+    });
+    getId('mergeInput').addEventListener('change', () => {
+        const input = getId('mergeInput') as HTMLInputElement;
+        player.merge.input = Math.max(Number(input.value), 0);
+        input.value = format(player.merge.input, { type: 'input' });
     });
     getId('stageInput').addEventListener('change', () => {
         const input = getId('stageInput') as HTMLInputElement;

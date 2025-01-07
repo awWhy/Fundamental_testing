@@ -12,7 +12,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     let buildingsActive, upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
 
     if (state) {
-        getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
         buildingsInfo.hoverText[2][0] = 'Tritium';
         buildingsInfo.hoverText[3][0] = 'Preons hardcap';
@@ -93,6 +92,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestone1S4.src = milestone1S4.src.replace('Main_sequence%20mass.png', 'Black%20hole.png');
         getQuery('#toggleAuto0Main label > span').textContent = 'Stage';
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
+        getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
 
         getId('preonCap').style.display = '';
         getId('molesProduction').style.display = '';
@@ -110,6 +110,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('stageAutoInterstellar').style.display = '';
         getId('vaporizationLimit').style.display = '';
         getId('collapseCapped').style.display = '';
+        getId('mergeToggleReset').style.display = '';
 
         getId('strange1Effect1Disabled').style.display = 'none';
         getId('stageAutoElse').style.display = 'none';
@@ -194,6 +195,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestone1S4.src = milestone1S4.src.replace('Black%20hole.png', 'Main_sequence%20mass.png');
         getQuery('#toggleAuto0Main label > span').textContent = 'Interstellar Stage';
         getQuery('#stageHistory > h3').textContent = 'Interstellar Stage resets:';
+        getId('mergeResetText').innerHTML = 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its true state.';
 
         getId('strange8Stage5').style.display = '';
         getId('milestonesProgressArea').style.display = '';
@@ -220,6 +222,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
                 getId(`strange${i}Stage${s}`).style.display = 'none';
             }
         }
+        getId('toggleAuto9Main').style.display = 'none';
         getId('energyGainStage1Build1Name').style.display = 'none';
         getId('energyGainStage1Build2Name').style.display = 'none';
         getId('energyGainStage1Build1').style.display = 'none';
@@ -266,6 +269,7 @@ export const switchVacuum = () => {
         player.stage.true = 6;
         player.collapse.show = 0;
         player.event = false;
+        visualTrueStageUnlocks();
         playEvent(6);
     }
 
@@ -285,6 +289,5 @@ export const switchVacuum = () => {
     player.challenges.active = null;
     prepareVacuum(true);
     visualUpdateInflation();
-    visualTrueStageUnlocks();
-    resetVacuum();
+    resetVacuum(false);
 };

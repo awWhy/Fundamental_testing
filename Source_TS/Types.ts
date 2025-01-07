@@ -36,6 +36,7 @@ export interface playerType {
     merge: {
         reward: [number, number, number, number]
         resets: number
+        input: number
     }
     inflation: {
         tree: number[]
@@ -140,8 +141,6 @@ export interface globalType {
         inflationSubtabs: string[]
     }
     debug: {
-        offlineSpeed: number
-        offlineUpdate: null | boolean
         errorID: boolean
         errorQuery: boolean
         errorGain: boolean
@@ -152,6 +151,11 @@ export interface globalType {
     }
     trueActive: number
     lastSave: number
+    offline: {
+        active: boolean
+        speed: number
+        stageUpdate: null | boolean
+    }
     paused: boolean
     footer: boolean
     hotkeys: {
@@ -212,6 +216,7 @@ export interface globalType {
         neutronEffect: number
         trueStars: number
         pointsLoop: number
+        timeUntil: number
     }
     mergeInfo: {
         checkReward: [number]
@@ -225,6 +230,8 @@ export interface globalType {
         microworld: number
         accretion: number
         massCap: number
+        totalSuperVoid: number
+        instability: number
     }
     intervalsId: {
         main: number | undefined
@@ -341,7 +348,7 @@ export interface globalType {
         effectText: Array<() => string>
         needText: Array<Array<Array<() => string>>>
         rewardText: string[][][]
-        reset: Array<'stage' | 'vacuum'>
+        resetType: Array<'stage' | 'vacuum'>
         time: number[]
         color: string[]
     }

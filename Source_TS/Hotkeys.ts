@@ -26,7 +26,7 @@ const hotkeyFunction = {
     galaxy: () => buyBuilding(3, 5),
     pause: (event) => {
         if (event.repeat) { return; }
-        void pauseGameUser();
+        pauseGameUser();
     },
     toggleAll: (event) => {
         if (event.repeat) { return; }

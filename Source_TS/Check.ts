@@ -14,7 +14,7 @@ export const checkTab = (tab: gameTab, subtab = null as null | string): boolean 
             return subtab === 'Upgrades' || subtab === null;
         case 'strangeness':
             if (player.stage.true < 7 && player.strange[0].total <= 0 && (!player.inflation.vacuum || player.stage.current < 5)) { return false; }
-            if (subtab === 'Milestones') { return player.stage.true >= 7 || !player.inflation.vacuum; }
+            if (subtab === 'Milestones') { return player.cosmon.total >= global.inflationTreeInfo.startCost[4] || !player.inflation.vacuum; }
             return subtab === 'Matter' || subtab === null;
         case 'inflation':
             if (player.stage.true < 7) { return false; }
@@ -70,7 +70,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade > 5) { return player.upgrades[1][5] === 1; }
                 return true;
             } else if (stageIndex === 2) {
-                if (upgrade === 0) { return player.buildings[2][1].true >= 1 || player.buildings[2][2].current.moreOrEqual('1'); }
+                if (upgrade === 0) { return player.buildings[2][1].true >= 1 || player.buildings[2][2].true >= 1; }
                 if (upgrade === 7) { return player.strangeness[2][2] >= 3; }
                 if (upgrade === 8) { return player.strangeness[2][8] >= 3; }
                 return true;

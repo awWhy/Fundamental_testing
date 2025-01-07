@@ -26,11 +26,6 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
     let energyRefund = 0;
     for (const s of stageIndex) {
-        if (s === 2) {
-            assignSubmergedLevels(true);
-        } else if (s === 4) {
-            global.collapseInfo.trueStars = 0;
-        }
         energyRefund += energyStage[s];
         energyStage[s] = 0;
 
@@ -49,6 +44,11 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             building[i as 1].true = 0;
             building[i].current.setValue('0');
             building[i].total.setValue('0');
+        }
+        if (s === 2) {
+            assignSubmergedLevels(true);
+        } else if (s === 4) {
+            global.collapseInfo.trueStars = 0;
         }
 
         if (type === 'discharge') { continue; }
@@ -222,7 +222,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     }
 };
 
-export const resetVacuum = () => {
+export const resetVacuum = (full = true) => {
     const activeMilestone = global.milestonesInfoS6.active;
     for (let s = 1; s <= 6; s++) {
         const buildings = player.buildings[s];
@@ -255,6 +255,10 @@ export const resetVacuum = () => {
     player.stage.time = 0;
     player.time.stage = 0;
     global.debug.timeLimit = false;
+    if (full) {
+        player.inflation.age = 0;
+        player.time.universe = 0;
+    }
 
     //Stage 1
     player.discharge.energy = 0;
@@ -298,7 +302,8 @@ export const resetVacuum = () => {
     }
 
     if (activeMilestone[0]) {
-        const start = player.buildings[6][1].true ** 2;
+        let start = player.buildings[6][1].true ** 2;
+        if (player.inflation.vacuum) { start += (global.inflationInfo.totalSuperVoid ** 2 + global.inflationInfo.totalSuperVoid) / 2; }
         player.strange[0].current = start;
         player.strange[0].total = start;
         player.strangeness[1][8] = 2;
@@ -426,6 +431,7 @@ export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {
             void: cloneArray(player.challenges.void)
         };
         clone.inflation = {
+            vacuum: player.inflation.vacuum,
             age: player.inflation.age
         };
         clone.stage.resets = player.stage.resets;
