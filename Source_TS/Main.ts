@@ -525,7 +525,7 @@ try { //Start everything
         if (globalSave.MDSettings[0]) {
             (document.getElementById('MDMessage1') as HTMLElement).remove();
             specialHTML.styleSheet.textContent += 'body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #hideToggle { -webkit-user-select: none; -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu and text selection
-            specialHTML.styleSheet.textContent += '#themeArea.windowOpen > div > div { display: flex; } #themeArea.windowOpen > div > button { clip-path: circle(0); }'; //More Safari junk to make windows work without focus
+            specialHTML.styleSheet.textContent += '#themeArea > div > div { position: unset; display: flex; } #themeArea > div > button { display: none; }'; //More Safari junk to make windows work without focus
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
 
             const arrowStage = document.createElement('button');
@@ -1164,10 +1164,6 @@ try { //Start everything
     });
     getId('export').addEventListener('click', exportFileGame);
     getId('saveConsole').addEventListener('click', saveConsole);
-    if (MD) {
-        getId('currentTheme').addEventListener('click', () => getId('themeArea').classList.add('windowOpen'));
-        getId('themeArea').addEventListener('mouseleave', () => getId('themeArea').classList.remove('windowOpen'));
-    }
     getId('switchTheme0').addEventListener('click', () => setTheme(null));
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`switchTheme${i}`).addEventListener('click', () => setTheme(i));
