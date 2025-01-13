@@ -3,7 +3,7 @@ import { global, player, playerStart } from './Player';
 import { resetVacuum } from './Reset';
 import { globalSave, playEvent, specialHTML } from './Special';
 import { setActiveStage } from './Stage';
-import { visualTrueStageUnlocks, visualUpdateInflation } from './Update';
+import { visualTrueStageUnlocks } from './Update';
 
 export const prepareVacuum = (state: boolean) => { //Must not use direct player values
     const { buildings } = playerStart;
@@ -46,13 +46,13 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         //researchesInfo[2].maxActive = 6;
         //researchesInfo[3].maxActive = 9;
         researchesInfo[4].maxActive = 6;
-        //researchesInfo[5].maxActive = 2;
+        researchesInfo[5].maxActive = 4;
 
         researchesExtraInfo[1].maxActive = 5;
-        researchesExtraInfo[2].maxActive = 4;
+        researchesExtraInfo[2].maxActive = 5;
         researchesExtraInfo[3].maxActive = 5;
         researchesExtraInfo[4].maxActive = 4;
-        //researchesExtraInfo[5].maxActive = 1;
+        researchesExtraInfo[5].maxActive = 2;
 
         global.elementsInfo.startCost[27] = 1e54;
         global.elementsInfo.startCost[28] = 1e58;
@@ -74,7 +74,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[2].maxActive = 10;
         strangenessInfo[3].maxActive = 10;
         strangenessInfo[4].maxActive = 10;
-        strangenessInfo[5].maxActive = 9;
+        strangenessInfo[5].maxActive = 10;
 
         const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
         milestone1S1.src = milestone1S1.src.replace('Quarks.png', 'Preon.png');
@@ -90,9 +90,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getQuery('#milestone1Stage3Main > span').textContent = 'Center of gravity';
         const milestone1S4 = getQuery('#milestone1Stage4Div > img') as HTMLImageElement;
         milestone1S4.src = milestone1S4.src.replace('Main_sequence%20mass.png', 'Black%20hole.png');
+        getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
+        getId('milestonesWelcome').innerHTML = 'Milestones require proper <span class="darkvioletText">Inflation</span> to have any effect';
         getQuery('#toggleAuto0Main label > span').textContent = 'Stage';
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
-        getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
 
         getId('preonCap').style.display = '';
         getId('molesProduction').style.display = '';
@@ -187,15 +188,16 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestone1S2.src = milestone1S2.src.replace('Clouds.png', 'Drop.png');
         milestone1S2.alt = 'A Nebula of Drops';
         const milestone2S2 = getQuery('#milestone2Stage2Div > img') as HTMLImageElement;
-        milestone2S2.src = milestone2S2.src.replace('Puddle.png', 'Drop.png');
+        milestone2S2.src = milestone2S2.src.replace('Drop.png', 'Puddle.png');
         (getQuery('#milestone1Stage3Div > img') as HTMLImageElement).alt = 'Cluster of Mass';
         global.milestonesInfo[3].name[0] = 'Cluster of Mass';
         getQuery('#milestone1Stage3Main > span').textContent = 'Cluster of Mass';
         const milestone1S4 = getQuery('#milestone1Stage4Div img') as HTMLImageElement;
         milestone1S4.src = milestone1S4.src.replace('Black%20hole.png', 'Main_sequence%20mass.png');
+        getId('mergeResetText').innerHTML = 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its true state.';
+        getId('milestonesWelcome').innerHTML = 'Completing any tier will award 1 <span class="greenText">Strange quark</span></p>';
         getQuery('#toggleAuto0Main label > span').textContent = 'Interstellar Stage';
         getQuery('#stageHistory > h3').textContent = 'Interstellar Stage resets:';
-        getId('mergeResetText').innerHTML = 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its true state.';
 
         getId('strange8Stage5').style.display = '';
         getId('milestonesProgressArea').style.display = '';
@@ -231,10 +233,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
             getId(`energyGainStage${s}`).style.display = 'none';
         }
     }
-    const stateId = getId('vacuumState');
-    stateId.textContent = state ? 'True' : 'False';
-    const color = `var(--${state ? 'green' : 'red'}-text)`;
-    if (stateId.style.color !== color) { stateId.style.color = color; }
 
     buildingsInfo.maxActive.splice(1, buildingsActive.length, ...buildingsActive);
     upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
@@ -275,7 +273,7 @@ export const switchVacuum = () => {
 
     const history = player.history.vacuum;
     const storage = global.historyStorage.vacuum;
-    const realTime = player.time.universe;
+    const realTime = player.time.vacuum;
     storage.unshift([realTime, false, income]);
     if (storage.length > 100) { storage.length = 100; }
     if (income / realTime > history.best[2] / history.best[0]) {
@@ -288,6 +286,5 @@ export const switchVacuum = () => {
     player.clone = {};
     player.challenges.active = null;
     prepareVacuum(true);
-    visualUpdateInflation();
-    resetVacuum(false);
+    resetVacuum();
 };

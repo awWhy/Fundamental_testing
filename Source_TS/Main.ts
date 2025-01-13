@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
-import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateInflation, visualUpdateUpgrades } from './Update';
-import { assignStrangeInfo, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSuperVoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSuperVoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
@@ -56,11 +56,10 @@ export const getQuery = (query: string): HTMLElement => {
 };
 
 const handleOfflineTime = (): number => {
-    const time = player.time;
     const timeNow = Date.now();
-    const offlineTime = (timeNow - time.updated) / 1000;
-    time.updated = timeNow;
-    time.export[0] += offlineTime;
+    const offlineTime = (timeNow - player.time.updated) / 1000;
+    player.time.updated = timeNow;
+    player.time.export[0] += offlineTime;
     return offlineTime;
 };
 export const simulateOffline = async(offline: number) => {
@@ -78,6 +77,7 @@ export const simulateOffline = async(offline: number) => {
     if (!player.toggles.normal[4] && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?`, 2) &&
         (globalSave.developerMode || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"))) {
         global.lastSave += handleOfflineTime();
+        timeUpdate(0.001, 0.001); //Just in case
         return pauseGame(false);
     }
     global.offline.stageUpdate = null;
@@ -96,7 +96,7 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
     const time = rate <= 0 ? warpTime : Math.min(600 * rate, warpTime);
     warpTime -= time;
     try {
-        timeUpdate(time, Math.max(time / 600, rate));
+        timeUpdate(Math.max(time / 600, rate), time);
     } catch (error) {
         offlineEnd();
         void Alert(`Offline calculation failed due to error:\n${error}`, 1);
@@ -153,7 +153,7 @@ const changeIntervals = () => {
     clearInterval(intervalsId.numbers);
     clearInterval(intervalsId.visual);
     clearInterval(intervalsId.autoSave);
-    intervalsId.main = paused ? undefined : setInterval(timeUpdate, intervals.main);
+    intervalsId.main = paused ? undefined : setInterval(timeUpdate, intervals.main, intervals.offline / 1000);
     intervalsId.numbers = paused ? undefined : setInterval(numbersUpdate, intervals.numbers);
     intervalsId.visual = paused ? undefined : setInterval(visualUpdate, intervals.visual);
     intervalsId.autoSave = paused ? undefined : setInterval(saveGame, intervals.autoSave);
@@ -256,9 +256,9 @@ const awardExport = () => {
         strange[1].current += strangelets;
         strange[1].total += strangelets;
         exportReward[2] -= strangelets;
-        assignStrangeInfo[1]();
+        assignBuildingsProduction.strange1();
     }
-    assignStrangeInfo[0]();
+    assignBuildingsProduction.strange0();
     exportReward[0] = 0;
 };
 
@@ -372,8 +372,8 @@ const replaceSaveFileSpecials = (): string => {
         `${player.strange[0].total}`,
         `${player.cosmon.total}`,
         `${player.inflation.vacuum}`,
-        `${player.buildings[5][3].true}`,
-        `${player.buildings[6][1].true}`
+        `${player.buildings[5][3].current}`,
+        `${player.buildings[6][1].current}`
     ];
     for (let i = 0; i < special.length; i++) {
         realName = realName.replace(special[i], replaceWith[i]);
@@ -412,7 +412,7 @@ const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness'
     } else { global.lastMilestone = [index, stageIndex]; }
     getStrangenessDescription(index, stageIndex, type);
 };
-const hoverChallenge = (index: number) => {
+const hoverChallenge = (index: number | null) => {
     global.lastChallenge[0] = index;
     getChallengeDescription(index);
     visualUpdate(); //Lazy way to update unlocked buttons
@@ -525,7 +525,7 @@ try { //Start everything
         if (globalSave.MDSettings[0]) {
             (document.getElementById('MDMessage1') as HTMLElement).remove();
             specialHTML.styleSheet.textContent += 'body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #hideToggle { -webkit-user-select: none; -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu and text selection
-            specialHTML.styleSheet.textContent += '#themeArea > div > div { position: unset; display: flex; } #themeArea > div > button { display: none; }'; //More Safari junk to make windows work without focus
+            specialHTML.styleSheet.textContent += '#themeArea > div > div { /* position: unset; */ display: flex; } #themeArea > div > button { display: none; }'; //More Safari junk to make windows work without focus
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
 
             const arrowStage = document.createElement('button');
@@ -643,7 +643,9 @@ try { //Start everything
                         visualUpdateResearches(i, s, 'strangeness');
                     }
                 }
-                visualUpdateInflation();
+                for (let i = 0; i < playerStart.inflation.tree.length; i++) {
+                    visualUpdateResearches(i, 0, 'inflations');
+                }
             });
 
             const primaryIndex = (reload = false) => {
@@ -865,6 +867,12 @@ try { //Start everything
         if (SR) { image.addEventListener('focus', () => hoverChallenge(i)); }
         image.addEventListener('click', () => { enterExitChallengeUser(i); });
     }
+    {
+        const image = getId('challenge0');
+        if (PC) { image.addEventListener('mouseover', () => hoverChallenge(null)); }
+        if (MD) { image.addEventListener('touchstart', () => hoverChallenge(null)); }
+        if (SR) { image.addEventListener('focus', () => hoverChallenge(null)); }
+    }
     getId('superVoidToggle').addEventListener('click', () => { toggleSuperVoid(true); });
     {
         const close = () => {
@@ -1076,7 +1084,7 @@ try { //Start everything
         if (MD) {
             image.addEventListener('touchstart', () => { /*repeatFunction(*/hoverFunc(); /*, true);*/ });
         } else {
-            const clickFunc = () => buyStrangeness(i, 0, 'inflation');
+            const clickFunc = () => buyStrangeness(i, 0, 'inflations');
             image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
@@ -1086,7 +1094,7 @@ try { //Start everything
     if (MD) {
         const button = getId('inflationActivate');
         const clickFunc = () => {
-            if (global.lastInflation !== null) { buyStrangeness(global.lastInflation, 0, 'inflation'); }
+            if (global.lastInflation !== null) { buyStrangeness(global.lastInflation, 0, 'inflations'); }
         };
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
@@ -1202,6 +1210,7 @@ try { //Start everything
         globalSave.intervals.offline = Math.min(Math.max(Math.trunc(Number(input.value)), globalSave.intervals.main * 2), 6000);
         input.value = `${globalSave.intervals.offline}`;
         saveGlobalSettings();
+        changeIntervals();
     });
     getId('numbersInterval').addEventListener('change', () => {
         const input = getId('numbersInterval') as HTMLInputElement;
@@ -1239,7 +1248,7 @@ try { //Start everything
     });
     getId('stageHistoryShow').addEventListener('change', () => {
         const input = getId('stageHistoryShow') as HTMLInputElement;
-        player.history.stage.input[1] = Math.min(Math.max(Math.trunc(Number(input.value)), 4), 100);
+        player.history.stage.input[1] = Math.min(Math.max(Math.trunc(Number(input.value)), 10), 100);
         input.value = `${player.history.stage.input[1]}`;
         global.debug.historyStage = null;
         visualUpdate();
@@ -1251,7 +1260,7 @@ try { //Start everything
     });
     getId('vacuumHistoryShow').addEventListener('change', () => {
         const input = getId('vacuumHistoryShow') as HTMLInputElement;
-        player.history.vacuum.input[1] = Math.min(Math.max(Math.trunc(Number(input.value)), 4), 100);
+        player.history.vacuum.input[1] = Math.min(Math.max(Math.trunc(Number(input.value)), 10), 100);
         input.value = `${player.history.vacuum.input[1]}`;
         global.debug.historyVacuum = null;
         visualUpdate();
@@ -1283,8 +1292,12 @@ try { //Start everything
     /* Post */
     document.head.append(specialHTML.styleSheet);
     stageUpdate();
-    if (globalSave.theme !== null) { setTheme(); }
-    getId('currentTheme').textContent = globalSave.theme === null ? 'Default' : global.stageInfo.word[globalSave.theme];
+    if (globalSave.theme !== null) {
+        getId('currentTheme').textContent = global.stageInfo.word[globalSave.theme];
+        getId(`switchTheme${globalSave.theme}`).style.textDecoration = 'underline';
+        getId('switchTheme0').style.textDecoration = '';
+        setTheme();
+    }
     if (save !== null) {
         global.lastSave = handleOfflineTime();
         Notify(`Welcome back, you were away for ${format(global.lastSave, { type: 'time', padding: false })}${oldVersion !== player.version ? `\nGame has been updated from ${oldVersion} to ${player.version}` : ''}${globalSave.developerMode ?

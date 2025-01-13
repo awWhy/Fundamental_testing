@@ -30,6 +30,7 @@ export interface playerType {
         massMax: number
         stars: [number, number, number]
         show: number
+        maxElement: number
         input: [number, number]
         points: number[]
     }
@@ -42,6 +43,7 @@ export interface playerType {
         tree: number[]
         vacuum: boolean
         resets: number
+        time: number
         age: number
     }
     time: {
@@ -51,6 +53,7 @@ export interface playerType {
         offline: number
         online: number
         stage: number
+        vacuum: number
         universe: number
     }
     buildings: Array<[
@@ -173,21 +176,15 @@ export interface globalType {
         energyType: number[][]
         energyStage: number[]
         energyTrue: number
-        tritium: Overlimit
-        miltiplier: number
-        selfBoost: number
-        base: number
         total: number
         next: number
         scaling: number
     }
     vaporizationInfo: {
-        trueResearch0: number
-        trueResearch1: number
-        trueResearchRain: number
+        S2Research0: number
+        S2Research1: number
+        S2Extra1: number
         get: Overlimit
-        tension: number
-        stress: number
     }
     accretionInfo: {
         unlockA: number[]
@@ -200,8 +197,6 @@ export interface globalType {
         rankImage: string[]
         maxRank: number
         effective: number
-        multiplier: number
-        satellites: Overlimit
         disableAuto: boolean
         dustSoft: number
     }
@@ -211,25 +206,19 @@ export interface globalType {
         unlockR: number[]
         newMass: number
         starCheck: [number, number, number]
-        multiplier: number
-        massEffect: number
-        neutronEffect: number
         trueStars: number
         pointsLoop: number
+        solarCap: number
         timeUntil: number
     }
     mergeInfo: {
-        checkReward: [number]
-        galaxyBase: number
-        multiplier: Overlimit
+        unlockR: number[]
+        unlockE: number[]
+        checkReward: [number, number, number, number]
+        galaxies: number
     }
     inflationInfo: {
         globalSpeed: number
-        preonCap: Overlimit
-        dustCap: Overlimit
-        microworld: number
-        accretion: number
-        massCap: number
         totalSuperVoid: number
         instability: number
     }
@@ -327,7 +316,7 @@ export interface globalType {
     lastStrangeness: [number | null, number]
     lastInflation: number | null
     lastMilestone: [number | null, number]
-    lastChallenge: [number, number | null]
+    lastChallenge: [number | null, number | null]
     milestonesInfo: Array<{
         name: string[]
         needText: Array<() => string>

@@ -47,7 +47,7 @@ html {
     --gray-text: #8f8f8f;
     --orchid-text: #e14bdb;
     --darkorchid-text: #bd24ef;
-    --darkviolet-text: #8635eb;
+    --darkviolet-text: #8b3cec;
     --red-text: #eb0000;
     --green-text: #00e900;
     --yellow-text: #fafa00;
@@ -166,8 +166,7 @@ img {
 }
 
 #footerStats img,
-#strangenessResearch .interactiveImage,
-#researches .interactiveImage {
+.researchesDiv .interactiveImage {
     border-radius: 3px;
     z-index: 2;
 }
@@ -604,6 +603,8 @@ input:-webkit-autofill { /* Chrome related pain */
     border-radius: 0;
 }
 
+#challenge0 { cursor: help; }
+
 #challengesMain > div:first-of-type {
     display: flex;
     gap: 0.44em;
@@ -688,10 +689,11 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #researches > section:not(:last-of-type) { margin-bottom: 0.4em; }
 
-#researches > section > div {
+#researches .researchesDiv {
     display: flex;
     flex-wrap: wrap;
-    border: 2px solid var(--stage-image-borderColor);
+    justify-content: center;
+    border: 2px solid;
     border-left-width: 1px;
     border-radius: 4px;
     padding: 0.25em;
@@ -700,11 +702,9 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--window-color);
 }
 
-#strangenessResearch section > div,
-#researches div > div { display: flex; }
+.researchesDiv > div { display: flex; }
 
-#strangenessResearch p,
-#researches p {
+.researchesDiv p {
     display: flex;
     align-items: center;
     border: 2px solid;
@@ -759,6 +759,8 @@ input:-webkit-autofill { /* Chrome related pain */
     padding: 0.4em;
     border: 2px solid darkgreen;
     background-color: var(--window-color);
+    margin-top: -1em;
+    margin-bottom: -0.6em;
 }
 
 #elementsGrid > .interactiveImage {
@@ -854,7 +856,7 @@ input:-webkit-autofill { /* Chrome related pain */
     margin-bottom: -0.6em;
 }
 
-#strangenessResearch > section {
+#strangenessResearch > .researchesDiv {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -914,30 +916,17 @@ input:-webkit-autofill { /* Chrome related pain */
 #milestonesProgressArea span { width: 5em; }
 #milestonesProgressArea span:first-of-type { width: 10.8em; }
 
-#inflationContainer {
+#inflations {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
     background-color: var(--window-color);
     border: 2px solid var(--stage-image-borderColor);
     border-radius: 4px;
     padding: 0.4em;
-    margin-bottom: -0.4em;
-}
-
-#inflationContainer > div {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    min-height: 32px;
-    width: 100%;
-    gap: 0.4em;
-}
-
-#inflationCreated {
-    border-top: 2px solid var(--stage-image-borderColor);
-    margin-top: 0.4em;
-    padding-top: 0.4em;
-    box-sizing: content-box;
+    gap: 0.5em;
+    margin-top: -1em;
+    margin-bottom: -0.6em;
 }
 
 #inflationMilestones {
@@ -1527,6 +1516,8 @@ li .hollowButton {
         margin-bottom: 0;
     }
 
+    #inflations,
+    #elementsGrid,
     #strangenessResearch {
         margin-top: -0.5em;
         margin-bottom: -0.3em;

@@ -1,7 +1,7 @@
 import { assignHotkeys, removeHotkey } from './Hotkeys';
 import { getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { deepClone, global, player } from './Player';
-import { assignMaxRank } from './Stage';
+import { assignResetInformation } from './Stage';
 import type { globalSaveType, hotkeysList } from './Types';
 import { format, numbersUpdate, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
 
@@ -202,7 +202,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchS6.png', 'stage4borderImage']
         ], [
             ['ResearchG1.png', 'stage1borderImage'],
-            ['ResearchG2.png', 'stage6borderImage']
+            ['ResearchG2.png', 'stage6borderImage'],
+            ['ResearchG3.png', 'stage6borderImage'],
+            ['Missing.png', 'stage4borderImage'] //ResearchG4
         ], []
     ],
     longestResearchExtra: 5,
@@ -226,7 +228,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchClouds1.png', 'stage3borderImage'],
             ['ResearchClouds2.png', 'stage2borderImage'],
             ['ResearchClouds3.png', 'stage4borderImage'],
-            ['ResearchClouds4.png', 'stage2borderImage']
+            ['ResearchClouds4.png', 'stage2borderImage'],
+            ['ResearchClouds5.png', 'stage2borderImage']
         ], [
             ['ResearchRank1.png', 'stage3borderImage'],
             ['ResearchRank2.png', 'stage3borderImage'],
@@ -239,7 +242,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchCollapse3.png', 'stage1borderImage'],
             ['ResearchCollapse4.png', 'stage6borderImage']
         ], [
-            ['ResearchGalaxy1.png', 'stage3borderImage']
+            ['ResearchGalaxy1.png', 'stage3borderImage'],
+            ['Missing.png', 'stage3borderImage'] //ResearchGalaxy2
         ], []
     ],
     longestFooterStats: 3,
@@ -316,10 +320,12 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             if (player.stage.true < theme) { theme = null; }
             if (theme === 6 && player.stage.true < 7) { theme = null; }
         }
+        getId(`switchTheme${globalSave.theme ?? 0}`).style.textDecoration = '';
 
         globalSave.theme = theme;
         saveGlobalSettings();
         getId('currentTheme').textContent = theme === null ? 'Default' : global.stageInfo.word[theme];
+        getId(`switchTheme${theme ?? 0}`).style.textDecoration = 'underline';
     } else { theme = globalSave.theme; }
 
     const upgradeTypes = ['upgrade', 'element', 'inflation'];
@@ -349,7 +355,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
         '--gray-text': '#8f8f8f',
         '--orchid-text': '#e14bdb',
         '--darkorchid-text': '#bd24ef',
-        '--darkviolet-text': '#8635eb',
+        '--darkviolet-text': '#8b3cec',
         '--red-text': '#eb0000',
         '--green-text': '#00e900',
         '--yellow-text': '#fafa00'
@@ -387,7 +393,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             properties['--main-text'] = 'var(--blue-text)';
             properties['--gray-text'] = '#9b9b9b';
             properties['--darkorchid-text'] = '#c71bff';
-            properties['--darkviolet-text'] = '#8b6bff';
+            properties['--darkviolet-text'] = '#8766ff';
             properties['--green-text'] = '#82cb3b';
             properties['--red-text'] = '#f70000';
             break;
@@ -473,7 +479,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             properties['--white-text'] = '#ff79ff';
             properties['--orchid-text'] = '#ff00f4';
             properties['--darkorchid-text'] = '#c000ff';
-            properties['--darkviolet-text'] = '#9f52ff';
+            properties['--darkviolet-text'] = '#8861ff';
             properties['--yellow-text'] = 'var(--darkviolet-text)';
             break;
         case 6:
@@ -701,7 +707,8 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
     });
 };
 
-export const Notify = (text: string) => {
+/** Repeats will make it behave as if X duplicates have been detected */
+export const Notify = (text: string, repeats = 0) => {
     const { notifications } = specialHTML;
 
     let index;
@@ -713,11 +720,11 @@ export const Notify = (text: string) => {
     }
 
     if (index === undefined) {
-        let count = 1;
+        let count = 1 + repeats;
         let timeout: number;
 
         const html = document.createElement('p');
-        html.textContent = text;
+        html.textContent = `${text}${count > 1 ? ` | x${count}` : ''}`;
         html.style.animation = 'hideX 800ms ease-in-out reverse';
         html.style.pointerEvents = 'none';
         if (globalSave.SRSettings[0]) { html.role = 'alert'; }
@@ -909,7 +916,7 @@ export const playEvent = (event: number, replay = true) => {
             return void Alert(`Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to softcap`);
         case 3:
             if (!replay) {
-                assignMaxRank();
+                assignResetInformation.maxRank();
                 global.debug.rankUpdated = null;
             }
             return void Alert("Can't gain any more Mass with current Rank. New one has been unlocked, but reaching it will softcap the Mass production");
