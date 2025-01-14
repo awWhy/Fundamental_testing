@@ -1500,11 +1500,11 @@ export const format = (input: number | Overlimit, settings = {} as { type?: 'num
 export const stageUpdate = (changed = true, offline = false) => {
     const { stageInfo, buildingsInfo } = global;
     const { active, current, true: highest } = player.stage;
+    const activeAll = stageInfo.activeAll;
     const vacuum = player.inflation.vacuum;
     const challenge = player.challenges.active;
 
-    stageInfo.activeAll = [];
-    const activeAll = stageInfo.activeAll;
+    activeAll.length = 0;
     if (vacuum) {
         activeAll.push(1);
         if (player.researchesExtra[1][2] >= 2) { activeAll.push(2); }

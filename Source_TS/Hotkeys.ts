@@ -210,15 +210,13 @@ export const handleTouchHotkeys = (event: TouchEvent) => {
     const touches = event.changedTouches;
     if (touches.length > 1) { return; }
     const mainHTML = document.documentElement;
-    const change = [ //Too lazy to detect changes in screen size, so no caching
-        (touches[0].clientX - specialHTML.mobileDevice.start[0]) / mainHTML.clientWidth,
-        (touches[0].clientY - specialHTML.mobileDevice.start[1]) / mainHTML.clientHeight
-    ];
+    const horizontal = (touches[0].clientX - specialHTML.mobileDevice.start[0]) / mainHTML.clientWidth;
+    const vertical = (touches[0].clientY - specialHTML.mobileDevice.start[1]) / mainHTML.clientHeight;
 
-    if (Math.abs(change[1]) > 0.2) {
-        if (Math.abs(change[1]) < 0.8 || Math.abs(change[0]) > 0.2) { return; }
-        changeSubtab(change[1] > 0 ? 'Up' : 'Down');
+    if (Math.abs(vertical) > 0.2) {
+        if (Math.abs(vertical) < 0.8 || Math.abs(horizontal) > 0.2) { return; }
+        changeSubtab(vertical > 0 ? 'Up' : 'Down');
         return;
-    } else if (Math.abs(change[0]) < 0.6) { return; }
-    changeTab(change[0] > 0 ? 'Left' : 'Right');
+    } else if (Math.abs(horizontal) < 0.6) { return; }
+    changeTab(horizontal > 0 ? 'Left' : 'Right');
 };

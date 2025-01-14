@@ -276,6 +276,8 @@ export const resetVacuum = () => {
     } else {
         player.accretion.rank = 0;
         player.buildings[3][0].current.setValue('5.9722e27');
+
+        global.buildingsInfo.producing[4][5].setValue('0');
     }
 
     //Stage 4
@@ -309,13 +311,15 @@ export const resetVacuum = () => {
         player.strange[0].total = start;
         player.strangeness[1][8] = 2;
     }
-    if (activeMilestone[1]) { player.strangeness[5][4] = 1; }
     if (activeMilestone[2]) {
         player.strangeness[3][6] = 3;
         player.strangeness[4][6] = 2;
         player.researchesAuto[0] = 3;
         player.researchesAuto[1] = 2;
     }
+    if (activeMilestone[3]) {
+        player.researchesAuto[2] = 5;
+    } else if (activeMilestone[1]) { player.strangeness[5][4] = 1; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 5; s++) {
@@ -326,6 +330,7 @@ export const resetVacuum = () => {
             player.ASR[s] = global.ASRInfo.max[s];
             player.strangeness[s][5] = 1;
         }
+        if (activeMilestone[3]) { player.strangeness[s][4] = 1; }
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
         autoUpgradesSet(s);
         autoResearchesSet('researches', s);

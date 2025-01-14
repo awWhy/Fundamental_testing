@@ -9,12 +9,10 @@ import { prepareVacuum, switchVacuum } from './Vacuum';
 
 /** Normal game tick */
 export const timeUpdate = (tick: number, timeWarp = 0) => {
-    const { time, ASR } = player;
+    const { time } = player;
     const { auto, buildings: autoBuy } = player.toggles;
     const { maxActive } = global.buildingsInfo;
-    const { autoU, autoR, autoE } = global.automatization;
     const activeAll = global.stageInfo.activeAll;
-    const vacuum = player.inflation.vacuum;
 
     let passedSeconds: number;
     if (timeWarp > 0) {
@@ -49,23 +47,32 @@ export const timeUpdate = (tick: number, timeWarp = 0) => {
     player.inflation.age += passedSeconds;
 
     if (player.toggles.normal[3]) { exitChallengeAuto(); }
-    if (vacuum || activeAll.includes(4)) { stageResetCheck(5, trueSeconds); }
+    if (!player.inflation.vacuum) {
+        if (auto[9]) { mergeResetCheck(true); }
+        if (activeAll.includes(4)) { stageResetCheck(5, trueSeconds); }
+        if (auto[0]) {
+            if (activeAll.includes(3)) { stageResetCheck(3, 0); }
+            if (activeAll.includes(2)) { stageResetCheck(2, 0); }
+            if (activeAll.includes(1)) { stageResetCheck(1, 0); }
+        }
+    } else { stageResetCheck(5, trueSeconds); }
+
+    const vacuum = player.inflation.vacuum;
     assignBuildingsProduction.globalCache();
     if (activeAll.includes(6)) {
         gainBuildings(0, 6, passedSeconds); //Dark matter
     }
     if (activeAll.includes(4)) {
-        if (global.automatization.elements.length !== 0) { autoElementsBuy(); }
+        if (auto[8]) { autoElementsBuy(); }
         if (activeAll.includes(5)) {
             if (player.strangeness[5][3] >= 1 || global.milestonesInfoS6.active[2]) {
-                if (autoU[5].length !== 0) { autoUpgradesBuy(5); }
-                if (autoR[5].length !== 0) { autoResearchesBuy('researches', 5); }
-                if (autoE[5].length !== 0) { autoResearchesBuy('researchesExtra', 5); }
+                if (auto[5]) { autoUpgradesBuy(5); }
+                if (auto[6]) { autoResearchesBuy('researches', 5); }
+                if (auto[7]) { autoResearchesBuy('researchesExtra', 5); }
             }
             for (let i = maxActive[5] - 1; i >= 1; i--) {
-                if (autoBuy[5][i] && ASR[5] >= i) { buyBuilding(i, 5, 0, true); }
+                if (autoBuy[5][i]) { buyBuilding(i, 5, 0, true); }
             }
-            if (!vacuum && auto[9]) { mergeResetCheck(true); }
             assignBuildingsProduction.stage5Cache();
             gainBuildings(0, 5, passedSeconds); //Brown dwarfs
             const research = player.researches[5][0];
@@ -74,12 +81,12 @@ export const timeUpdate = (tick: number, timeWarp = 0) => {
             if (research >= 3) { gainBuildings(3, 5, passedSeconds); } //Blue hypergiants
             if (research >= 4 && (player.challenges.active !== 0 || player.inflation.tree[3] >= 1)) { gainBuildings(4, 5, passedSeconds); } //Quasi-stars
         } else { assignBuildingsProduction.stage5Cache(); }
-        if (autoU[4].length !== 0) { autoUpgradesBuy(4); }
-        if (autoR[4].length !== 0) { autoResearchesBuy('researches', 4); }
-        if (autoE[4].length !== 0) { autoResearchesBuy('researchesExtra', 4); }
+        if (auto[5]) { autoUpgradesBuy(4); }
+        if (auto[6]) { autoResearchesBuy('researches', 4); }
+        if (auto[7]) { autoResearchesBuy('researchesExtra', 4); }
         assignBuildingsProduction.stage4Cache();
         for (let i = maxActive[4] - 1; i >= 1; i--) {
-            if (autoBuy[4][i] && ASR[4] >= i) { buyBuilding(i, 4, 0, true); }
+            if (autoBuy[4][i]) { buyBuilding(i, 4, 0, true); }
             gainBuildings(i - 1, 4, passedSeconds); //Elements
         }
         awardMilestone(0, 5);
@@ -88,28 +95,26 @@ export const timeUpdate = (tick: number, timeWarp = 0) => {
         awardMilestone(1, 4);
     } else if (vacuum) { assignResetInformation.solarHardcap(); }
     if (activeAll.includes(3)) {
-        if (!vacuum && auto[0]) { stageResetCheck(3, 0); }
         if (auto[3]) { rankResetCheck(true); }
-        if (autoU[3].length !== 0) { autoUpgradesBuy(3); }
-        if (autoR[3].length !== 0) { autoResearchesBuy('researches', 3); }
-        if (autoE[3].length !== 0) { autoResearchesBuy('researchesExtra', 3); }
+        if (auto[5]) { autoUpgradesBuy(3); }
+        if (auto[6]) { autoResearchesBuy('researches', 3); }
+        if (auto[7]) { autoResearchesBuy('researchesExtra', 3); }
         assignBuildingsProduction.stage3Cache();
         if (vacuum) { global.accretionInfo.disableAuto = player.strangeness[1][8] >= 2 && assignBuildingsProduction.S3Build1(true) >= calculateEffects.dustHardcap(); }
         for (let i = 1; i < maxActive[3]; i++) {
-            if (autoBuy[3][i] && ASR[3] >= i) { buyBuilding(i, 3, 0, true); }
+            if (autoBuy[3][i]) { buyBuilding(i, 3, 0, true); }
         }
         gainBuildings(2, 3, passedSeconds); //Planetesimals
         gainBuildings(1, 3, passedSeconds); //Cosmic dust
         if (!vacuum) { gainBuildings(0, 3, passedSeconds); } //Mass
     }
     if (activeAll.includes(2)) {
-        if (!vacuum && auto[0]) { stageResetCheck(2, 0); }
         vaporizationResetCheck(trueSeconds);
-        if (autoU[2].length !== 0) { autoUpgradesBuy(2); }
-        if (autoR[2].length !== 0) { autoResearchesBuy('researches', 2); }
-        if (autoE[2].length !== 0) { autoResearchesBuy('researchesExtra', 2); }
+        if (auto[5]) { autoUpgradesBuy(2); }
+        if (auto[6]) { autoResearchesBuy('researches', 2); }
+        if (auto[7]) { autoResearchesBuy('researchesExtra', 2); }
         for (let i = maxActive[2] - 1; i >= 1; i--) {
-            if (autoBuy[2][i] && ASR[2] >= i) { buyBuilding(i, 2, 0, true); }
+            if (autoBuy[2][i]) { buyBuilding(i, 2, 0, true); }
         }
         gainBuildings(1, 2, passedSeconds); //Drops
         if (!vacuum) { gainBuildings(0, 2, passedSeconds); } //Moles
@@ -117,14 +122,13 @@ export const timeUpdate = (tick: number, timeWarp = 0) => {
         awardMilestone(0, 2);
     }
     if (activeAll.includes(1)) {
-        if (!vacuum && auto[0]) { stageResetCheck(1, 0); }
-        if (autoU[1].length !== 0) { autoUpgradesBuy(1); }
-        if (autoR[1].length !== 0) { autoResearchesBuy('researches', 1); }
-        if (autoE[1].length !== 0) { autoResearchesBuy('researchesExtra', 1); }
+        if (auto[5]) { autoUpgradesBuy(1); }
+        if (auto[6]) { autoResearchesBuy('researches', 1); }
+        if (auto[7]) { autoResearchesBuy('researchesExtra', 1); }
         assignBuildingsProduction.stage1Cache();
         if (player.upgrades[1][8] === 1) { gainBuildings(5, 1, passedSeconds); } //Molecules
         for (let i = maxActive[1] - 1; i >= 1; i--) {
-            if (autoBuy[1][i] && ASR[1] >= i) { buyBuilding(i, 1, 0, true); }
+            if (autoBuy[1][i]) { buyBuilding(i, 1, 0, true); }
             gainBuildings(i - 1, 1, passedSeconds); //Rest of Microworld
         }
         awardMilestone(1, 1);
@@ -153,8 +157,8 @@ export const assignBuildingsProduction = {
     globalCache: () => {
         global.dischargeInfo.total = calculateEffects.effectiveGoals();
         effectsCache.dischargeBase = calculateEffects.dischargeBase();
-        effectsCache.S2Upgrade3 = calculateEffects.S2Upgrade3(calculateEffects.S2Upgrade3_power());
-        effectsCache.S2Upgrade4 = calculateEffects.S2Upgrade4(calculateEffects.S2Upgrade4_power());
+        effectsCache.S2Upgrade3 = player.upgrades[2][3] === 1 ? calculateEffects.S2Upgrade3(calculateEffects.S2Upgrade3_power()) : 1;
+        effectsCache.S2Upgrade4 = player.upgrades[2][4] === 1 ? calculateEffects.S2Upgrade4(calculateEffects.S2Upgrade4_power()) : 1;
         global.accretionInfo.effective = calculateEffects.effectiveRank();
         global.mergeInfo.galaxies = player.buildings[5][3].current.toNumber();
     },
@@ -590,7 +594,7 @@ export const assignResetInformation = {
         global.mergeInfo.galaxies = player.buildings[5][3].current.toNumber();
         effectsCache.element26 = calculateEffects.element26();
         effectsCache.S2Strange9 = player.inflation.vacuum && player.strangeness[2][9] >= 1 ? calculateEffects.S2Strange9() : 1;
-        global.strangeInfo.quarksGain = player.stage.true >= 6 && player.strange[0].total >= 1 ? calculateEffects.strangeGain(true) : 1;
+        global.strangeInfo.quarksGain = player.stage.true >= 6 || player.strange[0].total >= 1 ? calculateEffects.strangeGain(true) : 1;
     }
 };
 
@@ -650,10 +654,10 @@ export const calculateEffects = {
     },
     /** Research is player.researches[2][2] */
     S2Upgrade3_power: (research = player.researches[2][2]): number => (1 + research / 2) / 100,
-    S2Upgrade3: (power: number, level = player.upgrades[2][3]): number => level === 1 ? new Overlimit(player.buildings[2][0].current).max('1').power(power).toNumber() : 1,
+    S2Upgrade3: (power: number): number => new Overlimit(player.buildings[2][0].current).max('1').power(power).toNumber(),
     /** Research is player.researches[2][3] */
     S2Upgrade4_power: (research = player.researches[2][3]): number => (1 + research / 2) / 100,
-    S2Upgrade4: (power: number, level = player.upgrades[2][4]): number => level === 1 ? new Overlimit(player.buildings[2][1].current).max('1').power(power).toNumber() : 1,
+    S2Upgrade4: (power: number): number => new Overlimit(player.buildings[2][1].current).max('1').power(power).toNumber(),
     S2Upgrade5: (): number => 1 + player.researches[2][4],
     S2Upgrade6: (): number => 1 + player.researches[2][5],
     /** Level is global.vaporizationInfo.S2Extra1 if used for production and player.researchesExtra[2][1] if for automatization */
@@ -854,7 +858,7 @@ export const calculateEffects = {
 };
 
 export const buyBuilding = (index: number, stageIndex: number, howMany = player.toggles.shop.input, auto = false) => {
-    if (!checkBuilding(index, stageIndex) || (!auto && global.offline.active)) { return; }
+    if (!checkBuilding(index, stageIndex) || (auto ? player.ASR[stageIndex] < index : global.offline.active)) { return; }
     const building = player.buildings[stageIndex][index as 1];
 
     let currency; //Readonly
@@ -1201,9 +1205,9 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
                 if (upgrade === 0 || upgrade === 1) {
                     assignBuildingsProduction.S2Levels();
                 } else if (upgrade === 2) {
-                    effectsCache.S2Upgrade3 = calculateEffects.S2Upgrade3(calculateEffects.S2Upgrade3_power());
+                    if (player.upgrades[2][3] === 1) { effectsCache.S2Upgrade3 = calculateEffects.S2Upgrade3(calculateEffects.S2Upgrade3_power()); }
                 } else if (upgrade === 3) {
-                    effectsCache.S2Upgrade4 = calculateEffects.S2Upgrade4(calculateEffects.S2Upgrade4_power());
+                    if (player.upgrades[2][4] === 1) { effectsCache.S2Upgrade4 = calculateEffects.S2Upgrade4(calculateEffects.S2Upgrade4_power()); }
                 } else if (upgrade >= 4 /*&& upgrade < 6*/) {
                     assignBuildingsProduction.S2FreeBuilds();
                 }
@@ -1588,7 +1592,7 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
         }
     } else if (type === 'researchesAuto') {
         if (research === 2) {
-            max = player.inflation.vacuum ? 5 : 1;
+            max = player.inflation.vacuum || global.milestonesInfoS6.active[3] ? 5 : 1;
         }
     } else if (type === 'ASR') {
         if (stageIndex === 1) {
@@ -1678,8 +1682,8 @@ export const autoUpgradesSet = (which: number) => {
 };
 
 const autoUpgradesBuy = (stageIndex: number) => {
-    if (!player.toggles.auto[5] || player.researchesAuto[0] < 1) { return; }
     const auto = global.automatization.autoU[stageIndex];
+    if (auto.length < 1 || player.researchesAuto[0] < 1) { return; }
 
     for (let i = 0; i < auto.length; i++) {
         const index = auto[i];
@@ -1725,12 +1729,8 @@ const autoResearchesAddOne = (type: 'researches' | 'researchesExtra', which: num
 };
 
 const autoResearchesBuy = (type: 'researches' | 'researchesExtra', stageIndex: number) => {
-    if (type === 'researches') {
-        if (!player.toggles.auto[6] || player.researchesAuto[0] < 2) { return; }
-    } else /*if (type === 'researchesExtra')*/ {
-        if (!player.toggles.auto[7] || player.researchesAuto[0] < 3) { return; }
-    }
     const auto = global.automatization[type === 'researches' ? 'autoR' : 'autoE'][stageIndex];
+    if (auto.length < 1 || player.researchesAuto[0] < (type === 'researches' ? 2 : 3)) { return; }
     const pointer = global[`${type}Info`][stageIndex];
 
     for (let i = 0; i < auto.length; i++) {
@@ -1762,8 +1762,8 @@ export const autoElementsSet = () => {
 };
 
 const autoElementsBuy = () => {
-    if (!player.toggles.auto[8] || player.researchesAuto[1] < 2) { return; }
     const auto = global.automatization.elements;
+    if (auto.length < 1 || player.researchesAuto[1] < 2) { return; }
     const elements = player.elements;
 
     for (let i = 0; i < auto.length; i++) {
@@ -2388,7 +2388,10 @@ const mergeResetCheck = (auto = false): boolean => {
     const galaxies = player.buildings[5][3].true;
     if (!player.inflation.vacuum) {
         if (galaxies < 22) { return false; }
-        if (auto) { mergeReset(); }
+        if (auto) {
+            if (player.researchesAuto[2] < 5) { return false; }
+            mergeReset();
+        }
         return true;
     }
     if (player.merge.resets >= calculateEffects.mergeMaxResets() || galaxies < 1) { return false; }
@@ -2692,6 +2695,7 @@ const challengeReset = (next: number | null, old: number | null) => {
     } else if (old !== null) {
         if (player.stage.active < 6) { setActiveStage(1); }
         if (player.clone.inflation?.vacuum === false) {
+            global.buildingsInfo.producing[4][5].setValue('0');
             player.inflation.vacuum = false;
             prepareVacuum(false);
         }

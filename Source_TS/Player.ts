@@ -526,11 +526,11 @@ export const global: globalType = { //For information that doesn't need to be sa
                 },
                 () => { //[3]
                     const power = calculateEffects.S2Upgrade3_power();
-                    return `Puddles will get a boost based on Moles ^${format(power)}.\n(Boost: ${format(calculateEffects.S2Upgrade3(power, 1), { padding: true })})`;
+                    return `Puddles will get a boost based on Moles ^${format(power)}.\n(Boost: ${format(calculateEffects.S2Upgrade3(power), { padding: true })})`;
                 },
                 () => { //[4]
                     const power = calculateEffects.S2Upgrade4_power();
-                    return `Puddles will get a boost based on Drops ^${format(power)}.\n(Boost: ${format(calculateEffects.S2Upgrade4(power, 1), { padding: true })})`;
+                    return `Puddles will get a boost based on Drops ^${format(power)}.\n(Boost: ${format(calculateEffects.S2Upgrade4(power), { padding: true })})`;
                 },
                 () => `Ponds will increase current Puddle amount. (${format(calculateEffects.S2Upgrade5())} extra Puddles per Pond)`,
                 () => `Lakes will increase current Pond amount. (${format(calculateEffects.S2Upgrade6())} extra Ponds per Lake)`,
@@ -649,8 +649,14 @@ export const global: globalType = { //For information that doesn't need to be sa
             effectText: [
                 () => `Drops will ${player.inflation.vacuum ? 'improve Tritium' : 'produce Moles'} 3 times more.${player.upgrades[2][2] === 1 || player.inflation.vacuum ? `\nEffective level ${global.vaporizationInfo.S2Research0 !== player.researches[2][0] ? `is ${format(global.vaporizationInfo.S2Research0, { padding: true })}, will be restored with more Drops` : 'will be set to 0 after any Reset'}.` : ''}`,
                 () => `Puddles will produce 2 times more Drops.${player.upgrades[2][2] === 1 || player.inflation.vacuum ? `\nEffective level ${global.vaporizationInfo.S2Research1 !== player.researches[2][1] ? `is ${format(global.vaporizationInfo.S2Research1, { padding: true })}, will be restored with more Drops` : 'will be set to 0 after any Reset'}.` : ''}`,
-                () => `'Surface tension' base will be +${format(0.005)} stronger.\n(This is equal to ${format(calculateEffects.S2Upgrade3(calculateEffects.S2Upgrade3_power(player.researches[2][2] + 1) - calculateEffects.S2Upgrade3_power(), 1), { padding: true })}x boost improvement)`,
-                () => `'Surface stress' base will be +${format(0.005)} stronger.\n(This is equal to ${format(calculateEffects.S2Upgrade4(calculateEffects.S2Upgrade4_power(player.researches[2][3] + 1) - calculateEffects.S2Upgrade4_power(), 1), { padding: true })}x boost improvement)`,
+                () => { //[2]
+                    const power = calculateEffects.S2Upgrade3_power(player.researches[2][2] + 1) - calculateEffects.S2Upgrade3_power();
+                    return `'Surface tension' base will be +${format(power)} stronger.\n(This is equal to ${format(calculateEffects.S2Upgrade3(power), { padding: true })}x boost improvement)`;
+                },
+                () => { //[3]
+                    const power = calculateEffects.S2Upgrade4_power(player.researches[2][3] + 1) - calculateEffects.S2Upgrade4_power();
+                    return `'Surface stress' base will be +${format(power)} stronger.\n(This is equal to ${format(calculateEffects.S2Upgrade4(power), { padding: true })}x boost improvement)`;
+                },
                 () => 'With more streams, will be able to have even more extra Puddles. (+1 extra Puddles per Pond)',
                 () => 'Rivers will be able to split, which will allow even more Ponds per Lake. (+1 per)'
             ],
@@ -886,7 +892,7 @@ export const global: globalType = { //For information that doesn't need to be sa
             () => 'Elements will no longer require Collapse for activation.\nSecond level will unlock auto creation of Elements.',
             () => { //[2]
                 const index = player.researchesAuto[2] >= 4 ? 4 : Math.min(player.inflation.vacuum ? player.researchesAuto[2] : player.stage.current - 1, 3);
-                return `Unlock auto ${['Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge'][player.inflation.vacuum ? (index === 1 ? 2 : index === 2 ? 1 : index) : index]} level 1.\nCost will decrease by -1 level per related level 1 Strangeness.`;
+                return `Unlock auto ${['Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge'][player.inflation.vacuum ? (index === 1 ? 2 : index === 2 ? 1 : index) : index]} level 1.${player.inflation.vacuum ? '\nCost will decrease by -1 level per related level 1 Strangeness.' : ''}`;
             }
         ],
         costRange: [
@@ -1252,7 +1258,7 @@ export const global: globalType = { //For information that doesn't need to be sa
                 () => `Have current Energy reach ${format(global.milestonesInfo[1].need[1])}.`
             ],
             rewardText: [
-                () => player.inflation.vacuum ? `All Microworld Structures strength increased by ${format(global.milestonesInfo[1].reward[0], { padding: true })}.` : 'Increase Strange quarks from any Stage reset by +1.',
+                () => player.inflation.vacuum ? `All Microworld Structures strength increased by ${format(global.milestonesInfo[1].reward[0], { padding: true })}.` : 'Increase base for Strange quarks from any Stage reset by +1.',
                 () => player.inflation.vacuum ? `Effective Energy increased by ${format(global.milestonesInfo[1].reward[1], { padding: true })}.` : 'Permanent Microworld Stage.'
             ],
             need: [],
@@ -1350,7 +1356,7 @@ export const global: globalType = { //For information that doesn't need to be sa
         }
     ],
     milestonesInfoS6: {
-        requirement: [1, 2, 3],
+        requirement: [1, 2, 3, 4],
         active: []
     },
     challengesInfo: {

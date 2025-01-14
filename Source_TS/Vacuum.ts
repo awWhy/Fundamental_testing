@@ -9,7 +9,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     const { buildings } = playerStart;
     const { buildingsInfo, upgradesInfo, researchesInfo, researchesExtraInfo, strangenessInfo } = global;
     const star3ExpId = getQuery('#star3Effect > span:last-of-type');
-    let buildingsActive, upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
+    let upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
 
     if (state) {
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
@@ -18,7 +18,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildings[1][0].current.setValue('5.476e-3');
         buildings[2][0].current.setValue('0');
         buildings[3][0].current.setValue('9.76185667392e-36');
-        buildingsActive = [6, 7, 6, 6];
+        buildingsInfo.maxActive[1] = 6;
+        buildingsInfo.maxActive[2] = 7;
+        buildingsInfo.maxActive[3] = 6;
+        buildingsInfo.maxActive[4] = 6;
         if (buildingsInfo.name[1][0] !== 'Mass') {
             specialHTML.buildingHTML[1].unshift('Preon.png', 'Quarks.png');
             buildingsInfo.name[1].unshift('Mass', 'Preons');
@@ -127,7 +130,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
             buildingsInfo.name[1].splice(0, 2);
             buildingsInfo.hoverText[1].splice(0, 2);
         }
-        buildingsActive = [4, 6, 5, 5];
+        buildingsInfo.maxActive[1] = 4;
+        buildingsInfo.maxActive[2] = 6;
+        buildingsInfo.maxActive[3] = 5;
+        buildingsInfo.maxActive[4] = 5;
         buildingsInfo.startCost[1] = [0, 3, 24, 3];
         buildingsInfo.type[2][0] = 'producing';
         buildingsInfo.type[3][0] = 'producing';
@@ -234,7 +240,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         }
     }
 
-    buildingsInfo.maxActive.splice(1, buildingsActive.length, ...buildingsActive);
     upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
     researchesInfo[1].startCost.splice(0, researches1Cost.length, ...researches1Cost);
     researchesInfo[1].scaling.splice(0, researches1Scaling.length, ...researches1Scaling);
