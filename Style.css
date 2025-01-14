@@ -1524,7 +1524,7 @@ li .hollowButton {
     }
 
     #logoLinks { align-self: unset; }
-    #themeArea > div > div { width: 80vw; }
+    #themeArea > div > div { width: 80vw !important; }
 
     #fakeFooter { height: calc(32px + min(3.9vh, 2.4em) + 9.6744em + 3.6vw); }
     #footerMain > * { column-gap: 0.8em; }
