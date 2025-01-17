@@ -577,10 +577,10 @@ input:-webkit-autofill { /* Chrome related pain */
     cursor: help;
 }
 
-#mergeEffects:hover > p > span:first-of-type,
-#starEffects:hover > p > span:first-of-type { display: none; }
-#mergeEffects:not(:hover) > p > span:last-of-type,
-#starEffects:not(:hover) > p > span:last-of-type { display: none; }
+#mergeEffects:hover > p > span:not(.info),
+#starEffects:hover > p > span:not(.info) { display: none; }
+#mergeEffects:not(:hover) > p > span.info,
+#starEffects:not(:hover) > p > span.info { display: none; }
 
 #timeInfo {
     display: flex;

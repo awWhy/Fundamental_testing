@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateUpgrades } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSuperVoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
@@ -68,18 +68,19 @@ export const simulateOffline = async(offline: number) => {
         offline += player.time.offline;
         player.time.offline = 0;
     }
-    if (offline > 43200) {
-        offline = 43200;
-    } else if (offline <= 0) {
-        player.time.offline += offline;
-        return pauseGame(false);
+    let decline = false;
+    if (offline > 0 && !player.toggles.normal[4]) {
+        decline = !await Confirm(`Claim ${format(Math.min(offline, 43200), { type: 'time', padding: false })} worth of Offline time?\n(Includes time spent to click any of the buttons)`, 2) &&
+            (globalSave.developerMode || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"));
+        const extra = handleOfflineTime();
+        global.lastSave += extra;
+        offline += extra;
     }
-    if (!player.toggles.normal[4] && !await Confirm(`Claim ${format(offline, { type: 'time', padding: false })} worth of Offline time?`, 2) &&
-        (globalSave.developerMode || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"))) {
-        global.lastSave += handleOfflineTime();
-        timeUpdate(0.001, 0.001); //Just in case
-        return pauseGame(false);
-    }
+    if (decline || offline <= 0) {
+        if (offline <= 0) { player.time.offline += offline; }
+        timeUpdate(1, 0.04); //Just in case
+        return offlineEnd(true);
+    } else if (offline > 43200) { offline = 43200; }
     global.offline.stageUpdate = null;
     global.offline.speed = globalSave.intervals.offline / 1000;
 
@@ -110,7 +111,7 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
         if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').ariaValueText = `${format(100 - warpTime / start * 100)}% done`; }
     } else { offlineEnd(); }
 };
-const offlineEnd = () => {
+const offlineEnd = (early = false) => {
     if (global.offline.stageUpdate !== null) {
         stageUpdate(global.offline.stageUpdate);
     } else {
@@ -118,6 +119,7 @@ const offlineEnd = () => {
         numbersUpdate();
     }
     pauseGame(false);
+    if (early) { return; } //Just in case?
     getId('offlineMain').style.display = 'none';
 
     getId('offlineAccelerate').removeEventListener('click', offlineAccelerate);
@@ -232,6 +234,7 @@ const loadGame = (save: string) => {
 const exportFileGame = () => {
     if (player.stage.true >= 7 || player.strange[0].total > 0) {
         awardExport();
+        numbersUpdate();
     }
 
     const save = saveGame(globalSave.developerMode);
@@ -608,15 +611,16 @@ try { //Start everything
             message.className = 'greenText';
             message.ariaHidden = 'true';
             for (let i = 0; i <= 3; i++) {
-                const effectID = getQuery(`#${i === 0 ? 'solarMass' : `star${i}`}Effect > span:last-of-type`);
+                const effectID = getQuery(`#${i === 0 ? 'solarMass' : `star${i}`}Effect > span.info`);
                 effectID.textContent = ` (${effectID.textContent})`;
                 effectID.classList.remove('greenText');
             }
             for (let i = 1; i <= 1; i++) {
-                const effectID = getQuery(`#merge${i}Effect > span:last-of-type`);
+                const effectID = getQuery(`#merge${i}Effect > span.info`);
                 effectID.textContent = ` (${effectID.textContent})`;
                 effectID.classList.remove('greenText');
             }
+            specialHTML.styleSheet.textContent += '#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }';
 
             const SRMainDiv = document.createElement('article');
             SRMainDiv.innerHTML = '<h5>Information for Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
@@ -672,7 +676,6 @@ try { //Start everything
 
             if (globalSave.SRSettings[2]) { primaryIndex(true); }
             for (let i = 0; i < globalSaveStart.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
-            specialHTML.styleSheet.textContent += '#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }';
         } else {
             const index = globalSave.toggles[0] ? 0 : 1;
             const list = [globalSave.hotkeys.tabLeft[index], globalSave.hotkeys.tabRight[index], globalSave.hotkeys.subtabDown[index], globalSave.hotkeys.subtabUp[index]];
@@ -853,6 +856,7 @@ try { //Start everything
         numbersUpdate();
     });
     getId('autoWaitInput').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('autoWaitInput') as HTMLInputElement;
         let value = Math.max(Number(input.value), 1);
         if (isNaN(value)) { value = 2; }
@@ -873,7 +877,7 @@ try { //Start everything
         if (MD) { image.addEventListener('touchstart', () => hoverChallenge(null)); }
         if (SR) { image.addEventListener('focus', () => hoverChallenge(null)); }
     }
-    getId('superVoidToggle').addEventListener('click', () => { toggleSuperVoid(true); });
+    getId('supervoidToggle').addEventListener('click', () => { toggleSupervoid(true); });
     {
         const close = () => {
             getId('voidRewardsDiv').style.display = '';
@@ -1103,26 +1107,31 @@ try { //Start everything
 
     /* Settings tab */
     getId('vaporizationInput').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('vaporizationInput') as HTMLInputElement;
         player.vaporization.input[0] = Math.max(Number(input.value), 0);
         input.value = format(player.vaporization.input[0], { type: 'input' });
     });
     getId('vaporizationInputMax').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('vaporizationInputMax') as HTMLInputElement;
         player.vaporization.input[1] = Math.max(Number(input.value), 0);
         input.value = format(player.vaporization.input[1], { type: 'input' });
     });
     getId('collapseInput').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('collapseInput') as HTMLInputElement;
         player.collapse.input[0] = Math.max(Number(input.value), 1);
         input.value = format(player.collapse.input[0], { type: 'input' });
     });
     getId('collapseInputWait').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('collapseInputWait') as HTMLInputElement;
         player.collapse.input[1] = Number(input.value);
         input.value = format(player.collapse.input[1], { type: 'input' });
     });
     getId('collapseAddNewPoint').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('collapseAddNewPoint') as HTMLInputElement;
         const value = Number(input.value);
         const points = player.collapse.points;
@@ -1147,16 +1156,19 @@ try { //Start everything
         updateCollapsePointsText();
     });
     getId('mergeInput').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('mergeInput') as HTMLInputElement;
         player.merge.input = Math.max(Number(input.value), 0);
         input.value = format(player.merge.input, { type: 'input' });
     });
     getId('stageInput').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('stageInput') as HTMLInputElement;
         player.stage.input[0] = Math.max(Number(input.value), 0);
         input.value = format(player.stage.input[0], { type: 'input' });
     });
     getId('stageInputTime').addEventListener('change', () => {
+        if (global.offline.active) { return; }
         const input = getId('stageInputTime') as HTMLInputElement;
         player.stage.input[1] = Math.max(Number(input.value), 0);
         input.value = format(player.stage.input[1], { type: 'input' });

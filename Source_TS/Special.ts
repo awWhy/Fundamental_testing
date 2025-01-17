@@ -947,7 +947,8 @@ export const getVersionInfoHTML = () => {
     buildBigWindow();
     if (getId('versionHTML', true) === null) {
         const mainHTML = document.createElement('div');
-        mainHTML.innerHTML = `<label>v0.2.1</label><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions\n<a href="https://docs.google.com/document/d/1o6rk6mG-fCG7Xi1BpA4w4g_5_h9A87wrCv7bODweBWA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `<label>v0.2.2</label><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves current game state to load on exit\n<a href="https://docs.google.com/document/d/1x8zHjxB6mPQGwpZT3DV_bAyatFIB3SOlxp9TvzbrUds/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <label>v0.2.1</label><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions</p>
         <label>v0.2.0</label><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
         <label>v0.1.9</label><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>
         <label>v0.1.8</label><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Added copy to clipboard, load from string save file options</p>

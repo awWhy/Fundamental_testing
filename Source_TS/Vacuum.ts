@@ -87,14 +87,13 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestone1S2.src = milestone1S2.src.replace('Drop.png', 'Clouds.png');
         milestone1S2.alt = 'Distant Clouds';
         const milestone2S2 = getQuery('#milestone2Stage2Div > img') as HTMLImageElement;
-        milestone2S2.src = milestone2S2.src.replace('Drop.png', 'Puddle.png');
+        milestone2S2.src = milestone2S2.src.replace('Puddle.png', 'Drop.png');
         (getQuery('#milestone1Stage3Div > img') as HTMLImageElement).alt = 'Center of gravity';
         global.milestonesInfo[3].name[0] = 'Center of gravity';
         getQuery('#milestone1Stage3Main > span').textContent = 'Center of gravity';
         const milestone1S4 = getQuery('#milestone1Stage4Div > img') as HTMLImageElement;
         milestone1S4.src = milestone1S4.src.replace('Main_sequence%20mass.png', 'Black%20hole.png');
         getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting self-made <span class="grayText">Galaxies</span> into non self-made.';
-        getId('milestonesWelcome').innerHTML = 'Milestones require proper <span class="darkvioletText">Inflation</span> to have any effect';
         getQuery('#toggleAuto0Main label > span').textContent = 'Stage';
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
 
@@ -201,7 +200,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         const milestone1S4 = getQuery('#milestone1Stage4Div img') as HTMLImageElement;
         milestone1S4.src = milestone1S4.src.replace('Black%20hole.png', 'Main_sequence%20mass.png');
         getId('mergeResetText').innerHTML = 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its true state.';
-        getId('milestonesWelcome').innerHTML = 'Completing any tier will award 1 <span class="greenText">Strange quark</span></p>';
         getQuery('#toggleAuto0Main label > span').textContent = 'Interstellar Stage';
         getQuery('#stageHistory > h3').textContent = 'Interstellar Stage resets:';
 

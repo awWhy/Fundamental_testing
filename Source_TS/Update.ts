@@ -142,7 +142,6 @@ export const numbersUpdate = () => {
                 assignBuildingsProduction.S3Build2(true);
                 assignBuildingsProduction.S3Build3(true);
             }
-            if (player.upgrades[1][8] !== 1 && (active === 1 || (active === 2 && vacuum))) { assignBuildingsProduction.S1Build6(); }
             for (let i = 1; i < buildingsInfo.maxActive[active]; i++) {
                 const trueCountID = getId(`building${i}True`);
                 getId(`building${i}Cur`).textContent = format(buildings[i].current, { padding: trueCountID.style.display !== 'none' });
@@ -278,7 +277,7 @@ export const numbersUpdate = () => {
                     getQuery('#collapseBoostTotal > span').textContent = format(total, { padding: true });
                     if (vacuum) {
                         getQuery('#mainCap > span').textContent = format(collapseInfo.solarCap, { padding: true });
-                        getId('mainCapTill').textContent = isNaN(collapseInfo.timeUntil) ? 'Infinity' : format(collapseInfo.timeUntil, { padding: true });
+                        getId('mainCapTill').textContent = format(collapseInfo.timeUntil, { padding: true });
                     }
                 } else if (active === 5) {
                     if (vacuum) {
@@ -628,7 +627,7 @@ export const visualUpdate = () => {
                 getId('voidReward4').style.display = progress[3] >= 5 ? '' : 'none';
                 getId('voidReward5').style.display = progress[4] >= 4 ? '' : 'none';
             } else { getId('voidRewards').style.display = 'none'; }
-            getId('superVoidLabel').style.display = highest >= 7 && global.lastChallenge[0] === 0 ? '' : 'none';
+            getId('supervoidLabel').style.display = highest >= 7 && global.lastChallenge[0] === 0 ? '' : 'none';
             if (highest < 7) { getId('challenge1').style.display = player.stage.resets >= 1 ? '' : 'none'; }
         }
     } else if (tab === 'upgrade' || tab === 'Elements') {
@@ -697,8 +696,8 @@ export const visualUpdate = () => {
                 getId('research7').style.display = rank >= 4 || player.upgrades[3][4] === 1 ? '' : 'none';
                 getId('research8').style.display = rank >= 4 ? '' : 'none';
                 getId('research9').style.display = rank >= 5 ? '' : 'none';
-                getId('extraResearches').style.display = rank >= 2 ? '' : 'none';
-                getId('researchExtra2').style.display = rank >= 3 ? '' : 'none';
+                getId('extraResearches').style.display = rank >= 2 || (vacuum && player.challenges.supervoid[3] >= 1) ? '' : 'none';
+                getId('researchExtra2').style.display = rank >= 3 || (vacuum && player.challenges.supervoid[3] >= 2) ? '' : 'none';
                 getId('researchExtra3').style.display = rank >= 4 ? '' : 'none';
                 getId('researchExtra4').style.display = rank >= 5 ? '' : 'none';
                 if (vacuum) {
@@ -963,6 +962,7 @@ export const visualTrueStageUnlocks = () => {
     getId('toggleMax0').style.display = highest >= 4 ? '' : 'none';
     getId('globalSpeed').style.display = highest >= 7 ? '' : 'none';
     getId('strange1GlobalSpeedInfo').style.display = highest >= 7 ? '' : 'none';
+    getQuery('#resetToggles > h2 > span').style.display = highest >= 5 ? '' : 'none';
     getId('themeArea').style.display = highest >= 2 || globalSave.theme !== null ? '' : 'none';
     getId('switchTheme2').style.display = highest >= 2 ? '' : 'none';
     getId('switchTheme3').style.display = highest >= 3 ? '' : 'none';
@@ -1190,9 +1190,10 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
 export const getChallengeDescription = (index: number | null) => {
     let text;
     if (index === null) {
+        const gain = player.inflation.vacuum ? player.buildings[6][1].true + 1 : 1;
         text = `<h3 class="darkorchidText bigWord">Vacuum information</h3>
-        ${player.stage.true >= 7 ? `<p class="darkvioletText stage6Only">Current Cosmon gain: <span class="greenText">${format(player.buildings[6][1].true + 1)}</span> | <span class="redText">1</span></p>` : ''}
         <p class="orchidText">Vacuum state: <span class="${player.inflation.vacuum ? 'greenText">true' : 'redText">false'}</span> | Resets: <span class="darkorchidText">${player.inflation.resets}</span></p>
+        ${player.stage.true >= 7 ? `<p class="darkvioletText">Current Cosmon gain: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain, { padding: 'exponent' })}</span> | Rate: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain / player.time.vacuum, { type: 'income' })}</span></p>` : ''}
         <p class="orchidText">Time since last reset: <span class="darkorchidText">${format(player.inflation.time, { type: 'time' })}</span>${player.inflation.time !== player.time.vacuum ? ` (Real: <span class="darkorchidText">${format(player.time.vacuum, { type: 'time' })}</span>)` : ''}</p>`;
     } else {
         const isActive = player.challenges.active === index;
@@ -1213,7 +1214,7 @@ export const getChallengeReward = (index: number | null) => {
     if (index === null) { return; }
     const need = global.challengesInfo.needText[0][index];
     const reward = global.challengesInfo.rewardText[0][index];
-    const current = player.challenges[player.challenges.super ? 'superVoid' : 'void'][index];
+    const current = player.challenges[player.challenges.super ? 'supervoid' : 'void'][index];
     const best = player.challenges.super ? current : player.challenges.voidCheck[index];
     const noTime = player.time[player.challenges.super ? 'vacuum' : 'stage'] > global.challengesInfo.time[0];
     let text = '';

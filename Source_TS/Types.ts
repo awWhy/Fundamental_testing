@@ -88,7 +88,7 @@ export interface playerType {
         active: number | null
         super: boolean
         void: number[]
-        superVoid: number[]
+        supervoid: number[]
         voidCheck: number[]
     }
     toggles: {
@@ -219,7 +219,7 @@ export interface globalType {
     }
     inflationInfo: {
         globalSpeed: number
-        totalSuperVoid: number
+        totalSuper: number
         instability: number
     }
     intervalsId: {

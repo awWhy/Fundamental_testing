@@ -126,7 +126,13 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 4) { return player.strangeness[5][9] >= 1 && player.accretion.rank >= 7; }
                 return player.upgrades[2][2] === 1;
             } else if (stageIndex === 3) {
-                if (player.accretion.rank < global.accretionInfo.rankE[upgrade] || player.accretion.rank === 0) { return false; }
+                if (player.accretion.rank < global.accretionInfo.rankE[upgrade] || player.accretion.rank === 0) {
+                    if (player.inflation.vacuum) {
+                        if (upgrade === 0) { return player.challenges.supervoid[3] >= 1; }
+                        if (upgrade === 1) { return player.challenges.supervoid[3] >= 2; }
+                    }
+                    return false;
+                }
                 if (upgrade === 4) { return player.researchesExtra[1][2] >= 2; }
                 return true;
             } else if (stageIndex === 4) {

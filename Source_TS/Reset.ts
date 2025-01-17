@@ -195,13 +195,10 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         global.debug.timeLimit = false;
         researchesAuto[0] = strangeness[3][6];
         researchesAuto[1] = strangeness[4][6];
-        if (player.inflation.vacuum) {
-            researchesAuto[2] = strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4;
-            for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
-        } else {
-            researchesAuto[2] = strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0;
-            visualUpdateResearches(2, 0, 'researchesAuto');
-        }
+        researchesAuto[2] = global.milestonesInfoS6.active[3] ? 5 : player.inflation.vacuum ?
+            (strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4) :
+            (strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0);
+        for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
     } else { assignBuildingsProduction.globalCache(); }
 
     for (const s of stageIndex) { //Less errors if do it separatly
@@ -293,7 +290,7 @@ export const resetVacuum = () => {
     //Stage 5 and Strangeness
     player.merge.resets = 0;
     player.merge.reward = [0, 0, 0, 0];
-    player.challenges.void = cloneArray(player.challenges.superVoid);
+    player.challenges.void = cloneArray(player.challenges.supervoid);
     global.historyStorage.stage = [];
     player.history.stage.best = [3.1556952e16, 0, 0, 0];
     global.lastStrangeness = [null, 0];
@@ -306,20 +303,19 @@ export const resetVacuum = () => {
 
     if (activeMilestone[0]) {
         let start = player.buildings[6][1].true ** 2;
-        if (player.inflation.vacuum) { start += (global.inflationInfo.totalSuperVoid ** 2 + global.inflationInfo.totalSuperVoid) / 2; }
+        if (player.inflation.vacuum) { start += (global.inflationInfo.totalSuper + 1) * global.inflationInfo.totalSuper / 2; }
         player.strange[0].current = start;
         player.strange[0].total = start;
         player.strangeness[1][8] = 2;
     }
+    if (activeMilestone[1]) { player.strangeness[5][4] = 1; }
     if (activeMilestone[2]) {
         player.strangeness[3][6] = 3;
         player.strangeness[4][6] = 2;
         player.researchesAuto[0] = 3;
         player.researchesAuto[1] = 2;
     }
-    if (activeMilestone[3]) {
-        player.researchesAuto[2] = 5;
-    } else if (activeMilestone[1]) { player.strangeness[5][4] = 1; }
+    if (activeMilestone[3]) { player.researchesAuto[2] = 5; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 5; s++) {
