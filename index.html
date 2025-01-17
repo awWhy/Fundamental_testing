@@ -195,10 +195,10 @@
                             <p id="collapseBoostTotal" class="orchidText">Total boost after Collapse: <span class="cyanText">1</span></p>
                             <section id="starEffects">
                                 <h3 class="orangeText bigWord">Current effects</h3>
-                                <p id="solarMassEffect" class="cyanText">Solar mass: <span class="greenText">0</span><span class="greenText">Boost to all Stars</span></p>
-                                <p id="star1Effect" class="redText">Red giants: <span class="greenText">0</span><span class="greenText">Boost to Main-sequence</span></p>
-                                <p id="star2Effect" class="darkvioletText">Neutron stars: <span class="greenText">0</span><span class="greenText">Boost to all Stars</span></p>
-                                <p id="star3Effect" class="grayText">Black holes: <span class="greenText">0</span><span class="greenText">Boost to Solar mass gain</span></p>
+                                <p id="solarMassEffect" class="cyanText">Solar mass: <span class="greenText">0</span><span class="info greenText">Boost to all Stars</span></p>
+                                <p id="star1Effect" class="redText">Red giants: <span class="greenText">0</span><span class="info greenText">Boost to Main-sequence</span></p>
+                                <p id="star2Effect" class="darkvioletText">Neutron stars: <span class="greenText">0</span><span class="info greenText">Boost to all Stars</span></p>
+                                <p id="star3Effect" class="grayText">Black holes: <span class="greenText">0</span><span class="info greenText">Boost to Solar mass gain</span></p>
                             </section>
                         </div>
                         <div class="stage5Only">
@@ -207,8 +207,8 @@
                             <p id="collapseBoostTotalS5" class="orchidText">Total boost after Collapse: <span class="orangeText">1</span></p>
                             <p id="mergeBoostTotal" class="darkvioletText">Total boost after Merge: <span class="grayText">1</span> ^2</p>
                             <section id="mergeEffects">
-                                <h3 class="cyanText bigWord">Current effects</h3>
-                                <p id="merge1Effect" class="grayText">Groups: <span class="greenText">1</span><span class="greenText">Boost to Galaxies</span></p>
+                                <h3 class="cyanText bigWord">Current effects | Requirements</h3>
+                                <p id="merge1Effect" class="grayText">Groups: <span class="greenText">1</span><span class="info greenText">Boost to Galaxies</span><span> | <span class="greenText">40</span> Galaxies</span></p>
                             </section>
                         </div>
                         <div class="stage6Only">
@@ -252,7 +252,7 @@
                     </div>
                     <div id="advancedInfo">
                         <label class="whiteText">Automatically leave current Challenge after reaching its time limit <button type="button" id="toggleNormal3" class="toggleNormal">ON</button></label>
-                        <label id="superVoidLabel" class="whiteText">Enable Super Void <button type="button" id="superVoidToggle" class="specialToggle">ON</button></label>
+                        <label id="supervoidLabel" class="whiteText">Enable Supervoid <button type="button" id="supervoidToggle" class="specialToggle">ON</button></label>
                     </div>
                 </section>
             </div>
@@ -685,7 +685,7 @@
                 <section id="strangenessSubtabMilestones" class="insideTab" style="display: none;" aria-label="Current tab">
                     <div class="fullWidth center">
                         <h2 class="stageText bigWord">Milestones</h2>
-                        <p id="milestonesWelcome" class="whiteText">Completing any tier will award 1 <span class="greenText">Strange quark</span></p>
+                        <p class="whiteText">Completing any tier will award 1 <span class="greenText">Strange quark</span></p>
                     </div>
                     <div id="milestones">
                         <div id="milestone1Stage1Div" class="stage1borderImage stage1windowBackground"><img src="Used_art/Quarks.png" alt="Fundamental Matter" loading="lazy" draggable="false" aria-labelledby="milestonesText milestonesMultiline"></div>
@@ -779,8 +779,8 @@
             </div>
             <div id="settingsTab" style="display: none;">
                 <section id="settingsSubtabSettings" class="insideTab" aria-label="Current tab">
-                    <article id="resetToggles" aria-label="Confirmation toggles and Reset settings">
-                        <h2 class="center" aria-hidden="true">Confirmation toggles</h2>
+                    <article id="resetToggles">
+                        <h2 class="center">Reset confirmation<span> and automatization</span> toggles</h2>
                         <div>
                             <section id="stageToggleReset" aria-label="Stage">
                                 <img src="Used_art/Stage%20toggle.png" alt="Stage" loading="lazy" draggable="false" title="Stage" class="stageBorderImage" aria-hidden="true">
@@ -811,7 +811,7 @@
                                         <button type="button" class="hollowButton stage2borderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                         <div class="popUpMenu" role="menu" aria-label="Settings menu">
                                             <p><label>Vaporize when boost from new Clouds has reached at least <input type="number" id="vaporizationInput" value="3" step="any" inputmode="text"></label><label id="vaporizationLimit"> until <input type="number" id="vaporizationInputMax" value="0" step="any" inputmode="text"> Clouds, ignored if set to 0</label></p>
-                                            <label id="vaporizationExtra">(Automatically turn off if auto level is 2 or more <button type="button" id="toggleNormal1" class="toggleNormal">ON</button>)</label>
+                                            <label id="vaporizationExtra">(Automatically turn off if auto level is 2 or above <button type="button" id="toggleNormal1" class="toggleNormal">ON</button>)</label>
                                         </div>
                                     </div>
                                 </div>
@@ -842,10 +842,11 @@
                                 <img src="Used_art/Merge%20toggle.png" alt="Merge" loading="lazy" draggable="false" title="Merge" aria-hidden="true">
                                 <div>
                                     <button type="button" id="toggleConfirm5" class="toggleConfirm" title="Merge Confirmation">All</button><!--
-                                    --><div id="toggleAuto9Main" class="settingsMenu">
+                                     --><div id="toggleAuto9Main" class="settingsMenu">
                                            <button type="button" class="hollowButton stage5borderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                            <div class="popUpMenu" role="menu" aria-label="Settings menu">
                                                <label>Merge if current self-made Galaxies are above or equal to <input type="number" id="mergeInput" value="0" step="1">, also failed to auto Collapse and Solar mass is hardcapped</label>
+                                               <label>(Reset as soon as minimum value has been reached <button type="button" id="toggleNormal5" class="toggleNormal">ON</button>)</label>
                                            </div>
                                        </div>
                                 </div>
@@ -931,7 +932,7 @@
                     </section>
                     <div class="options">
                         <section id="autoTogglesUpgrades">
-                            <h3>Automatization</h3>
+                            <h3>Other automatization</h3>
                             <div id="autoToggle8">
                                 <label for="toggleAuto8" class="whiteText">Elements <span class="mainText">⟶</span></label>
                                 <button type="button" id="toggleAuto8" class="toggleAuto">Auto OFF</button>
