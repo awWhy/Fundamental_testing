@@ -6,7 +6,7 @@ import { format, switchTab, visualTrueStageUnlocks, visualUpdateResearches, visu
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = {
-    version: 'v0.2.3',
+    version: 'v0.2.3_t1',
     fileName: 'Fundamental, [dateD.M.Y] [timeH-M-S], [stage]',
     stage: {
         true: 1,
@@ -1718,7 +1718,7 @@ export const updatePlayer = (load: playerType): string => {
             load.cosmon.current = load.cosmon.total;
         }
         if (load.version === 'v0.2.2') {
-            load.version = 'v0.2.3';
+            load.version = 'v0.2.3_t1';
             load.challenges.super = false;
             load.challenges.supervoid = cloneArray(playerStart.challenges.supervoid);
             load.inflation.spent = load.cosmon.total - load.cosmon.current;
