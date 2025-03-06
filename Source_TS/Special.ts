@@ -10,7 +10,7 @@ export const globalSave: globalSaveType = {
         main: 20,
         offline: 40,
         numbers: 80,
-        visual: 1000,
+        visual: 800,
         autoSave: 20000
     },
     hotkeys: {
@@ -169,6 +169,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG2.png',
             'UpgradeG3.png',
             'UpgradeG4.png',
+            'Missing.png',
+            'Missing.png',
             'Missing.png'
         ], []
     ],
@@ -254,7 +256,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage'],
             ['Missing.png', 'stage3borderImage'],
-            ['Missing.png', 'greenBorderImage']
+            ['Missing.png', 'greenBorderImage'],
+            ['Missing.png', 'redBorderImage']
         ], []
     ],
     longestFooterStats: 3,
@@ -293,7 +296,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     },
     cache: {
         imagesDiv: document.createElement('div'), //Saved just in case
-        innerHTML: new Map<string | HTMLElement, string>(), //Lazy way to get around automatic html replacings
+        /** Lazy way to optimize HTML, without it can't properly detect changes */
+        innerHTML: new Map<string | HTMLElement, string | number>(),
         idMap: new Map<string, HTMLElement>(),
         classMap: new Map<string, HTMLCollectionOf<HTMLElement>>(),
         queryMap: new Map<string, HTMLElement>()
@@ -818,14 +822,26 @@ export const hideFooter = () => {
     }
 };
 
+export const resetMinSizes = (full = true) => {
+    for (let i = 1; i <= 3; i++) {
+        const element = getQuery(`#special${i} > p`);
+        specialHTML.cache.innerHTML.set(element, '');
+        element.style.minWidth = '';
+    }
+
+    if (!full) { return; }
+    const mile = getId('milestonesMultiline').parentElement as HTMLElement;
+    specialHTML.cache.innerHTML.set(mile, '');
+    mile.style.minHeight = '';
+};
+
 export const changeFontSize = (initial = false) => {
     const input = getId('customFontSize') as HTMLInputElement;
     const size = Math.min(Math.max(initial ? globalSave.fontSize : (input.value === '' ? 16 : Math.floor(Number(input.value) * 100) / 100), 12), 24);
     if (!initial) {
         globalSave.fontSize = size;
         saveGlobalSettings();
-
-        (getId('milestonesMultiline').parentElement as HTMLElement).style.minHeight = '';
+        resetMinSizes();
     }
 
     document.documentElement.style.fontSize = size === 16 ? '' : `${size}px`;
@@ -973,7 +989,8 @@ export const getVersionInfoHTML = () => {
     buildBigWindow();
     if (getId('versionHTML', true) === null) {
         const mainHTML = document.createElement('div');
-        mainHTML.innerHTML = `<label>v0.2.2</label><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves current game state to load on exit\n<a href="https://docs.google.com/document/d/1x8zHjxB6mPQGwpZT3DV_bAyatFIB3SOlxp9TvzbrUds/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `<label>v0.2.3</label><p>- Small amount of new content\n- Supervoid rework\n- Abyss small rebalance\n<a href="https://docs.google.com/document/d/1oFlo82k9H11nQ9R7YvcTSZaz9c-Nj-N5b38gNmIvDO0/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <label>v0.2.2</label><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves current game state to load on exit</p>
         <label>v0.2.1</label><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions</p>
         <label>v0.2.0</label><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
         <label>v0.1.9</label><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>

@@ -201,10 +201,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             }
             return true;
         case 'inflations':
-            if (player.stage.true < 7) { return false; }
             if (upgrade === 5) { return player.challenges.supervoid[1] >= 1; }
-            if (upgrade === 6) { return player.challenges.supervoid[3] >= 1; }
-            return true;
+            return player.stage.true >= 7;
     }
 
     return false;
@@ -213,7 +211,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
 export const allowedToBeReset = (check: number, stageIndex: number, type: 'structures' | 'upgrades' | 'researches' | 'researchesExtra' | 'elements'): boolean => {
     switch (type) {
         case 'structures':
-            if (stageIndex === 1) { return check !== 1 || !player.inflation.vacuum || player.inflation.tree[6] < 1; }
+            if (stageIndex === 1) { return check !== 1 || !player.inflation.vacuum || player.challenges.supervoid[3] < 1; }
             if (stageIndex === 5) { return check !== 3; }
             if (stageIndex === 6) { return check < 1; }
             break;
