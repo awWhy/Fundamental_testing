@@ -48,6 +48,7 @@ html {
     --orchid-text: #e14bdb;
     --darkorchid-text: #bd24ef;
     --darkviolet-text: #8b3cec;
+    --brown-text: #9b7346;
     --red-text: #eb0000;
     --green-text: #00e900;
     --yellow-text: #fafa00;
@@ -62,8 +63,8 @@ html {
 
     color: var(--main-text);
     background-color: var(--background-color);
-    min-width: 100vw;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
     font-size: 16px;
 }
 
@@ -84,6 +85,7 @@ body {
 .orchidText { color: var(--orchid-text) !important; }
 .darkorchidText { color: var(--darkorchid-text) !important; }
 .darkvioletText { color: var(--darkviolet-text) !important; }
+.brownText { color: var(--brown-text) !important; }
 .redText { color: var(--red-text) !important; }
 .greenText { color: var(--green-text) !important; }
 .yellowText { color: var(--yellow-text) !important; }
@@ -166,12 +168,6 @@ img {
     font-size: 0.66rem;
 }
 
-#footerStats img,
-.researchesDiv .interactiveImage {
-    border-radius: 3px;
-    z-index: 2;
-}
-
 p > img {
     float: left;
     margin: 0.5em 0.5em 0 0.2em;
@@ -197,15 +193,12 @@ p > img {
 .biggerWord { font-size: 1.2em !important; }
 
 a { color: red; }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; }
 .center { text-align: center; }
 .fullWidth { width: 100%; }
 
-h1, h2, h3, h4, h5, h6 {
-    font-weight: normal;
-    cursor: default;
-}
-
 .downArrow {
+    display: inline-block;
     background-color: var(--main-text);
     clip-path: polygon(0 0, 50% 100%, 100% 0, 50% 25%);
     pointer-events: none;
@@ -608,6 +601,21 @@ input:-webkit-autofill { /* Chrome related pain */
 #mergeEffects:not(:hover) > p > span.info,
 #starEffects:not(:hover) > p > span.info { display: none; }
 
+#mergeScore {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    grid-auto-rows: max-content;
+    border-left: 2px solid;
+    width: max-content;
+    column-gap: 0.3em;
+    padding-left: 0.4em;
+    margin: 0 auto;
+    text-align: left;
+}
+
+#mergeScore p { display: contents; }
+#mergeScore p > span:nth-of-type(2) { text-align: center; }
+
 #timeInfo {
     display: flex;
     flex-direction: column;
@@ -729,9 +737,20 @@ input:-webkit-autofill { /* Chrome related pain */
     margin-left: -1px;
     gap: 0.5em;
     background-color: var(--window-color);
+    transition-property: background-color;
 }
 
-.researchesDiv > div { display: flex; }
+.researchesDiv > div {
+    display: flex;
+    transition-property: background-color;
+}
+
+.researchesDiv img,
+.researchesDiv .interactiveImage {
+    border-radius: 3px;
+    z-index: 2;
+    transition-property: background-color;
+}
 
 .researchesDiv p {
     display: flex;
@@ -744,6 +763,7 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--background-color);
     margin-left: -3px;
     height: 32px;
+    transition-property: background-color;
 }
 
 .descriptionTextMain {
@@ -812,7 +832,6 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #element0:hover { opacity: 1; }
 
-/* Easier to do this through CSS (extra background value to prevent flashing) */
 .elementType1.awaiting { background: #780000 linear-gradient(45deg, #780000 50%, var(--background-color) 50%); }
 .elementType2.awaiting { background: #a55900 linear-gradient(45deg, #a55900 50%, var(--background-color) 50%); }
 .elementType3.awaiting { background: #0000c1 linear-gradient(45deg, #0000c1 50%, var(--background-color) 50%); }
@@ -969,9 +988,6 @@ input:-webkit-autofill { /* Chrome related pain */
     padding-top: 0.5em;
 }
 
-#inflationLoadouts { width: max-content; }
-#inflationLoadouts > .downArrow { display: inline-block; }
-
 #loadoutsMain {
     display: flex;
     flex-direction: column;
@@ -981,7 +997,7 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--window-color);
     border: 2px solid var(--window-border);
     border-radius: 7px;
-    width: 22em;
+    width: 24em;
 }
 
 #loadoutsMain > div {
@@ -990,7 +1006,10 @@ input:-webkit-autofill { /* Chrome related pain */
     align-items: center;
 }
 
-#loadoutsName { height: 1.8em; }
+#loadoutsName {
+    width: 7.8em;
+    height: 1.8em;
+}
 
 #loadoutsList {
     text-align: center;
@@ -1008,19 +1027,19 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 0.6em;
 }
 
-#inflationMilestones > div {
-    background-color: #4d0000;
-    color: var(--red-text);
-    border: 2px solid darkred;
+#inflationMilestones > section {
+    background-color: #004200;
+    color: var(--green-text);
+    border: 2px solid darkgreen;
     border-radius: 6px;
     padding: 0.3em 0.6em;
     text-align: center;
 }
 
-#inflationMilestones > div.completed {
-    background-color: #004200;
-    color: var(--green-text);
-    border-color: darkgreen;
+#inflationMilestones > section.uncompleted {
+    background-color: #4d0000;
+    color: var(--red-text);
+    border-color: darkred;
 }
 
 #resetToggles > div {
@@ -1334,6 +1353,39 @@ li .hollowButton {
     justify-content: center;
 }
 
+#globalStats {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    right: 2%;
+    bottom: 15%;
+    background-color: var(--window-color);
+    border: 2px solid var(--window-border);
+    border-radius: 8px;
+    padding: 0.4em;
+    row-gap: 0.4em;
+    cursor: move;
+    z-index: 7;
+}
+
+#globalStats:hover { opacity: 0.2; }
+#globalStats img { background-color: black; }
+
+#globalStats p {
+    text-align: center;
+    border-radius: 0 4px 4px 0;
+    background-color: black;
+    padding-left: calc(3px + 0.5em);
+    padding-right: 0.5em;
+    width: 100%;
+    white-space: nowrap;
+}
+
+#globalStats span {
+    margin-left: auto;
+    width: 4.4em;
+}
+
 #fakeFooter {
     visibility: hidden;
     height: calc(32px + min(3.9vh, 2.4em) + 3.9336em + 0.8vw);
@@ -1388,7 +1440,6 @@ li .hollowButton {
 }
 
 #footerStats span:last-of-type {
-    display: inline-block;
     white-space: nowrap;
     width: 4.4em;
 }
@@ -1502,8 +1553,7 @@ li .hollowButton {
     #footerMain { overflow-x: auto; } /* scrollbar-gutter, doesn't work for horizontal scrolls... */
 }
 @supports not selector(::-webkit-scrollbar) {
-    /* There is no way to make themed color with main (html) scrollbar, custom variables are ignored */
-    html { scrollbar-color: gray black; }
+    html { scrollbar-color: gray black; } /* Custom variables are ignored here */
     body { scrollbar-color: var(--input-border) black; }
 }
 

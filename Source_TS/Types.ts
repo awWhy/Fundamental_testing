@@ -11,6 +11,8 @@ export interface playerType {
         time: number
         /** Interstellar only */
         peak: number
+        /** Interstellar only */
+        peakedAt: number
         input: [number, number]
     }
     discharge: {
@@ -38,7 +40,7 @@ export interface playerType {
         points: number[]
     }
     merge: {
-        reward: [number, number, number, number]
+        rewards: [number, number, number, number]
         resets: number
         /** [Min Galaxies, time since last Galaxy] */
         input: [number, number]
@@ -48,7 +50,6 @@ export interface playerType {
     inflation: {
         tree: number[]
         loadouts: Record<string, number[]>
-        spent: number
         vacuum: boolean
         resets: number
         time: number
@@ -192,10 +193,18 @@ export interface globalType {
     offline: {
         active: boolean
         speed: number
+        cacheUpdate: boolean
         stageUpdate: null | boolean
     }
     paused: boolean
+    /** Footer is hidden */
     footer: boolean
+    log: {
+        /** ['Text', count, time] */
+        add: Array<[string, number, number]>
+        /** Last added HTML into list, ['Text', count, time, changed] */
+        lastHTML: [string, number, number, boolean]
+    }
     hotkeys: {
         disabled: boolean
         /** Used to test if focus was received through keyboard press */
@@ -394,7 +403,7 @@ export interface globalType {
         name: string
         description: () => string
         effectText: () => string
-        needText: Array<Array<() => string>>
+        needText: Array<Array<() => string | null>>
         /** [Void, Supervoid] */
         rewardText: string[][][]
         resetType: 'stage' | 'vacuum'
@@ -421,7 +430,6 @@ export interface globalType {
 
 export interface globalSaveType {
     intervals: {
-        main: number
         offline: number
         numbers: number
         visual: number
@@ -429,7 +437,7 @@ export interface globalSaveType {
     }
     /** hotkeyFunction: [key, code] */
     hotkeys: Record<hotkeysList, Array<string | undefined>>
-    /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3] */
+    /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4] */
     toggles: boolean[]
     /** Point[0], Separator[1] */
     format: [string, string]
@@ -450,7 +458,7 @@ export interface calculateEffectsType {
     dischargeScaling: (S1Research3?: number, S1Strange2?: number, inflation5?: number) => number
     dischargeCost: (scaling?: number) => number
     dischargeBase: (S1research4?: number) => number
-    /** Requires to be divided by 100 */
+    /** Result need to be divided by 100 */
     S1Upgrade6: () => number
     S1Upgrade7: (preons?: boolean) => number
     S1Upgrade9: () => number
@@ -495,6 +503,7 @@ export interface calculateEffectsType {
     S4Extra1: () => number
     mergeMaxResets: () => number
     reward: Array<(post?: boolean) => number>
+    mergeScore: (post?: boolean) => number
     S5Upgrade0: () => number
     S5Upgrade1: () => number
     S5Upgrade2: (post?: boolean, level?: number) => number

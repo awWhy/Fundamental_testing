@@ -19,7 +19,7 @@
             <button type="button" id="globalToggle0" class="specialToggle" style="display: none;">OFF</button>
         </div>
         <div id="alertMain" style="display: none;">
-            <div role="dialog" aria-modal="true">
+            <div role="alertdialog" aria-modal="true" aria-label="Alert window">
                 <p id="alertText" aria-live="assertive">Welcome back</p>
                 <div>
                     <input type="text" id="alertInput" autocomplete="off" style="display: none;">
@@ -28,9 +28,9 @@
                 </div>
             </div>
         </div>
-        <div id="offlineMain" style="display: none;" role="alertdialog" aria-modal="true">
+        <div id="offlineMain" style="display: none;" role="alertdialog" aria-modal="true" aria-label="Offline calculation">
             <div role="progressbar" aria-valuetext="0% done">
-                <p>Calculating Offline time by using <span id="offlineTick">1</span> seconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage">0</span>% done)</p>
+                <p>Calculating Offline time by using <span id="offlineTick">1</span> milliseconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage">0</span>% done)</p>
                 <div>
                     <button type="button" id="offlineAccelerate">Accelerate by 2</button>
                     <button type="button" id="offlineCancel">Finish now</button>
@@ -43,13 +43,13 @@
                 <section id="stageSubtabStructures" class="insideTab" aria-label="Current tab">
                     <article id="resets" aria-label="Resets">
                         <section id="resetStage" aria-label="Stage reset">
-                            <p class="whiteText">Current Stage is <span id="stageWord" class="stageText bigWord">Microworld</span>.<br>Resets everything Stage related to <span id="stageRewardNew">gain <span id="stageReward">0</span> Strange quarks</span><span id="stageRewardOld">increase current Stage</span>.</p>
+                            <p class="whiteText">Current Stage is <span id="stageWord" class="bigWord">Microworld</span>.<br>Resets everything Stage related to <span id="stageRewardNew">gain <span id="stageReward">0</span> Strange quarks</span><span id="stageRewardOld">increase current Stage</span>.</p>
                             <button type="button" id="stageReset" tabindex="-1">Missing</button>
                         </section>
                         <section id="reset1Main" aria-label="Basic reset">
                             <p class="whiteText stage1Only"><span class="orangeText">Discharge</span> resets Structures so spent <span class="orangeText">Energy</span> could be regained or to increase current boost.</p>
                             <p class="whiteText stage2Only"><span class="blueText">Vaporization</span> resets Structures and Upgrades for <span class="grayText">Clouds</span>. Their gain is based on current amount of <span class="blueText">Drops</span>.</p>
-                            <p class="whiteText stage3Only"><img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false" id="rankImage">Current <span class="darkorchidText">Rank</span> is <span id="rankName"></span>.<br>Resets Structures, Upgrades and Stage Researches.</p>
+                            <p class="whiteText stage3Only"><img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false" id="rankImage">Current <span class="darkorchidText">Rank</span> is <span id="rankName">Missing</span>.<br>Resets Structures, Upgrades and Stage Researches.</p>
                             <p class="whiteText stage4Only"><span class="orchidText">Collapse</span> resets Structures, Upgrades and all Researches for <span class="cyanText">Solar mass</span> and <span class="darkorchidText">Star remnants</span>.</p>
                             <p class="whiteText stage5Only" id="mergeResetText">Missing</p>
                             <button type="button" id="reset1Button" tabindex="-1">Missing</button>
@@ -59,7 +59,7 @@
                         <section id="specials" aria-label="Special Structures">
                             <div id="special1" title="Red giants">
                                 <img src="Used_art/Red%20giant.png" alt="" loading="lazy" draggable="false">
-                                <p class="whiteText"><span id="special1Cur" class="redText">0</span><span>(+<span id="special1Get">0</span>)</span></p>
+                                <p class="whiteText"><span id="special1Cur">0</span><span>(+<span id="special1Get">0</span>)</span></p>
                             </div>
                             <div id="special2" title="Neutron stars">
                                 <img src="Used_art/Neutron%20star.png" alt="" loading="lazy" draggable="false">
@@ -168,7 +168,7 @@
                             </div>
                             <div id="autoWaitMain">
                                 <input type="number" id="autoWaitInput" step="any">
-                                <label for="autoWaitInput" class="popUpMenu">How many times of cost Auto should wait before making a Structure</label>
+                                <label for="autoWaitInput" class="popUpMenu">How many times of the Structure cost Auto should wait before making that Structure</label>
                             </div>
                             <button type="button" id="toggleBuilding0" class="toggleBuilding" tabindex="-1">All ON</button>
                         </div>
@@ -176,7 +176,7 @@
                     <div id="stageInfo">
                         <div class="stage1Only">
                             <p id="tritiumEffect" class="cyanText">Tritium production of Molecules: <span class="blueText">0</span></p>
-                            <p id="preonCap" class="cyanText">Preons production hardcap starts at <span class="grayText">1e14</span><br>(Production to hardcap ratio is <span id="preonCapRatio" class="grayText">0</span>)</p>
+                            <p id="preonCap" class="cyanText">Preons production hardcap starts at <span class="grayText">1e14</span><br>(Production to the hardcap ratio is <span id="preonCapRatio" class="grayText">0</span>)</p>
                             <p id="dischargeEffect" class="orangeText">Boost from Discharge goals: <span class="darkorchidText">1</span></p>
                             <p id="energySpent" class="orangeText">Missing Energy: <span class="darkorchidText">0</span></p>
                         </div>
@@ -188,7 +188,7 @@
                         <div class="stage3Only">
                             <p id="massProduction" class="grayText">Preons production of Mass: <span class="cyanText">0</span></p>
                             <p id="dustSoftcap" class="grayText">Cosmic dust production is raised to the power of <span class="darkorchidText">1</span></p>
-                            <p id="dustCap" class="grayText">Cosmic dust production hardcap starts at <span class="darkorchidText">1e48</span><br>(Production to hardcap ratio is <span id="dustCapRatio" class="darkorchidText">0</span>)</p>
+                            <p id="dustCap" class="grayText">Cosmic dust production hardcap starts at <span class="darkorchidText">1e48</span><br>(Production to the hardcap ratio is <span id="dustCapRatio" class="darkorchidText">0</span>)</p>
                             <p id="submersionBoost" class="blueText">Boost to Cosmic dust from Drops: <span class="cyanText">0</span></p>
                         </div>
                         <div class="stage4Only">
@@ -199,20 +199,26 @@
                                 <p id="solarMassEffect" class="cyanText">Solar mass: <span class="greenText">0</span><span class="info greenText">Boost to all Stars</span></p>
                                 <p id="star1Effect" class="redText">Red giants: <span class="greenText">0</span><span class="info greenText">Boost to Main-sequence</span></p>
                                 <p id="star2Effect" class="darkvioletText">Neutron stars: <span class="greenText">0</span><span class="info greenText">Boost to all Stars</span></p>
-                                <p id="star3Effect" class="grayText">Black holes: <span class="greenText">0</span><span class="info greenText">Boost to Solar mass gain</span></p>
+                                <p id="star3Effect" class="grayText">Black holes: <span class="greenText">0</span><span class="info greenText">Boost to the Solar mass gain</span></p>
                             </section>
                         </div>
                         <div class="stage5Only">
                             <p id="mainCapS5" class="cyanText">Solar mass after Collapse: <span class="orangeText">0</span><span id="mainCapHardS5"> | Hardcap: <span class="orangeText">0</span></span><span id="mainCapPostS5"> | Post: <span class="orangeText">0</span></span><span id="timeSinceGalaxy" class="grayText"><br>(Time since last Galaxy: <span class="orangeText">0 seconds</span>)</span></p>
-                            <p id="elementsProductionS5" class="redText">Total production of Elements: <span class="orangeText">0</span></p>
+                            <p id="elementsProductionS5" class="redText">Total production of Stardust: <span class="orangeText">0</span></p>
                             <p id="collapseBoostTotalS5" class="orchidText">Total boost after Collapse: <span class="orangeText">1</span></p>
                             <p id="mergeBoostTotal" class="darkvioletText">Total boost after Merge: <span class="grayText">1</span> ^2</p>
                             <section id="mergeEffects">
                                 <h3 class="cyanText bigWord">Current effects | Requirements</h3>
-                                <p id="merge1Effect" class="grayText">Groups: <span class="greenText">1</span><span class="info greenText">Boost to Galaxies</span><span> | <span class="greenText">40</span> Galaxies</span></p>
+                                <p id="merge1Effect" class="grayText">Groups: <span class="greenText">1</span><span class="info greenText">Boost to Galaxies</span><span> | <span class="greenText">0</span> out of <span class="greenText">50</span> Galaxies</span></p>
                             </section>
                         </div>
                         <div class="stage6Only">
+                            <p id="mergeResetsS6" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max</p>
+                            <section id="mergeScore" class="stage6borderImage" title="Merge score">
+                                <p id="mergeScore0" class="grayText"><span>Galaxies:</span> <span id="mergeScore0Cur" class="greenText">0</span> <span>(<span class="greenText">1</span> per)</span></p>
+                                <p id="mergeScore1" class="grayText"><span>Groups:</span> <span id="mergeScore1Cur" class="greenText">0</span> <span>(<span class="greenText">2</span> per)</span></p>
+                                <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span>(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
+                            </section>
                             <p class="darkvioletText">Cosmon gain on Vacuum resets: <span class="greenText" id="cosmonGainTrue">1</span> (<span class="greenText">true</span>) | <span class="redText" id="cosmonGainFalse">1</span> (<span class="redText">false</span>)</p>
                             <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span><span id="universeTimeReal"> (Real: <span class="orangeText">0 seconds</span>)</span></p>
                         </div>
@@ -236,11 +242,11 @@
                         </section>
                         <div>
                             <section>
-                                <h3 class="bigWord"><button id="challengeName" class="selectBtn" type="button"></button><span id="challengeActive" class="greenText">, active</span></h3>
+                                <h3 class="bigWord"><button type="button" id="challengeName" class="selectBtn"></button><span id="challengeActive" class="greenText">, active</span></h3>
                                 <div id="challengeMultiline"></div>
                             </section>
                             <section id="voidRewards" aria-labelledby="rewardsType">
-                                <button id="rewardsType" class="selectBtn darkvioletText bigWord" type="button">Void rewards:</button>
+                                <button type="button" id="rewardsType" class="selectBtn darkvioletText bigWord">Void rewards:</button>
                                 <div>
                                     <button type="button" id="voidReward1" class="hollowButton stage1borderButton cyanText" aria-controls="voidRewardsMultiline">Microworld</button>
                                     <button type="button" id="voidReward2" class="hollowButton stage2borderButton blueText" aria-controls="voidRewardsMultiline">Submerged</button>
@@ -285,39 +291,39 @@
                             <div class="researchesDiv stageAllborderImage">
                                 <div id="research1" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research1Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research1Level" class="redText">0</span>/<span id="research1Max" class="greenText">1</span></p>
+                                    <p><span id="research1Level">0</span>/<span id="research1Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research2" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research2Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research2Level" class="redText">0</span>/<span id="research2Max" class="greenText">1</span></p>
+                                    <p><span id="research2Level">0</span>/<span id="research2Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research3" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research3Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research3Level" class="redText">0</span>/<span id="research3Max" class="greenText">1</span></p>
+                                    <p><span id="research3Level">0</span>/<span id="research3Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research4" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research4Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research4Level" class="redText">0</span>/<span id="research4Max" class="greenText">1</span></p>
+                                    <p><span id="research4Level">0</span>/<span id="research4Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research5" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research5Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research5Level" class="redText">0</span>/<span id="research5Max" class="greenText">1</span></p>
+                                    <p><span id="research5Level">0</span>/<span id="research5Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research6" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research6Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research6Level" class="redText">0</span>/<span id="research6Max" class="greenText">1</span></p>
+                                    <p><span id="research6Level">0</span>/<span id="research6Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research7" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research7Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research7Level" class="redText">0</span>/<span id="research7Max" class="greenText">1</span></p>
+                                    <p><span id="research7Level">0</span>/<span id="research7Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research8" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research8Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research8Level" class="redText">0</span>/<span id="research8Max" class="greenText">1</span></p>
+                                    <p><span id="research8Level">0</span>/<span id="research8Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="research9" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="research9Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="research9Level" class="redText">0</span>/<span id="research9Max" class="greenText">1</span></p>
+                                    <p><span id="research9Level">0</span>/<span id="research9Max" class="greenText">1</span></p>
                                 </div>
                             </div>
                         </section>
@@ -326,27 +332,27 @@
                             <div class="researchesDiv">
                                 <div id="researchExtra1" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="researchExtra1Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchExtra1Level" class="redText">0</span>/<span id="researchExtra1Max" class="greenText">1</span></p>
+                                    <p><span id="researchExtra1Level">0</span>/<span id="researchExtra1Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchExtra2" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="researchExtra2Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchExtra2Level" class="redText">0</span>/<span id="researchExtra2Max" class="greenText">1</span></p>
+                                    <p><span id="researchExtra2Level">0</span>/<span id="researchExtra2Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchExtra3" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="researchExtra3Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchExtra3Level" class="redText">0</span>/<span id="researchExtra3Max" class="greenText">1</span></p>
+                                    <p><span id="researchExtra3Level">0</span>/<span id="researchExtra3Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchExtra4" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="researchExtra4Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchExtra4Level" class="redText">0</span>/<span id="researchExtra4Max" class="greenText">1</span></p>
+                                    <p><span id="researchExtra4Level">0</span>/<span id="researchExtra4Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchExtra5" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="researchExtra5Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchExtra5Level" class="redText">0</span>/<span id="researchExtra5Max" class="greenText">1</span></p>
+                                    <p><span id="researchExtra5Level">0</span>/<span id="researchExtra5Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchExtra6" class="whiteText">
                                     <input type="image" src="Used_art/Missing.png" alt="Missing" draggable="false" id="researchExtra6Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchExtra6Level" class="redText">0</span>/<span id="researchExtra6Max" class="greenText">1</span></p>
+                                    <p><span id="researchExtra6Level">0</span>/<span id="researchExtra6Max" class="greenText">1</span></p>
                                 </div>
                             </div>
                         </section>
@@ -355,19 +361,19 @@
                             <div class="researchesDiv stage3borderImage">
                                 <div id="ASR" class="whiteText stageAllborderImage">
                                     <input type="image" src="Used_art/Auto.png" alt="Auto Structures" draggable="false" id="ASRImage" class="stageBorderImage interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="ASRLevel" class="redText">0</span>/<span id="ASRMax" class="greenText">1</span></p>
+                                    <p><span id="ASRLevel">0</span>/<span id="ASRMax" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchAuto1" class="whiteText stage3borderImage">
                                     <input type="image" src="Used_art/ResearchAuto1.png" alt="Upgrade automatization" draggable="false" id="researchAuto1Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchAuto1Level" class="redText">0</span>/<span id="researchAuto1Max" class="greenText">1</span></p>
+                                    <p><span id="researchAuto1Level">0</span>/<span id="researchAuto1Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchAuto2" class="whiteText stage4borderImage">
                                     <input type="image" src="Used_art/ResearchAuto2.png" alt="Element automatization" draggable="false" id="researchAuto2Image" class="interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchAuto2Level" class="redText">0</span>/<span id="researchAuto2Max" class="greenText">1</span></p>
+                                    <p><span id="researchAuto2Level">0</span>/<span id="researchAuto2Max" class="greenText">1</span></p>
                                 </div>
                                 <div id="researchAuto3" class="whiteText stageAllborderImage">
                                     <input type="image" src="Used_art/ResearchAuto3.png" alt="Reset automatization" draggable="false" id="researchAuto3Image" class="stageBorderImage interactiveImage" aria-controls="upgradeCost upgradeEffect">
-                                    <p><span id="researchAuto3Level" class="redText">0</span>/<span id="researchAuto3Max" class="greenText">1</span></p>
+                                    <p><span id="researchAuto3Level">0</span>/<span id="researchAuto3Max" class="greenText">1</span></p>
                                 </div>
                             </div>
                         </section>
@@ -378,9 +384,9 @@
                             <button type="button" id="toggleMax0" class="toggleMax">Max create ON</button>
                         </div>
                         <div class="descriptionText">
-                            <h3>Type: <span id="upgradeText" class="darkorchidText">Hover to see.</span></h3>
-                            <p>Effect: <span id="upgradeEffect" class="blueText">Hover to see.</span></p>
-                            <p>Next: <span id="upgradeCost" class="orangeText">Resource.</span></p>
+                            <h3>Type: <span id="upgradeText">Hover to see.</span></h3>
+                            <p>Effect: <span id="upgradeEffect">Hover to see.</span></p>
+                            <p>Next: <span id="upgradeCost">Resource.</span></p>
                         </div>
                     </div>
                 </section>
@@ -421,11 +427,12 @@
                         <input type="image" src="Used_art/Element31.png" alt="Gallium" draggable="false" id="element31" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
                         <input type="image" src="Used_art/Element32.png" alt="Germanium" draggable="false" id="element32" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
                         <input type="image" src="Used_art/Element33.png" alt="Arsenic" draggable="false" id="element33" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element34.png" alt="Selenium" draggable="false" id="element34" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
                     </section>
                     <div class="descriptionText">
-                        <h3>Element: <span id="elementText" class="darkorchidText">Hover to see.</span></h3>
-                        <p>Effect: <span id="elementEffect" class="blueText">Hover to see.</span></p>
-                        <p>Unlock: <span id="elementCost" class="orangeText">Resource.</span></p>
+                        <h3>Element: <span id="elementText">Hover to see.</span></h3>
+                        <p>Effect: <span id="elementEffect">Hover to see.</span></p>
+                        <p>Unlock: <span id="elementCost">Resource.</span></p>
                     </div>
                 </section>
             </div>
@@ -434,17 +441,17 @@
                     <div class="fullWidth center greenText">
                         <h2 class="biggerWord">Strange matter</h2>
                         <p>Stage reset reward: <span class="whiteText"><span id="strange0Gain">1</span> Strange quarks</span><span id="strange1Unlocked">, <span class="whiteText"><span id="strange1Gain">1</span> Strangelets</span></span></p>
-                        <p>Strange quarks rate: <span id="strangeRate" class="whiteText">0 per eon</span> (Peak: <span id="strangePeak" class="whiteText">0 per eon</span>)</p>
+                        <p>Strange quarks rate: <span id="strangeRate" class="whiteText">0 per eon</span> (<span id="strangePeakAllowed">Peak: <span id="strangePeak" class="whiteText">0 per eon</span> | At: <span id="strangePeakedAt" class="whiteText">0 seconds</span></span><span id="strangePeakDisabled" class="whiteText" style="display: none;">Interstellar Stage only</span>)</p>
                         <p>Stage time: <span id="stageTimeStrangeness" class="whiteText">0 seconds</span> (From the best reset: <span id="stageTimeBestReset" class="whiteText">1 seconds</span>)</p>
                     </div>
                     <article id="strangeStructures" class="greenText" aria-label="Strange Structures">
-                        <section id="strange0" class="noFocusOutline" tabindex="0" aria-haspopup="dialog"> <!-- Tabindex here is to make window close easier -->
+                        <section id="strange0" class="noFocusOutline" tabindex="0" aria-haspopup="dialog" aria-controls="strange0EffectsMain"> <!-- Tabindex here is to make window close easier -->
                             <h3>Strange quarks</h3>
                             <div>
                                 <img src="Used_art/Strange%20Quarks.png" alt="" loading="lazy" draggable="false">
                                 <p id="strange0Cur">0</p>
                             </div>
-                            <div id="strange0EffectsMain" class="popUpMenu mainText" style="display: none;" role="dialog">
+                            <div id="strange0EffectsMain" class="popUpMenu mainText" data-open="false" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Current effects:</h4>
                                 <ul class="whiteText">
                                     <li>Improving all Microworld Structures by <span id="strange0Effect1Stat">1</span></li>
@@ -455,235 +462,235 @@
                                 </ul>
                             </div>
                         </section>
-                        <section id="strange1" class="noFocusOutline" tabindex="0" aria-haspopup="dialog">
+                        <section id="strange1" class="noFocusOutline" tabindex="0" aria-haspopup="dialog" aria-controls="strange1EffectsMain">
                             <h3>Strangelets</h3>
                             <div>
                                 <img src="Used_art/Strangelets.png" alt="" loading="lazy" draggable="false">
                                 <p id="strange1Cur">0</p>
                             </div>
-                            <div id="strange1EffectsMain" class="popUpMenu mainText" style="display: none;" role="dialog">
+                            <div id="strange1EffectsMain" class="popUpMenu mainText" data-open="false" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Current effects:</h4>
                                 <ul class="whiteText">
-                                    <li>Producing <span id="strange1Effect1Stat0">0</span>% of current Strange quarks rate<br>(<span id="strange1Effect1Allowed">Which is equal to <span id="strange1Effect1Stat1">0 per eon</span></span><span id="strange1Effect1Disabled">For Interstellar Stage only</span><span id="strange1GlobalSpeedInfo">, not affected by global speed</span>)</li>
+                                    <li>Producing <span id="strange1Effect1Stat0">0</span>% of current Strange quarks rate<br>(<span id="strange1Effect1Allowed">Which is equal to <span id="strange1Effect1Stat1">0 per eon</span></span><span id="strange1Effect1Disabled" style="display: none;">For Interstellar Stage only</span><span id="strange1GlobalSpeedInfo">, not affected by global speed</span>)</li>
                                     <li>Increasing Stage reset reward by <span id="strange1Effect2Stat">1</span></li>
                                 </ul>
                             </div>
                         </section>
                     </article>
-                    <h2 id="strangenessHeader" class="fullWidth greenText center"><span class="bigWord">Strangeness</span><span><br><button id="strangenessVisibility" class="selectBtn" type="button">Permanent ones are hidden</button></span></h2>
+                    <h2 id="strangenessHeader" class="fullWidth greenText center"><span class="bigWord">Strangeness</span><span><br><button type="button" id="strangenessVisibility" class="selectBtn">Permanent ones are hidden</button></span></h2>
                     <article id="strangenessResearch" aria-labelledby="strangenessHeader">
                         <section id="strangenessSection1" class="researchesDiv stage1borderImage" aria-label="Microworld">
                             <div id="strange1Stage1" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Particle+.png" alt="Fundamental boost" draggable="false" id="strange1Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange1Stage1Level" class="redText">0</span>/<span id="strange1Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange1Stage1Level">0</span>/<span id="strange1Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange2Stage1" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/ResearchQ3.png" alt="Better improvement" draggable="false" id="strange2Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange2Stage1Level" class="redText">0</span>/<span id="strange2Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange2Stage1Level">0</span>/<span id="strange2Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange3Stage1" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/ResearchQ4.png" alt="Cheaper Discharge" draggable="false" id="strange3Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange3Stage1Level" class="redText">0</span>/<span id="strange3Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange3Stage1Level">0</span>/<span id="strange3Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange4Stage1" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Discharge%20+1.png" alt="Free Discharge" draggable="false" id="strange4Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange4Stage1Level" class="redText">0</span>/<span id="strange4Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange4Stage1Level">0</span>/<span id="strange4Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange5Stage1" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Discharge%20auto.png" alt="Automatic Discharge" draggable="false" id="strange5Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange5Stage1Level" class="redText">0</span>/<span id="strange5Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange5Stage1Level">0</span>/<span id="strange5Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange6Stage1" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Auto%20S1.png" alt="Auto Structures" draggable="false" id="strange6Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange6Stage1Level" class="redText">0</span>/<span id="strange6Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange6Stage1Level">0</span>/<span id="strange6Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange7Stage1" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Boost%20Stage%201.png" alt="Strange boost" draggable="false" id="strange7Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange7Stage1Level" class="redText">0</span>/<span id="strange7Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange7Stage1Level">0</span>/<span id="strange7Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange8Stage1" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Energy%20Preon.png" alt="Energy increase" draggable="false" id="strange8Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange8Stage1Level" class="redText">0</span>/<span id="strange8Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange8Stage1Level">0</span>/<span id="strange8Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage1" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Mass%20recycle.png" alt="Conservation of Mass" draggable="false" id="strange9Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange9Stage1Level" class="redText">0</span>/<span id="strange9Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange9Stage1Level">0</span>/<span id="strange9Stage1Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange10Stage1" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Energy%20recycle.png" alt="Conservation of Energy" draggable="false" id="strange10Stage1Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange10Stage1Level" class="redText">0</span>/<span id="strange10Stage1Max" class="greenText">1</span></p>
+                                <p><span id="strange10Stage1Level">0</span>/<span id="strange10Stage1Max" class="greenText">1</span></p>
                             </div>
                         </section>
                         <section id="strangenessSection2" class="researchesDiv stage2borderImage" aria-label="Submerged">
                             <div id="strange1Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Water+.png" alt="More Moles" draggable="false" id="strange1Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange1Stage2Level" class="redText">0</span>/<span id="strange1Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange1Stage2Level">0</span>/<span id="strange1Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange2Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Puddle%20big.png" alt="Bigger Puddles" draggable="false" id="strange2Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange2Stage2Level" class="redText">0</span>/<span id="strange2Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange2Stage2Level">0</span>/<span id="strange2Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange3Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Spread.png" alt="More spread" draggable="false" id="strange3Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange3Stage2Level" class="redText">0</span>/<span id="strange3Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange3Stage2Level">0</span>/<span id="strange3Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange4Stage2" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Clouds%20plus.png" alt="Cloud density" draggable="false" id="strange4Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange4Stage2Level" class="redText">0</span>/<span id="strange4Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange4Stage2Level">0</span>/<span id="strange4Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange5Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Vaporization%20auto.png" alt="Automatic Vaporization" draggable="false" id="strange5Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange5Stage2Level" class="redText">0</span>/<span id="strange5Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange5Stage2Level">0</span>/<span id="strange5Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange6Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Auto%20S2.png" alt="Auto Structures" draggable="false" id="strange6Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange6Stage2Level" class="redText">0</span>/<span id="strange6Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange6Stage2Level">0</span>/<span id="strange6Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange7Stage2" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Boost%20Stage%202.png" alt="Strange boost" draggable="false" id="strange7Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange7Stage2Level" class="redText">0</span>/<span id="strange7Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange7Stage2Level">0</span>/<span id="strange7Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange8Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Better%20water.png" alt="Improved flow" draggable="false" id="strange8Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange8Stage2Level" class="redText">0</span>/<span id="strange8Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange8Stage2Level">0</span>/<span id="strange8Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Spread%202.png" alt="Mechanical spread" draggable="false" id="strange9Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange9Stage2Level" class="redText">0</span>/<span id="strange9Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange9Stage2Level">0</span>/<span id="strange9Stage2Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange10Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Ocean%20world.png" alt="Ocean world" draggable="false" id="strange10Stage2Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange10Stage2Level" class="redText">0</span>/<span id="strange10Stage2Max" class="greenText">1</span></p>
+                                <p><span id="strange10Stage2Level">0</span>/<span id="strange10Stage2Max" class="greenText">1</span></p>
                             </div>
                         </section>
                         <section id="strangenessSection3" class="researchesDiv stage3borderImage" aria-label="Accretion">
                             <div id="strange1Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/ResearchA1.png" alt="Faster Accretion" draggable="false" id="strange1Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange1Stage3Level" class="redText">0</span>/<span id="strange1Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange1Stage3Level">0</span>/<span id="strange1Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange2Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Mass-.png" alt="Intense weathering" draggable="false" id="strange2Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange2Stage3Level" class="redText">0</span>/<span id="strange2Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange2Stage3Level">0</span>/<span id="strange2Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange3Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Rank%20levels.png" alt="More levels" draggable="false" id="strange3Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange3Stage3Level" class="redText">0</span>/<span id="strange3Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange3Stage3Level">0</span>/<span id="strange3Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange4Stage3" class="whiteText redBorderImage">
                                 <input type="image" src="Used_art/System%20red.png" alt="Improved Satellites" draggable="false" id="strange4Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange4Stage3Level" class="redText">0</span>/<span id="strange4Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange4Stage3Level">0</span>/<span id="strange4Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange5Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Rank%20auto.png" alt="Automatic Rank" draggable="false" id="strange5Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange5Stage3Level" class="redText">0</span>/<span id="strange5Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange5Stage3Level">0</span>/<span id="strange5Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange6Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Auto%20S3.png" alt="Auto Structures" draggable="false" id="strange6Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange6Stage3Level" class="redText">0</span>/<span id="strange6Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange6Stage3Level">0</span>/<span id="strange6Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange7Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Upgrades%20auto.png" alt="Upgrade automatization" draggable="false" id="strange7Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange7Stage3Level" class="redText">0</span>/<span id="strange7Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange7Stage3Level">0</span>/<span id="strange7Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange8Stage3" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Boost%20Stage%203.png" alt="Strange boost" draggable="false" id="strange8Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange8Stage3Level" class="redText">0</span>/<span id="strange8Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange8Stage3Level">0</span>/<span id="strange8Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Cosmic%20mass.png" alt="Mass delay" draggable="false" id="strange9Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange9Stage3Level" class="redText">0</span>/<span id="strange9Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange9Stage3Level">0</span>/<span id="strange9Stage3Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange10Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Rank%20max.png" alt="Rank raise" draggable="false" id="strange10Stage3Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange10Stage3Level" class="redText">0</span>/<span id="strange10Stage3Max" class="greenText">1</span></p>
+                                <p><span id="strange10Stage3Level">0</span>/<span id="strange10Stage3Max" class="greenText">1</span></p>
                             </div>
                         </section>
                         <section id="strangenessSection4" class="researchesDiv stage4borderImage" aria-label="Interstellar">
                             <div id="strange1Stage4" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Brown%20dwarf%20hot.png" alt="Hotter Stars" draggable="false" id="strange1Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange1Stage4Level" class="redText">0</span>/<span id="strange1Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange1Stage4Level">0</span>/<span id="strange1Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange2Stage4" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Brown%20dwarf-.png" alt="Cheaper Stars" draggable="false" id="strange2Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange2Stage4Level" class="redText">0</span>/<span id="strange2Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange2Stage4Level">0</span>/<span id="strange2Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange3Stage4" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Brown%20dwarf%20time.png" alt="New Upgrade" draggable="false" id="strange3Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange3Stage4Level" class="redText">0</span>/<span id="strange3Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange3Stage4Level">0</span>/<span id="strange3Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange4Stage4" class="whiteText redBorderImage">
                                 <input type="image" src="Used_art/Red%20giant+.png" alt="Main giants" draggable="false" id="strange4Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange4Stage4Level" class="redText">0</span>/<span id="strange4Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange4Stage4Level">0</span>/<span id="strange4Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange5Stage4" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Collapse%20auto.png" alt="Automatic Collapse" draggable="false" id="strange5Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange5Stage4Level" class="redText">0</span>/<span id="strange5Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange5Stage4Level">0</span>/<span id="strange5Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange6Stage4" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Auto%20S4.png" alt="Auto Structures" draggable="false" id="strange6Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange6Stage4Level" class="redText">0</span>/<span id="strange6Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange6Stage4Level">0</span>/<span id="strange6Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange7Stage4" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Elements%20auto.png" alt="Element automatization" draggable="false" id="strange7Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange7Stage4Level" class="redText">0</span>/<span id="strange7Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange7Stage4Level">0</span>/<span id="strange7Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange8Stage4" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Boost%20Stage%204.png" alt="Strange boost" draggable="false" id="strange8Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange8Stage4Level" class="redText">0</span>/<span id="strange8Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange8Stage4Level">0</span>/<span id="strange8Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage4" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Neutronium.png" alt="Neutronium" draggable="false" id="strange9Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange9Stage4Level" class="redText">0</span>/<span id="strange9Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange9Stage4Level">0</span>/<span id="strange9Stage4Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange10Stage4" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Brown%20dwarf%20time%20hot.png" alt="Newer Upgrade" draggable="false" id="strange10Stage4Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange10Stage4Level" class="redText">0</span>/<span id="strange10Stage4Max" class="greenText">1</span></p>
+                                <p><span id="strange10Stage4Level">0</span>/<span id="strange10Stage4Max" class="greenText">1</span></p>
                             </div>
                         </section>
                         <section id="strangenessSection5" class="researchesDiv stage5borderImage" aria-label="Intergalactic">
                             <div id="strange1Stage5" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Nebula+.png" alt="Bigger Structures" draggable="false" id="strange1Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange1Stage5Level" class="redText">0</span>/<span id="strange1Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange1Stage5Level">0</span>/<span id="strange1Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange2Stage5" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Star%20cluster%20denser.png" alt="Higher density" draggable="false" id="strange2Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange2Stage5Level" class="redText">0</span>/<span id="strange2Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange2Stage5Level">0</span>/<span id="strange2Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange3Stage5" class="whiteText greenBorderImage">
                                 <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="Strange gain" draggable="false" id="strange3Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange3Stage5Level" class="redText">0</span>/<span id="strange3Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange3Stage5Level">0</span>/<span id="strange3Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange4Stage5" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Gravitational%20bound.png" alt="Gravitational bound" id="strange4Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange4Stage5Level" class="redText">0</span>/<span id="strange4Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange4Stage5Level">0</span>/<span id="strange4Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange5Stage5" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Galaxy%20auto.png" alt="Automatic Galaxy" draggable="false" id="strange5Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange5Stage5Level" class="redText">0</span>/<span id="strange5Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange5Stage5Level">0</span>/<span id="strange5Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange6Stage5" class="whiteText stage5borderImage">
                                 <input type="image" src="Used_art/Auto%20S5.png" alt="Auto Structures" draggable="false" id="strange6Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange6Stage5Level" class="redText">0</span>/<span id="strange6Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange6Stage5Level">0</span>/<span id="strange6Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange7Stage5" class="whiteText stageAllborderImage">
                                 <input type="image" src="Used_art/Stage%20auto.png" alt="Automatic Stage" draggable="false" id="strange7Stage5Image" class="interactiveImage stageBorderImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange7Stage5Level" class="redText">0</span>/<span id="strange7Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange7Stage5Level">0</span>/<span id="strange7Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange8Stage5" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Boost%20Stage%205.png" alt="Strange boost" draggable="false" id="strange8Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange8Stage5Level" class="redText">0</span>/<span id="strange8Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange8Stage5Level">0</span>/<span id="strange8Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange9Stage5" class="whiteText greenBorderImage">
                                 <input type="image" src="Used_art/Strange%20growth.png" alt="Strange growth" draggable="false" id="strange9Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange9Stage5Level" class="redText">0</span>/<span id="strange9Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange9Stage5Level">0</span>/<span id="strange9Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange10Stage5" class="whiteText brownBorderImage">
                                 <input type="image" src="Used_art/Merge%20auto.png" alt="Automatic Merge" draggable="false" id="strange10Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange10Stage5Level" class="redText">0</span>/<span id="strange10Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange10Stage5Level">0</span>/<span id="strange10Stage5Max" class="greenText">1</span></p>
                             </div>
                             <div id="strange11Stage5" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Galactic%20tide.png" alt="Galactic tide" draggable="false" id="strange11Stage5Image" class="interactiveImage" aria-controls="strangenessCost strangenessEffect">
-                                <p><span id="strange11Stage5Level" class="redText">0</span>/<span id="strange11Stage5Max" class="greenText">1</span></p>
+                                <p><span id="strange11Stage5Level">0</span>/<span id="strange11Stage5Max" class="greenText">1</span></p>
                             </div>
                         </section>
                     </article>
@@ -750,72 +757,74 @@
                         <section id="inflationsDiv1" class="researchesDiv" aria-label="Refundable">
                             <div id="inflation1" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Time%20fast.png" alt="Overboost" draggable="false" id="inflation1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation1Level" class="redText">0</span>/<span id="inflation1Max" class="greenText">1</span></p>
+                                <p><span id="inflation1Level">0</span>/<span id="inflation1Max" class="greenText">1</span></p>
                             </div>
                             <div id="inflation2" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Time.png" alt="Global boost" draggable="false" id="inflation2Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation2Level" class="redText">0</span>/<span id="inflation2Max" class="greenText">1</span></p>
+                                <p><span id="inflation2Level">0</span>/<span id="inflation2Max" class="greenText">1</span></p>
                             </div>
                             <div id="inflation3" class="whiteText greenBorderImage">
                                 <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="Strange gain" draggable="false" id="inflation3Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation3Level" class="redText">0</span>/<span id="inflation3Max" class="greenText">1</span></p>
+                                <p><span id="inflation3Level">0</span>/<span id="inflation3Max" class="greenText">1</span></p>
                             </div>
-                            <div id="inflation4" class="whiteText stage6borderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Instability" draggable="false" id="inflation4Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation4Level" class="redText">0</span>/<span id="inflation4Max" class="greenText">1</span></p>
+                            <div id="inflation4" class="whiteText stage5borderImage">
+                                <input type="image" src="Used_art/Instability.png" alt="Instability" draggable="false" id="inflation4Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation4Level">0</span>/<span id="inflation4Max" class="greenText">1</span></p>
                             </div>
                             <div id="inflation5" class="whiteText stage6borderImage">
                                 <input type="image" src="Used_art/Milestones.png" alt="Void Milestones" draggable="false" id="inflation5Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation5Level" class="redText">0</span>/<span id="inflation5Max" class="greenText">1</span></p>
+                                <p><span id="inflation5Level">0</span>/<span id="inflation5Max" class="greenText">1</span></p>
                             </div>
                         </section>
-                        <section id="inflationsDiv2" class="researchesDiv" aria-label="Non refundable">
+                        <section id="inflationsDiv2" class="researchesDiv" aria-label="Non-refundable">
                             <div id="inflation6" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/ResearchQ5.png" alt="Discharge improvement" draggable="false" id="inflation6Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation6Level" class="redText">0</span>/<span id="inflation6Max" class="greenText">1</span></p>
+                                <p><span id="inflation6Level">0</span>/<span id="inflation6Max" class="greenText">1</span></p>
                             </div>
                         </section>
                     </div>
                     <div class="descriptionTextMain">
                         <div>
                             <button type="button" id="inflationRefund" class="hollowButton">Refund</button>
-                            <button type="button" id="inflationLoadouts" class="hollowButton" aria-haspopup="menu">Loadouts <div class="downArrow"></div></button>
+                            <button type="button" id="inflationLoadouts" class="hollowButton" aria-controls="loadoutsMain" aria-expanded="false">Loadouts <span class="downArrow"></span></button>
                         </div>
-                        <section id="loadoutsMain" class="darkvioletText" data-open="false" style="display: none;" role="menu" aria-label="Loadouts menu">
+                        <section id="loadoutsMain" class="darkvioletText" data-open="false" style="display: none;" aria-label="Loadouts menu">
                             <div>
-                                <label>Selected: <input type="text" id="loadoutsName" placeholder="Name" autocomplete="off"></label>
+                                <label>Selected: <input type="text" id="loadoutsName" autocomplete="off"></label>
                                 <button type="button" id="loadoutsLoad" class="hollowButton">Load</button>
                                 <button type="button" id="loadoutsSave" class="hollowButton">Save</button>
                                 <button type="button" id="loadoutsDelete" class="hollowButton">Delete</button>
                             </div>
                             <input type="text" id="loadoutsEdit" autocomplete="off">
-                            <p id="loadoutsList">Saved: <span>none</span></p>
+                            <p id="loadoutsList">Saved: <span></span><button type="button" id="loadoutsLoadAuto" class="selectBtn greenText">Auto-generate</button></p>
+                            <p>(Hold shift to quick load and refund)</p>
                         </section>
                         <div class="descriptionText">
-                            <h3>Research: <span id="inflationText" class="darkorchidText">Hover to see.</span></h3>
-                            <p>Effect: <span id="inflationEffect" class="blueText">Hover to see.</span></p>
-                            <p>Requirement: <span id="inflationCost" class="orangeText">Resource.</span></p>
+                            <h3>Research: <span id="inflationText">Hover to see.</span></h3>
+                            <p>Effect: <span id="inflationEffect">Hover to see.</span></p>
+                            <p>Requirement: <span id="inflationCost">Resource.</span></p>
                         </div>
                     </div>
                 </section>
                 <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Current tab">
                     <div id="inflationMilestones">
-                        <div id="inflationSupervoid" class="completed"><p>Supervoid unlocks:</p>
-                            <span>Improved conservation ‒ Remove Stage requirement from both levels of 'Conservation of Mass' Strangeness</span>
-                            <span id="inflationSupervoid2"><br>Indestructible matter ‒ Make self-made Preons immune to basic resets, that will increase starting Energy</span>
-                        </div>
-                        <div id="inflationMilestone1"><p>Unlocked at 1 Universes:</p>Start Vacuum resets with Strange quarks equal to self-made Universes ^2 and 'Conservation of Mass' Strangeness maxed</div>
-                        <div id="inflationMilestone2"><p>Unlocked at 2 Universes:</p>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1<br>Unlock harder version of Void ‒ Supervoid, will need to click on Challenge name to change it</div>
-                        <div id="inflationMilestone3"><p>Unlocked at 3 Universes:</p>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</div>
-                        <div id="inflationMilestone4"><p>Unlocked at 4 Universes:</p>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank and Collapse at level 1</div>
-                        <div id="inflationMilestone5"><p>Unlocked at 5 Universes:</p>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum</div>
+                        <section id="inflationPermanent"><h4>Permanent unlocks:</h4>
+                            <p>Supervoid ‒ Harder version of Void, click the '<span style="text-decoration: underline;">Name</span>' button to change Void type</p>
+                            <p id="inflationSupervoid1">Improved conservation ‒ Remove Stage requirement from both levels of 'Conservation of Mass' Strangeness</p>
+                            <p id="inflationSupervoid2">Indestructible matter ‒ Make self-made Preons and related Energy immune to pre-Stage resets</p>
+                        </section>
+                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universes:</h4>Start Vacuum resets with Strange quarks equal to self-made Universes, ^2 if in the true Vacuum<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</section>
+                        <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1</section>
+                        <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</section>
+                        <section id="inflationMilestone4"><h4>Unlocked at 4 Universes:</h4>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank and Collapse at level 1</section>
+                        <section id="inflationMilestone5"><h4>Unlocked at 5 Universes:</h4>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum</section>
                     </div>
                 </section>
             </div>
             <div id="settingsTab" style="display: none;">
                 <section id="settingsSubtabSettings" class="insideTab" aria-label="Current tab">
                     <article id="resetToggles">
-                        <h2 class="center">Reset confirmation<span> and automatization</span> toggles</h2>
+                        <h2 class="center">Reset confirmations<span> and automatization toggles</span></h2>
                         <div>
                             <section id="stageToggleReset" aria-labelledby="stageToggleImage">
                                 <img id="stageToggleImage" src="Used_art/Stage%20toggle.png" alt="Stage" loading="lazy" draggable="false" title="Stage" class="stageBorderImage">
@@ -825,7 +834,7 @@
                                         <button type="button" class="hollowButton stageAllborderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                         <div class="popUpMenu" role="menu" aria-label="Settings menu">
                                             <p id="stageAutoInterstellar"><label>Perform <span>Interstellar Stage</span> reset when can get at least <input type="number" id="stageInput" step="any" inputmode="text"> Strange quarks</label> and <label><input type="number" id="stageInputTime" step="any"> seconds have passed, doesn't reset if both are set to 0</label></p>
-                                            <label id="stageAutoElse">Reset pre Interstellar Stages only if all Milestones are maxed <button type="button" id="toggleNormal2" class="toggleNormal">ON</button>, ignored if time limit is reached</label>
+                                            <label id="stageAutoElse">Reset pre-Interstellar Stages only if all Milestones are maxed <button type="button" id="toggleNormal2" class="toggleNormal">ON</button>, ignored if time limit is reached</label>
                                         </div>
                                     </div>
                                 </div>
@@ -881,7 +890,7 @@
                                            <button type="button" class="hollowButton stage5borderButton" aria-haspopup="menu" aria-label="Settings">!</button>
                                            <div class="popUpMenu" role="menu" aria-label="Settings menu">
                                                <p><label>Merge if current self-made Galaxies are at least <input type="number" id="mergeInput" step="1"></label> and <label><input type="number" id="mergeInputSince" step="any"> seconds passed since last Galaxy, will wait for Solar mass hardcap instead if set to 0</label></p>
-                                               <span>(Requires for auto Collapse to fail to reset)</span>
+                                               <p>(Requires for auto Collapse to fail to reset)</p>
                                            </div>
                                        </div>
                                 </div>
@@ -894,11 +903,11 @@
                             <img src="Used_art/SVG/Discord.svg" alt="" loading="lazy" draggable="false">
                             Discord
                         </a>
-                        <button id="hotkeysButton" aria-haspopup="dialog">
+                        <button type="button" id="hotkeysButton" aria-haspopup="dialog" aria-controls="hotkeysHTML">
                             <img src="Used_art/SVG/Keyboard.svg" alt="" loading="lazy">
                             Hotkeys
                         </button>
-                        <button type="button" id="versionButton" aria-haspopup="dialog">
+                        <button type="button" id="versionButton" aria-haspopup="dialog" aria-controls="versionHTML">
                             <img src="Used_art/SVG/Files.svg" alt="" loading="lazy" draggable="false">
                             Version
                         </button>
@@ -949,9 +958,8 @@
                                     </div>
                                 </div>
                             </li>
-                            <li><label>Automatization speed interval <input type="number" id="mainInterval" min="20" max="200" step="1"> ms</label><button type="button" id="pauseButton" class="hollowButton">Pause</button></li>
-                            <li><label>Starting Offline tick interval <input type="number" id="offlineInterval" min="20" max="6000" step="1"> ms</label></li>
-                            <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label></li>
+                            <li><label>Starting Offline tick interval <input type="number" id="offlineInterval" min="20" max="6000" step="1"> ms</label><button type="button" id="pauseButton" class="hollowButton">Pause</button></li>
+                            <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label><button type="button" id="showLog" class="hollowButton" aria-haspopup="dialog" aria-controls="logHTML">Log</button></li>
                             <li><label>Visual update interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
                             <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="4" max="1800" step="1"> s</label></li>
                             <li><label>Auto accept Offline time<button type="button" id="toggleNormal4" class="toggleNormal">OFF</button></label></li>
@@ -959,8 +967,9 @@
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" maxlength="1" autocomplete="off"></label></li>
                             <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label></li>
                             <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
+                            <li id="hideGlobalStats"><label>Hide global stats window<button type="button" id="globalToggle4" class="specialToggle">OFF</button></label></li>
                             <li><label>Allow text selection<button type="button" id="globalToggle2" class="specialToggle">OFF</button></label></li>
-                            <li><label>Move footer to the top<button type="button" id="globalToggle3" class="specialToggle">OFF</button></label></li>
+                            <li><label>Footer at the top<button type="button" id="globalToggle3" class="specialToggle">OFF</button></label></li>
                             <li id="elementsAsTab"><label>Elements as Tab<button type="button" id="globalToggle1" class="specialToggle">OFF</button></label></li>
                             <li title="Default is 16px. Art won't scale"><label>Font size: <input type="number" id="customFontSize" step="any" min="12" max="24" value="16" tabindex="-1"> px</label></li>
                         </ul>
@@ -1143,7 +1152,7 @@
                                         <p id="energyGainStage1Build3"><span>Particles:</span> <span id="energyGainStage1Build3Cur" class="greenText">0</span> <span>(<span id="energyGainStage1Build3Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage1Build4"><span>Atoms:</span> <span id="energyGainStage1Build4Cur" class="greenText">0</span> <span>(<span id="energyGainStage1Build4Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage1Build5"><span>Molecules:</span> <span id="energyGainStage1Build5Cur" class="greenText">0</span> <span>(<span id="energyGainStage1Build5Per" class="greenText">0</span> per)</span></p>
-                                        <p><span>Total:</span> <span id="energyGainStage1TotalCur" class="greenText">0</span></p>
+                                        <p><span>Total:</span> <span id="energyGainStage1Total" class="greenText">0</span></p>
                                     </section>
                                     <section id="energyGainStage2" class="blueText stage2borderImage" aria-label="Submerged Stage">
                                         <p id="energyGainStage2Build1"><span>Drops:</span> <span id="energyGainStage2Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage2Build1Per" class="greenText">0</span> per)</span></p>
@@ -1152,7 +1161,7 @@
                                         <p id="energyGainStage2Build4"><span>Lakes:</span> <span id="energyGainStage2Build4Cur" class="greenText">0</span> <span>(<span id="energyGainStage2Build4Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage2Build5"><span>Seas:</span> <span id="energyGainStage2Build5Cur" class="greenText">0</span> <span>(<span id="energyGainStage2Build5Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage2Build6"><span>Oceans:</span> <span id="energyGainStage2Build6Cur" class="greenText">0</span> <span>(<span id="energyGainStage2Build6Per" class="greenText">0</span> per)</span></p>
-                                        <p><span>Total:</span> <span id="energyGainStage2TotalCur" class="greenText">0</span></p>
+                                        <p><span>Total:</span> <span id="energyGainStage2Total" class="greenText">0</span></p>
                                     </section>
                                     <section id="energyGainStage3" class="grayText stage3borderImage" aria-label="Accretion Stage">
                                         <p id="energyGainStage3Build1"><span>Cosmic dust:</span> <span id="energyGainStage3Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage3Build1Per" class="greenText">0</span> per)</span></p>
@@ -1160,7 +1169,7 @@
                                         <p id="energyGainStage3Build3"><span>Protoplanets:</span> <span id="energyGainStage3Build3Cur" class="greenText">0</span> <span>(<span id="energyGainStage3Build3Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage3Build4"><span>Satellites:</span> <span id="energyGainStage3Build4Cur" class="greenText">0</span> <span>(<span id="energyGainStage3Build4Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage3Build5"><span>Subsatellites:</span> <span id="energyGainStage3Build5Cur" class="greenText">0</span> <span>(<span id="energyGainStage3Build5Per" class="greenText">0</span> per)</span></p>
-                                        <p><span>Total:</span> <span id="energyGainStage3TotalCur" class="greenText">0</span></p>
+                                        <p><span>Total:</span> <span id="energyGainStage3Total" class="greenText">0</span></p>
                                     </section>
                                     <section id="energyGainStage4" class="orangeText stage4borderImage" aria-label="Interstellar Stage">
                                         <p id="energyGainStage4Build1"><span>Brown dwarfs:</span> <span id="energyGainStage4Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage4Build1Per" class="greenText">0</span> per)</span></p>
@@ -1168,13 +1177,13 @@
                                         <p id="energyGainStage4Build3"><span>Red supergiants:</span> <span id="energyGainStage4Build3Cur" class="greenText">0</span> <span>(<span id="energyGainStage4Build3Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage4Build4"><span>Blue hypergiants:</span> <span id="energyGainStage4Build4Cur" class="greenText">0</span> <span>(<span id="energyGainStage4Build4Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage4Build5"><span>Quasi-stars:</span> <span id="energyGainStage4Build5Cur" class="greenText">0</span> <span>(<span id="energyGainStage4Build5Per" class="greenText">0</span> per)</span></p>
-                                        <p><span>Total:</span> <span id="energyGainStage4TotalCur" class="greenText">0</span></p>
+                                        <p><span>Total:</span> <span id="energyGainStage4Total" class="greenText">0</span></p>
                                     </section>
                                     <section id="energyGainStage5" class="darkorchidText stage5borderImage" aria-label="Intergalactic Stage">
                                         <p id="energyGainStage5Build1"><span>Nebulas:</span> <span id="energyGainStage5Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage5Build1Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage5Build2"><span>Star clusters:</span> <span id="energyGainStage5Build2Cur" class="greenText">0</span> <span>(<span id="energyGainStage5Build2Per" class="greenText">0</span> per)</span></p>
                                         <p id="energyGainStage5Build3"><span>Galaxies:</span> <span id="energyGainStage5Build3Cur" class="greenText">0</span> <span>(<span id="energyGainStage5Build3Per" class="greenText">0</span> per)</span></p>
-                                        <p><span>Total:</span> <span id="energyGainStage5TotalCur" class="greenText">0</span></p>
+                                        <p><span>Total:</span> <span id="energyGainStage5Total" class="greenText">0</span></p>
                                     </section>
                                 </div>
                             </section>
@@ -1223,7 +1232,7 @@
                                 <p id="merge1Stat" class="grayText">Groups: <span class="greenText">1</span></p>
                                 <h4 class="darkvioletText">Total: <span id="mergeTotal" class="greenText">1</span> ^2</h4>
                             </section>
-                            <p id="mergeResets" class="darkvioletText">Merge resets: <span class="redText">0</span> | <span class="greenText">1</span> Max</p>
+                            <p id="mergeResets" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max</p>
                             <p id="galaxyBase" class="grayText">Galaxy base: <span class="orangeText">0</span></p>
                             <p class="redText">Self-made Stars: <span id="trueStarsStat" class="orangeText">0</span></p>
                         </div>
@@ -1231,6 +1240,28 @@
                     </div>
                 </section>
             </div>
+            <article id="globalStats" class="researchesDiv" aria-label="Global stats">
+                <div id="globalStat1" class="stage1Include">
+                    <img src="Used_art/Energy.png" alt="" loading="lazy" draggable="false">
+                    <p class="stage4borderImage orangeText">Energy:&nbsp;<span id="globalStat1Span">0</span></p>
+                </div>
+                <div id="globalStat2" class="stage2Include">
+                    <img src="Used_art/Drop.png" alt="" loading="lazy" draggable="false">
+                    <p class="stage2borderImage blueText">Drops:&nbsp;<span id="globalStat2Span">0</span></p>
+                </div>
+                <div id="globalStat3" class="stage3Include">
+                    <img src="Used_art/Mass.png" alt="" loading="lazy" draggable="false">
+                    <p class="stage3borderImage grayText">A. Mass:&nbsp;<span id="globalStat3Span">0</span></p>
+                </div>
+                <div id="globalStat4" class="stage4Include">
+                    <img src="Used_art/Elements.png" alt="" loading="lazy" draggable="false">
+                    <p class="stage4borderImage orangeText">Stardust:&nbsp;<span id="globalStat4Span">0</span></p>
+                </div>
+                <div id="globalStat5" class="stage6Include">
+                    <img src="Used_art/Dark%20matter.png" alt="" loading="lazy" draggable="false">
+                    <p class="stage3borderImage grayText">Matter:&nbsp;<span id="globalStat5Span">0</span></p>
+                </div>
+            </article>
             <div id="fakeFooter"></div>
             <footer id="footer" aria-label="Footer">
                 <div>

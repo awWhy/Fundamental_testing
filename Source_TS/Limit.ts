@@ -104,7 +104,7 @@ export default class Overlimit extends Array<number> {
         return true;
     }
 
-    /** Set original number to biggest of provided arguments */
+    /** Set original number to the biggest of provided arguments */
     max(...compare: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
         for (let i = 0; i < compare.length; i++) {
@@ -116,7 +116,7 @@ export default class Overlimit extends Array<number> {
 
         return this.#privateSet(result);
     }
-    /** Set original number to smallest of provided arguments */
+    /** Set original number to the smallest of provided arguments */
     min(...compare: allowedTypes[]) {
         let result: [number, number] | Overlimit = this;
         for (let i = 0; i < compare.length; i++) {

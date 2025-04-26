@@ -1,7 +1,7 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
-import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateUpgrades } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
-import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, getHotkeysHTML, getVersionInfoHTML } from './Special';
+import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateUpgrades, addIntoLog } from './Update';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
@@ -106,7 +106,7 @@ const calculateOffline = (warpTime: number, start = warpTime) => {
     }
     if (warpTime > 0) {
         setTimeout(calculateOffline, 0, warpTime, start);
-        getId('offlineTick').textContent = format(rate / 1000);
+        getId('offlineTick').textContent = format(rate);
         getId('offlineRemains').textContent = format(warpTime / 1000, { type: 'time' });
         getId('offlinePercentage').textContent = format(100 - warpTime / start * 100, { padding: true });
         if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').ariaValueText = `${format(100 - warpTime / start * 100)}% done`; }
@@ -156,7 +156,7 @@ const changeIntervals = () => {
     clearInterval(intervalsId.numbers);
     clearInterval(intervalsId.visual);
     clearInterval(intervalsId.autoSave);
-    intervalsId.main = paused ? undefined : setInterval(timeUpdate, intervals.main, intervals.main);
+    intervalsId.main = paused ? undefined : setInterval(timeUpdate, 20, 20);
     intervalsId.numbers = paused ? undefined : setInterval(numbersUpdate, intervals.numbers);
     intervalsId.visual = paused ? undefined : setInterval(visualUpdate, intervals.visual);
     intervalsId.autoSave = paused ? undefined : setInterval(saveGame, intervals.autoSave);
@@ -173,6 +173,11 @@ export const pauseGame = (pause = true) => {
     global.hotkeys.disabled = pause;
     global.offline.active = pause;
     changeIntervals();
+
+    if (!pause && global.offline.cacheUpdate) {
+        global.offline.cacheUpdate = false;
+        preventImageUnload();
+    }
 };
 export const pauseGameUser = () => {
     if (global.offline.active) { return; }
@@ -215,7 +220,7 @@ const saveGame = (noSaving = false): string | null => {
         return save;
     } catch (error) {
         const stack = (error as { stack: string }).stack;
-        void Alert(`Failed to save game\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 1);
+        void Alert(`Failed to save the game\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 1);
         throw error;
     }
 };
@@ -273,11 +278,11 @@ const awardExport = () => {
 };
 
 const saveConsole = async() => {
-    let value = await Prompt("Available options:\n'Copy' ‒ copy save file to clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file string here to load it");
+    let value = await Prompt("Available options:\n'Copy' ‒ copy save file to the clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it");
     if (value === null || value === '') { return; }
     let lower = value.toLowerCase();
     if (lower === 'global') {
-        value = await Prompt("Available options:\n'Reset' ‒ reset global settings\n'Copy' ‒ copy global settings to clipboard\nOr insert global settings string here to load it\n(this will overwrite current ones and require page reload)");
+        value = await Prompt("Available options:\n'Reset' ‒ reset global settings\n'Copy' ‒ copy global settings to the clipboard\nOr insert global settings text here to load it");
         if (value === null || value === '') { return; }
         lower = `global_${value.toLowerCase()}`;
     }
@@ -288,8 +293,8 @@ const saveConsole = async() => {
             try {
                 await navigator.clipboard.writeText(save);
             } catch (error) {
-                console.warn(`Full error for being unable to write to clipboard:\n${error}`);
-                if (await Confirm("Could not copy text into clipboard, press 'Confrim' to save it as file instead")) {
+                console.warn(`Full error for being unable to write to the clipboard:\n${error}`);
+                if (await Confirm("Could not copy text into clipboard, press 'Confrim' to save it as a file instead")) {
                     const a = document.createElement('a');
                     a.href = `data:text/plain,${save}`;
                     a.download = `${lower === 'global_copy' ? 'Settings' : 'Save'} clipboard`;
@@ -318,10 +323,17 @@ const saveConsole = async() => {
         Notify(`Found a ${lower === 'secret_secret' ? "ultra rare secret, but it doesn't proof anything" : `${lower === 'global_secret' ? 'global' : 'rare'} secret, don't share it with anybody`}`);
     } else if (lower === 'secret_proof') {
         Notify('Found a proof that you were looking for!');
+    } else if (lower === 'quantum') {
+        getId('body').style.display = 'none';
+        document.documentElement.style.backgroundColor = 'black';
+        await Alert('Close when you are done enjoying the Quantum Vacuum');
+        document.documentElement.style.backgroundColor = '';
+        getId('body').style.display = '';
+        addIntoLog('Experienced the Quantum Vacuum');
     } else {
         if (value.length < 20) { return void Alert(`Input '${value}' doesn't match anything`); }
         if (lower.includes('global_')) {
-            if (!await Confirm("Press 'Confirm' to load input as a new global settings, this will reload page\n(Input is too long to be displayed)")) { return; }
+            if (!await Confirm("Press 'Confirm' to load input as a new global settings, this will reload the page\n(Input is too long to be displayed)")) { return; }
             localStorage.setItem(specialHTML.localStorage.settings, value[6] === '_' ? value.substring(7) : value);
             window.location.reload();
             void Alert('Awaiting game reload');
@@ -444,21 +456,28 @@ export const changeRewardType = (state = !global.sessionToggles[0]) => {
     global.sessionToggles[0] = state;
     getId('rewardsType').textContent = `${state ? 'Supervoid' : 'Void'} rewards:`;
 };
-/** Handles requirement to switch Stage, returns true if can safely return early */
-const handleAutoSwitch = (index: number, type = 'researchesAuto'): boolean => {
+/** Creates X automatization Research or switches Stage to from which that Research auto can be created if done from wrong Stage */
+const handleAutoResearchCreation = (index: number) => {
     const stageIndex = player.stage.active;
-    if (type === 'researchesAuto' && !checkUpgrade(index, stageIndex, type)) {
-        const autoStage = global.researchesAutoInfo.autoStage[index][player.researchesAuto[index]];
-        if (autoStage !== undefined && !(autoStage === stageIndex || (autoStage === 4 && stageIndex === 5))) { switchStage(autoStage, stageIndex); }
-        return true;
+    if (checkUpgrade(index, stageIndex, 'researchesAuto')) {
+        buyUpgrades(index, stageIndex, 'researchesAuto');
+        return;
     }
-    return false;
+
+    const autoStage = global.researchesAutoInfo.autoStage[index][player.researchesAuto[index]];
+    if (autoStage === undefined) { return; }
+    global.lastUpgrade[autoStage][0] = index;
+    global.lastUpgrade[autoStage][1] = 'researchesAuto';
+    switchStage(autoStage, stageIndex);
 };
 
 export const buyAll = () => {
     const active = player.stage.active;
-    for (let i = 1; i < specialHTML.longestBuilding; i++) {
-        buyBuilding(i, active, 0);
+    const max = global.buildingsInfo.maxActive[active];
+    if (active === 3) {
+        for (let i = 1; i < max; i++) { buyBuilding(i, active, 0); }
+    } else {
+        for (let i = max - 1; i >= 1; i--) { buyBuilding(i, active, 0); }
     }
 };
 
@@ -471,14 +490,13 @@ export const updateCollapsePointsText = () => {
     getId('collapsePoints').textContent = array.length > 0 ? `${array.join(', ')} or ` : '';
 };
 
-const loadoutsVisual = (loadout: number[]) => {
+export const loadoutsVisual = (loadout: number[]) => {
+    if (getId('loadoutsMain').dataset.open !== 'true') { return; }
     let string = '';
     for (let i = 0, dupes = 1; i < loadout.length; i += dupes, dupes = 1) {
         const current = loadout[i];
         while (loadout[i + dupes] === current) { dupes++; }
-        if (i > 0) { string += ', '; }
-        string += `${current + 1}`;
-        if (dupes > 1) { string += `x${dupes}`; }
+        string += `${i > 0 ? ', ' : ''}${current + 1}${dupes > 1 ? `x${dupes}` : ''}`;
     }
     (getId('loadoutsEdit') as HTMLInputElement).value = string;
 };
@@ -491,39 +509,41 @@ export const loadoutsRecreate = () => {
     const listHTML = getQuery('#loadoutsList > span');
     const load = player.inflation.loadouts;
     listHTML.textContent = '';
-    let empty = true;
     for (const key in load) {
         const button = document.createElement('button');
         button.textContent = key;
         button.className = 'selectBtn redText';
         button.type = 'button';
         const event = () => {
+            if (global.hotkeys.shift) { return void loadoutsLoad(key); }
             (getId('loadoutsName') as HTMLInputElement).value = key;
             global.loadouts.input = player.inflation.loadouts[key];
             loadoutsVisual(player.inflation.loadouts[key]);
-            numbersUpdate();
         };
         newOld[key] = {
             html: button,
             event: event
         };
-        if (empty) {
-            empty = false;
-            listHTML.append(button);
-        } else {
-            listHTML.append(', ', button);
-        }
+        listHTML.append(button, ', ');
         button.addEventListener('click', event);
     }
-    if (empty) { listHTML.innerHTML = '<span class="redText">none</span>'; }
     global.loadouts.buttons = newOld;
+};
+const loadoutsLoad = async(loadout = null as null | string) => {
+    const quick = loadout !== null;
+    if (!await inflationRefund(quick || global.hotkeys.shift, true)) { return; }
+
+    const array = quick ? player.inflation.loadouts[loadout] : global.loadouts.input;
+    for (let i = 0; i < array.length; i++) {
+        buyStrangeness(array[i], 0, 'inflations', true);
+    }
+    if ((getId('loadoutsName') as HTMLInputElement).value === 'Auto-generate') { loadoutsLoadAuto(); }
+    numbersUpdate();
+    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = `Loaded ${quick ? `'${loadout}'` : 'selected'} loadout`; }
 };
 
 export const globalSaveStart = deepClone(globalSave);
 try { //Start everything
-    preventImageUnload();
-    const body = document.body;
-
     const globalSettings = localStorage.getItem(specialHTML.localStorage.settings);
     if (globalSettings !== null) {
         try {
@@ -535,7 +555,6 @@ try { //Start everything
                     array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
                 }
             }
-            if (!(globalSave.intervals.main >= 20)) { globalSave.intervals.main = 20; } //Fix NaN and undefined
             if (!(globalSave.intervals.offline >= 20)) { globalSave.intervals.offline = 20; } //Fix NaN and undefined
             for (let i = globalSave.toggles.length; i < globalSaveStart.toggles.length; i++) {
                 globalSave.toggles[i] = false;
@@ -557,7 +576,6 @@ try { //Start everything
         }
         (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0];
         (getId('thousandSeparator') as HTMLInputElement).value = globalSave.format[1];
-        (getId('mainInterval') as HTMLInputElement).value = `${globalSave.intervals.main}`;
         (getId('offlineInterval') as HTMLInputElement).value = `${globalSave.intervals.offline}`;
         (getId('numbersInterval') as HTMLInputElement).value = `${globalSave.intervals.numbers}`;
         (getId('visualInterval') as HTMLInputElement).value = `${globalSave.intervals.visual}`;
@@ -571,12 +589,19 @@ try { //Start everything
             getId('body').prepend(getId('footer'));
             getId('fakeFooter').after(getId('phoneHotkeys'));
             getId('footerMain').append(getId('subtabs'), getId('stageSelect'));
-            specialHTML.styleSheet.textContent += `.insideTab { margin-top: 0.6rem; } #footer { position: unset; } #footerMain { padding: 0.6em; row-gap: 0.6em; }
-            #footerMain button, #phoneHotkeys button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; } #footerMain > * { margin: 0 auto; gap: 0.4em; } #footerStats { gap: 0.6em; }
-            #stageSelect { position: unset; justify-content: unset; pointer-events: unset; } #stageSelect > div { position: unset; justify-content: unset; flex-wrap: unset; gap: 0.4em; margin: 0 auto; max-width: unset; } #subtabs { flex-direction: row; }
-            #phoneHotkeys { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100%; bottom: 0.6em; margin: 0; } #fakeFooter { height: 3.04em; }`;
+            specialHTML.styleSheet.textContent += `.insideTab { margin-top: 0.6rem; }
+                #footer { position: unset; }
+                #footerMain { padding: 0.6em; row-gap: 0.6em; }
+                #footerMain button, #phoneHotkeys button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; }
+                #footerMain > * { margin: 0 auto; gap: 0.4em; }
+                #footerStats { gap: 0.6em; }
+                #stageSelect { position: unset; justify-content: unset; pointer-events: unset; }
+                #stageSelect > div { position: unset; justify-content: unset; flex-wrap: unset; gap: 0.4em; margin: 0 auto; max-width: unset; }
+                #subtabs { flex-direction: row; }
+                #phoneHotkeys { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100%; bottom: 0.6em; margin: 0; }
+                #fakeFooter { height: 3.04em; }`;
         }
-        if (globalSave.toggles[2]) { body.classList.remove('noTextSelection'); }
+        if (globalSave.toggles[2]) { document.body.classList.remove('noTextSelection'); }
         if (globalSave.toggles[1]) {
             const elementsArea = getId('upgradeSubtabElements');
             elementsArea.id = 'ElementsTab';
@@ -597,15 +622,17 @@ try { //Start everything
 
         if (globalSave.MDSettings[0]) {
             (document.getElementById('MDMessage1') as HTMLElement).remove();
-            specialHTML.styleSheet.textContent += 'body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #hideToggle { -webkit-user-select: none; -webkit-touch-callout: none; }'; //Safari junk to disable image hold menu and text selection
-            specialHTML.styleSheet.textContent += '#themeArea > div > div { position: unset; display: flex; width: 15em; } #themeArea > div > button { display: none; }'; //More Safari junk to make windows work without focus
+            specialHTML.styleSheet.textContent += `body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #hideToggle { -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
+                #themeArea > div > div { position: unset; display: flex; width: 15em; }
+                #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */
+                #globalStats { right: 22%; bottom: 32%; opacity: 1; }`;
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
 
             const arrowStage = document.createElement('button');
-            arrowStage.innerHTML = '<div class="downArrow"></div>';
+            arrowStage.innerHTML = '<span class="downArrow"></span>';
             arrowStage.type = 'button';
             const arrowReset1 = document.createElement('button');
-            arrowReset1.innerHTML = '<div class="downArrow"></div>';
+            arrowReset1.innerHTML = '<span class="downArrow"></span>';
             arrowReset1.type = 'button';
             getId('resetStage').append(arrowStage);
             arrowStage.addEventListener('click', () => getId('resetStage').classList.toggle('open'));
@@ -613,8 +640,12 @@ try { //Start everything
             getId('reset1Main').append(arrowReset1);
             arrowReset1.addEventListener('click', () => getId('reset1Main').classList.toggle('open'));
             arrowReset1.addEventListener('blur', () => getId('reset1Main').classList.remove('open'));
-            specialHTML.styleSheet.textContent += '#resets { row-gap: 1em; } #resets > section { position: relative; flex-direction: row; justify-content: center; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; } #resets > section:not(.open) > p { display: none !important; }';
-            specialHTML.styleSheet.textContent += '#resets > section > button:last-of-type { width: 2.2em !important; margin-left: -2px; } #resets .downArrow { width: 1.24em; height: 1.24em; margin: auto; } #resets p { position: absolute; width: 17.4em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(100% - 2px); z-index: 1; box-sizing: content-box; }';
+            specialHTML.styleSheet.textContent += `#resets { row-gap: 1em; }
+                #resets > section { position: relative; flex-direction: row; justify-content: center; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; }
+                #resets > section:not(.open) > p { display: none !important; }
+                #resets > section > button:last-of-type { display: flex; justify-content: center; align-items: center; width: 2.2em; margin-left: -2px; }
+                #resets .downArrow { width: 1.24em; height: 1.24em; }
+                #resets p { position: absolute; width: 17.4em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(100% - 2px); z-index: 2; box-sizing: content-box; }`;
 
             const structuresButton = document.createElement('button');
             structuresButton.textContent = 'Structures';
@@ -637,7 +668,12 @@ try { //Start everything
             resetGalaxy.id = 'resetGalaxyFooter';
             resetGalaxy.type = 'button';
             resetGalaxy.className = 'stage4Only';
-            getId('phoneHotkeys').prepend(resetGalaxy, reset1Button, resetCollapse, stageButton, structuresButton);
+            const resetMerge = document.createElement('button');
+            resetMerge.textContent = 'Merge';
+            resetMerge.id = 'resetMergeFooter';
+            resetMerge.type = 'button';
+            resetMerge.className = 'stage6Only';
+            getId('phoneHotkeys').prepend(resetGalaxy, reset1Button, resetMerge, resetCollapse, stageButton, structuresButton);
 
             const createUpgButton = document.createElement('button');
             createUpgButton.className = 'hollowButton';
@@ -656,7 +692,9 @@ try { //Start everything
             const pages = document.createElement('div');
             pages.id = 'strangenessPages';
             pages.innerHTML = '<button type="button" id="strangenessPage1" class="stage1borderImage hollowButton">1</button><button type="button" id="strangenessPage2" class="stage2borderImage hollowButton">2</button><button type="button" id="strangenessPage3" class="stage3borderImage hollowButton">3</button><button type="button" id="strangenessPage4" class="stage4borderImage hollowButton">4</button><button type="button" id="strangenessPage5" class="stage5borderImage hollowButton">5</button><button type="button" id="strangenessCreate" class="hollowButton">Create</button>';
-            specialHTML.styleSheet.textContent += '#strangenessPages { display: flex; justify-content: center; column-gap: 0.3em; } #strangenessPages button { width: 2.08em; height: calc(2.08em - 2px); border-top: none; border-radius: 0 0 4px 4px; } #strangenessCreate { width: unset !important; padding: 0 0.4em; }';
+            specialHTML.styleSheet.textContent += `#strangenessPages { display: flex; justify-content: center; column-gap: 0.3em; }
+                #strangenessPages button { width: 2.08em; height: calc(2.08em - 2px); border-top: none; border-radius: 0 0 4px 4px; }
+                #strangenessCreate { width: unset !important; padding: 0 0.4em; }`;
             getId('strangenessResearch').append(pages);
 
             const mainLi = getId('MDLi');
@@ -669,7 +707,7 @@ try { //Start everything
             refreshButton.type = 'button';
             mainLi.append(refreshButton);
             refreshButton.addEventListener('click', async() => {
-                if (await Confirm('Reload page?\n(Game will not autosave)')) { window.location.reload(); }
+                if (await Confirm('Reload the page?\n(Game will not autosave)')) { window.location.reload(); }
             });
 
             getId('MDToggle1').addEventListener('click', () => toggleSpecial(1, 'mobile', true, true));
@@ -683,18 +721,21 @@ try { //Start everything
             message.ariaHidden = 'true';
             for (let i = 0; i <= 3; i++) {
                 const effectID = getQuery(`#${i === 0 ? 'solarMass' : `star${i}`}Effect > span.info`);
-                effectID.textContent = ` (${effectID.textContent})`;
                 effectID.classList.remove('greenText');
+                effectID.before(' (');
+                effectID.after(')');
             }
             for (let i = 1; i <= 1; i++) {
                 const effectID = getQuery(`#merge${i}Effect > span.info`);
-                effectID.textContent = ` (${effectID.textContent})`;
                 effectID.classList.remove('greenText');
+                effectID.before(' (');
+                effectID.after(')');
             }
-            specialHTML.styleSheet.textContent += '#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }';
+            specialHTML.styleSheet.textContent += `#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }
+                #starEffects, #mergeEffects { cursor: default; }`;
 
             const SRMainDiv = document.createElement('article');
-            SRMainDiv.innerHTML = '<h5>Information for Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
+            SRMainDiv.innerHTML = '<h5>Information for the Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
             SRMainDiv.className = 'reader';
             getId('fakeFooter').before(SRMainDiv);
 
@@ -772,33 +813,86 @@ try { //Start everything
     const MD = globalSave.MDSettings[0];
     const SR = globalSave.SRSettings[0];
     const PC = !MD || globalSave.MDSettings[1];
+    const htmlHTML = document.documentElement;
     const releaseHotkey = (event: KeyboardEvent | MouseEvent) => {
         if (global.hotkeys.shift && !event.shiftKey) { global.hotkeys.shift = false; }
         if (global.hotkeys.ctrl && !event.ctrlKey) { global.hotkeys.ctrl = false; }
         global.hotkeys.tab = false;
     };
-    body.addEventListener('contextmenu', (event) => {
+    htmlHTML.addEventListener('contextmenu', (event) => {
         const activeType = (document.activeElement as HTMLInputElement)?.type;
         if (activeType !== 'text' && activeType !== 'number' && !globalSave.developerMode) { event.preventDefault(); }
     });
-    body.addEventListener('keydown', (key) => detectHotkey(key));
-    body.addEventListener('keyup', releaseHotkey);
+    htmlHTML.addEventListener('keydown', (key) => detectHotkey(key));
+    htmlHTML.addEventListener('keyup', releaseHotkey);
     if (PC) {
-        body.addEventListener('mouseup', (event) => {
+        htmlHTML.addEventListener('mouseup', (event) => {
             cancelRepeat();
             releaseHotkey(event);
         });
-        body.addEventListener('mouseleave', cancelRepeat);
+        htmlHTML.addEventListener('mouseleave', cancelRepeat);
     }
     if (MD) {
-        body.addEventListener('touchstart', (event) => {
+        htmlHTML.addEventListener('touchstart', (event) => {
             specialHTML.mobileDevice.start = [event.touches[0].clientX, event.touches[0].clientY];
         }, { passive: true }); //Passive just in case to prevent issues with scrolling
-        body.addEventListener('touchend', (event) => {
+        htmlHTML.addEventListener('touchend', (event) => {
             cancelRepeat();
             handleTouchHotkeys(event);
         });
-        body.addEventListener('touchcancel', cancelRepeat);
+        htmlHTML.addEventListener('touchcancel', cancelRepeat);
+    }
+
+    /** Footer */
+    {
+        const startEvent = (event: MouseEvent | TouchEvent) => {
+            event.preventDefault(); //To prevent scrolling
+            const html = getId('globalStats');
+            const bodyMain = document.documentElement;
+            const screenWidth = bodyMain.clientWidth;
+            const screenHeight = bodyMain.clientHeight;
+
+            const mouse = event instanceof MouseEvent;
+            let lastX = mouse ? event.clientX : event.changedTouches[0].clientX;
+            let lastY = mouse ? event.clientY : event.changedTouches[0].clientY;
+            const move = (event: MouseEvent | TouchEvent) => {
+                const newX = mouse ? (event as MouseEvent).clientX : (event as TouchEvent).changedTouches[0].clientX;
+                const newY = mouse ? (event as MouseEvent).clientY : (event as TouchEvent).changedTouches[0].clientY;
+                const current = html.getBoundingClientRect();
+                html.style.right = `${(1 - Math.min(Math.max(current.right + newX - lastX, current.width), screenWidth) / screenWidth) * 100}%`;
+                html.style.bottom = `${(1 - Math.min(Math.max(current.bottom + newY - lastY, current.height), screenHeight) / screenHeight) * 100}%`;
+                lastX = newX;
+                lastY = newY;
+
+                if (!mouse) { html.style.opacity = ''; }
+            };
+            const removeEvents = mouse ? () => {
+                bodyMain.removeEventListener('mousemove', move);
+                bodyMain.removeEventListener('mouseup', removeEvents);
+                bodyMain.removeEventListener('mouseleave', removeEvents);
+                html.addEventListener('mousedown', startEvent, { once: true });
+                html.style.opacity = '';
+            } : () => {
+                bodyMain.removeEventListener('touchmove', move);
+                bodyMain.removeEventListener('touchend', removeEvents);
+                bodyMain.removeEventListener('touchcancel', removeEvents);
+                html.addEventListener('touchstart', startEvent, { once: true });
+                html.style.opacity = '';
+            };
+            if (mouse) {
+                bodyMain.addEventListener('mousemove', move);
+                bodyMain.addEventListener('mouseup', removeEvents);
+                bodyMain.addEventListener('mouseleave', removeEvents);
+                html.style.opacity = '1';
+            } else {
+                bodyMain.addEventListener('touchmove', move);
+                bodyMain.addEventListener('touchend', removeEvents);
+                bodyMain.addEventListener('touchcancel', removeEvents);
+                html.style.opacity = '0.2';
+            }
+        };
+        if (PC) { getId('globalStats').addEventListener('mousedown', startEvent, { once: true }); }
+        if (MD) { getId('globalStats').addEventListener('touchstart', startEvent, { once: true }); }
     }
 
     /* Toggles */
@@ -813,7 +907,9 @@ try { //Start everything
                     getQuery(`#${key}Hotkey > button`).textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
                 }
             } else if (i === 2) {
-                body.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
+                document.body.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
+            } else {
+                getId('globalStats').style.display = !globalSave.toggles[4] ? '' : 'none';
             }
         });
     }
@@ -893,6 +989,7 @@ try { //Start everything
             footerButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
             if (PC) { footerButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
             getId('resetCollapseFooter').addEventListener('click', collapseResetUser);
+            getId('resetMergeFooter').addEventListener('click', mergeResetUser);
 
             const clickGalaxy = () => buyBuilding(3, 5);
             const galaxyButton = getId('resetGalaxyFooter');
@@ -1023,11 +1120,8 @@ try { //Start everything
         if (MD) {
             image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
         } else {
-            const clickFunc = () => buyUpgrades(i, player.stage.active, 'researchesAuto');
-            image.addEventListener('click', () => {
-                if (handleAutoSwitch(i)) { return; }
-                clickFunc();
-            });
+            const clickFunc = () => handleAutoResearchCreation(i);
+            image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
         if (PC || SR) {
@@ -1061,7 +1155,7 @@ try { //Start everything
             const active = player.stage.active;
             const last = global.lastUpgrade[active];
             if (last[0] !== null) {
-                if (handleAutoSwitch(last[0], last[1])) { return; }
+                if (last[1] === 'researchesAuto') { return handleAutoResearchCreation(last[0]); }
                 buyUpgrades(last[0], active, last[1]);
             }
         };
@@ -1128,10 +1222,16 @@ try { //Start everything
         const strange = getId(`strange${i}`);
         const openFunction = () => {
             if (i === 0 && player.stage.true < 6 && player.milestones[4][0] < 8) { return; }
-            getId(`strange${i}EffectsMain`).style.display = '';
+            const html = getId(`strange${i}EffectsMain`);
+            html.dataset.open = 'true';
+            html.style.display = '';
             numbersUpdate();
         };
-        const closeFunc = () => (getId(`strange${i}EffectsMain`).style.display = 'none');
+        const closeFunc = () => {
+            const html = getId(`strange${i}EffectsMain`);
+            html.dataset.open = 'false';
+            html.style.display = 'none';
+        };
         strange.addEventListener('click', openFunction, { capture: true }); //Clicking on window does unnessary call, before closing
         if (PC || SR) {
             strange.addEventListener('focus', () => {
@@ -1213,16 +1313,19 @@ try { //Start everything
             });
         }
     }
-    getId('inflationRefund').addEventListener('click', () => void inflationRefund());
+    getId('inflationRefund').addEventListener('click', () => void inflationRefund(global.hotkeys.shift));
     getId('inflationLoadouts').addEventListener('click', () => {
         const windowHTML = getId('loadoutsMain');
-        if (windowHTML.dataset.open === 'true') {
-            windowHTML.style.display = 'none';
-            windowHTML.dataset.open = 'false';
-        } else {
+        const status = windowHTML.dataset.open !== 'true';
+        if (status) {
             windowHTML.style.display = '';
             windowHTML.dataset.open = 'true';
+            loadoutsVisual(global.loadouts.input);
+        } else {
+            windowHTML.style.display = 'none';
+            windowHTML.dataset.open = 'false';
         }
+        if (globalSave.SRSettings[0]) { getId('inflationLoadouts').ariaExpanded = `${status}`; }
     });
     getId('loadoutsEdit').addEventListener('change', () => {
         const first = (getId('loadoutsEdit') as HTMLInputElement).value.split(',');
@@ -1243,20 +1346,18 @@ try { //Start everything
         global.loadouts.input = final;
         loadoutsVisual(final);
     });
+    getId('loadoutsLoadAuto').addEventListener('click', () => {
+        if (!global.hotkeys.shift) { (getId('loadoutsName') as HTMLInputElement).value = 'Auto-generate'; }
+        loadoutsLoadAuto();
+    });
     getId('loadoutsSave').addEventListener('click', () => {
         const name = (getId('loadoutsName') as HTMLInputElement).value;
         const check = Number(name); //Lazy check for all types of only having spacebars
-        if (!isNaN(check) && `${check}` !== name) { return Notify(`Loadout name: '${name}' is not allowed`); }
+        if ((!isNaN(check) && `${check}` !== name) || name === 'Auto-generate') { return Notify(`Loadout name: '${name}' is not allowed`); }
         player.inflation.loadouts[name] = global.loadouts.input;
         loadoutsRecreate();
     });
-    getId('loadoutsLoad').addEventListener('click', async() => {
-        if (!await inflationRefund(true)) { return; }
-        const loadout = global.loadouts.input;
-        for (let i = 0; i < loadout.length; i++) {
-            buyStrangeness(loadout[i], 0, 'inflations', true);
-        }
-    });
+    getId('loadoutsLoad').addEventListener('click', () => void loadoutsLoad());
     getId('loadoutsDelete').addEventListener('click', () => {
         const name = (getId('loadoutsName') as HTMLInputElement).value;
         if (player.inflation.loadouts[name] === undefined) { return; }
@@ -1347,8 +1448,8 @@ try { //Start everything
         player.stage.input[1] = Math.max(Number(input.value), 0);
         input.value = format(player.stage.input[1], { type: 'input' });
     });
-    getId('versionButton').addEventListener('click', getVersionInfoHTML);
-    getId('hotkeysButton').addEventListener('click', getHotkeysHTML);
+    getId('versionButton').addEventListener('click', openVersionInfo);
+    getId('hotkeysButton').addEventListener('click', openHotkeys);
     getId('save').addEventListener('click', () => { saveGame(); });
     getId('file').addEventListener('change', async() => {
         const id = getId('file') as HTMLInputElement;
@@ -1379,13 +1480,6 @@ try { //Start everything
             });
         }
     }
-    getId('mainInterval').addEventListener('change', () => {
-        const input = getId('mainInterval') as HTMLInputElement;
-        globalSave.intervals.main = Math.min(Math.max(Math.trunc(Number(input.value)), 20), 200);
-        input.value = `${globalSave.intervals.main}`;
-        saveGlobalSettings();
-        changeIntervals();
-    });
     getId('offlineInterval').addEventListener('change', () => {
         const input = getId('offlineInterval') as HTMLInputElement;
         globalSave.intervals.offline = Math.min(Math.max(Math.trunc(Number(input.value)), 20), 6000);
@@ -1418,6 +1512,7 @@ try { //Start everything
     getId('MDToggle0').addEventListener('click', () => toggleSpecial(0, 'mobile', true, true));
     getId('SRToggle0').addEventListener('click', () => toggleSpecial(0, 'reader', true, true));
     getId('pauseButton').addEventListener('click', pauseGameUser);
+    getId('showLog').addEventListener('click', openLog);
     getId('reviewEvents').addEventListener('click', replayEvent);
     getId('customFontSize').addEventListener('change', () => changeFontSize());
 
@@ -1501,14 +1596,14 @@ try { //Start everything
     getId('exportError').addEventListener('click', () => {
         exported = true;
         const save = localStorage.getItem(specialHTML.localStorage.main);
-        if (save === null) { return void Alert('No save file detected'); }
+        if (save === null) { return void Alert("Couldn't find any save files"); }
         const a = document.createElement('a');
         a.href = `data:text/plain,${save}`;
         a.download = 'Fundamental post error export';
         a.click();
     });
     getId('deleteError').addEventListener('click', async() => {
-        if (!exported && !await Confirm("Recommended to export save file first\nPress 'Confirm' to confirm and delete your save file")) { return; }
+        if (!exported && !await Confirm("It's recommended to export save file first\nPress 'Confirm' to confirm and delete your save file")) { return; }
         localStorage.removeItem(specialHTML.localStorage.main);
         window.location.reload();
         void Alert('Awaiting game reload');

@@ -207,11 +207,10 @@ const changeStage = (direction: 'Left' | 'Right') => {
 
 /* preventDefault should not be used here */
 export const handleTouchHotkeys = (event: TouchEvent) => {
-    const touches = event.changedTouches;
-    if (touches.length > 1) { return; }
+    if (event.changedTouches.length > 1) { return; }
     const mainHTML = document.documentElement;
-    const horizontal = (touches[0].clientX - specialHTML.mobileDevice.start[0]) / mainHTML.clientWidth;
-    const vertical = (touches[0].clientY - specialHTML.mobileDevice.start[1]) / mainHTML.clientHeight;
+    const horizontal = (event.changedTouches[0].clientX - specialHTML.mobileDevice.start[0]) / mainHTML.clientWidth;
+    const vertical = (event.changedTouches[0].clientY - specialHTML.mobileDevice.start[1]) / mainHTML.clientHeight;
 
     if (Math.abs(vertical) > 0.2) {
         if (Math.abs(vertical) < 0.8 || Math.abs(horizontal) > 0.2) { return; }
