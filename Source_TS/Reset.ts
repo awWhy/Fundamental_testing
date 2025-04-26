@@ -421,7 +421,7 @@ export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {
     };
     clone.elements = cloneArray(player.elements);
     clone.merge = {
-        reward: cloneArray(player.merge.rewards),
+        rewards: cloneArray(player.merge.rewards),
         resets: player.merge.resets,
         since: player.merge.since
     };
