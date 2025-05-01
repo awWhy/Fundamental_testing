@@ -195,7 +195,6 @@ p > img {
 a { color: red; }
 h1, h2, h3, h4, h5, h6 { font-weight: normal; }
 .center { text-align: center; }
-.fullWidth { width: 100%; }
 
 .downArrow {
     display: inline-block;
@@ -210,8 +209,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: normal; }
 
 #loading, #alertMain, #offlineMain, #bigWindow {
     position: fixed;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     top: 0;
     display: flex;
     flex-direction: column;
@@ -425,9 +424,8 @@ input:-webkit-autofill { /* Chrome related pain */
 .insideTab {
     margin-top: min(2vh, 1rem);
     display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    align-items: start;
+    flex-flow: column wrap;
+    align-items: center;
     gap: 1.6em;
 }
 
@@ -436,7 +434,6 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-wrap: wrap;
     justify-content: center;
     height: min-content;
-    width: 100%;
     gap: 1.2em;
 }
 
@@ -579,11 +576,6 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #toggleBuilding0 { margin-left: 0.3em; }
 
-#stageInfo {
-    text-align: center;
-    width: 100%;
-}
-
 #stageInfo > div {
     display: flex;
     flex-direction: column;
@@ -592,6 +584,7 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #starEffects, #mergeEffects {
     width: max-content;
+    max-width: 90vw;
     align-self: center;
     cursor: help;
 }
@@ -621,7 +614,6 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-direction: column;
     text-align: center;
     row-gap: 0.1em;
-    width: 100%;
 }
 
 #challengesMain {
@@ -690,7 +682,6 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-direction: column;
     text-align: center;
     row-gap: 0.3em;
-    width: 100%;
 }
 
 .togglesDiv > label {
@@ -702,7 +693,6 @@ input:-webkit-autofill { /* Chrome related pain */
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
     row-gap: 0.5em;
     margin-bottom: -0.4em;
 }
@@ -755,6 +745,7 @@ input:-webkit-autofill { /* Chrome related pain */
 .researchesDiv p {
     display: flex;
     align-items: center;
+    justify-content: center;
     border: 2px solid;
     border-color: inherit;
     border-left: none;
@@ -771,7 +762,6 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-direction: column;
     align-items: center;
     row-gap: 0.6em;
-    width: 100%;
 }
 
 .descriptionText {
@@ -779,13 +769,10 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-direction: column;
     align-items: center;
     text-align: center;
-    width: 100%;
+    max-width: 80vw;
     row-gap: 0.3em;
     white-space: pre-line;
 }
-
-.descriptionText > h3,
-.descriptionText > p { max-width: 80%; }
 
 .descriptionTextMain > div:first-of-type {
     display: flex;
@@ -1042,6 +1029,12 @@ input:-webkit-autofill { /* Chrome related pain */
     border-color: darkred;
 }
 
+#settingsSubtabSettings {
+    flex-direction: row;
+    justify-content: center;
+    align-items: start;
+}
+
 #resetToggles > div {
     display: flex;
     flex-wrap: wrap;
@@ -1088,7 +1081,8 @@ input:-webkit-autofill { /* Chrome related pain */
     align-self: end;
 }
 
-#logoLinks > * {
+#logoLinks > a,
+#logoLinks > button {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1121,7 +1115,7 @@ input:-webkit-autofill { /* Chrome related pain */
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
+    width: 100vw; /* Too lazy to rework settings subtab */
     row-gap: 0.3em;
 }
 
@@ -1207,7 +1201,7 @@ li .hollowButton {
 .settingsMenu:focus-within > div { display: flex; }
 
 #saveFileNameInput {
-    width: 17.2em;
+    width: 19.2em;
     height: 1.82em;
     font-size: 0.88em;
     text-align: left;
@@ -1357,8 +1351,8 @@ li .hollowButton {
     display: flex;
     flex-direction: column;
     position: fixed;
-    right: 2%;
-    bottom: 15%;
+    bottom: calc(32px + min(3.9vh, 2.4em) + 2.02em + 0.4vw);
+    right: 3vw;
     background-color: var(--window-color);
     border: 2px solid var(--window-border);
     border-radius: 8px;
@@ -1388,12 +1382,12 @@ li .hollowButton {
 
 #fakeFooter {
     visibility: hidden;
-    height: calc(32px + min(3.9vh, 2.4em) + 3.9336em + 0.8vw);
+    height: calc(32px + min(3.9vh, 2.4em) + 5.8472em + 1.2vw);
 }
 
 #footer {
     position: fixed;
-    width: 100%;
+    width: 100vw;
     bottom: 0;
     z-index: 6;
 }
@@ -1408,7 +1402,8 @@ li .hollowButton {
     overscroll-behavior-x: none;
 }
 
-#footerMain > * {
+#footerStats,
+#footerMain > nav {
     display: flex;
     column-gap: 1em;
     margin: 0 auto;
@@ -1447,18 +1442,31 @@ li .hollowButton {
 #footer > div:first-child {
     display: flex;
     align-items: end;
-    /* justify-content: space-between; */
+    justify-content: center;
     height: 0; /* To click behind it (annoying to make pointer-events work here, but possible) */
 }
 
 #subtabs {
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap-reverse;
+    max-width: 25vw;
     margin-left: 3vw;
+    margin-bottom: 0.4vw;
+    margin-right: auto;
+    gap: 0.4vw;
+}
+
+#phoneHotkeys {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: end;
+    max-width: 25vw;
+    margin-right: 3vw;
     margin-bottom: 0.4vw;
     gap: 0.4vw;
 }
 
+#phoneHotkeys button,
 #subtabs button {
     min-width: 5.5em;
     background-color: var(--background-color);
@@ -1468,12 +1476,13 @@ li .hollowButton {
 
 #stageSelect {
     display: flex;
-    align-items: end;
+    position: absolute;
+    flex-wrap: wrap-reverse;
     justify-content: center;
     margin-bottom: 0.4vw;
+    max-width: 50vw;
+    gap: 0.4vw;
     pointer-events: none;
-    position: absolute;
-    width: 100%;
 }
 
 #stageSelect button {
@@ -1484,63 +1493,11 @@ li .hollowButton {
     pointer-events: auto;
 }
 
-#stageSelect > div {
-    display: none;
-    position: absolute;
-    flex-direction: row;
-    flex-wrap: wrap-reverse;
-    justify-content: center;
-    gap: 0.4vw;
-    max-width: 40vw;
-    z-index: 1;
-}
-
 #footer button:hover { background-color: var(--footerButton-hover); }
-#stageSelect.active > #currentSwitch { clip-path: circle(0); }
-#stageSelect.active > div { display: flex; }
-
-#phoneHotkeys {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4vw;
-    margin-right: 2vw;
-    margin-left: auto; /* Can be replaced, if display none changed into visibility hidden for subtabs */
-}
-
-#phoneHotkeys button {
-    width: 100%;
-    background-color: var(--background-color);
-    border-radius: 2px;
-    padding: 0 0.6em;
-}
-
-#hideToggle {
-    height: min-content;
-    width: min-content;
-    display: flex;
-    align-items: center;
-    column-gap: 0.25em;
-    background-color: var(--footer-color);
-    padding: 0.2em 0.5em 0;
-    border-radius: 10px 10px 0 0;
-    user-select: none;
-    cursor: pointer;
-}
 
 @keyframes hideX {
     from { transform: translateX(0); }
     to { transform: translateX(100%); }
-}
-
-@keyframes hideY {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
-}
-
-@keyframes rotate {
-    from { transform: rotate(0); }
-    to { transform: rotate(180deg); }
 }
 
 /* Firefox related pain */
@@ -1572,9 +1529,6 @@ li .hollowButton {
     #notifications > p { width: 95vw; }
 
     .insideTab {
-        flex-direction: column;
-        justify-content: start;
-        align-items: center;
         gap: 1.2em;
         margin-top: 1vh;
     }
@@ -1588,7 +1542,7 @@ li .hollowButton {
 
     .buyBuilding, #specials > div { column-gap: 0.15em; }
     .buyBuilding > div:first-of-type, #specials p { flex-direction: column; }
-    .buyBuilding > div:first-of-type { width: 100%; } /* max-width: 19.2em; */
+    .buyBuilding > div:first-of-type { width: 100%; }
     .buyBuilding button:first-of-type,
     .buyBuilding > div > p:first-of-type { width: unset; }
     .buyBuilding > div > p:first-of-type > span { white-space: nowrap; }
@@ -1613,7 +1567,7 @@ li .hollowButton {
     .buyBuilding > div > div > div { display: none; }
     .availableBuilding > div > div > p { border-color: var(--building-afford); }
 
-    .descriptionText > p { max-width: 90vw; }
+    .descriptionText { max-width: 90vw; }
 
     #challengesMain > div {
         flex-direction: column;
@@ -1636,26 +1590,48 @@ li .hollowButton {
         margin-bottom: -0.3em;
     }
 
+    #settingsSubtabSettings {
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+    }
+
     #logoLinks { align-self: unset; }
     #themeArea > div > div { width: 80vw !important; }
 
-    #fakeFooter { height: calc(32px + min(3.9vh, 2.4em) + 9.6744em + 3.6vw); }
-    #footerMain > * { column-gap: 0.8em; }
-    #stageSelect { margin-bottom: 0.8vw; }
-
-    #stageSelect > div {
-        gap: 0.8vw;
-        max-width: 60vw;
+    #globalStats {
+        bottom: calc(32px + min(3.9vh, 2.4em) + 2.02em + 0.8vw);
+        right: 1vw;
     }
 
-    #subtabs {
-        flex-direction: column-reverse;
+    #fakeFooter { height: calc(32px + min(3.9vh, 2.4em) + 9.6744em + 3.6vw); }
+    #footerStats,
+    #footerMain > nav { column-gap: 0.8em; }
+
+    #stageSelect {
+        max-width: 60vw;
         margin-bottom: 0.8vw;
         gap: 0.8vw;
     }
 
+    #subtabs {
+        flex-direction: column-reverse;
+        max-width: unset;
+        margin-left: 2vw;
+        margin-bottom: 0.8vw;
+        gap: 0.8vw;
+    }
+
+    #phoneHotkeys {
+        flex-direction: column;
+        max-width: unset;
+        margin-right: 2vw;
+        margin-bottom: 0.8vw;
+        gap: 0.8vw;
+    }
+
+    #phoneHotkeys button,
     #subtabs button { width: 100%; }
-    #phoneHotkeys { gap: 0.8vw; }
 }
 @media screen and (max-width: 394px) {
     .buyBuilding { margin-left: calc(-32px - 0.348em); }
@@ -1670,5 +1646,8 @@ li .hollowButton {
         height: 32px;
         object-fit: scale-down;
     }
+
+    #subtabs { margin-left: 1vw; }
+    #phoneHotkeys { margin-right: 1vw; }
 }
 /* No rules are allowed past this point */
