@@ -40,27 +40,27 @@ const hotkeyFunction = {
     exitChallenge: () => enterExitChallengeUser(null),
     tabRight: (event) => {
         if (event.repeat) { return; }
-        changeTab('Right');
+        changeTab('right');
     },
     tabLeft: (event) => {
         if (event.repeat) { return; }
-        changeTab('Left');
+        changeTab('left');
     },
     subtabUp: (event) => {
         if (event.repeat) { return; }
-        changeSubtab('Up');
+        changeSubtab('up');
     },
     subtabDown: (event) => {
         if (event.repeat) { return; }
-        changeSubtab('Down');
+        changeSubtab('down');
     },
     stageRight: (event) => {
         if (event.repeat) { return; }
-        changeStage('Right');
+        changeStage('right');
     },
     stageLeft: (event) => {
         if (event.repeat) { return; }
-        changeStage('Left');
+        changeStage('left');
     }
 } as Record<hotkeysList, (event: KeyboardEvent) => void>;
 
@@ -143,66 +143,64 @@ export const detectHotkey = (check: KeyboardEvent) => {
     }
 };
 
-const changeTab = (direction: 'Left' | 'Right') => {
+const changeTab = (direction: 'left' | 'right') => {
     const tabs = global.tabList.tabs;
     let index = tabs.indexOf(global.tab);
 
-    if (direction === 'Left') {
+    if (direction === 'left') {
         do {
             if (index <= 0) {
                 index = tabs.length - 1;
             } else { index--; }
         } while (!checkTab(tabs[index]));
-        switchTab(tabs[index]);
     } else {
         do {
             if (index >= tabs.length - 1) {
                 index = 0;
             } else { index++; }
         } while (!checkTab(tabs[index]));
-        switchTab(tabs[index]);
     }
+    switchTab(tabs[index]);
 };
 
-const changeSubtab = (direction: 'Down' | 'Up') => {
+/** Through a hotkey */
+export const changeSubtab = (direction: 'down' | 'up') => {
     const tab = global.tab;
     const subtabs = global.tabList[`${tab}Subtabs`] as string[];
     if (subtabs.length < 2) { return; } //To remove never[]
     let index = subtabs.indexOf(global.subtab[`${tab}Current`]);
 
-    if (direction === 'Down') {
+    if (direction === 'down') {
         do {
             if (index <= 0) {
                 index = subtabs.length - 1;
             } else { index--; }
         } while (!checkTab(tab, subtabs[index]));
-        switchTab(tab, subtabs[index]);
     } else {
         do {
             if (index >= subtabs.length - 1) {
                 index = 0;
             } else { index++; }
         } while (!checkTab(tab, subtabs[index]));
-        switchTab(tab, subtabs[index]);
     }
+    switchTab(tab, subtabs[index]);
 };
 
-const changeStage = (direction: 'Left' | 'Right') => {
+const changeStage = (direction: 'left' | 'right') => {
     const activeAll = global.stageInfo.activeAll;
     if (activeAll.length === 1) { return; }
     let index = activeAll.indexOf(player.stage.active);
 
-    if (direction === 'Left') {
+    if (direction === 'left') {
         if (index <= 0) {
             index = activeAll.length - 1;
         } else { index--; }
-        switchStage(activeAll[index]);
     } else {
         if (index >= activeAll.length - 1) {
             index = 0;
         } else { index++; }
-        switchStage(activeAll[index]);
     }
+    switchStage(activeAll[index]);
 };
 
 /* preventDefault should not be used here */
@@ -214,8 +212,8 @@ export const handleTouchHotkeys = (event: TouchEvent) => {
 
     if (Math.abs(vertical) > 0.2) {
         if (Math.abs(vertical) < 0.8 || Math.abs(horizontal) > 0.2) { return; }
-        changeSubtab(vertical > 0 ? 'Up' : 'Down');
+        changeSubtab(vertical > 0 ? 'up' : 'down');
         return;
     } else if (Math.abs(horizontal) < 0.6) { return; }
-    changeTab(horizontal > 0 ? 'Left' : 'Right');
+    changeTab(horizontal > 0 ? 'left' : 'right');
 };

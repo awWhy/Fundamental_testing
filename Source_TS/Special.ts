@@ -3,7 +3,7 @@ import { getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { deepClone, global, player } from './Player';
 import { assignResetInformation } from './Stage';
 import type { globalSaveType, hotkeysList } from './Types';
-import { format, numbersUpdate, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
+import { format, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -36,7 +36,7 @@ export const globalSave: globalSaveType = {
     format: ['.', ''],
     theme: null,
     fontSize: 16,
-    MDSettings: [false, false],
+    MDSettings: [false, false, false],
     SRSettings: [false, false, false],
     developerMode: false
 };
@@ -257,7 +257,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchGalaxy1.png', 'stage3borderImage'],
             ['Missing.png', 'stage3borderImage'],
             ['ResearchGalaxy3.png', 'stage3borderImage'],
-            ['ResearchGalaxy4.png', 'brownBorderImage']
+            ['ResearchGalaxy4.png', 'brownBorderImage'],
+            ['Missing.png', 'redBorderImage']
         ], []
     ],
     longestFooterStats: 3,
@@ -290,7 +291,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     },
     localStorage: {
         /** Index for game's primary save slot */
-        main: 'testing_save',
+        main: 'save',
         /** Index for global game settings */
         settings: 'fundamentalSettings'
     },
@@ -302,6 +303,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         classMap: new Map<string, HTMLCollectionOf<HTMLElement>>(),
         queryMap: new Map<string, HTMLElement>()
     },
+    errorCooldowns: [] as string[],
     /** [text, true ? incrementFunc : closeFunc] */
     notifications: [] as Array<[string, (instantClose?: boolean) => void]>,
     /** [priority, closeFunc] */
@@ -776,7 +778,8 @@ export const Notify = (text: string, start = 1) => {
             timeout = setTimeout(remove, 7200);
         }]) - 1];
         const remove = () => {
-            notifications.splice(notifications.indexOf(pointer), 1);
+            const index = notifications.indexOf(pointer);
+            if (index !== -1) { notifications.splice(index, 1); }
             html.removeEventListener('click', remove);
             html.style.animation = 'hideX 800ms ease-in-out forwards';
             html.style.pointerEvents = 'none';
@@ -792,48 +795,32 @@ export const Notify = (text: string, start = 1) => {
     } else { notifications[index][1](); }
 };
 
-export const hideFooter = () => {
-    const toggleData = getId('hideToggle').dataset;
-    if (toggleData.disabled === 'true') { return; }
-    const footer = getId('footer');
-    const footerArea = getId('footerMain');
-    const arrow = getId('hideArrow');
+/** Notify about error in the code with a cooldown of 20 seconds */
+export const errorNotify = (text: string) => {
+    const { errorCooldowns } = specialHTML;
+    if (errorCooldowns.includes(text)) { return; }
 
-    const animationReset = () => {
-        footer.style.animation = '';
-        arrow.style.animation = '';
-        toggleData.disabled = '';
-    };
-
-    global.footer = !global.footer;
-    toggleData.disabled = 'true';
-    if (global.footer) {
-        footerArea.style.display = '';
-        arrow.style.transform = '';
-        footer.style.animation = 'hideY 800ms reverse';
-        arrow.style.animation = 'rotate 800ms reverse';
-        getQuery('#hideToggle > p').textContent = 'Hide';
-        getId('stageSelect').classList.add('active');
-        setTimeout(animationReset, 800);
-
-        visualUpdate();
-        numbersUpdate();
-    } else {
-        footer.style.animation = 'hideY 800ms backwards';
-        arrow.style.animation = 'rotate 800ms backwards';
-        getQuery('#hideToggle > p').textContent = 'Show';
-        getId('stageSelect').classList.remove('active');
-        setTimeout(() => {
-            footerArea.style.display = 'none';
-            arrow.style.transform = 'rotate(180deg)';
-            animationReset();
-        }, 800);
-    }
+    Notify(text);
+    errorCooldowns.push(text);
+    setTimeout(() => {
+        const index = errorCooldowns.indexOf(text);
+        if (index !== -1) { errorCooldowns.splice(index, 1); }
+    }, 2e4);
 };
 
 export const resetMinSizes = (full = true) => {
     for (let i = 1; i <= 3; i++) {
         const element = getQuery(`#special${i} > p`);
+        specialHTML.cache.innerHTML.set(element, '');
+        element.style.minWidth = '';
+    }
+    for (let i = 0; i < global.researchesInfo[player.stage.active].maxActive; i++) {
+        const element = getQuery(`#research${i + 1} > p`);
+        specialHTML.cache.innerHTML.set(element, '');
+        element.style.minWidth = '';
+    }
+    for (let i = 0; i < global.researchesExtraInfo[player.stage.active].maxActive; i++) {
+        const element = getQuery(`#researchExtra${i + 1} > p`);
         specialHTML.cache.innerHTML.set(element, '');
         element.style.minWidth = '';
     }
@@ -926,8 +913,9 @@ export const SRHotkeysInfo = (short = false) => {
 };
 
 export const MDStrangenessPage = (stageIndex: number) => {
-    for (let s = 1; s <= 5; s++) { getId(`strangenessSection${s}`).style.display = 'none'; }
+    getId(`strangenessSection${global.debug.MDStrangePage}`).style.display = 'none';
     getId(`strangenessSection${stageIndex}`).style.display = '';
+    global.debug.MDStrangePage = stageIndex;
 };
 
 export const replayEvent = async() => {

@@ -259,7 +259,7 @@ export const milestoneGetValue = (index: number, stageIndex: number): number | O
         }
         if (index === 1) { return player.buildings[5][3].true; }
     }
-    throw new TypeError(`Milestone s${stageIndex}-i${index} doesn't exist`);
+    return 0;
 };
 export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     const pointer = global.milestonesInfo[stageIndex];

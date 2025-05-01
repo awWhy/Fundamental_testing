@@ -1,7 +1,7 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
-import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, visualUpdateResearches, visualUpdateUpgrades, addIntoLog } from './Update';
+import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, addIntoLog } from './Update';
 import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
-import { Alert, hideFooter, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog } from './Special';
+import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog, errorNotify } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
@@ -19,11 +19,7 @@ export const getId = (id: string, noError = false): HTMLElement => {
     }
 
     if (noError) { return null as unknown as HTMLElement; }
-    if (global.debug.errorID) {
-        global.debug.errorID = false;
-        Notify(`Error encountered, ID ‒ '${id}' doesn't exist`);
-        setTimeout(() => { global.debug.errorID = true; }, 6e4);
-    }
+    errorNotify(`Error encountered, ID ‒ '${id}' doesn't exist`);
     throw new ReferenceError(`ID ‒ '${id}' doesn't exist`);
 };
 
@@ -36,8 +32,8 @@ export const getClass = (idCollection: string): HTMLCollectionOf<HTMLElement> =>
     return store;
 };
 
-/** Only for static HTML */
-export const getQuery = (query: string): HTMLElement => {
+/** Only for static HTML, by default (false) throws error if query isn't found is null */
+export const getQuery = (query: string, noError = false): HTMLElement => {
     const test = specialHTML.cache.queryMap.get(query);
     if (test !== undefined) { return test; }
 
@@ -47,12 +43,9 @@ export const getQuery = (query: string): HTMLElement => {
         return store;
     }
 
-    if (global.debug.errorQuery) {
-        global.debug.errorQuery = false;
-        Notify(`Error encountered, Query ‒ '${query}' failed to find anything`);
-        setTimeout(() => { global.debug.errorQuery = true; }, 6e4);
-    }
-    throw new ReferenceError(`Query ‒ '${query}' failed`);
+    if (noError) { return null as unknown as HTMLElement; }
+    errorNotify(`Error encountered, Query ‒ '${query}' failed to find anything`);
+    throw new ReferenceError(`Query ‒ '${query}' failed to find anything`);
 };
 
 /** Returns offline time in milliseconds */
@@ -297,7 +290,7 @@ const saveConsole = async() => {
                 if (await Confirm("Could not copy text into clipboard, press 'Confrim' to save it as a file instead")) {
                     const a = document.createElement('a');
                     a.href = `data:text/plain,${save}`;
-                    a.download = `${lower === 'global_copy' ? 'Settings' : 'Save'} clipboard`;
+                    a.download = `Fundamental ${lower === 'global_copy' ? 'settings' : 'save'} clipboard`;
                     a.click();
                 }
             }
@@ -344,15 +337,13 @@ const saveConsole = async() => {
     }
 };
 
-const replaceSaveFileSpecials = (): string => {
-    let realName = player.fileName;
-
+const replaceSaveFileSpecials = (name = player.fileName): string => {
     const date = new Date();
-    const dateIndex = realName.indexOf('[date');
+    const dateIndex = name.indexOf('[date');
     if (dateIndex >= 0) {
-        const endIndex = realName.indexOf(']', dateIndex + 5);
+        const endIndex = name.indexOf(']', dateIndex + 5);
         if (endIndex >= 0) {
-            let replaced = realName.substring(dateIndex + 5, endIndex);
+            let replaced = name.substring(dateIndex + 5, endIndex);
             const special = [
                 'Y',
                 'M',
@@ -366,14 +357,14 @@ const replaceSaveFileSpecials = (): string => {
             for (let i = 0; i < special.length; i++) {
                 replaced = replaced.replace(special[i], replaceWith[i]);
             }
-            realName = realName.replace(realName.substring(dateIndex, endIndex + 1), replaced);
+            name = name.replace(name.substring(dateIndex, endIndex + 1), replaced);
         }
     }
-    const timeIndex = realName.indexOf('[time');
+    const timeIndex = name.indexOf('[time');
     if (timeIndex >= 0) {
-        const endIndex = realName.indexOf(']', timeIndex + 5);
+        const endIndex = name.indexOf(']', timeIndex + 5);
         if (endIndex >= 0) {
-            let replaced = realName.substring(timeIndex + 5, endIndex);
+            let replaced = name.substring(timeIndex + 5, endIndex);
             const special = [
                 'H',
                 'M',
@@ -387,7 +378,7 @@ const replaceSaveFileSpecials = (): string => {
             for (let i = 0; i < special.length; i++) {
                 replaced = replaced.replace(special[i], replaceWith[i]);
             }
-            realName = realName.replace(realName.substring(timeIndex, endIndex + 1), replaced);
+            name = name.replace(name.substring(timeIndex, endIndex + 1), replaced);
         }
     }
 
@@ -403,16 +394,16 @@ const replaceSaveFileSpecials = (): string => {
     const replaceWith = [
         player.version,
         global.stageInfo.word[player.stage.current],
-        `${player.strange[0].total}`,
-        `${player.cosmon.total}`,
+        format(player.strange[0].total, { type: 'input', padding: true }),
+        format(player.cosmon.total, { type: 'input', padding: 'exponent' }),
         `${player.inflation.vacuum}`,
-        `${player.buildings[5][3].current}`,
-        `${player.buildings[6][1].current}`
+        format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' }),
+        format(player.buildings[6][1].current, { type: 'input', padding: 'exponent' })
     ];
     for (let i = 0; i < special.length; i++) {
-        realName = realName.replace(special[i], replaceWith[i]);
+        name = name.replace(special[i], replaceWith[i]);
     }
-    return `${realName}.txt`;
+    return `${name}.txt`;
 };
 
 /* Arguments are not done as '(...data: any) => any, ...data: any' because TS won't do type safety */
@@ -582,23 +573,28 @@ try { //Start everything
         (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
         for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'global'); }
         if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also sets breakpoints for screen size
+        if (globalSave.toggles[4]) { getId('globalStats').style.display = 'none'; }
         if (globalSave.toggles[3]) {
-            getId('hideToggle').style.display = 'none';
-            getId('currentSwitch').style.display = 'none';
             getQuery('#footer > div:first-child').style.display = 'none';
-            getId('body').prepend(getId('footer'));
+            const fake2 = document.createElement('div');
+            fake2.style.height = 'max(calc(6.08em + 32px), 7.92em)';
+            getId('body').prepend(getId('footer'), fake2);
             getId('fakeFooter').after(getId('phoneHotkeys'));
-            getId('footerMain').append(getId('subtabs'), getId('stageSelect'));
+            const div = document.createElement('div');
+            div.append(getId('footerStats'), getQuery('#footerMain > nav'), getId('stageSelect'));
+            getId('footerMain').append(div, getId('subtabs'));
             specialHTML.styleSheet.textContent += `.insideTab { margin-top: 0.6rem; }
-                #footer { position: unset; }
-                #footerMain { padding: 0.6em; row-gap: 0.6em; }
+                #footer { top: 0; bottom: unset; }
+                #footerMain { flex-direction: row; padding: 0.6em 0; gap: 0.6em; }
+                #footerMain > div { display: flex; flex-direction: column; row-gap: 0.6em; margin: 0 0 0 auto; }
+                #footerMain > div > nav { display: flex; flex-flow: row nowrap; justify-content: center; column-gap: 0.4em; }
+                #footerStats { justify-content: center; column-gap: 0.6em; margin: 0; }
+                #stageSelect { position: unset; margin: 0; max-width: unset; pointer-events: unset; }
+                #subtabs { flex-flow: column-reverse wrap; gap: 0.6em !important; align-self: end; margin: 0 auto 0 0 !important; max-height: 6.72em; }
                 #footerMain button, #phoneHotkeys button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; }
-                #footerMain > * { margin: 0 auto; gap: 0.4em; }
-                #footerStats { gap: 0.6em; }
-                #stageSelect { position: unset; justify-content: unset; pointer-events: unset; }
-                #stageSelect > div { position: unset; justify-content: unset; flex-wrap: unset; gap: 0.4em; margin: 0 auto; max-width: unset; }
-                #subtabs { flex-direction: row; }
-                #phoneHotkeys { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100%; bottom: 0.6em; margin: 0; }
+                #subtabs button { width: 100%; min-width: 7em; }
+                #globalStats { bottom: 0.6em; right: calc(50vw - 6.325em); }
+                #phoneHotkeys { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100vw; max-width: unset; bottom: 0.6em; margin: 0; }
                 #fakeFooter { height: 3.04em; }`;
         }
         if (globalSave.toggles[2]) { document.body.classList.remove('noTextSelection'); }
@@ -622,11 +618,12 @@ try { //Start everything
 
         if (globalSave.MDSettings[0]) {
             (document.getElementById('MDMessage1') as HTMLElement).remove();
-            specialHTML.styleSheet.textContent += `body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #hideToggle { -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
+            specialHTML.styleSheet.textContent += `body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p { -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
                 #themeArea > div > div { position: unset; display: flex; width: 15em; }
                 #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */
-                #globalStats { right: 22%; bottom: 32%; opacity: 1; }`;
+                #globalStats { ${globalSave.toggles[3] ? 'bottom: 3.04em;' : 'bottom: calc(32px + min(3.9vh, 2.4em) + 9.6744em + 3.6vw); right: calc(50vw - 6.325em);'} }`;
             (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
+            global.debug.MDStrangePage = 1;
 
             const arrowStage = document.createElement('button');
             arrowStage.innerHTML = '<span class="downArrow"></span>';
@@ -673,7 +670,9 @@ try { //Start everything
             resetMerge.id = 'resetMergeFooter';
             resetMerge.type = 'button';
             resetMerge.className = 'stage6Only';
-            getId('phoneHotkeys').prepend(resetGalaxy, reset1Button, resetMerge, resetCollapse, stageButton, structuresButton);
+            const hotkeysMain = getId('phoneHotkeys');
+            hotkeysMain.prepend(resetGalaxy, reset1Button, resetMerge, resetCollapse, stageButton, structuresButton);
+            hotkeysMain.style.display = '';
 
             const createUpgButton = document.createElement('button');
             createUpgButton.className = 'hollowButton';
@@ -700,7 +699,16 @@ try { //Start everything
             const mainLi = getId('MDLi');
             const MDToggle1 = document.createElement('li');
             MDToggle1.innerHTML = '<label>Keep mouse events<button type="button" id="MDToggle1" class="specialToggle">OFF</button></label>';
-            mainLi.after(MDToggle1);
+            const MDToggle2 = document.createElement('li');
+            MDToggle2.innerHTML = '<label>Allow zoom<button type="button" id="MDToggle2" class="specialToggle">OFF</button></label> (can break stuff)';
+            mainLi.after(MDToggle1, MDToggle2);
+            for (let i = 1; i < globalSaveStart.MDSettings.length; i++) {
+                getId(`MDToggle${i}`).addEventListener('click', () => toggleSpecial(i, 'mobile', true, i === 1));
+                if (i === 2) {
+                    (getId('viewportMeta') as HTMLMetaElement).content = `width=device-width${globalSave.MDSettings[2] ? '' : ', minimum-scale=1.0, maximum-scale=1.0'}, initial-scale=1.0`;
+                }
+            }
+
             const refreshButton = document.createElement('button');
             refreshButton.className = 'hollowButton';
             refreshButton.textContent = 'Reload';
@@ -710,9 +718,8 @@ try { //Start everything
                 if (await Confirm('Reload the page?\n(Game will not autosave)')) { window.location.reload(); }
             });
 
-            getId('MDToggle1').addEventListener('click', () => toggleSpecial(1, 'mobile', true, true));
             for (let i = 0; i < globalSaveStart.MDSettings.length; i++) { toggleSpecial(i, 'mobile'); }
-            MDStrangenessPage(1);
+            if (globalSave.MDSettings[2]) { (getId('viewportMeta') as HTMLMetaElement).content = 'width=device-width, initial-scale=1.0'; }
         }
         if (globalSave.SRSettings[0]) {
             const message = getId('SRMessage1');
@@ -745,27 +752,7 @@ try { //Start everything
             SRToggle2.innerHTML = '<label>Keep tab index on primary buttons<button type="button" id="SRToggle2" class="specialToggle">OFF</button></label>';
             getId('SRLi').after(SRToggle1, SRToggle2);
 
-            getId('SRToggle1').addEventListener('click', () => {
-                toggleSpecial(1, 'reader', true);
-                const active = player.stage.active;
-                for (let i = 0; i < global.upgradesInfo[active].maxActive; i++) { visualUpdateUpgrades(i, active, 'upgrades'); }
-                for (let i = 0; i < global.researchesInfo[active].maxActive; i++) { visualUpdateResearches(i, active, 'researches'); }
-                for (let i = 0; i < global.researchesExtraInfo[active].maxActive; i++) { visualUpdateResearches(i, active, 'researchesExtra'); }
-                for (let i = 0; i < playerStart.researchesAuto.length; i++) { visualUpdateResearches(i, 0, 'researchesAuto'); }
-                visualUpdateResearches(0, active, 'ASR');
-                for (let i = 0; i < playerStart.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
-                for (let s = 1; s < playerStart.strangeness.length; s++) {
-                    for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) {
-                        visualUpdateResearches(i, s, 'strangeness');
-                    }
-                }
-                for (let i = 0; i < playerStart.inflation.tree.length; i++) {
-                    visualUpdateResearches(i, 0, 'inflations');
-                }
-            });
-
-            const primaryIndex = (reload = false) => {
-                if (!reload) { toggleSpecial(2, 'reader', true); }
+            const primaryIndex = () => {
                 const newTab = globalSave.SRSettings[2] ? 0 : -1;
                 getId('stageReset').tabIndex = newTab;
                 getId('reset1Button').tabIndex = newTab;
@@ -784,10 +771,15 @@ try { //Start everything
                     getId(`stageSwitch${i}`).tabIndex = newTab;
                 }
             };
-            getId('SRToggle2').addEventListener('click', () => { primaryIndex(); });
+            for (let i = 1; i < globalSaveStart.SRSettings.length; i++) {
+                getId(`SRToggle${i}`).addEventListener('click', () => toggleSpecial(i, 'reader', true));
+                if (i === 2) {
+                    primaryIndex();
+                }
+            }
 
-            if (globalSave.SRSettings[2]) { primaryIndex(true); }
             for (let i = 0; i < globalSaveStart.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
+            if (globalSave.SRSettings[2]) { primaryIndex(); }
         } else {
             const index = globalSave.toggles[0] ? 0 : 1;
             const list = [globalSave.hotkeys.tabLeft[index], globalSave.hotkeys.tabRight[index], globalSave.hotkeys.subtabDown[index], globalSave.hotkeys.subtabUp[index]];
@@ -843,59 +835,6 @@ try { //Start everything
         htmlHTML.addEventListener('touchcancel', cancelRepeat);
     }
 
-    /** Footer */
-    {
-        const startEvent = (event: MouseEvent | TouchEvent) => {
-            event.preventDefault(); //To prevent scrolling
-            const html = getId('globalStats');
-            const bodyMain = document.documentElement;
-            const screenWidth = bodyMain.clientWidth;
-            const screenHeight = bodyMain.clientHeight;
-
-            const mouse = event instanceof MouseEvent;
-            let lastX = mouse ? event.clientX : event.changedTouches[0].clientX;
-            let lastY = mouse ? event.clientY : event.changedTouches[0].clientY;
-            const move = (event: MouseEvent | TouchEvent) => {
-                const newX = mouse ? (event as MouseEvent).clientX : (event as TouchEvent).changedTouches[0].clientX;
-                const newY = mouse ? (event as MouseEvent).clientY : (event as TouchEvent).changedTouches[0].clientY;
-                const current = html.getBoundingClientRect();
-                html.style.right = `${(1 - Math.min(Math.max(current.right + newX - lastX, current.width), screenWidth) / screenWidth) * 100}%`;
-                html.style.bottom = `${(1 - Math.min(Math.max(current.bottom + newY - lastY, current.height), screenHeight) / screenHeight) * 100}%`;
-                lastX = newX;
-                lastY = newY;
-
-                if (!mouse) { html.style.opacity = ''; }
-            };
-            const removeEvents = mouse ? () => {
-                bodyMain.removeEventListener('mousemove', move);
-                bodyMain.removeEventListener('mouseup', removeEvents);
-                bodyMain.removeEventListener('mouseleave', removeEvents);
-                html.addEventListener('mousedown', startEvent, { once: true });
-                html.style.opacity = '';
-            } : () => {
-                bodyMain.removeEventListener('touchmove', move);
-                bodyMain.removeEventListener('touchend', removeEvents);
-                bodyMain.removeEventListener('touchcancel', removeEvents);
-                html.addEventListener('touchstart', startEvent, { once: true });
-                html.style.opacity = '';
-            };
-            if (mouse) {
-                bodyMain.addEventListener('mousemove', move);
-                bodyMain.addEventListener('mouseup', removeEvents);
-                bodyMain.addEventListener('mouseleave', removeEvents);
-                html.style.opacity = '1';
-            } else {
-                bodyMain.addEventListener('touchmove', move);
-                bodyMain.addEventListener('touchend', removeEvents);
-                bodyMain.addEventListener('touchcancel', removeEvents);
-                html.style.opacity = '0.2';
-            }
-        };
-        if (PC) { getId('globalStats').addEventListener('mousedown', startEvent, { once: true }); }
-        if (MD) { getId('globalStats').addEventListener('touchstart', startEvent, { once: true }); }
-    }
-
-    /* Toggles */
     for (let i = 0; i < globalSaveStart.toggles.length; i++) {
         getId(`globalToggle${i}`).addEventListener('click', () => {
             toggleSpecial(i, 'global', true, i === 1 || i === 3);
@@ -910,6 +849,10 @@ try { //Start everything
                 document.body.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
             } else {
                 getId('globalStats').style.display = !globalSave.toggles[4] ? '' : 'none';
+                if (!globalSave.toggles[4]) {
+                    visualUpdate();
+                    numbersUpdate();
+                }
             }
         });
     }
@@ -1463,22 +1406,23 @@ try { //Start everything
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`switchTheme${i}`).addEventListener('click', () => setTheme(i));
     }
-    getId('saveFileNameInput').addEventListener('change', () => {
-        const input = getId('saveFileNameInput') as HTMLInputElement;
-        const testValue = input.value;
-        if (testValue.length < 1) { return void (input.value = playerStart.fileName); }
-        player.fileName = testValue;
-    });
     {
-        const button = getId('saveFileHoverButton');
-        const hoverFunc = () => (getId('saveFileNamePreview').textContent = replaceSaveFileSpecials());
-        button.addEventListener('mouseover', hoverFunc);
-        if (PC || SR) {
-            button.addEventListener('focus', () => {
-                if (!global.hotkeys.tab) { return; }
-                hoverFunc();
-            });
-        }
+        const input = getId('saveFileNameInput') as HTMLInputElement;
+        input.addEventListener('change', () => {
+            const input = getId('saveFileNameInput') as HTMLInputElement;
+            let testValue = input.value;
+            if (testValue.length < 1) {
+                testValue = playerStart.fileName;
+                input.value = testValue;
+            }
+            player.fileName = testValue;
+        });
+        const changePreview = () => {
+            const value = (getId('saveFileNameInput') as HTMLInputElement).value;
+            getId('saveFileNamePreview').textContent = replaceSaveFileSpecials(value.length < 1 ? playerStart.fileName : value);
+        };
+        input.addEventListener('input', changePreview);
+        input.addEventListener('focus', changePreview);
     }
     getId('offlineInterval').addEventListener('change', () => {
         const input = getId('offlineInterval') as HTMLInputElement;
@@ -1542,17 +1486,58 @@ try { //Start everything
     });
 
     /* Footer */
-    if (!globalSave.toggles[3]) {
-        const toggle = getId('hideToggle');
-        if (MD) {
-            const timeoutFunc = () => {
-                if (!global.footer) { return hideFooter(); }
-                if (global.intervalsId.mouseRepeat !== undefined) { return; }
-                global.intervalsId.mouseRepeat = setTimeout(hideFooter, 400);
+    {
+        const startEvent = (event: MouseEvent | TouchEvent) => {
+            event.preventDefault(); //To prevent scrolling (doesn't work if to click edge of the window due to mouseEvent)
+            const mouse = event instanceof MouseEvent;
+            const html = getId('globalStats');
+            if (global.hotkeys.shift) {
+                toggleSpecial(4, 'global', true);
+                getId('globalStats').style.display = 'none';
+                return;
+            }
+            const bodyMain = document.documentElement;
+            const screenWidth = bodyMain.clientWidth;
+            const screenHeight = bodyMain.clientHeight;
+
+            let lastX = mouse ? event.clientX : event.changedTouches[0].clientX;
+            let lastY = mouse ? event.clientY : event.changedTouches[0].clientY;
+            const move = (event: MouseEvent | TouchEvent) => {
+                const newX = mouse ? (event as MouseEvent).clientX : (event as TouchEvent).changedTouches[0].clientX;
+                const newY = mouse ? (event as MouseEvent).clientY : (event as TouchEvent).changedTouches[0].clientY;
+                const current = html.getBoundingClientRect();
+                html.style.right = `${(1 - Math.min(Math.max(current.right + newX - lastX, current.width), screenWidth) / screenWidth) * 100}%`;
+                html.style.bottom = `${(1 - Math.min(Math.max(current.bottom + newY - lastY, current.height), screenHeight) / screenHeight) * 100}%`;
+                lastX = newX;
+                lastY = newY;
+
+                if (!mouse) { html.style.opacity = '1'; }
             };
-            toggle.addEventListener('touchstart', timeoutFunc);
-            if (PC) { toggle.addEventListener('mousedown', timeoutFunc); }
-        } else { toggle.addEventListener('click', hideFooter); }
+            const removeEvents = mouse ? () => {
+                bodyMain.removeEventListener('mousemove', move);
+                bodyMain.removeEventListener('mouseup', removeEvents);
+                bodyMain.removeEventListener('mouseleave', removeEvents);
+                html.style.opacity = '';
+            } : () => {
+                bodyMain.removeEventListener('touchmove', move);
+                bodyMain.removeEventListener('touchend', removeEvents);
+                bodyMain.removeEventListener('touchcancel', removeEvents);
+                html.style.opacity = '1';
+            };
+            if (mouse) {
+                bodyMain.addEventListener('mousemove', move);
+                bodyMain.addEventListener('mouseup', removeEvents);
+                bodyMain.addEventListener('mouseleave', removeEvents);
+                html.style.opacity = '1';
+            } else {
+                bodyMain.addEventListener('touchmove', move);
+                bodyMain.addEventListener('touchend', removeEvents);
+                bodyMain.addEventListener('touchcancel', removeEvents);
+                html.style.opacity = '0.2';
+            }
+        };
+        if (PC) { getId('globalStats').addEventListener('mousedown', startEvent, { capture: true }); }
+        if (MD) { getId('globalStats').addEventListener('touchstart', startEvent, { capture: true }); }
     }
     for (const tabText of global.tabList.tabs) {
         getId(`${tabText}TabBtn`).addEventListener('click', () => switchTab(tabText));

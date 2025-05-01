@@ -3,9 +3,9 @@ import Overlimit, { compareFunc } from './Limit';
 import { changeRewardType, getId, loadoutsVisual, simulateOffline } from './Main';
 import { effectsCache, global, logAny, player, playerStart } from './Player';
 import { cloneBeforeReset, loadFromClone, reset, resetStage, resetVacuum } from './Reset';
-import { Confirm, Notify, globalSave, playEvent } from './Special';
+import { Confirm, Notify, errorNotify, globalSave, playEvent } from './Special';
 import type { calculateEffectsType } from './Types';
-import { addIntoLog, format, numbersUpdate, stageUpdate, switchTab, visualTrueStageUnlocks, visualUpdate, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { addIntoLog, format, numbersUpdate, stageUpdate, switchTab, visualTrueStageUnlocks, visualUpdate } from './Update';
 import { prepareVacuum, switchVacuum } from './Vacuum';
 
 /** Normal game tick, everything calculated in milliseconds */
@@ -189,7 +189,7 @@ export const calculateEffects: calculateEffectsType = {
         return discharges > 7 ? discharges + 14 : discharges * 3;
     },
     S1Extra1: (level = player.researchesExtra[1][1]) => level >= 4 ? 1.1 : level >= 3 ? 1.2 : (20 - 3 * level) / 10,
-    S1Extra3: (level = player.researchesExtra[1][3]) => level / 20,
+    S1Extra3: (level = player.researchesExtra[1][3]) => (level * (player.challenges.supervoid[3] >= 2 ? 6 : 5)) / 100,
     S1Extra4: (research = player.researchesExtra[1][5]) => (global.dischargeInfo.base + calculateEffects.effectiveEnergy() ** 0.1) * (research + 1) / 100 + 1,
     preonsHardcap: (laterPreons) => 1e14 * laterPreons * effectsCache.S1SolarDelay * assignBuildingsProduction.S3Build1(),
     clouds: (post = false) => {
@@ -382,6 +382,7 @@ export const calculateEffects: calculateEffectsType = {
         if (post) { groups += global.mergeInfo.checkReward[0]; }
         return (8 + level * groups) / 8;
     },
+    S5Extra4: (level = player.researchesExtra[5][4]) => (19 - level) * level / 2, //Starts at 9 and -1 is the step
     element6: () => player.researchesExtra[4][2] >= 1 ? 2 : 1.5,
     element24_power: () => player.elements[27] >= 1 ? 0.02 : 0.01,
     element24: () => new Overlimit(player.buildings[4][0].current).max('1').power(calculateEffects.element24_power()),
@@ -890,9 +891,9 @@ export const assignResetInformation = {
         starCheck[1] = Math.max(building[3].true - stars[1], 0);
         starCheck[2] = Math.max(building[4].true + (building[5].true * player.researches[4][5]) - stars[2], 0);
     },
-    /** Returns Groups Galaxy requirement, because I was lazy */
+    /** Returns Groups Galaxy requirement */
     mergeReward: () => {
-        const requirement = 50;
+        const requirement = 50 - calculateEffects.S5Extra4();
 
         global.mergeInfo.checkReward[0] = player.researchesExtra[5][1] >= 2 ?
             Math.max(Math.floor(global.mergeInfo.galaxies / requirement) - player.merge.rewards[0], 0) :
@@ -980,8 +981,12 @@ export const buyBuilding = (index: number, stageIndex: number, howMany = player.
             }
             if (afford > 1) { total.multiply(new Overlimit(scaling).power(afford).minus('1').divide(scaling - 1)); }
         }
-    }
 
+        if (!isFinite(afford)) {
+            errorNotify(`Error encountered, couldn't create ${afford} of ${global.buildingsInfo.name[stageIndex][index]}`);
+            return;
+        }
+    }
     building.true += afford;
     building.current.plus(afford);
     building.total.plus(afford);
@@ -1133,13 +1138,9 @@ const gainBuildings = (get: number, stageIndex: number, time: number) => {
         add.multiply(assignBuildingsProduction[`S${stageIndex}Build${get + 1}` as 'S2Build1']());
         if (stageIndex === 4) { get = 0; }
     }
-    if (add.lessOrEqual('0')) { return; }
+    if (!add.notEqual('0')) { return; }
     if (!add.isFinite()) {
-        if (global.debug.errorGain) {
-            global.debug.errorGain = false;
-            Notify(`Error while gaining ${add} of ${global.buildingsInfo.name[stageGet][get]}`);
-            setTimeout(() => { global.debug.errorGain = true; }, 6e4);
-        }
+        errorNotify(`Error encountered, couldn't gain ${add} of ${global.buildingsInfo.name[stageGet][get]}`);
         return;
     }
 
@@ -1173,13 +1174,9 @@ const gainBuildings = (get: number, stageIndex: number, time: number) => {
 const gainStrange = (time: number) => {
     const strange = player.strange[0];
     const add = global.strangeInfo.strangeletsInfo[0] * (global.strangeInfo.quarksGain / player.time.stage) * time;
-    if (add <= 0) { return; }
+    if (add === 0) { return; }
     if (!isFinite(add)) {
-        if (global.debug.errorGain) {
-            global.debug.errorGain = false;
-            Notify(`Error while gaining ${add} of ${global.strangeInfo.name[0]}`);
-            setTimeout(() => { global.debug.errorGain = true; }, 6e4);
-        }
+        errorNotify(`Error encountered, couldn't gain ${add} of ${global.strangeInfo.name[0]}`);
         return;
     }
     strange.current += add;
@@ -1204,6 +1201,10 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
     } else {
         currency = player.buildings[4][0].current;
     }
+    if (currency.isNaN()) {
+        errorNotify(`Error encountered, prevented spending of NaN ${global.stageInfo.costName[stageIndex]}`);
+        return false;
+    }
 
     if (type === 'upgrades') {
         if (player.upgrades[stageIndex][upgrade] >= 1) { return false; }
@@ -1222,7 +1223,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
             } else if (upgrade === 4) {
                 effectsCache.S2Upgrade4 = calculateEffects.S2Upgrade4();
             } else if (upgrade >= 5 /*&& upgrade < 9*/) { assignBuildingsProduction.S2FreeBuilds(); }
-        } else if (stageIndex === 4 && upgrade === 1 && global.tab === 'upgrade') { switchTab('upgrade'); }
+        } else if (stageIndex === 4 && upgrade === 1 && global.tab === 'upgrade') { switchTab(); }
         if (!auto && globalSave.SRSettings[0]) { getId('SRMain').textContent = `New upgrade '${pointer.name[upgrade]}', has been created`; }
     } else if (type === 'researches' || type === 'researchesExtra') {
         const pointer = global[`${type}Info`][stageIndex];
@@ -1234,7 +1235,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
 
         let newLevels = 1;
         if ((auto || player.toggles.max[0]) && pointer.max[upgrade] > 1) {
-            const scaling = pointer.scaling[upgrade]; //Must be >1 (>0 for Stage 1)
+            const scaling = pointer.scaling[upgrade] as number; //Must be >1 (>0 for Stage 1)
             if (stageIndex === 1) {
                 if (free) {
                     newLevels = Math.min(Math.floor((currency.toNumber() - cost) / scaling + 1), pointer.max[upgrade] - level[upgrade]);
@@ -1244,8 +1245,9 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
                     if (newLevels > 1) { cost = newLevels * (newLevels * scaling / 2 + simplify); }
                 }
             } else {
-                newLevels = Math.min(Math.floor(new Overlimit(currency).multiply(scaling - 1).divide(cost).plus('1').log(scaling).toNumber()), pointer.max[upgrade] - level[upgrade]);
-                if (newLevels > 1) { cost = new Overlimit(scaling).power(newLevels).minus('1').divide(scaling - 1).multiply(cost); }
+                const minusOne = typeof scaling === 'string' ? scaling : scaling - 1;
+                newLevels = Math.min(Math.floor(new Overlimit(currency).multiply(minusOne).divide(cost).plus('1').log(scaling).toNumber()), pointer.max[upgrade] - level[upgrade]);
+                if (newLevels > 1) { cost = new Overlimit(scaling).power(newLevels).minus('1').divide(minusOne).multiply(cost); }
             }
         }
 
@@ -1253,6 +1255,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
         if (!free) { currency.minus(cost); }
 
         /* Special cases */
+        calculateResearchCost(upgrade, stageIndex, type);
         if (type === 'researches') {
             if (stageIndex === 1) {
                 if (upgrade === 4) {
@@ -1414,12 +1417,6 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
         }
     }
 
-    if (type === 'upgrades' || type === 'elements') {
-        visualUpdateUpgrades(upgrade, stageIndex, type);
-    } else {
-        if (type !== 'researchesAuto' && type !== 'ASR') { calculateResearchCost(upgrade, stageIndex, type); }
-        visualUpdateResearches(upgrade, stageIndex, type);
-    }
     if (!auto) { numbersUpdate(); }
     return true;
 };
@@ -1444,11 +1441,9 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                     if (player.clone.depth === 'stage' && player.clone.researchesAuto[2] < 1) { player.clone.researchesAuto[2] = maxLevel; }
                     if (player.researchesAuto[2] < 1) { player.researchesAuto[2] = maxLevel; }
                 } else if (player.stage.current === 1 && player.researchesAuto[2] < 1) { player.researchesAuto[2] = 1; }
-                visualUpdateResearches(2, 0, 'researchesAuto');
             } else if (upgrade === 5) {
                 if (player.clone.depth === 'stage') { player.clone.ASR[1] = global.ASRInfo.max[1]; }
                 player.ASR[1] = global.ASRInfo.max[1];
-                visualUpdateResearches(0, 1, 'ASR');
             } else if (upgrade === 7) {
                 assignResetInformation.trueEnergy();
             }
@@ -1462,11 +1457,9 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                     if (player.clone.depth === 'stage' && player.clone.researchesAuto[2] === 2) { player.clone.researchesAuto[2] = maxLevel; }
                     if (player.researchesAuto[2] === 2) { player.researchesAuto[2] = maxLevel; }
                 } else if (player.stage.current === 2 && player.researchesAuto[2] < 1) { player.researchesAuto[2] = 1; }
-                visualUpdateResearches(2, 0, 'researchesAuto');
             } else if (upgrade === 5) {
                 if (player.clone.depth === 'stage') { player.clone.ASR[2] = global.ASRInfo.max[2]; }
                 player.ASR[2] = global.ASRInfo.max[2];
-                visualUpdateResearches(0, 2, 'ASR');
             } else if (upgrade === 8) {
                 calculateMaxLevel(2, 2, 'researches', true);
                 calculateMaxLevel(3, 2, 'researches', true);
@@ -1481,15 +1474,12 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                     if (player.clone.depth === 'stage' && player.clone.researchesAuto[2] === 1) { player.clone.researchesAuto[2] = maxLevel; }
                     if (player.researchesAuto[2] === 1) { player.researchesAuto[2] = maxLevel; }
                 } else if (player.stage.current === 3 && player.researchesAuto[2] < 1) { player.researchesAuto[2] = 1; }
-                visualUpdateResearches(2, 0, 'researchesAuto');
             } else if (upgrade === 5) {
                 if (player.clone.depth === 'stage') { player.clone.ASR[3] = global.ASRInfo.max[3]; }
                 player.ASR[3] = global.ASRInfo.max[3];
-                visualUpdateResearches(0, 3, 'ASR');
             } else if (upgrade === 6) {
                 if (player.clone.depth === 'stage') { player.clone.researchesAuto[0] = Math.max(player.strangeness[3][6], player.clone.researchesAuto[0]); }
                 player.researchesAuto[0] = Math.max(player.strangeness[3][6], player.researchesAuto[0]);
-                visualUpdateResearches(0, 0, 'researchesAuto');
             } else if (upgrade === 9) {
                 calculateMaxLevel(2, 0, 'researchesAuto', true);
                 global.debug.rankUpdated = null;
@@ -1502,15 +1492,12 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                     if (player.clone.depth === 'stage' && player.clone.researchesAuto[2] === 3) { player.clone.researchesAuto[2] = maxLevel; }
                     if (player.researchesAuto[2] === 3) { player.researchesAuto[2] = maxLevel; }
                 } else if (player.stage.current === 4 && player.researchesAuto[2] < 1) { player.researchesAuto[2] = 1; }
-                visualUpdateResearches(2, 0, 'researchesAuto');
             } else if (upgrade === 5) {
                 if (player.clone.depth === 'stage') { player.clone.ASR[4] = global.ASRInfo.max[4]; }
                 player.ASR[4] = global.ASRInfo.max[4];
-                visualUpdateResearches(0, 4, 'ASR');
             } else if (upgrade === 6) {
                 if (player.clone.depth === 'stage') { player.clone.researchesAuto[1] = Math.max(player.strangeness[4][6], player.clone.researchesAuto[1]); }
                 player.researchesAuto[1] = Math.max(player.strangeness[4][6], player.researchesAuto[1]);
-                visualUpdateResearches(1, 0, 'researchesAuto');
                 for (let i = 1; i < playerStart.elements.length; i++) {
                     i = player.elements.indexOf(0.5, i);
                     if (i < 1) { break; }
@@ -1518,10 +1505,7 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 }
             } else if (upgrade === 8) {
                 if (player.clone.depth === 'stage') { player.clone.elements[0] = 1; }
-                if (player.elements[0] < 1) {
-                    player.elements[0] = 1;
-                    visualUpdateUpgrades(0, 4, 'elements');
-                }
+                if (player.elements[0] < 1) { player.elements[0] = 1; }
             }
         } else if (stageIndex === 5) {
             if (upgrade === 3) {
@@ -1530,19 +1514,14 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 if (player.strangeness[5][5] >= 1) {
                     if (player.clone.depth === 'stage') { player.clone.ASR[5] = global.ASRInfo.max[5]; }
                     player.ASR[5] = global.ASRInfo.max[5];
-                    visualUpdateResearches(0, 5, 'ASR');
                 }
             } else if (upgrade === 5) {
                 const newLevel = player.strangeness[5][4] >= 1 ? global.ASRInfo.max[5] : 2;
                 if (player.clone.depth === 'stage') { player.clone.ASR[5] = newLevel; }
                 player.ASR[5] = newLevel;
-                visualUpdateResearches(0, 5, 'ASR');
             } else if (upgrade === 9) {
                 if (player.clone.depth === 'stage' && player.clone.researchesAuto[2] === 4) { player.clone.researchesAuto[2] = 5; }
-                if (player.researchesAuto[2] === 4) {
-                    player.researchesAuto[2] = 5;
-                    visualUpdateResearches(2, 0, 'researchesAuto');
-                }
+                if (player.researchesAuto[2] === 4) { player.researchesAuto[2] = 5; }
             } else if (upgrade === 10) {
                 assignResetInformation.trueEnergy();
             }
@@ -1576,7 +1555,6 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
     }
 
     calculateResearchCost(upgrade, stageIndex, type);
-    visualUpdateResearches(upgrade, stageIndex, type);
     if (!auto) { numbersUpdate(); }
     return true;
 };
@@ -1616,9 +1594,7 @@ export const inflationRefund = async(noConfirmation = false, loadout = false): P
     const refundable = global.inflationTreeInfo.refundable;
     for (let i = 0; i < refundable.length; i++) {
         if (!refundable[i]) { continue; }
-
         tree[i] = 0;
-        visualUpdateResearches(i, 0, 'inflations');
         calculateResearchCost(i, 0, 'inflations');
     }
 
@@ -1645,7 +1621,7 @@ export const calculateResearchCost = (research: number, stageIndex: number, type
         const pointer = global[`${type}Info`][stageIndex];
 
         if (stageIndex === 1) {
-            pointer.cost[research] = (pointer.startCost[research] as number) + pointer.scaling[research] * player[type][stageIndex][research];
+            pointer.cost[research] = (pointer.startCost[research] as number) + (pointer.scaling[research] as number) * player[type][stageIndex][research];
         } else {
             (pointer.cost[research] as Overlimit).setValue(pointer.scaling[research]).power(player[type][stageIndex][research]).multiply(pointer.startCost[research]);
         }
@@ -1721,7 +1697,7 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
             if (research === 1) {
                 max = player.buildings[6][1].true >= 4 ? 2 : 1;
             } else if (research === 2) {
-                max = player.buildings[6][1].true >= 5 ? 6 : 2;
+                max = player.buildings[6][1].true >= 5 ? 8 : 2;
             }
         }
     } else if (type === 'researchesAuto') {
@@ -1802,7 +1778,6 @@ export const calculateMaxLevel = (research: number, stageIndex: number, type: 'r
     }
 
     if (type !== 'researchesAuto' && type !== 'ASR') { calculateResearchCost(research, stageIndex, type); }
-    visualUpdateResearches(research, stageIndex, type);
     if (addAuto && (type === 'researches' || type === 'researchesExtra')) { autoResearchesAddOne(type, stageIndex, research); }
 };
 
@@ -2615,7 +2590,7 @@ export const assignMilestoneInformation = (index: number, stageIndex: number) =>
     const pointer = global.milestonesInfo[stageIndex];
     const level = player.milestones[stageIndex][index];
     if (player.inflation.vacuum) {
-        pointer.time[index] = 3600;
+        pointer.time[index] = player.challenges.super ? 1200 : 3600;
         if (stageIndex === 1) {
             if (index === 0) {
                 pointer.need[0].setValue('1e32').power(level).multiply('1e32');

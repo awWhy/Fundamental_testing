@@ -2,7 +2,7 @@ import Overlimit from './Limit';
 import { getId, loadoutsRecreate, updateCollapsePointsText } from './Main';
 import { calculateMaxLevel, assignMilestoneInformation, toggleConfirm, toggleSwap, calculateEffects, autoUpgradesSet, autoResearchesSet, autoElementsSet, toggleSupervoid, assignBuildingsProduction, assignResetInformation, loadoutsLoadAuto } from './Stage';
 import type { globalType, playerType } from './Types';
-import { format, switchTab, visualTrueStageUnlocks, visualUpdateResearches, visualUpdateUpgrades } from './Update';
+import { format, switchTab, visualTrueStageUnlocks } from './Update';
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = {
@@ -303,14 +303,11 @@ export const global: globalType = {
         inflationSubtabs: ['Researches', 'Milestones']
     } as globalType['tabList'],
     debug: {
-        errorID: true,
-        errorQuery: true,
-        errorGain: true,
         timeLimit: false,
         rankUpdated: null,
         historyStage: null,
         historyVacuum: null
-    },
+    } as globalType['debug'],
     offline: {
         active: true,
         speed: 0.2,
@@ -320,7 +317,6 @@ export const global: globalType = {
     paused: false,
     trueActive: 1,
     lastSave: 0,
-    footer: true,
     log: {
         add: [],
         lastHTML: ['Start of the log', 1, 0, true]
@@ -408,8 +404,8 @@ export const global: globalType = {
     },
     mergeInfo: {
         unlockU: [0, 0, 0, 0, 1, 1, 3],
-        unlockR: [0, 0, 3, 3, 5],
-        unlockE: [0, 2, 4, 4],
+        unlockR: [0, 0, 3, 3, 6e100],
+        unlockE: [0, 2, 4, 4, 5e100],
         S5Extra2: 0,
         checkReward: [0, 0, 0, 0],
         galaxies: 0
@@ -734,7 +730,7 @@ export const global: globalType = {
             ],
             cost: [],
             startCost: [1e3, 5e4, 1e8, 1e11, 1e28, 1e154],
-            scaling: [10, 200, 1e12, 1, 2e8, 1e216],
+            scaling: [10, 200, 1e12, 1, 2e8, '1e386'],
             max: [3, 2, 1, 1, 2, 1],
             maxActive: 5
         }, { //Stage 5
@@ -881,7 +877,8 @@ export const global: globalType = {
                 'Hypercompact stellar system',
                 'Interacting Galaxies',
                 'Central dominant Galaxy',
-                'More Merges'
+                'More Merges',
+                'Compact Group'
             ],
             effectText: [
                 () => `Super dense core which will allow creation of a new Structure. That Structure will increase Stage reset reward${player.inflation.vacuum ? ', starting Energy after any Reset' : ''}, boost Nebulas and Star clusters. But creating it will fully reset ${player.inflation.vacuum ? 'all' : 'Interstellar and Intergalactic'} Stages.\nThis Research ${player.strangeness[5][3] < 1 ? "can't be created because 'Gravitational bound' is missing" : 'also removes Solar mass and other Remnant requirements from everything in the Interstellar Stage'}.`,
@@ -891,12 +888,13 @@ export const global: globalType = {
                     const trueLevel = global.mergeInfo.S5Extra2;
                     return `An even bigger Galaxy to improve Stage reset reward and Galaxy groups effect with every Galaxy group.\nEffective level ${trueLevel !== maxLevel ? `is ${format(trueLevel, { padding: true })}, will be restored with more Stardust, this doesn't` : "will be set to 0 after any reset, this won't"} affect Stage reset reward.\n(Total boost: ${format(calculateEffects.S5Extra2(trueLevel), { padding: true })} ⟶ ${format(calculateEffects.S5Extra2(maxLevel + (maxLevel === trueLevel ? 1 : 0)), { padding: true })})`;
                 },
-                () => 'Increase max allowed Merge reset by +1 per level.'
+                () => 'Increase max allowed Merge reset by +1 per level.',
+                () => `Decrease amount of Galaxies required for the creation of a Galaxy Group.\n(Effect: ${calculateEffects.S5Extra4()} ⟶ ${calculateEffects.S5Extra4(player.researchesExtra[5][4] + 1)}, effect increase per level decreases by current level)`
             ],
             cost: [],
-            startCost: [1e80, 1e260, '1e320', '1e350'] as unknown as Overlimit,
-            scaling: [1, 1e150, 1e30, 1e90],
-            max: [1, 1, 2, 1],
+            startCost: [1e80, 1e260, '1e320', '1e350', '1e520'] as unknown as Overlimit,
+            scaling: [1, 1e150, 1e30, 1e90, 1e90],
+            max: [1, 1, 2, 1, 1],
             maxActive: 1
         }, { //Stage 6
             name: [],
@@ -1424,7 +1422,7 @@ export const global: globalType = {
                 () => player.stage.true >= 7 ? `Reach ${format(1e12)} Clouds without increasing Rank${global.sessionToggles[0] ? ' (WIP)' : ''}` : null
             ], [
                 () => "Reach 'Meteoroid' Rank",
-                () => `Reach 'Asteroid' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
+                () => "Reach 'Asteroid' Rank",
                 () => `Reach 'Planet' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
                 () => `Reach 'Jovian planet' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
                 () => `Reach 'Protostar' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
@@ -1452,7 +1450,7 @@ export const global: globalType = {
             [],
             ["'Discharge improvement' (Non-refundable)", "'Improved conservation' (Milestone)", 'Missing'],
             ['Missing', 'Missing', 'Missing'],
-            ["'Indestructible matter' (Milestone)", 'Missing', 'Missing', 'Missing', 'Missing', 'Missing'],
+            ["'Indestructible matter' (Milestone)", "'Latest Preons' (Milestone)", 'Missing', 'Missing', 'Missing', 'Missing'],
             ['Missing', 'Missing', 'Missing', 'Missing', 'Missing'],
             ['Missing', 'Missing', 'Missing']
         ]],
@@ -1850,9 +1848,6 @@ export const updatePlayer = (load: playerType): string => {
 
     /* Final preparations and fixes */
     global.trueActive = player.stage.active;
-    global.debug.errorID = true;
-    global.debug.errorQuery = true;
-    global.debug.errorGain = true;
     global.debug.historyStage = null;
     global.debug.historyVacuum = null;
     global.debug.timeLimit = false;
@@ -1886,27 +1881,20 @@ export const updatePlayer = (load: playerType): string => {
             const strangenessMax = global.strangenessInfo[s].max;
             for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) {
                 calculateMaxLevel(i, s, 'strangeness');
-                if (strangeness[i] > strangenessMax[i]) {
-                    strangeness[i] = strangenessMax[i];
-                    visualUpdateResearches(i, s, 'strangeness');
-                }
+                if (strangeness[i] > strangenessMax[i]) { strangeness[i] = strangenessMax[i]; }
             }
         }
         const extra = player.researchesExtra[s];
         const extraMax = global.researchesExtraInfo[s].max;
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) {
             calculateMaxLevel(i, s, 'researchesExtra');
-            if (extra[i] > extraMax[i]) {
-                extra[i] = extraMax[i];
-            }
+            if (extra[i] > extraMax[i]) { extra[i] = extraMax[i]; }
         }
         const researches = player.researches[s];
         const researchesMax = global.researchesInfo[s].max;
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) {
             calculateMaxLevel(i, s, 'researches');
-            if (researches[i] > researchesMax[i]) {
-                researches[i] = researchesMax[i];
-            }
+            if (researches[i] > researchesMax[i]) { researches[i] = researchesMax[i]; }
         }
         calculateMaxLevel(0, s, 'ASR');
         autoUpgradesSet(s);
@@ -1946,9 +1934,8 @@ export const updatePlayer = (load: playerType): string => {
     (getId('loadoutsName') as HTMLInputElement).value = 'Auto-generate';
     loadoutsLoadAuto();
 
-    switchTab(global.tab); //Update subtab list
+    switchTab();
     visualTrueStageUnlocks();
-    for (let i = 0; i < playerStart.elements.length; i++) { visualUpdateUpgrades(i, 4, 'elements'); }
     (getId('saveFileNameInput') as HTMLInputElement).value = player.fileName;
     (getId('stageInput') as HTMLInputElement).value = format(player.stage.input[0], { type: 'input' });
     (getId('stageInputTime') as HTMLInputElement).value = format(player.stage.input[1], { type: 'input' });

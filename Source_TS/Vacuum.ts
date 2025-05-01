@@ -58,7 +58,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[2].maxActive = 5;
         researchesExtraInfo[3].maxActive = 6;
         researchesExtraInfo[4].maxActive = 4;
-        researchesExtraInfo[5].maxActive = 4;
+        researchesExtraInfo[5].maxActive = 5;
 
         global.elementsInfo.startCost[27].setValue('1e54');
         global.elementsInfo.startCost[28].setValue('1e58');
@@ -104,12 +104,16 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('element0').style.display = '';
         getId('strangePeakAllowed').style.display = '';
         getId('strange1Effect1Allowed').style.display = '';
+        const test = getId('strangenessPage5', true); //No idea if global setting should be allowed here
+        (test === null ? getId('strangenessSection5') : test).style.display = '';
         getId('strange7Stage1').style.display = '';
         getId('strange7Stage2').style.display = '';
         getId('strange8Stage3').style.display = '';
         getId('strange8Stage4').style.display = '';
         getId('strange3Stage5').style.display = '';
         getId('strange4Stage5').style.display = '';
+        getId('milestone1Stage5Div').style.display = '';
+        getId('milestone2Stage5Div').style.display = '';
         getId('stageAutoInterstellar').style.display = '';
         getId('vaporizationLimit').style.display = '';
         getId('collapseCapped').style.display = '';

@@ -172,12 +172,6 @@ export interface globalType {
         inflationSubtabs: string[]
     }
     debug: {
-        /** Notify about missing ID */
-        errorID: boolean
-        /** Notify about incorect Query */
-        errorQuery: boolean
-        /** Notify about NaN or Infinity */
-        errorGain: boolean
         /** Notify about reaching time limit */
         timeLimit: boolean
         /** Which Rank is displayed */
@@ -186,6 +180,8 @@ export interface globalType {
         historyStage: number | null
         /** How many resets on last update */
         historyVacuum: number | null
+        /** (Phones only) What page for Strangeness is selected */
+        MDStrangePage: number
     }
     trueActive: number
     /** In milliseconds */
@@ -197,8 +193,6 @@ export interface globalType {
         stageUpdate: null | boolean
     }
     paused: boolean
-    /** Footer is hidden */
-    footer: boolean
     log: {
         /** ['Text', count, time] */
         add: Array<[string, number, number]>
@@ -327,27 +321,31 @@ export interface globalType {
     upgradesInfo: Array<{
         name: string[]
         effectText: Array<() => string>
-        /** Cost is number for stage 1, Overlimit for rest */
+        /** Number for Stage 1, Overlimit for rest */
         startCost: number[] | Overlimit[]
         maxActive: number
     }>
     researchesInfo: Array<{
         name: string[]
         effectText: Array<() => string>
-        /** Cost is number for stage 1, Overlimit for rest */
+        /** Number for Stage 1, Overlimit for rest */
         cost: number[] | Overlimit[]
+        /** Number for Stage 1, Overlimit for rest */
         startCost: number[] | Overlimit[]
-        scaling: number[]
+        /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
+        scaling: Array<number | string>
         max: number[]
         maxActive: number
     }>
     researchesExtraInfo: Array<{
         name: string[]
         effectText: Array<() => string>
-        /** Cost is number for stage 1, Overlimit for rest */
+        /** Number for Stage 1, Overlimit for rest */
         cost: number[] | Overlimit[]
+        /** Number for Stage 1, Overlimit for rest */
         startCost: number[] | Overlimit[]
-        scaling: number[]
+        /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
+        scaling: Array<number | string>
         max: number[]
         maxActive: number
     }>
@@ -443,7 +441,7 @@ export interface globalSaveType {
     format: [string, string]
     theme: null | number
     fontSize: number
-    /** Status[0], Mouse events[1] */
+    /** Status[0], Mouse events[1], Enable zoom[2] */
     MDSettings: boolean[]
     /** Status[0], Tabindex Upgrades[1], Tabindex primary[2] */
     SRSettings: boolean[]
@@ -511,6 +509,7 @@ export interface calculateEffectsType {
     S5Research3: () => number
     /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][2] if for Stage reset */
     S5Extra2: (level: number, post?: boolean) => number
+    S5Extra4: (level?: number) => number
     element6: () => number
     element24_power: () => number
     element24: () => Overlimit
