@@ -291,7 +291,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     },
     localStorage: {
         /** Index for game's primary save slot */
-        main: 'save',
+        main: 'testing_save',
         /** Index for global game settings */
         settings: 'fundamentalSettings'
     },
