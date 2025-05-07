@@ -219,7 +219,7 @@
                                 <p id="mergeScore1" class="grayText"><span>Groups:</span> <span id="mergeScore1Cur" class="greenText">0</span> <span>(<span class="greenText">2</span> per)</span></p>
                                 <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span>(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
                             </section>
-                            <p class="darkvioletText">Cosmon gain on Vacuum resets: <span class="greenText" id="cosmonGainTrue">1</span> (<span class="greenText">true</span>) | <span class="redText" id="cosmonGainFalse">1</span> (<span class="redText">false</span>)</p>
+                            <p class="darkvioletText">Inflatons gain on Vacuum resets: <span class="greenText" id="inflatonGainTrue">1</span> (<span class="greenText">true</span>) | <span class="redText" id="inflatonGainFalse">1</span> (<span class="redText">false</span>)</p>
                             <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span><span id="universeTimeReal"> (Real: <span class="orangeText">0 seconds</span>)</span></p>
                         </div>
                     </div>
@@ -231,7 +231,7 @@
                         <p id="stageTime" class="blueText">Stage time: <span class="cyanText">1 seconds</span><span id="stageTimeReal"> (Real: <span class="cyanText">0 seconds</span>)</span></p>
                         <p id="globalSpeed" class="blueText">Global speed multiplier: <span class="cyanText">1</span></p>
                     </div>
-                    <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpful stuff. Current hotkeys to change tabs are <span></span>, and for subtabs are <span></span></p>
+                    <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpful stuff. Current hotkeys to change tabs are <span>Arrow Left and Arrow Right</span>, and for subtabs are <span>Arrow Down and Arrow Up</span></p>
                     <p id="MDMessage1" aria-hidden="true">If you are playing on Mobile device, then enabling support in Settings will add helpful stuff and can fix some bugs</p>
                 </section>
                 <section id="stageSubtabAdvanced" class="insideTab" style="display: none;" aria-label="Current tab">
@@ -393,41 +393,42 @@
                 <section id="upgradeSubtabElements" class="insideTab" style="display: none;" aria-label="Current tab">
                     <h2 id="elementsHeader" class="orangeText biggerWord">Elements</h2>
                     <section id="elementsGrid" aria-labelledby="elementsHeader">
-                        <input type="image" src="Used_art/Element0.png" alt="Neutronium" draggable="false" id="element0" class="interactiveImage elementType1" aria-controls="elementCost elementEffect" aria-hidden="true" tabindex="-1">
-                        <input type="image" src="Used_art/Element1.png" alt="Hydrogen" draggable="false" id="element1" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element2.png" alt="Helium" draggable="false" id="element2" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element3.png" alt="Lithium" draggable="false" id="element3" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element4.png" alt="Beryllium" draggable="false" id="element4" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element5.png" alt="Boron" draggable="false" id="element5" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element6.png" alt="Carbon" draggable="false" id="element6" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element7.png" alt="Nitrogen" draggable="false" id="element7" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element8.png" alt="Oxygen" draggable="false" id="element8" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element9.png" alt="Fluorine" draggable="false" id="element9" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element10.png" alt="Neon" draggable="false" id="element10" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element11.png" alt="Sodium" draggable="false" id="element11" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element12.png" alt="Magnesium" draggable="false" id="element12" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element13.png" alt="Aluminium" draggable="false" id="element13" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element14.png" alt="Silicon" draggable="false" id="element14" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element15.png" alt="Phosphorus" draggable="false" id="element15" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element16.png" alt="Sulfur" draggable="false" id="element16" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element17.png" alt="Chlorine" draggable="false" id="element17" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element18.png" alt="Argon" draggable="false" id="element18" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element19.png" alt="Potassium" draggable="false" id="element19" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element20.png" alt="Calcium" draggable="false" id="element20" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element21.png" alt="Scandium" draggable="false" id="element21" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element22.png" alt="Titanium" draggable="false" id="element22" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element23.png" alt="Vanadium" draggable="false" id="element23" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element24.png" alt="Chromium" draggable="false" id="element24" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element25.png" alt="Manganese" draggable="false" id="element25" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element26.png" alt="Iron" draggable="false" id="element26" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element27.png" alt="Cobalt" draggable="false" id="element27" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element28.png" alt="Nickel" draggable="false" id="element28" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element29.png" alt="Copper" draggable="false" id="element29" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element30.png" alt="Zinc" draggable="false" id="element30" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element31.png" alt="Gallium" draggable="false" id="element31" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element32.png" alt="Germanium" draggable="false" id="element32" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element33.png" alt="Arsenic" draggable="false" id="element33" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
-                        <input type="image" src="Used_art/Element34.png" alt="Selenium" draggable="false" id="element34" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element0.png" alt="[0] Neutronium" draggable="false" id="element0" class="interactiveImage elementType1" aria-controls="elementCost elementEffect" aria-hidden="true" tabindex="-1">
+                        <input type="image" src="Used_art/Element1.png" alt="[1] Hydrogen" draggable="false" id="element1" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element2.png" alt="[2] Helium" draggable="false" id="element2" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element3.png" alt="[3] Lithium" draggable="false" id="element3" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element4.png" alt="[4] Beryllium" draggable="false" id="element4" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element5.png" alt="[5] Boron" draggable="false" id="element5" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element6.png" alt="[6] Carbon" draggable="false" id="element6" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element7.png" alt="[7] Nitrogen" draggable="false" id="element7" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element8.png" alt="[8] Oxygen" draggable="false" id="element8" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element9.png" alt="[9] Fluorine" draggable="false" id="element9" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element10.png" alt="[10] Neon" draggable="false" id="element10" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element11.png" alt="[11] Sodium" draggable="false" id="element11" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element12.png" alt="[12] Magnesium" draggable="false" id="element12" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element13.png" alt="[13] Aluminium" draggable="false" id="element13" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element14.png" alt="[14] Silicon" draggable="false" id="element14" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element15.png" alt="[15] Phosphorus" draggable="false" id="element15" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element16.png" alt="[16] Sulfur" draggable="false" id="element16" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element17.png" alt="[17] Chlorine" draggable="false" id="element17" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element18.png" alt="[18] Argon" draggable="false" id="element18" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element19.png" alt="[19] Potassium" draggable="false" id="element19" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element20.png" alt="[20] Calcium" draggable="false" id="element20" class="interactiveImage elementType1" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element21.png" alt="[21] Scandium" draggable="false" id="element21" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element22.png" alt="[22] Titanium" draggable="false" id="element22" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element23.png" alt="[23] Vanadium" draggable="false" id="element23" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element24.png" alt="[24] Chromium" draggable="false" id="element24" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element25.png" alt="[25] Manganese" draggable="false" id="element25" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element26.png" alt="[26] Iron" draggable="false" id="element26" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element27.png" alt="[27] Cobalt" draggable="false" id="element27" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element28.png" alt="[28] Nickel" draggable="false" id="element28" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element29.png" alt="[29] Copper" draggable="false" id="element29" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element30.png" alt="[30] Zinc" draggable="false" id="element30" class="interactiveImage elementType3" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element31.png" alt="[31] Gallium" draggable="false" id="element31" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element32.png" alt="[32] Germanium" draggable="false" id="element32" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element33.png" alt="[33] Arsenic" draggable="false" id="element33" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element34.png" alt="[34] Selenium" draggable="false" id="element34" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element35.png" alt="[35] Bromine" draggable="false" id="element35" class="interactiveImage elementType2" aria-controls="elementCost elementEffect">
                     </section>
                     <div class="descriptionText">
                         <h3>Element: <span id="elementText">Hover to see.</span></h3>
@@ -754,32 +755,36 @@
                 <section id="inflationSubtabResearches" class="insideTab" aria-label="Current tab">
                     <h2 id="inflationsHeader" class="darkvioletText biggerWord">Inflations</h2>
                     <div id="inflations" class="researchesDiv" aria-labelledby="inflationsHeader">
-                        <section id="inflationsDiv1" class="researchesDiv" aria-label="Refundable">
-                            <div id="inflation1" class="whiteText stage1borderImage">
-                                <input type="image" src="Used_art/Time%20fast.png" alt="Overboost" draggable="false" id="inflation1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation1Level">0</span>/<span id="inflation1Max" class="greenText">1</span></p>
+                        <section id="inflationsTree1" class="researchesDiv" aria-label="Refundable">
+                            <div id="inflation1Tree1" class="whiteText stage1borderImage">
+                                <input type="image" src="Used_art/Time%20fast.png" alt="Overboost" draggable="false" id="inflation1Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation1Tree1Level">0</span>/<span id="inflation1Tree1Max" class="greenText">1</span></p>
                             </div>
-                            <div id="inflation2" class="whiteText stage4borderImage">
-                                <input type="image" src="Used_art/Time.png" alt="Global boost" draggable="false" id="inflation2Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation2Level">0</span>/<span id="inflation2Max" class="greenText">1</span></p>
+                            <div id="inflation2Tree1" class="whiteText stage4borderImage">
+                                <input type="image" src="Used_art/Time.png" alt="Global boost" draggable="false" id="inflation2Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation2Tree1Level">0</span>/<span id="inflation2Tree1Max" class="greenText">1</span></p>
                             </div>
-                            <div id="inflation3" class="whiteText greenBorderImage">
-                                <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="Strange gain" draggable="false" id="inflation3Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation3Level">0</span>/<span id="inflation3Max" class="greenText">1</span></p>
+                            <div id="inflation3Tree1" class="whiteText greenBorderImage">
+                                <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="Strange gain" draggable="false" id="inflation3Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation3Tree1Level">0</span>/<span id="inflation3Tree1Max" class="greenText">1</span></p>
                             </div>
-                            <div id="inflation4" class="whiteText stage5borderImage">
-                                <input type="image" src="Used_art/Instability.png" alt="Instability" draggable="false" id="inflation4Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation4Level">0</span>/<span id="inflation4Max" class="greenText">1</span></p>
+                            <div id="inflation4Tree1" class="whiteText stage5borderImage">
+                                <input type="image" src="Used_art/Instability.png" alt="Instability" draggable="false" id="inflation4Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation4Tree1Level">0</span>/<span id="inflation4Tree1Max" class="greenText">1</span></p>
                             </div>
-                            <div id="inflation5" class="whiteText stage6borderImage">
-                                <input type="image" src="Used_art/Milestones.png" alt="Void Milestones" draggable="false" id="inflation5Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation5Level">0</span>/<span id="inflation5Max" class="greenText">1</span></p>
+                            <div id="inflation5Tree1" class="whiteText stage6borderImage">
+                                <input type="image" src="Used_art/Milestones.png" alt="Void Milestones" draggable="false" id="inflation5Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation5Tree1Level">0</span>/<span id="inflation5Tree1Max" class="greenText">1</span></p>
+                            </div>
+                            <div id="inflation6Tree1" class="whiteText stage2borderImage">
+                                <input type="image" src="Used_art/Offline.png" alt="Better Offline" draggable="false" id="inflation6Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation6Tree1Level">0</span>/<span id="inflation6Tree1Max" class="greenText">1</span></p>
                             </div>
                         </section>
-                        <section id="inflationsDiv2" class="researchesDiv" aria-label="Non-refundable">
-                            <div id="inflation6" class="whiteText stage4borderImage">
-                                <input type="image" src="Used_art/ResearchQ5.png" alt="Discharge improvement" draggable="false" id="inflation6Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
-                                <p><span id="inflation6Level">0</span>/<span id="inflation6Max" class="greenText">1</span></p>
+                        <section id="inflationsTree2" class="researchesDiv" aria-label="Non-refundable">
+                            <div id="inflation1Tree2" class="whiteText stage4borderImage">
+                                <input type="image" src="Used_art/ResearchQ5.png" alt="Discharge improvement" draggable="false" id="inflation1Tree2Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <p><span id="inflation1Tree2Level">0</span>/<span id="inflation1Tree2Max" class="greenText">1</span></p>
                             </div>
                         </section>
                     </div>
@@ -814,11 +819,12 @@
                             <p id="inflationSupervoid2">Indestructible matter ‒ Make self-made Preons and related Energy immune to pre-Stage resets</p>
                             <p id="inflationSupervoid3">Latest Preons ‒ Improve effect scaling of 'Later Preons' Energy Research by 20%</p>
                         </section>
-                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universes:</h4>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up, ^2 if in the true Vacuum<br>Hardcaps after 5 Universes (WIP). True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</section>
+                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universes:</h4>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up, ^2 if in the true Vacuum<br>Hardcaps after 5 Universes. True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</section>
                         <section id="inflationMilestone4"><h4>Unlocked at 4 Universes:</h4>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank and Collapse at level 1</section>
                         <section id="inflationMilestone5"><h4>Unlocked at 5 Universes:</h4>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum</section>
+                        <section id="inflationMilestone6"><h4>Unlocked at 6 Universes:</h4>Start Vacuum resets with 'Strange growth' Strangeness unlocked, and at level 1 for true Vacuum</section>
                     </div>
                 </section>
             </div>
@@ -937,7 +943,7 @@
                                         <p class="mainText">[version] - <span class="whiteText">for game version</span></p>
                                         <p class="stageText">[stage] - <span class="whiteText">for current Stage</span></p>
                                         <p id="saveFileNameStrange" class="greenText">[strange] - <span class="whiteText">for total Strange quarks</span></p>
-                                        <p id="saveFileNameCosmon" class="darkvioletText">[cosmon] - <span class="whiteText">for total Cosmon</span></p>
+                                        <p id="saveFileNameInflaton" class="darkvioletText">[inflaton] - <span class="whiteText">for total Inflatons</span></p>
                                         <p id="saveFileNameVacuum" class="orchidText">[vacuum] - <span class="whiteText">for current state of Vacuum</span></p>
                                         <p id="saveFileNameGalaxy" class="grayText">[galaxy] - <span class="whiteText">for current Galaxies</span></p>
                                         <p id="saveFileNameUniverse" class="darkvioletText">[universe] - <span class="whiteText">for current Universes</span></p>
@@ -1131,12 +1137,12 @@
                                 </div>
                             </section>
                         </article>
-                        <article id="cosmonStat" class="statsWindows" role="none">
+                        <article id="inflatonStat" class="statsWindows" role="none">
                             <section>
-                                <h4 class="darkvioletText bigWord">Cosmon</h4>
+                                <h4 class="darkvioletText bigWord">Inflatons</h4>
                                 <div>
                                     <p>Total:</p>
-                                    <span id="cosmonStatTotal" class="whiteText">0</span>
+                                    <span id="inflatonStatTotal" class="whiteText">0</span>
                                 </div>
                             </section>
                         </article>

@@ -6,6 +6,7 @@ import { playEvent, specialHTML } from './Special';
 import { setActiveStage } from './Stage';
 import { addIntoLog, visualTrueStageUnlocks } from './Update';
 
+/** Sets playerStart, global and HTML values */
 export const prepareVacuum = (state: boolean) => { //Must not use direct player values
     const { buildings } = playerStart;
     const { buildingsInfo, upgradesInfo, researchesInfo, researchesExtraInfo, strangenessInfo } = global;
@@ -74,8 +75,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangeness3Scaling = [2, 3.4, 3, 1, 100, 1, 1.74, 1];
         strangeness4Cost = [1, 2, 4, 2, 12, 6, 6, 24];
         strangeness4Scaling = [2, 3.4, 3, 4, 1900, 1, 1.74, 1];
-        strangeness5Cost = [24, 36, 4, 24, 15600, 24, 480, 120];
-        strangeness5Scaling = [2, 2, 4, 1, 1, 1, 1, 1];
+        strangeness5Cost = [24, 36, 4, 24, 15600, 24, 480, 120, 6000];
+        strangeness5Scaling = [2, 2, 4, 1, 1, 1, 1, 1, 1];
         strangenessInfo[1].maxActive = 10;
         strangenessInfo[2].maxActive = 10;
         strangenessInfo[3].maxActive = 10;
@@ -141,6 +142,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.startCost[1] = [0, 3, 24, 3];
         buildingsInfo.type[2][0] = 'producing';
         buildingsInfo.type[3][0] = 'producing';
+        global.buildingsInfo.producing[4][5].setValue('0');
 
         upgrades1Cost = [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800];
         (upgradesInfo[2].startCost[0] as Overlimit).setValue('1e4');
@@ -181,13 +183,13 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangeness3Scaling = [0.75, 1.5, 1, 0, 0, 0, 2.5, 0];
         strangeness4Cost = [1, 1, 3, 2, 4, 2, 4, 24];
         strangeness4Scaling = [1, 2, 1.5, 2, 0, 0, 68, 0];
-        strangeness5Cost = [20, 24, 240, 24, 6000, 24, 20, 120];
-        strangeness5Scaling = [20, 24, 240, 0, 0, 0, 220, 0];
+        strangeness5Cost = [20, 24, 240, 24, 6000, 24, 20, 120, 6000];
+        strangeness5Scaling = [20, 24, 240, 0, 0, 0, 220, 0, 0];
         strangenessInfo[1].maxActive = 7;
         strangenessInfo[2].maxActive = 7;
         strangenessInfo[3].maxActive = 8;
         strangenessInfo[4].maxActive = 8;
-        strangenessInfo[5].maxActive = 8;
+        strangenessInfo[5].maxActive = 9;
 
         getId('milestonesExtra').innerHTML = 'Completing any tier will award 1 <span class="greenText">Strange quark</span>';
         milestone1S1.src = milestone1S1.src.replace('Preon.png', 'Quarks.png');
@@ -265,8 +267,8 @@ export const switchVacuum = () => {
     let income = 0;
     if (player.stage.true >= 7) {
         income = 1;
-        player.cosmon.current += income;
-        player.cosmon.total += income;
+        player.cosmon[0].current += income;
+        player.cosmon[0].total += income;
     } else {
         player.stage.true = 6;
         player.collapse.show = 0;
@@ -287,8 +289,8 @@ export const switchVacuum = () => {
     if ((player.toggles.normal[0] && global.tab !== 'inflation') || player.stage.active < 6) { setActiveStage(1); }
     player.inflation.vacuum = true;
     player.inflation.resets++;
-    player.clone = {};
     player.challenges.active = null;
+    player.clone = {};
     prepareVacuum(true);
     resetVacuum();
     addIntoLog('Vacuum reset');

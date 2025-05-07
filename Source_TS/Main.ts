@@ -53,7 +53,7 @@ const handleOfflineTime = (): number => {
     const timeNow = Date.now();
     const offlineTime = timeNow - player.time.updated;
     player.time.updated = timeNow;
-    player.time.export[0] += offlineTime;
+    player.time.export[0] += offlineTime * 4.8 / (4.8 - player.tree[0][5]);
     return offlineTime;
 };
 export const simulateOffline = async(offline: number) => {
@@ -253,14 +253,15 @@ const awardExport = () => {
     const exportReward = player.time.export;
     if (exportReward[0] <= 0) { return; }
     const { strange } = player;
+    const improved = player.tree[0][5] >= 1;
     const conversion = Math.min(exportReward[0] / 86400_000, 1);
-    const quarks = (exportReward[1] / 2.5 + 1) * conversion;
+    const quarks = (improved ? exportReward[1] : (exportReward[1] / 2.5 + 1)) * conversion;
 
     strange[0].current += quarks;
     strange[0].total += quarks;
     exportReward[1] = Math.max(exportReward[1] - quarks, 0);
     if (player.strangeness[5][8] >= 1) {
-        const strangelets = exportReward[2] / 2.5 * conversion;
+        const strangelets = (improved ? exportReward[2] : (exportReward[2] / 2.5)) * conversion;
         strange[1].current += strangelets;
         strange[1].total += strangelets;
         exportReward[2] -= strangelets;
@@ -285,6 +286,7 @@ const saveConsole = async() => {
         if (save !== null) {
             try {
                 await navigator.clipboard.writeText(save);
+                Notify(`${lower === 'global_copy' ? 'Settings have' : 'Save has'} been copied to the clipboard`);
             } catch (error) {
                 console.warn(`Full error for being unable to write to the clipboard:\n${error}`);
                 if (await Confirm("Could not copy text into clipboard, press 'Confrim' to save it as a file instead")) {
@@ -386,7 +388,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         '[version]',
         '[stage]',
         '[strange]',
-        '[cosmon]',
+        '[inflaton]',
         '[vacuum]',
         '[galaxy]',
         '[universe]'
@@ -395,7 +397,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         player.version,
         global.stageInfo.word[player.stage.current],
         format(player.strange[0].total, { type: 'input', padding: true }),
-        format(player.cosmon.total, { type: 'input', padding: 'exponent' }),
+        format(player.cosmon[0].total, { type: 'input', padding: 'exponent' }),
         `${player.inflation.vacuum}`,
         format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' }),
         format(player.buildings[6][1].current, { type: 'input', padding: 'exponent' })
@@ -420,19 +422,17 @@ const cancelRepeat = () => {
     global.intervalsId.mouseRepeat = undefined;
 };
 
-const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'inflation') => {
-    if (type === 'inflation') {
-        global.lastInflation = index;
-    } else {
-        if (player.toggles.hover[0]) { buyUpgrades(index, player.stage.active, type); }
-        if (type === 'elements') {
-            global.lastElement = index;
-        } else { global.lastUpgrade[player.stage.active] = [index, type]; }
-    }
+const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements') => {
+    if (player.toggles.hover[0]) { buyUpgrades(index, player.stage.active, type); }
+    if (type === 'elements') {
+        global.lastElement = index;
+    } else { global.lastUpgrade[player.stage.active] = [index, type]; }
     getUpgradeDescription(index, type);
 };
-const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones') => {
-    if (type === 'strangeness') {
+const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflations') => {
+    if (type === 'inflations') {
+        global.lastInflation = [index, stageIndex];
+    } else if (type === 'strangeness') {
         global.lastStrangeness = [index, stageIndex];
     } else { global.lastMilestone = [index, stageIndex]; }
     getStrangenessDescription(index, stageIndex, type);
@@ -589,7 +589,7 @@ try { //Start everything
                 #footerMain > div { display: flex; flex-direction: column; row-gap: 0.6em; margin: 0 0 0 auto; }
                 #footerMain > div > nav { display: flex; flex-flow: row nowrap; justify-content: center; column-gap: 0.4em; }
                 #footerStats { justify-content: center; column-gap: 0.6em; margin: 0; }
-                #stageSelect { position: unset; margin: 0; max-width: unset; pointer-events: unset; }
+                #stageSelect { position: unset; margin: 0; max-width: unset; }
                 #subtabs { flex-flow: column-reverse wrap; gap: 0.6em !important; align-self: end; margin: 0 auto 0 0 !important; max-height: 6.72em; }
                 #footerMain button, #phoneHotkeys button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; }
                 #subtabs button { width: 100%; min-width: 7em; }
@@ -617,6 +617,7 @@ try { //Start everything
         }
 
         if (globalSave.MDSettings[0]) {
+            toggleSpecial(0, 'mobile');
             (document.getElementById('MDMessage1') as HTMLElement).remove();
             specialHTML.styleSheet.textContent += `body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p { -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
                 #themeArea > div > div { position: unset; display: flex; width: 15em; }
@@ -703,11 +704,15 @@ try { //Start everything
             MDToggle2.innerHTML = '<label>Allow zoom<button type="button" id="MDToggle2" class="specialToggle">OFF</button></label> (can break stuff)';
             mainLi.after(MDToggle1, MDToggle2);
             for (let i = 1; i < globalSaveStart.MDSettings.length; i++) {
-                getId(`MDToggle${i}`).addEventListener('click', () => toggleSpecial(i, 'mobile', true, i === 1));
-                if (i === 2) {
-                    (getId('viewportMeta') as HTMLMetaElement).content = `width=device-width${globalSave.MDSettings[2] ? '' : ', minimum-scale=1.0, maximum-scale=1.0'}, initial-scale=1.0`;
-                }
+                getId(`MDToggle${i}`).addEventListener('click', () => {
+                    toggleSpecial(i, 'mobile', true, i === 1);
+                    if (i === 2) {
+                        (getId('viewportMeta') as HTMLMetaElement).content = `width=device-width${globalSave.MDSettings[2] ? '' : ', minimum-scale=1.0, maximum-scale=1.0'}, initial-scale=1.0`;
+                    }
+                });
+                toggleSpecial(i, 'mobile');
             }
+            if (globalSave.MDSettings[2]) { (getId('viewportMeta') as HTMLMetaElement).content = 'width=device-width, initial-scale=1.0'; }
 
             const refreshButton = document.createElement('button');
             refreshButton.className = 'hollowButton';
@@ -717,11 +722,9 @@ try { //Start everything
             refreshButton.addEventListener('click', async() => {
                 if (await Confirm('Reload the page?\n(Game will not autosave)')) { window.location.reload(); }
             });
-
-            for (let i = 0; i < globalSaveStart.MDSettings.length; i++) { toggleSpecial(i, 'mobile'); }
-            if (globalSave.MDSettings[2]) { (getId('viewportMeta') as HTMLMetaElement).content = 'width=device-width, initial-scale=1.0'; }
         }
         if (globalSave.SRSettings[0]) {
+            toggleSpecial(0, 'reader');
             const message = getId('SRMessage1');
             message.textContent = 'Screen reader support is enabled, disable it if its not required';
             message.className = 'greenText';
@@ -772,13 +775,14 @@ try { //Start everything
                 }
             };
             for (let i = 1; i < globalSaveStart.SRSettings.length; i++) {
-                getId(`SRToggle${i}`).addEventListener('click', () => toggleSpecial(i, 'reader', true));
-                if (i === 2) {
-                    primaryIndex();
-                }
+                getId(`SRToggle${i}`).addEventListener('click', () => {
+                    toggleSpecial(i, 'reader', true);
+                    if (i === 2) {
+                        primaryIndex();
+                    }
+                });
+                toggleSpecial(i, 'reader');
             }
-
-            for (let i = 0; i < globalSaveStart.SRSettings.length; i++) { toggleSpecial(i, 'reader'); }
             if (globalSave.SRSettings[2]) { primaryIndex(); }
         } else {
             const index = globalSave.toggles[0] ? 0 : 1;
@@ -807,8 +811,8 @@ try { //Start everything
     const PC = !MD || globalSave.MDSettings[1];
     const htmlHTML = document.documentElement;
     const releaseHotkey = (event: KeyboardEvent | MouseEvent) => {
-        if (global.hotkeys.shift && !event.shiftKey) { global.hotkeys.shift = false; }
-        if (global.hotkeys.ctrl && !event.ctrlKey) { global.hotkeys.ctrl = false; }
+        if (global.hotkeys.shift) { global.hotkeys.shift = event.shiftKey; }
+        if (global.hotkeys.ctrl) { global.hotkeys.ctrl = event.ctrlKey; }
         global.hotkeys.tab = false;
     };
     htmlHTML.addEventListener('contextmenu', (event) => {
@@ -830,6 +834,13 @@ try { //Start everything
         }, { passive: true }); //Passive just in case to prevent issues with scrolling
         htmlHTML.addEventListener('touchend', (event) => {
             cancelRepeat();
+            let target = event.target as HTMLElement;
+            const body = document.body;
+            const notAllowed = [getId('globalStats'), getId('footerMain')];
+            while (target != null && target !== body) {
+                if (notAllowed.includes(target)) { return; }
+                target = target.parentElement as HTMLElement;
+            }
             handleTouchHotkeys(event);
         });
         htmlHTML.addEventListener('touchcancel', cancelRepeat);
@@ -847,7 +858,7 @@ try { //Start everything
                 }
             } else if (i === 2) {
                 document.body.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
-            } else {
+            } else if (i === 4) {
                 getId('globalStats').style.display = !globalSave.toggles[4] ? '' : 'none';
                 if (!globalSave.toggles[4]) {
                     visualUpdate();
@@ -1238,22 +1249,24 @@ try { //Start everything
     }
 
     /* Inflation tab */
-    for (let i = 0; i < playerStart.inflation.tree.length; i++) {
-        const image = getId(`inflation${i + 1}Image`);
-        const hoverFunc = () => hoverUpgrades(i, 'inflation');
-        if (PC) { image.addEventListener('mouseover', hoverFunc); }
-        if (MD) {
-            image.addEventListener('touchstart', () => { /*repeatFunction(*/hoverFunc(); /*, true);*/ });
-        } else {
-            const clickFunc = () => buyStrangeness(i, 0, 'inflations');
-            image.addEventListener('click', clickFunc);
-            image.addEventListener('mousedown', () => repeatFunction(clickFunc));
-        }
-        if (PC || SR) {
-            image.addEventListener('focus', () => {
-                if (!global.hotkeys.tab) { return; }
-                hoverFunc();
-            });
+    for (let s = 0; s <= 1; s++) {
+        for (let i = 0; i < playerStart.tree[s].length; i++) {
+            const image = getId(`inflation${i + 1}Tree${s + 1}Image`);
+            const hoverFunc = () => hoverStrangeness(i, s, 'inflations');
+            if (PC) { image.addEventListener('mouseover', hoverFunc); }
+            if (MD) {
+                image.addEventListener('touchstart', () => { /*repeatFunction(*/hoverFunc(); /*, true);*/ });
+            } else {
+                const clickFunc = () => buyStrangeness(i, s, 'inflations');
+                image.addEventListener('click', clickFunc);
+                image.addEventListener('mousedown', () => repeatFunction(clickFunc));
+            }
+            if (PC || SR) {
+                image.addEventListener('focus', () => {
+                    if (!global.hotkeys.tab) { return; }
+                    hoverFunc();
+                });
+            }
         }
     }
     getId('inflationRefund').addEventListener('click', () => void inflationRefund(global.hotkeys.shift));
@@ -1310,7 +1323,7 @@ try { //Start everything
     if (MD) {
         const button = getId('inflationActivate');
         const clickFunc = () => {
-            if (global.lastInflation !== null) { buyStrangeness(global.lastInflation, 0, 'inflations'); }
+            if (global.lastInflation[0] !== null) { buyStrangeness(global.lastInflation[0], global.lastInflation[1], 'inflations'); }
         };
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
@@ -1488,7 +1501,6 @@ try { //Start everything
     /* Footer */
     {
         const startEvent = (event: MouseEvent | TouchEvent) => {
-            event.preventDefault(); //To prevent scrolling (doesn't work if to click edge of the window due to mouseEvent)
             const mouse = event instanceof MouseEvent;
             const html = getId('globalStats');
             if (global.hotkeys.shift) {
@@ -1530,13 +1542,14 @@ try { //Start everything
                 bodyMain.addEventListener('mouseleave', removeEvents);
                 html.style.opacity = '1';
             } else {
+                event.preventDefault(); //To prevent scrolling, doesn't work on edge
                 bodyMain.addEventListener('touchmove', move);
                 bodyMain.addEventListener('touchend', removeEvents);
                 bodyMain.addEventListener('touchcancel', removeEvents);
                 html.style.opacity = '0.2';
             }
         };
-        if (PC) { getId('globalStats').addEventListener('mousedown', startEvent, { capture: true }); }
+        if (PC) { getId('globalStats').addEventListener('mousedown', startEvent); }
         if (MD) { getId('globalStats').addEventListener('touchstart', startEvent, { capture: true }); }
     }
     for (const tabText of global.tabList.tabs) {

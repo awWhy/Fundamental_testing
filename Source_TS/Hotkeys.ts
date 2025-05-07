@@ -89,6 +89,8 @@ export const removeHotkey = (remove: string): string | null => {
 export const detectHotkey = (check: KeyboardEvent) => {
     let { shiftKey } = check;
     const { key, code } = check;
+    if (shiftKey) { global.hotkeys.shift = true; }
+    if (check.ctrlKey) { global.hotkeys.ctrl = true; }
     if (code === 'Tab' || code === 'Enter' || code === 'Space') {
         if (check.metaKey || check.ctrlKey || check.altKey) { return; }
         if (code === 'Tab') { global.hotkeys.tab = true; }
@@ -100,8 +102,6 @@ export const detectHotkey = (check: KeyboardEvent) => {
         document.body.classList.add('noFocusOutline');
     }
     if (global.hotkeys.disabled) { return; }
-    if (shiftKey) { global.hotkeys.shift = true; }
-    if (check.ctrlKey) { global.hotkeys.ctrl = true; }
 
     if (code === 'Escape') {
         if (check.metaKey || check.ctrlKey || shiftKey || check.altKey ||
@@ -206,14 +206,16 @@ const changeStage = (direction: 'left' | 'right') => {
 /* preventDefault should not be used here */
 export const handleTouchHotkeys = (event: TouchEvent) => {
     if (event.changedTouches.length > 1) { return; }
-    const mainHTML = document.documentElement;
-    const horizontal = (event.changedTouches[0].clientX - specialHTML.mobileDevice.start[0]) / mainHTML.clientWidth;
-    const vertical = (event.changedTouches[0].clientY - specialHTML.mobileDevice.start[1]) / mainHTML.clientHeight;
+    const horizontal = event.changedTouches[0].clientX - specialHTML.mobileDevice.start[0];
+    const vertical = event.changedTouches[0].clientY - specialHTML.mobileDevice.start[1];
 
-    if (Math.abs(vertical) > 0.2) {
-        if (Math.abs(vertical) < 0.8 || Math.abs(horizontal) > 0.2) { return; }
+    const horizontalAbs = Math.abs(horizontal);
+    if (horizontalAbs < 50) { return; }
+    if (Math.abs(vertical) >= 100) {
         changeSubtab(vertical > 0 ? 'up' : 'down');
-        return;
-    } else if (Math.abs(horizontal) < 0.6) { return; }
-    changeTab(horizontal > 0 ? 'left' : 'right');
+    } else if (horizontalAbs >= 250) {
+        changeStage(horizontal > 0 ? 'left' : 'right');
+    } else if (horizontalAbs >= 100) {
+        changeTab(horizontal > 0 ? 'left' : 'right');
+    }
 };

@@ -48,7 +48,6 @@ export interface playerType {
         since: number
     }
     inflation: {
-        tree: number[]
         loadouts: Record<string, number[]>
         vacuum: boolean
         resets: number
@@ -89,10 +88,10 @@ export interface playerType {
         current: number
         total: number
     }>
-    cosmon: {
+    cosmon: Array<{
         current: number
         total: number
-    }
+    }>
     upgrades: number[][]
     researches: number[][]
     researchesExtra: number[][]
@@ -102,12 +101,17 @@ export interface playerType {
     elements: number[]
     strangeness: number[][]
     milestones: number[][]
+    /** Inflation tree */
+    tree: number[][]
     challenges: {
         active: number | null
         super: boolean
         void: number[]
-        supervoid: number[]
+        /** Highest Void reward ever unlocked */
         voidCheck: number[]
+        supervoid: number[]
+        /** Supervoid progress in the current Universe */
+        supervoidMax: number[]
     }
     toggles: {
         /** Auto Stage switch[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
@@ -136,7 +140,7 @@ export interface playerType {
             list: Array<[number, number, number]>
             input: [number, number]
         }
-        /** [time, state, cosmon] */
+        /** [time, state, inflatons] */
         vacuum: {
             best: [number, boolean, number]
             list: Array<[number, boolean, number]>
@@ -209,7 +213,7 @@ export interface globalType {
     lastUpgrade: Array<[number | null, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
     lastElement: number | null
     lastStrangeness: [number | null, number]
-    lastInflation: number | null
+    lastInflation: [number | null, number]
     lastMilestone: [number | null, number]
     lastChallenge: [number, number]
     /** Void reward type[0], Strangeness shown[1] */
@@ -283,8 +287,8 @@ export interface globalType {
     }
     inflationInfo: {
         globalSpeed: number
+        /** In the current Universe */
         totalSuper: number
-        instability: number
     }
     intervalsId: {
         main: number | undefined
@@ -378,15 +382,15 @@ export interface globalType {
         max: number[]
         maxActive: number
     }>
-    inflationTreeInfo: {
+    /** Inflation tree */
+    treeInfo: Array<{
         name: string[]
         effectText: Array<() => string>
         cost: number[]
         startCost: number[]
         scaling: number[]
         max: number[]
-        refundable: boolean[]
-    }
+    }>
     milestonesInfo: Array<{
         name: string[]
         needText: Array<() => string>
@@ -453,7 +457,7 @@ export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | '
 export interface calculateEffectsType {
     effectiveEnergy: () => number
     effectiveGoals: () => number
-    dischargeScaling: (S1Research3?: number, S1Strange2?: number, inflation5?: number) => number
+    dischargeScaling: (S1Research3?: number, S1Strange2?: number) => number
     dischargeCost: (scaling?: number) => number
     dischargeBase: (S1research4?: number) => number
     /** Result need to be divided by 100 */

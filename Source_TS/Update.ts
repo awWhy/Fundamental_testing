@@ -103,7 +103,7 @@ export const numbersUpdate = () => {
         let noTime = null as boolean | null;
         if (vacuum) {
             if (challenge !== null) { noTime = player.time[global.challengesInfo[challenge].resetType] > global.challengesInfo[challenge].time; }
-        } else if (player.inflation.tree[4] < 1 && (player.stage.true >= 7 || player.stage.resets >= 4)) {
+        } else if (player.tree[0][4] < 1 && (player.stage.true >= 7 || player.stage.resets >= 4)) {
             const s = Math.min(player.stage.current, 4);
             const info = global.milestonesInfo;
             let maxTime = 0;
@@ -151,7 +151,7 @@ export const numbersUpdate = () => {
         }
     } else if (active === 6) {
         getId('footerStat1Span').textContent = format(buildings[0].current, { padding: true });
-        getId('footerStat2Span').textContent = format(player.cosmon.current, { padding: 'exponent' });
+        getId('footerStat2Span').textContent = format(player.cosmon[0].current, { padding: 'exponent' });
     }
 
     if (tab === 'stage') {
@@ -368,7 +368,7 @@ export const numbersUpdate = () => {
                     getQuery('#mergeResetsS6 > span').textContent = `${player.merge.resets}`;
                     getQuery('#mergeResetsS6 > span:last-of-type').textContent = `${calculateEffects.mergeMaxResets()}`;
                 }
-                getId('cosmonGainTrue').textContent = format(buildings[1].true + 1, { padding: 'exponent' });
+                getId('inflatonGainTrue').textContent = format(buildings[1].true + 1, { padding: 'exponent' });
                 getQuery('#universeTime > span').textContent = format(player.inflation.age, { type: 'time' });
                 getQuery('#universeTimeReal > span').textContent = format(player.time.universe, { type: 'time' });
             }
@@ -437,7 +437,7 @@ export const numbersUpdate = () => {
         } else if (subtab.strangenessCurrent === 'Milestones') {
             const { milestonesInfo: info } = global;
             const time = player.time[player.challenges.active === 0 && player.challenges.super ? 'vacuum' : 'stage'];
-            const timeLimited = vacuum || player.inflation.tree[4] < 1;
+            const timeLimited = vacuum || player.tree[0][4] < 1;
             for (let s = 1; s < info.length; s++) {
                 for (let i = 0; i < info[s].need.length; i++) {
                     getId(`milestone${i + 1}Stage${s}Current`).textContent = format(milestoneGetValue(i, s), { padding: true });
@@ -449,8 +449,10 @@ export const numbersUpdate = () => {
         }
     } else if (tab === 'inflation') {
         if (subtab.inflationCurrent === 'Researches') {
-            for (let i = 0; i < global.inflationTreeInfo.name.length; i++) { visualUpdateResearches(i, 0, 'inflations'); }
-            getUpgradeDescription(global.lastInflation, 'inflation');
+            for (let s = 0; s <= 1; s++) {
+                for (let i = 0; i < global.treeInfo[s].name.length; i++) { visualUpdateResearches(i, s, 'inflations'); }
+            }
+            getStrangenessDescription(global.lastInflation[0], global.lastInflation[1], 'inflations');
         } else if (subtab.inflationCurrent === 'Milestones') {
             getQuery('#inflationMilestone1 > span').textContent = format(1.5);
         }
@@ -470,7 +472,7 @@ export const numbersUpdate = () => {
             const exportReward = player.time.export;
             getId('exportQuarksMax').textContent = format(exportReward[1] / 2.5 + 1, { padding: true });
             getId('exportStrangeletsMax').textContent = format(exportReward[2] / 2.5, { padding: true });
-            getId('exportTimeToMax').textContent = format(86400 - exportReward[0] / 1000, { type: 'time' });
+            getId('exportTimeToMax').textContent = format((86400 - exportReward[0] / 1000) * (4.8 - player.tree[0][5]) / 4.8, { type: 'time' });
             getId('exportQuarksStorage').textContent = format(exportReward[1], { padding: true });
             getId('exportStrangeletsStorage').textContent = format(exportReward[2], { padding: true });
             if (active === 1) {
@@ -561,7 +563,7 @@ export const numbersUpdate = () => {
 
             getId('strange0StatTotal').textContent = format(player.strange[0].total, { padding: true });
             getId('strange1StatTotal').textContent = format(player.strange[1].total, { padding: true });
-            getId('cosmonStatTotal').textContent = format(player.cosmon.total, { padding: 'exponent' });
+            getId('inflatonStatTotal').textContent = format(player.cosmon[0].total, { padding: 'exponent' });
         }
     }
 };
@@ -928,7 +930,7 @@ export const visualUpdate = () => {
                 getId('strange5Stage5').style.display = (universes.moreOrEqual('2') ? show1 : voidProgress[4] >= 1) && bound ? '' : 'none';
                 getId('strange6Stage5').style.display = show1 && bound ? '' : 'none';
                 getId('strange8Stage5').style.display = bound ? '' : 'none';
-                getId('strange9Stage5').style.display = voidProgress[3] >= 5 ? '' : 'none';
+                getId('strange9Stage5').style.display = (universes.moreOrEqual('6') ? global.sessionToggles[1] : voidProgress[3] >= 5) ? '' : 'none';
                 getId('strange10Stage5').style.display = voidProgress[3] >= 6 ? '' : 'none';
                 getId('strange11Stage5').style.display = voidProgress[2] >= 3 ? '' : 'none';
             } else {
@@ -950,6 +952,7 @@ export const visualUpdate = () => {
                 getId('strange4Stage5').style.display = firstTwo ? '' : 'none';
                 getId('strange5Stage5').style.display = show1 && milestones[4][1] >= 8 ? '' : 'none';
                 getId('strange6Stage5').style.display = show1 && firstTwo ? '' : 'none';
+                getId('strange9Stage5').style.display = universes.moreOrEqual('6') ? '' : 'none';
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = strange5 ? '' : 'none';
                 if (globalSave.MDSettings[0] && (global.debug.MDStrangePage === 5 ? !strange5 : (highest < 6 && player.stage.resets < global.debug.MDStrangePage + 3))) { MDStrangenessPage(1); }
             }
@@ -972,15 +975,16 @@ export const visualUpdate = () => {
     } else if (tab === 'inflation') {
         if (subtab.inflationCurrent === 'Researches') {
             const supervoid = player.challenges.supervoid;
-            getId('inflationsDiv2').style.display = supervoid[1] >= 1 ? '' : 'none';
-            getId('inflation6').style.display = supervoid[1] >= 1 ? '' : 'none';
+            getId('inflation6Tree1').style.display = supervoid[3] >= 3 ? '' : 'none';
+            getId('inflationsTree2').style.display = supervoid[1] >= 1 ? '' : 'none';
+            getId('inflation1Tree2').style.display = supervoid[1] >= 1 ? '' : 'none';
         } else if (subtab.inflationCurrent === 'Milestones') {
             const universes = player.buildings[6][1].current;
             const supervoid = player.challenges.supervoid;
             getId('inflationSupervoid1').style.display = supervoid[1] >= 2 ? '' : 'none';
             getId('inflationSupervoid2').style.display = supervoid[3] >= 1 ? '' : 'none';
             getId('inflationSupervoid3').style.display = supervoid[3] >= 2 ? '' : 'none';
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 6; i++) {
                 getId(`inflationMilestone${i}`).classList[universes.moreOrEqual(i) ? 'remove' : 'add']('uncompleted');
             }
         }
@@ -1105,8 +1109,8 @@ export const visualTrueStageUnlocks = () => {
     (getId('rewardsType') as HTMLButtonElement).disabled = !superUnlocked;
     getId('strange1GlobalSpeedInfo').style.display = highest >= 7 ? '' : 'none';
     getQuery('#strangenessHeader > span:last-of-type').style.display = highest >= 7 ? '' : 'none';
-    getId('inflation4').style.display = superUnlocked ? '' : 'none';
-    getId('inflation5').style.display = superUnlocked ? '' : 'none';
+    getId('inflation4Tree1').style.display = superUnlocked ? '' : 'none';
+    getId('inflation5Tree1').style.display = superUnlocked ? '' : 'none';
     getId('inflationPermanent').style.display = superUnlocked ? '' : 'none';
     getQuery('#resetToggles > h2 > span').style.display = highest >= 5 ? '' : 'none';
     getId('themeArea').style.display = highest >= 2 || globalSave.theme !== null ? '' : 'none';
@@ -1118,9 +1122,9 @@ export const visualTrueStageUnlocks = () => {
     getId('saveFileNameStrange').style.display = highest >= 5 ? '' : 'none';
     getId('saveFileNameVacuum').style.display = highest >= 6 ? '' : 'none';
     getId('saveFileNameUniverse').style.display = highest >= 7 ? '' : 'none';
-    getId('saveFileNameCosmon').style.display = highest >= 7 ? '' : 'none';
+    getId('saveFileNameInflaton').style.display = highest >= 7 ? '' : 'none';
     getId('autoStageSwitch').style.display = highest >= 5 ? '' : 'none';
-    getId('cosmonStat').style.display = highest >= 7 ? '' : 'none';
+    getId('inflatonStat').style.display = highest >= 7 ? '' : 'none';
     getId('vacuumHistory').style.display = highest >= 7 ? '' : 'none';
     if (highest >= 2) {
         getId('toggleBuilding0').style.display = '';
@@ -1164,27 +1168,13 @@ export const visualTrueStageUnlocks = () => {
     if (specialHTML.bigWindow === 'hotkeys') {
         getId('stageRightHotkey').style.display = highest >= 5 ? '' : 'none';
         getId('stageLeftHotkey').style.display = highest >= 5 ? '' : 'none';
+        if (globalSave.MDSettings[0]) { getId('stageSwipe').style.display = highest >= 5 ? '' : 'none'; }
         if (highest >= 2) { getId('stageHotkey').style.display = ''; }
         if (highest >= 7) { getId('exitChallengeHotkey').style.display = ''; }
     }
 };
 
-export const getUpgradeDescription = (index: number | null, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'inflation') => {
-    if (type === 'inflation') {
-        if (index === null) {
-            getId('inflationText').textContent = 'Hover to see.';
-            getId('inflationEffect').textContent = 'Hover to see.';
-            getId('inflationCost').textContent = 'Cosmon.';
-            return;
-        }
-        const pointer = global.inflationTreeInfo;
-        const level = player.inflation.tree[index];
-
-        getId('inflationText').textContent = `${pointer.name[index]}. (Level ${level} out of ${pointer.max[index]})`;
-        getId('inflationEffect').textContent = pointer.effectText[index]();
-        getId('inflationCost').textContent = `${level >= pointer.max[index] ? 'Fully activated' : pointer.cost[index] === 0 ? 'None' : `${format(pointer.cost[index])} Cosmon`}.${pointer.refundable[index] ? '' : " (Can't be refunded)"}`;
-        return;
-    }
+export const getUpgradeDescription = (index: number | null, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements') => {
     if (type === 'elements') {
         if (index === null) {
             getId('elementText').textContent = 'Hover to see.';
@@ -1295,7 +1285,22 @@ export const getUpgradeDescription = (index: number | null, type: 'upgrades' | '
     }
 };
 
-export const getStrangenessDescription = (index: number | null, stageIndex: number, type: 'strangeness' | 'milestones') => {
+export const getStrangenessDescription = (index: number | null, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflations') => {
+    if (type === 'inflations') {
+        if (index === null) {
+            getId('inflationText').textContent = 'Hover to see.';
+            getId('inflationEffect').textContent = 'Hover to see.';
+            getId('inflationCost').textContent = 'Inflatons.';
+            return;
+        }
+        const pointer = global.treeInfo[stageIndex];
+        const level = player.tree[stageIndex][index];
+
+        getId('inflationText').textContent = `${pointer.name[index]}. (Level ${level} out of ${pointer.max[index]})`;
+        getId('inflationEffect').textContent = pointer.effectText[index]();
+        getId('inflationCost').textContent = `${level >= pointer.max[index] ? 'Fully activated' : pointer.cost[index] === 0 ? 'None' : `${format(pointer.cost[index])} Inflatons`}.`;
+        return;
+    }
     const stageText = getId(`${type}Stage`);
     if (index !== null) {
         stageText.style.color = `var(--${global.stageInfo.textColor[stageIndex]}-text)`;
@@ -1326,14 +1331,14 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
             const level = player.milestones[stageIndex][index];
             getId('milestonesText').textContent = `${pointer.name[index]}. (Tier ${level}${player.inflation.vacuum ? '' : ` out of ${pointer.max[index]}`})`;
             if (player.inflation.vacuum) {
-                const isActive = player.challenges.active === 0 && player.inflation.tree[4] >= 1;
+                const isActive = player.challenges.active === 0 && player.tree[0][4] >= 1;
                 text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
                 <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive ? player.time[player.challenges.super ? 'vacuum' : 'stage'] : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to increase this tier within ${player.challenges.super ? 'Supervoid' : 'Void'}.</span></p>
-                <p class="darkvioletText">Effect: <span class="greenText">${pointer.rewardText[index]()}</span>${player.inflation.tree[4] < 1 ? ' <span class="redText">(Disabled)</span>' : ''}</p>`;
+                <p class="darkvioletText">Effect: <span class="greenText">${pointer.rewardText[index]()}</span>${player.tree[0][4] < 1 ? ' <span class="redText">(Disabled)</span>' : ''}</p>`;
             } else if (level < pointer.max[index]) {
                 const isActive = global.stageInfo.activeAll.includes(Math.min(stageIndex, 4));
                 text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
-                <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive && player.inflation.tree[4] < 1 ? player.time.stage : 0), { type: 'time' })} ${isActive && player.inflation.tree[4] < 1 ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
+                <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive && player.tree[0][4] < 1 ? player.time.stage : 0), { type: 'time' })} ${isActive && player.tree[0][4] < 1 ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
                 <p class="darkvioletText">Unlock: <span class="greenText">Main reward unlocked after ${pointer.max[index] - level} more completions.</span></p>`;
             } else { text = `<p class="darkvioletText">Reward: <span class="greenText">${pointer.rewardText[index]()}</span></p>`; }
         }
@@ -1364,7 +1369,7 @@ export const getChallengeDescription = (index: number) => {
     if (index === 1) {
         const gain = player.inflation.vacuum ? player.buildings[6][1].true + 1 : 1;
         text = `<p class="orchidText">Vacuum state: <span class="${player.inflation.vacuum ? 'greenText">true' : 'redText">false'}</span> | Resets: <span class="darkorchidText">${player.inflation.resets}</span></p>
-        ${player.stage.true >= 7 || player.event ? `<p class="darkvioletText">Current Cosmon gain: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain, { padding: 'exponent' })}</span> | Rate: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain / player.time.vacuum, { type: 'income' })}</span></p>` : ''}
+        ${player.stage.true >= 7 || player.event ? `<p class="darkvioletText">Current Inflatons gain: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain, { padding: 'exponent' })}</span> | Rate: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain / player.time.vacuum, { type: 'income' })}</span></p>` : ''}
         <p class="orchidText">Time since last reset: <span class="darkorchidText">${format(player.inflation.time, { type: 'time' })}</span>${player.inflation.time !== player.time.vacuum ? ` (Real: <span class="darkorchidText">${format(player.time.vacuum, { type: 'time' })}</span>)` : ''}</p>`;
     } else {
         text = `<p class="whiteText">${info.description()}</p>
@@ -1384,16 +1389,20 @@ export const getChallengeReward = (index: number) => {
     const supervoid = global.sessionToggles[0];
     const info = global.challengesInfo[0];
     const reward = info.rewardText[supervoid ? 1 : 0][index];
-    const current = player.challenges[supervoid ? 'supervoid' : 'void'][index];
-    const best = supervoid ? current : player.challenges.voidCheck[index];
-    let text = `<p class="greenText center">All unlocks are ${supervoid ? 'permanent and related to Inflations' : 'related to Strangeness'}<br>Also gain ${supervoid ? 'a single Cosmon for unlocking any reward' : 'Strange quarks equal to unlocked rewards'}</p>`;
+    const current = player.challenges[supervoid ? 'supervoidMax' : 'void'][index];
+    const best = player.challenges[supervoid ? 'supervoid' : 'voidCheck'][index];
+    const arrayMax = player.challenges[supervoid ? 'supervoid' : 'void'];
+    const total = 1 + arrayMax[1] + arrayMax[2] + arrayMax[3] + arrayMax[4] + arrayMax[5];
+    let text = `<p class="greenText center">All unlocks are related to ${supervoid ? 'Inflations' : 'Strangeness'}<br>Also gain ${supervoid ? `a single Inflaton after unlocking ${total - global.inflationInfo.totalSuper} more` : `${total} Strange quarks, which is equal to total`} rewards</p>`;
     for (let i = 0; i < reward.length; i++) {
         const needText = info.needText[index][i]();
         if (needText === null) { continue; }
         const unlocked = current > i;
         let failText;
         if (!unlocked && player.challenges.active === 0) {
-            if (player.time[supervoid ? 'vacuum' : 'stage'] > info.time) {
+            if (supervoid && !player.challenges.super) {
+                failText = 'Supervoid only';
+            } else if (player.time[supervoid ? 'vacuum' : 'stage'] > info.time) {
                 failText = 'Out of time';
             } else if (index === 2 && i === 2 && player.accretion.rank > 1) {
                 failText = 'Failed';
@@ -1482,12 +1491,12 @@ const visualUpdateResearches = (index: number, stageIndex: number, type: 'resear
         getId(`strange${index + 1}Stage${stageIndex}Max`).textContent = `${max}`;
         image = getId(`strange${index + 1}Stage${stageIndex}Image`);
     } else /*if (type === 'inflations')*/ {
-        max = global.inflationTreeInfo.max[index];
-        level = player.inflation.tree[index];
+        max = global.treeInfo[stageIndex].max[index];
+        level = player.tree[stageIndex][index];
 
-        upgradeHTML = getId(`inflation${index + 1}Level`);
-        getId(`inflation${index + 1}Max`).textContent = `${max}`;
-        image = getId(`inflation${index + 1}Image`);
+        upgradeHTML = getId(`inflation${index + 1}Tree${stageIndex + 1}Level`);
+        getId(`inflation${index + 1}Tree${stageIndex + 1}Max`).textContent = `${max}`;
+        image = getId(`inflation${index + 1}Tree${stageIndex + 1}Image`);
     }
 
     upgradeHTML.textContent = `${level}`;
@@ -1581,13 +1590,13 @@ const updateVacuumHistory = () => {
     let text = '';
     if (length > 0) {
         for (let i = 0; i < length; i++) {
-            text += `<li class="whiteText"><span class="darkvioletText">${format(list[i][2], { padding: true })} Cosmon</span>, <span class="blueText">${format(list[i][0], { type: 'time' })}</span>, <span class="darkorchidText">${format(list[i][2] / list[i][0], { type: 'income' })}</span>, <span class="${list[i][1] ? 'greenText">true' : 'redText">false'} Vacuum</span></li>`;
+            text += `<li class="whiteText"><span class="darkvioletText">${format(list[i][2], { padding: true })} Inflatons</span>, <span class="blueText">${format(list[i][0], { type: 'time' })}</span>, <span class="darkorchidText">${format(list[i][2] / list[i][0], { type: 'income' })}</span>, <span class="${list[i][1] ? 'greenText">true' : 'redText">false'} Vacuum</span></li>`;
         }
     } else { text = '<li class="redText">Reference list is empty</li>'; }
     getId('vacuumHistoryList').innerHTML = text;
 
     const best = player.history.vacuum.best;
-    getId('vacuumHistoryBest').innerHTML = `<span class="darkvioletText">${format(best[2], { padding: true })} Cosmon</span>, <span class="blueText">${format(best[0], { type: 'time' })}</span>, <span class="darkorchidText">${format(best[2] / best[0], { type: 'income' })}</span>, <span class="${best[1] ? 'greenText">true' : 'redText">false'} Vacuum</span>`;
+    getId('vacuumHistoryBest').innerHTML = `<span class="darkvioletText">${format(best[2], { padding: true })} Inflatons</span>, <span class="blueText">${format(best[0], { type: 'time' })}</span>, <span class="darkorchidText">${format(best[2] / best[0], { type: 'income' })}</span>, <span class="${best[1] ? 'greenText">true' : 'redText">false'} Vacuum</span>`;
     global.debug.historyVacuum = player.inflation.resets;
 };
 
@@ -1814,7 +1823,7 @@ export const stageUpdate = (changed = true, offline = false) => {
         }
     }
     if (vacuum) {
-        getId('milestonesProgressArea').style.display = challenge === 0 && player.inflation.tree[4] >= 1 ? '' : 'none';
+        getId('milestonesProgressArea').style.display = challenge === 0 && player.tree[0][4] >= 1 ? '' : 'none';
     } else {
         const interstellar = (active >= 6 ? current : active) >= 4;
         getId('strangePeakAllowed').style.display = interstellar ? '' : 'none';

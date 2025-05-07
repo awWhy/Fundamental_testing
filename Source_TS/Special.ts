@@ -282,7 +282,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Stars.png', 'redBorderImage redText', 'Stars']
         ], [
             ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter'],
-            ['Cosmon.png', 'stage6borderImage darkvioletText', 'Cosmon']
+            ['Missing.png', 'stage6borderImage darkvioletText', 'Inflatons']
         ]
     ],
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
@@ -978,7 +978,7 @@ export const playEvent = (event: number, replay = true) => {
         text = "Now that the first Universe is finished, it's time to Inflate a new one and so to unlock the Inflation tab, new Upgrades and more Void rewards to complete\n(Also improve 'Nucleosynthesis' effect to unlock more Elements based on self-made Universes)";
     } else if (event === 10) {
         if (!replay) { visualTrueStageUnlocks(); }
-        text = "Now that there was even more matter to rearrange ‒ the 'Supervoid' was formed. Check it out by clicking on the Void name in the 'Advanced' subtab.\n(Also unlocked 2 new Inflations)";
+        text = "Now that there was even more matter to rearrange ‒ the 'Supervoid' was formed. Check it out by clicking on the Void name in the 'Advanced' subtab.\n(Also unlocked 2 new Inflations, Supervoid unlocks are kept through Universe reset)";
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);
@@ -1071,8 +1071,9 @@ export const openHotkeys = () => {
     const mainHTML = buildBigWindow('hotkeysHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `<h3 id="hotkeysMessage" class="bigWord" aria-live="assertive">Some hotkeys can be changed by clicking on them</h3>
-        ${globalSave.MDSettings[0] ? `<p>Swipe Left or Right ‒ <span class="whiteText">change current tab</span></p>
-        <p>Swipe Down or Up ‒ <span class="whiteText">change current subtab</span></p>` : ''}
+        ${globalSave.MDSettings[0] ? `<p>Left or Right swipe ‒ <span class="whiteText">change current tab</span></p>
+        <p>Diagonal Down or Up swipe ‒ <span class="whiteText">change current subtab</span></p>
+        <p id="stageSwipe">Long Left or Right swipe ‒ <span class="whiteText">change current active Stage</span></p>` : ''}
         <label id="tabRightHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">change tab to the next one</span></label>
         <label id="tabLeftHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">change tab to the previous one</span></label>
         <label id="subtabUpHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">change subtab to the next one</span></label>

@@ -211,9 +211,16 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     }
 };
 
-export const resetVacuum = () => {
+export const resetVacuum = (universe = false) => {
+    const vacuum = player.inflation.vacuum;
     const inflations = [false];
-    for (let i = 1; i <= 5; i++) { inflations[i] = player.buildings[6][1].current.moreOrEqual(i); }
+    for (let i = 1; i <= 6; i++) { inflations[i] = player.buildings[6][1].current.moreOrEqual(i); }
+    if (universe) {
+        player.inflation.age = 0;
+        player.time.universe = 0;
+        player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoid);
+        global.inflationInfo.totalSuper = 0;
+    }
     for (let s = 1; s <= 6; s++) {
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;
@@ -239,7 +246,7 @@ export const resetVacuum = () => {
     }
     player.researchesAuto[0] = inflations[3] ? 3 : 0;
     player.researchesAuto[1] = inflations[3] ? 2 : 0;
-    player.researchesAuto[2] = inflations[4] ? (player.inflation.vacuum ? 4 : 1) : 0;
+    player.researchesAuto[2] = inflations[4] ? (vacuum ? 4 : 1) : 0;
     player.stage.current = 1;
     player.stage.resets = 0;
     player.stage.peak = 0;
@@ -261,13 +268,11 @@ export const resetVacuum = () => {
     assignBuildingsProduction.S2Levels(false);
 
     //Stage 3
-    if (player.inflation.vacuum) {
+    if (vacuum) {
         player.accretion.rank = 1;
     } else {
         player.accretion.rank = 0;
         player.buildings[3][0].current.setValue('5.9722e27');
-
-        global.buildingsInfo.producing[4][5].setValue('0');
     }
 
     //Stage 4
@@ -298,17 +303,18 @@ export const resetVacuum = () => {
     }
 
     if (inflations[1]) {
-        const start = Math.ceil(Math.min(player.buildings[6][1].true, 99) ** (player.inflation.vacuum ? 2 : 1.5));
+        const start = Math.ceil(Math.min(player.buildings[6][1].true, 5) ** (vacuum ? 2 : 1.5));
         player.strange[0].current = start;
         player.strange[0].total = start;
-        if (player.inflation.vacuum) { player.strangeness[1][8] = 2; }
+        if (vacuum) { player.strangeness[1][8] = 2; }
     }
     if (inflations[2]) { player.strangeness[5][4] = 1; }
     if (inflations[3]) {
         player.strangeness[3][6] = 3;
         player.strangeness[4][6] = 2;
     }
-    if (inflations[5]) { player.strangeness[5][6] = player.inflation.vacuum ? 1 : 2; }
+    if (inflations[5]) { player.strangeness[5][6] = vacuum ? 1 : 2; }
+    if (inflations[6] && vacuum) { player.strangeness[5][8] = 1; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 5; s++) {
