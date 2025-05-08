@@ -187,6 +187,8 @@ p > img {
     position: absolute;
     clip-path: circle(0);
     pointer-events: none;
+    height: 0;
+    width: 0;
 }
 
 .bigWord { font-size: 1.1em !important; }

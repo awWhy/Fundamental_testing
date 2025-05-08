@@ -210,12 +210,12 @@ export const handleTouchHotkeys = (event: TouchEvent) => {
     const vertical = event.changedTouches[0].clientY - specialHTML.mobileDevice.start[1];
 
     const horizontalAbs = Math.abs(horizontal);
-    if (horizontalAbs < 50) { return; }
+    if (horizontalAbs < 100) { return; }
     if (Math.abs(vertical) >= 100) {
         changeSubtab(vertical > 0 ? 'up' : 'down');
     } else if (horizontalAbs >= 250) {
         changeStage(horizontal > 0 ? 'left' : 'right');
-    } else if (horizontalAbs >= 100) {
+    } else {
         changeTab(horizontal > 0 ? 'left' : 'right');
     }
 };
