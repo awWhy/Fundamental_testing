@@ -303,7 +303,7 @@ export const resetVacuum = (universe = false) => {
     }
 
     if (inflations[1]) {
-        const start = Math.ceil(Math.min(player.buildings[6][1].true, 5) ** (vacuum ? 2 : 1.5));
+        const start = Math.min(Math.ceil(player.buildings[6][1].true ** (vacuum ? 2 : 1.5)), 25);
         player.strange[0].current = start;
         player.strange[0].total = start;
         if (vacuum) { player.strangeness[1][8] = 2; }
@@ -314,7 +314,7 @@ export const resetVacuum = (universe = false) => {
         player.strangeness[4][6] = 2;
     }
     if (inflations[5]) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    if (inflations[6] && vacuum) { player.strangeness[5][8] = 1; }
+    if (inflations[6]) { player.strangeness[5][9] = 1; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 5; s++) {

@@ -59,7 +59,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[2].maxActive = 5;
         researchesExtraInfo[3].maxActive = 6;
         researchesExtraInfo[4].maxActive = 4;
-        researchesExtraInfo[5].maxActive = 5;
+        researchesExtraInfo[5].maxActive = 6;
 
         global.elementsInfo.startCost[27].setValue('1e54');
         global.elementsInfo.startCost[28].setValue('1e58');
@@ -75,8 +75,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangeness3Scaling = [2, 3.4, 3, 1, 100, 1, 1.74, 1];
         strangeness4Cost = [1, 2, 4, 2, 12, 6, 6, 24];
         strangeness4Scaling = [2, 3.4, 3, 4, 1900, 1, 1.74, 1];
-        strangeness5Cost = [24, 36, 4, 24, 15600, 24, 480, 120, 6000];
-        strangeness5Scaling = [2, 2, 4, 1, 1, 1, 1, 1, 1];
+        strangeness5Cost = [24, 36, 4, 24, 15600, 24, 480, 120];
+        strangeness5Scaling = [2, 2, 4, 1, 1, 1, 1, 1];
         strangenessInfo[1].maxActive = 10;
         strangenessInfo[2].maxActive = 10;
         strangenessInfo[3].maxActive = 10;
@@ -183,13 +183,13 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangeness3Scaling = [0.75, 1.5, 1, 0, 0, 0, 2.5, 0];
         strangeness4Cost = [1, 1, 3, 2, 4, 2, 4, 24];
         strangeness4Scaling = [1, 2, 1.5, 2, 0, 0, 68, 0];
-        strangeness5Cost = [20, 24, 240, 24, 6000, 24, 20, 120, 6000];
-        strangeness5Scaling = [20, 24, 240, 0, 0, 0, 220, 0, 0];
+        strangeness5Cost = [20, 24, 240, 24, 6000, 24, 20, 120];
+        strangeness5Scaling = [20, 24, 240, 0, 0, 0, 220, 0];
         strangenessInfo[1].maxActive = 7;
         strangenessInfo[2].maxActive = 7;
         strangenessInfo[3].maxActive = 8;
         strangenessInfo[4].maxActive = 8;
-        strangenessInfo[5].maxActive = 9;
+        strangenessInfo[5].maxActive = 10;
 
         getId('milestonesExtra').innerHTML = 'Completing any tier will award 1 <span class="greenText">Strange quark</span>';
         milestone1S1.src = milestone1S1.src.replace('Preon.png', 'Quarks.png');
@@ -231,6 +231,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
                 getId(`strange${i}Stage${s}`).style.display = 'none';
             }
         }
+        getId('strange9Stage5').style.display = 'none';
         getId('toggleAuto9Main').style.display = 'none';
         getId('energyGainStage1Build1').style.display = 'none';
         getId('energyGainStage1Build2').style.display = 'none';

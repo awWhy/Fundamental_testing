@@ -6,7 +6,7 @@ import { format, switchTab, visualTrueStageUnlocks } from './Update';
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = {
-    version: 'v0.2.5b',
+    version: 'v0.2.5c',
     fileName: 'Fundamental, [dateD.M.Y] [timeH-M-S], [stage]',
     stage: {
         true: 1,
@@ -259,7 +259,8 @@ export const player: playerType = {
         void: [0, 0, 0, 0, 0, 0],
         voidCheck: [0, 0, 0, 0, 0, 0],
         supervoid: [0, 0, 0, 0, 0, 0],
-        supervoidMax: [0, 0, 0, 0, 0, 0]
+        supervoidMax: [0, 0, 0, 0, 0, 0],
+        stability: 0
     },
     toggles: {
         normal: [], //class 'toggleNormal'
@@ -301,7 +302,7 @@ export const global: globalType = {
     tabList: { //Order comes from footer
         tabs: ['stage', 'upgrade', 'strangeness', 'inflation', 'settings'],
         stageSubtabs: ['Structures', 'Advanced'],
-        settingsSubtabs: ['Settings', 'History', 'Stats'],
+        settingsSubtabs: ['Settings', 'Stats', 'History'],
         upgradeSubtabs: ['Upgrades', 'Elements'],
         strangenessSubtabs: ['Matter', 'Milestones'],
         inflationSubtabs: ['Researches', 'Milestones']
@@ -409,7 +410,7 @@ export const global: globalType = {
     mergeInfo: {
         unlockU: [0, 0, 0, 0, 1, 1, 3],
         unlockR: [0, 0, 3, 3, 6],
-        unlockE: [0, 2, 4, 4, 6],
+        unlockE: [0, 2, 4, 4, 6, 6],
         S5Extra2: 0,
         checkReward: [0, 0, 0, 0],
         galaxies: 0
@@ -881,23 +882,25 @@ export const global: globalType = {
                 'Interacting Galaxies',
                 'Central dominant Galaxy',
                 'More Merges',
-                'Compact Group'
+                'Compact Group',
+                'Interacting Groups'
             ],
             effectText: [
                 () => `Super dense core which will allow creation of a new Structure. That Structure will increase Stage reset reward${player.inflation.vacuum ? ', starting Energy after any Reset' : ''}, boost Nebulas and Star clusters. But creating it will fully reset ${player.inflation.vacuum ? 'all' : 'Interstellar and Intergalactic'} Stages.\nThis Research ${player.strangeness[5][3] < 1 ? "can't be created because 'Gravitational bound' is missing" : 'also removes Solar mass and other Remnant requirements from everything in the Interstellar Stage'}.`,
                 () => `Unlock a new Result for Merge resets, if to reset with enough self-made Galaxies.${global.researchesExtraInfo[5].max[1] > 1 ? '\nSecond level will allow the use of excess Galaxies from previous Merge resets when forming new Galaxy groups.' : ''}`,
                 () => { //[2]
-                    const maxLevel = player.researchesExtra[5][2];
+                    const maxLevel = player.researchesExtra[5][2] + player.merge.rewards[1];
                     const trueLevel = global.mergeInfo.S5Extra2;
-                    return `An even bigger Galaxy to improve Stage reset reward and Galaxy groups effect with every Galaxy group.\nEffective level ${trueLevel !== maxLevel ? `is ${format(trueLevel, { padding: true })}, will be restored with more Stardust, this doesn't` : "will be set to 0 after any reset, this won't"} affect Stage reset reward.\n(Total boost: ${format(calculateEffects.S5Extra2(trueLevel), { padding: true })} ⟶ ${format(calculateEffects.S5Extra2(maxLevel + (maxLevel === trueLevel ? 1 : 0)), { padding: true })})`;
+                    return `An even bigger Galaxy to improve Stage reset reward and Galaxy groups effect with every Galaxy group.\nEffective level is ${format(trueLevel, { padding: trueLevel !== maxLevel })}, will be ${trueLevel !== maxLevel ? "restored with more Stardust, this doesn't" : "set to 0 after any reset, this won't"} affect Stage reset reward.\n(Total boost: ${format(calculateEffects.S5Extra2(trueLevel), { padding: true })} ⟶ ${format(calculateEffects.S5Extra2(maxLevel + (maxLevel === trueLevel ? 1 : 0)), { padding: true })})`;
                 },
                 () => 'Increase max allowed Merge reset by +1 per level.',
-                () => `Decrease amount of Galaxies required for the creation of a Galaxy Group.\n(Effect: ${calculateEffects.S5Extra4()} ⟶ ${calculateEffects.S5Extra4(player.researchesExtra[5][4] + 1)}, effect increase per level decreases by current level)`
+                () => `Decrease amount of Galaxies required for the creation of a Galaxy Group.\n(Effect: ${calculateEffects.S5Extra4()} ⟶ ${calculateEffects.S5Extra4(player.researchesExtra[5][4] + 1)}, effect increase per level decreases with more level)`,
+                () => 'Unlock the second Merge result.'
             ],
             cost: [],
-            startCost: [1e80, 1e260, '1e320', '1e350', '1e560'] as unknown as Overlimit,
-            scaling: [1, 1e150, 1e30, 1e210, 1e90],
-            max: [1, 1, 2, 1, 1],
+            startCost: [1e80, 1e260, '1e320', '1e350', '1e560', '1e660'] as unknown as Overlimit,
+            scaling: [1, 1e150, 1e30, 1e210, 1e90, 1],
+            max: [1, 1, 2, 1, 1, 1],
             maxActive: 1
         }, { //Stage 6
             name: [],
@@ -1244,7 +1247,7 @@ export const global: globalType = {
                 () => `Automatically trigger Stage reset${player.inflation.vacuum ? ' or leave current Challenge if time limit is reached' : `, doesn't work for Interstellar Stage${player.stage.true >= 7 ? ' and Challenges' : ''} until second level`}. (Needs to be enabled in Settings)`,
                 () => `Unspent Strange quarks will boost Intergalactic by increasing Solar mass gain.\n(Formula: (x + 1) ^${format(0.06)} | Effect: ${format(global.strangeInfo.stageBoost[5], { padding: true })})`,
                 () => 'Unlock another Strange Structure.\n(Click on that Structure to see its effects)',
-                () => "Automatically Merge Galaxies if can't get any more of them quickly. (Needs to be enabled in Settings)",
+                () => `Automatically Merge Galaxies ${player.inflation.vacuum ? "if can't get any more of them quickly" : 'as soon as its possible'}. (Needs to be enabled in Settings)`,
                 () => { //[10]
                     let passive = 'none';
                     let upgrades = 'none';
@@ -1277,7 +1280,7 @@ export const global: globalType = {
             'Strange gain',
             'Instability',
             'Void Milestones',
-            'Better Offline'
+            'Improved Offline'
         ],
         effectText: [
             () => `Boost global speed by 2, but reduce time limit on everything that has it by 4, if level is below 2.\nIf there is no time limit, then 2nd level will instead boost global speed by ${format(calculateEffects.inflation0(), { padding: true })} (strength depletes over 1 hour of real Stage time).`,
@@ -1285,12 +1288,12 @@ export const global: globalType = {
                 const power = calculateEffects.inflation1_power();
                 return `Boost global speed by (unspent Dark matter + 1) ^${format(power, { padding: true })}.\n(Boost per level: ${format(calculateEffects.inflation1(calculateEffects.inflation1_power(player.tree[0][1] + 1) - power), { padding: true })})`;
             },
-            () => `Gain ${format(1.4)} times more Strange quarks from any Stage reset per level.${player.tree[0][3] >= 1 ? `\nFirst ${player.tree[0][3] * 2} levels will also boost global speed by ${format(1.2)}, only while inside any Void.` : ''}`,
+            () => `Gain ${format(1.4)} times more Strange quarks from any Stage reset per level.${player.tree[0][3] >= 1 ? `\nFirst ${player.tree[0][3] * 2} levels will also boost global speed by ${format(1.2)}, but only while inside any Void.` : ''}`,
             () => `Boost global speed and Stage reset reward by ${format(calculateEffects.inflation3())}, strength is based on Supervoid progress in the current Universe.\nEvery level will also improve 2 levels of 'Strange gain' Inflation to boost global speed while inside any Void.`,
             () => 'For false Vacuum it will remove time limit from Milestones.\nFor true Vacuum it will unlock Void Milestones. Their effects are active, only when this Inflation is active.',
             () => {
-                const level = Math.min(player.tree[0][5], 3);
-                return `Allow for Export storage to be increased by ${25 * (level + 1)}% of the Stage reset value and to claim entire storage at once, but without bonus +1 to the Strange quarks base. Also increases Export time gain by ${format((4.8 - level) / (3.8 - level), { padding: true })}.\nIf inside reqular Void, then it will decrease time limit by 10 minutes per level, but boost global speed by ${format((6 - level) / (5 - level), { padding: true })}.\nIf inside Supervoid, then it will decrease global speed nerf by ${format((5 - level) / (4 - level), { padding: true })}.`;
+                const level = player.tree[0][5];
+                return `Allow for Export storage to be increased by ${(2 + 2 * level) * level}%${level < 4 ? ` ⟶ ${(4 + 2 * level) * (level + 1)}%` : ''} of the Stage reset value and to claim entire storage at once, but without bonus +1 to the Strange quarks base. Also increases Export time gain by ${format(4.8 / (4.8 - level), { padding: level < 4 })}${level < 4 ? ` ⟶ ${format(4.8 / (3.8 - level), { padding: true })}` : ''}.\nIf inside any Challenge, then it will boost global speed by ${format(6 / (6 - level))}${level < 4 ? ` ⟶ ${format(6 / (5 - level))}` : ''}, but decrease the time limit for the normal Void by ${10 * level}${level < 4 ? ` ⟶ ${10 * (level + 1)}` : ''} minutes.`;
             }
         ],
         cost: [],
@@ -1426,14 +1429,14 @@ export const global: globalType = {
             if (progress[1] >= 3) { text += `<p class="blueText">‒ Effective Drops amount is hardcapped at 1\n‒ Puddles are ${format(8000)} times weaker\n${progress[2] >= 1 ? `‒ Clouds gain is decreased by ^${format(0.8)}` : 'More nerfs will be shown with more rewards'}</p>`; }
             if (progress[1] >= 2) { text += `<p class="grayText">‒ Cosmic dust is softcapped (^${format(0.9)})\n${progress[3] >= 4 ? `‒ Softcap is stronger after reaching 'Jovian planet' Rank (^${format(0.8)})` : 'More nerfs will be shown with more rewards'}</p>`; }
             if (progress[3] >= 5) { text += `<p class="orchidText">‒ Stars are ${format(8000)} times weaker${progress[4] >= 1 ? '\n‒ Solar mass gain is 2 times smaller' : ''}${progress[4] >= 2 ? `\n‒ Solar mass effect is softcapped ^${format(0.2)} after 1` : ''}\n${progress[4] >= 5 ? "‒ Can't create or gain Quasi-stars" : 'More nerfs will be shown with more rewards'}</p>`; }
-            if (progress[2] >= 1) { text += `<p class="cyanText">${player.challenges.super && player.tree[0][5] < 4 ? `‒ Global speed is divided by ${5 - player.tree[0][5]}\n` : ''}‒ All resets affect all ${player.stage.true >= 7 ? 'pre-Abyss ' : ''}Stages${progress[5] >= 1 ? `\n‒ Galaxies cost scaling increased by +${format(0.05)}` : progress[4] >= 5 ? '\nMore nerfs will be shown with more rewards' : ''}</p>`; }
+            if (progress[2] >= 1) { text += `<p class="cyanText">${player.challenges.super ? '‒ Global speed is decreased by 5\n' : ''}‒ All resets affect all ${player.stage.true >= 7 ? 'pre-Abyss ' : ''}Stages${progress[5] >= 1 ? `\n‒ Galaxies cost scaling increased by +${format(0.05)}` : progress[4] >= 5 ? '\nMore nerfs will be shown with more rewards' : ''}</p>`; }
             return text;
         },
         needText: [
             [], [
                 () => 'Perform the Discharge',
                 () => 'Unlock Accretion Stage',
-                () => `Unlock Submerged Stage${global.sessionToggles[0] ? ' (WIP)' : ''}`
+                () => 'Unlock Submerged Stage'
             ], [
                 () => `Vaporize the Drops${global.sessionToggles[0] ? ' (WIP)' : ''}`,
                 () => `Have more than ${format(1e4)} Clouds${global.sessionToggles[0] ? ' (WIP)' : ''}`,
@@ -1442,7 +1445,7 @@ export const global: globalType = {
                 () => "Reach 'Meteoroid' Rank",
                 () => "Reach 'Asteroid' Rank",
                 () => "Reach 'Planet' Rank",
-                () => `Reach 'Jovian planet' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
+                () => "Reach 'Jovian planet' Rank",
                 () => `Reach 'Protostar' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
                 () => player.stage.true >= 7 ? `Reach 'Protogalaxy' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}` : null
             ], [
@@ -1453,7 +1456,7 @@ export const global: globalType = {
                 () => `Unlock Intergalactic Stage${global.sessionToggles[0] ? ' (WIP)' : ''}`
             ], [
                 () => `Create a Galaxy${global.sessionToggles[0] ? ' (WIP)' : ''}`,
-                () => player.stage.true >= 7 ? `Force a Galaxic Merge${global.sessionToggles[0] ? ' (WIP)' : ''}` : null,
+                () => player.stage.true >= 7 ? 'Force a Galaxic Merge (WIP)' : null,
                 () => player.stage.true >= 7 ? 'Create a Galaxy group (WIP)' : null
             ]
         ],
@@ -1467,8 +1470,8 @@ export const global: globalType = {
         ], [
             [],
             ["'Discharge improvement' (Non-refundable)", "'Improved conservation' (Milestone)", 'Missing'],
-            ['Missing', 'Missing', 'Missing'],
-            ["'Indestructible matter' (Milestone)", "'Latest Preons' (Milestone)", "'Better Offline' (Refundable)", 'Missing', 'Missing', 'Missing'],
+            ["'Conservation of Resources' (Non-refundable, WIP)", 'Missing', 'Missing'],
+            ["'Indestructible matter' (Milestone)", "'Latest Preons' (Milestone)", "'Improved Offline' (Refundable)", "'Stability' (Non-refundable, WIP)", 'Missing', 'Missing'],
             ['Missing', 'Missing', 'Missing', 'Missing', 'Missing'],
             ['Missing', 'Missing', 'Missing']
         ]],
@@ -1476,9 +1479,18 @@ export const global: globalType = {
         time: 3600,
         color: 'darkviolet'
     }, {
-        name: 'Vacuum information',
+        name: 'Vacuum stability',
+        description: () => 'A more stable, but still the false Vacuum state\n(Entering will force a Vacuum reset, will be reverted after exiting)',
+        effectText: () => {
+            const completions = player.challenges.stability;
+            return `<p class="orchidText">‒ Global speed is decreased by 2\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
+            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** Math.max((player.challenges.active === 1 ? player.stage.resets : 0) + completions - 8, 0), { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by 4\n‒ Stage resets above ${8 - completions} decrease Strange quarks from Stage resets by 2</p>
+            <p class="darkvioletText">‒ Merge requirement is increased by +${completions}, which is equal to ${22 + completions}</p>`;
+        },
+        needText: ['1 Completion'],
+        rewardText: ['Start Universe resets with the true Vacuum (WIP)'],
         resetType: 'vacuum',
-        time: 1200,
+        time: 3600,
         color: 'darkorchid'
     }],
     historyStorage: {
@@ -1769,6 +1781,10 @@ export const updatePlayer = (load: playerType): string => {
 
             /* Can be removed eventually */
             load.fileName = load.fileName.replace('[cosmon]', '[inflaton]');
+        }
+        if (load.version === 'v0.2.5b') {
+            load.version = 'v0.2.5c';
+            load.challenges.stability = 0;
         }
 
         if (load.version !== playerStart.version) {

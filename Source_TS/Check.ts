@@ -184,19 +184,28 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 9) { return player.challenges.void[4] >= 5; }
                 } else if (stageIndex === 5) {
                     if (upgrade === 4) { return player.challenges.void[4] >= 1; }
-                    if (upgrade === 8) { return player.challenges.void[3] >= 5 || player.buildings[6][1].current.moreOrEqual('6'); }
+                    if (upgrade === 8) { return player.challenges.void[3] >= 5; }
                     if (upgrade === 9) { return player.challenges.void[3] >= 6; }
                     if (upgrade === 10) { return player.challenges.void[2] >= 3; }
                     if ([0, 1, 5, 7].includes(upgrade)) { return player.strangeness[5][3] >= 1; }
                 }
-                return true;
-            }
-            if (((stageIndex === 1 || stageIndex === 2) && upgrade < 6) || ((stageIndex === 3 || stageIndex === 4) && upgrade < 7)) { return true; }
-            if (player.milestones[4][0] < 8) { return false; }
-            if (stageIndex === 5) {
-                if (upgrade === 2) { return player.milestones[5][0] >= 8; }
-                if (upgrade === 4) { return player.milestones[4][1] >= 8; }
-                if ([0, 1, 3, 5].includes(upgrade)) { return player.milestones[2][0] >= 7 || player.milestones[3][0] >= 7; }
+            } else {
+                if (player.challenges.active === 1) {
+                    if (stageIndex === 1) {
+                        if (player.milestones[1][1] >= 6) { return false; }
+                    } else if (stageIndex === 2) {
+                        if (player.milestones[2][1] >= 7) { return false; }
+                    } else if (stageIndex === 3) {
+                        if (player.milestones[3][1] >= 7) { return false; }
+                    }
+                }
+                if (((stageIndex === 1 || stageIndex === 2) && upgrade < 6) || ((stageIndex === 3 || stageIndex === 4) && upgrade < 7)) { return true; }
+                if (player.milestones[4][0] < 8) { return false; }
+                if (stageIndex === 5) {
+                    if (upgrade === 2) { return player.milestones[5][0] >= 8; }
+                    if (upgrade === 4) { return player.milestones[4][1] >= 8; }
+                    if ([0, 1, 3, 5].includes(upgrade)) { return player.milestones[2][0] >= 7 || player.milestones[3][0] >= 7; }
+                }
             }
             return true;
         case 'inflations':

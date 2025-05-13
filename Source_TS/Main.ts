@@ -1,5 +1,5 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
-import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallengeReward, stageUpdate, getStrangenessDescription, addIntoLog } from './Update';
+import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, addIntoLog } from './Update';
 import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog, errorNotify } from './Special';
 import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
@@ -440,7 +440,11 @@ const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness'
 const hoverChallenge = (index: number) => {
     global.lastChallenge[0] = index;
     getChallengeDescription(index);
-    if (index === 0) { getChallengeReward(global.lastChallenge[1]); }
+    if (index === 0) {
+        getChallenge0Reward(global.lastChallenge[1]);
+    } else if (index === 1) {
+        getChallenge1Reward();
+    }
     visualUpdate();
 };
 export const changeRewardType = (state = !global.sessionToggles[0]) => {
@@ -483,12 +487,24 @@ export const updateCollapsePointsText = () => {
 
 export const loadoutsVisual = (loadout: number[]) => {
     if (getId('loadoutsMain').dataset.open !== 'true') { return; }
+    const appeared = {} as Record<number, number>;
+    const { startCost, scaling } = global.treeInfo[0];
+    const calculate = (index: number) => Math.floor(Math.round((startCost[index] + scaling[index] * appeared[index]) * 100) / 100);
+
+    let cost = 0;
     let string = '';
     for (let i = 0, dupes = 1; i < loadout.length; i += dupes, dupes = 1) {
         const current = loadout[i];
-        while (loadout[i + dupes] === current) { dupes++; }
+        appeared[current] = appeared[current] === undefined ? 0 : appeared[current] + 1;
+        cost += calculate(current);
+        while (loadout[i + dupes] === current) {
+            appeared[current]++;
+            cost += calculate(current);
+            dupes++;
+        }
         string += `${i > 0 ? ', ' : ''}${current + 1}${dupes > 1 ? `x${dupes}` : ''}`;
     }
+    getQuery('#loadoutsEditLabel > span').textContent = format(cost, { padding: 'exponent' });
     (getId('loadoutsEdit') as HTMLInputElement).value = string;
 };
 export const loadoutsRecreate = () => {
@@ -519,6 +535,13 @@ export const loadoutsRecreate = () => {
         button.addEventListener('click', event);
     }
     global.loadouts.buttons = newOld;
+};
+const loadoutsSave = () => {
+    const name = (getId('loadoutsName') as HTMLInputElement).value;
+    if (name.length < 1 || name.trim() !== name || name === 'Auto-generate') { return Notify(`Loadout name: '${name}' is not allowed`); }
+    player.inflation.loadouts[name] = global.loadouts.input;
+    loadoutsRecreate();
+    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = `Saved the '${name}' loadout`; }
 };
 const loadoutsLoad = async(loadout = null as null | string) => {
     const quick = loadout !== null;
@@ -735,7 +758,7 @@ try { //Start everything
                 effectID.before(' (');
                 effectID.after(')');
             }
-            for (let i = 1; i <= 1; i++) {
+            for (let i = 1; i <= 2; i++) {
                 const effectID = getQuery(`#merge${i}Effect > span.info`);
                 effectID.classList.remove('greenText');
                 effectID.before(' (');
@@ -836,11 +859,15 @@ try { //Start everything
             cancelRepeat();
             let target = event.target as HTMLElement;
             const body = document.body;
-            const notAllowed = [getId('globalStats'), getId('footerMain')];
+            const notAllowed = [getId('globalStats'), getId('footerMain')]; //[0] Shouldn't be changed
             while (target != null && target !== body) {
-                if (notAllowed.includes(target)) { return; }
+                if (notAllowed.includes(target)) {
+                    if (target !== notAllowed[0]) { notAllowed[0].style.opacity = '1'; }
+                    return;
+                }
                 target = target.parentElement as HTMLElement;
             }
+            notAllowed[0].style.opacity = '1';
             handleTouchHotkeys(event);
         });
         htmlHTML.addEventListener('touchcancel', cancelRepeat);
@@ -995,13 +1022,13 @@ try { //Start everything
     getId('challengeName').addEventListener('click', () => { toggleSupervoid(true); });
     getId('rewardsType').addEventListener('click', () => {
         changeRewardType();
-        getChallengeReward(global.lastChallenge[1]);
+        getChallenge0Reward(global.lastChallenge[1]);
     });
     for (let s = 1; s <= 5; s++) {
         const image = getId(`voidReward${s}`);
         const clickFunc = () => {
             global.lastChallenge[1] = s;
-            getChallengeReward(s);
+            getChallenge0Reward(s);
         };
         image.addEventListener('mouseover', clickFunc);
         if (PC || SR) {
@@ -1269,6 +1296,10 @@ try { //Start everything
             }
         }
     }
+    getId('loadoutsName').addEventListener('keydown', (event) => {
+        if (event.repeat || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
+        if (event.code === 'Enter') { loadoutsSave(); }
+    });
     getId('inflationRefund').addEventListener('click', () => void inflationRefund(global.hotkeys.shift));
     getId('inflationLoadouts').addEventListener('click', () => {
         const windowHTML = getId('loadoutsMain');
@@ -1285,6 +1316,8 @@ try { //Start everything
     });
     getId('loadoutsEdit').addEventListener('change', () => {
         const first = (getId('loadoutsEdit') as HTMLInputElement).value.split(',');
+        const appeared = {} as Record<number, number>;
+        const max = global.treeInfo[0].max;
         const final = [];
         for (let i = 0; i < first.length; i++) {
             const index = first[i].indexOf('x');
@@ -1294,9 +1327,11 @@ try { //Start everything
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
-            if (isNaN(number) || number < 0) { continue; }
-            if (isNaN(repeat)) { repeat = 1; }
-            if (repeat > 8) { repeat = 8; }
+            const inside = appeared[number] ?? 0;
+            const maxRepeats = max[number] - inside;
+            if (repeat > maxRepeats) { repeat = maxRepeats; }
+            if (isNaN(maxRepeats) || isNaN(repeat) || repeat < 1) { continue; }
+            appeared[number] = inside + repeat;
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
         global.loadouts.input = final;
@@ -1306,13 +1341,7 @@ try { //Start everything
         if (!global.hotkeys.shift) { (getId('loadoutsName') as HTMLInputElement).value = 'Auto-generate'; }
         loadoutsLoadAuto();
     });
-    getId('loadoutsSave').addEventListener('click', () => {
-        const name = (getId('loadoutsName') as HTMLInputElement).value;
-        const check = Number(name); //Lazy check for all types of only having spacebars
-        if ((!isNaN(check) && `${check}` !== name) || name === 'Auto-generate') { return Notify(`Loadout name: '${name}' is not allowed`); }
-        player.inflation.loadouts[name] = global.loadouts.input;
-        loadoutsRecreate();
-    });
+    getId('loadoutsSave').addEventListener('click', loadoutsSave);
     getId('loadoutsLoad').addEventListener('click', () => void loadoutsLoad());
     getId('loadoutsDelete').addEventListener('click', () => {
         const name = (getId('loadoutsName') as HTMLInputElement).value;
@@ -1502,16 +1531,11 @@ try { //Start everything
     {
         const startEvent = (event: MouseEvent | TouchEvent) => {
             const mouse = event instanceof MouseEvent;
-            const html = getId('globalStats');
-            if (global.hotkeys.shift) {
-                toggleSpecial(4, 'global', true);
-                getId('globalStats').style.display = 'none';
-                return;
-            }
             const bodyMain = document.documentElement;
             const screenWidth = bodyMain.clientWidth;
             const screenHeight = bodyMain.clientHeight;
 
+            const html = getId('globalStats');
             let lastX = mouse ? event.clientX : event.changedTouches[0].clientX;
             let lastY = mouse ? event.clientY : event.changedTouches[0].clientY;
             const move = (event: MouseEvent | TouchEvent) => {
@@ -1534,7 +1558,6 @@ try { //Start everything
                 bodyMain.removeEventListener('touchmove', move);
                 bodyMain.removeEventListener('touchend', removeEvents);
                 bodyMain.removeEventListener('touchcancel', removeEvents);
-                html.style.opacity = '1';
             };
             if (mouse) {
                 bodyMain.addEventListener('mousemove', move);
@@ -1542,7 +1565,7 @@ try { //Start everything
                 bodyMain.addEventListener('mouseleave', removeEvents);
                 html.style.opacity = '1';
             } else {
-                event.preventDefault(); //To prevent scrolling, doesn't work on edge
+                event.preventDefault(); //To prevent scrolling, doesn't work on edges
                 bodyMain.addEventListener('touchmove', move);
                 bodyMain.addEventListener('touchend', removeEvents);
                 bodyMain.addEventListener('touchcancel', removeEvents);

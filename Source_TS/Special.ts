@@ -258,6 +258,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Missing.png', 'stage3borderImage'],
             ['ResearchGalaxy3.png', 'stage3borderImage'],
             ['ResearchGalaxy4.png', 'brownBorderImage'],
+            ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
         ], []
     ],
@@ -342,7 +343,7 @@ export const preventImageUnload = (): void => {
     for (const text of global.accretionInfo.rankImage) { //Already cached in Accretion stats, this only refreshes it
         images += `<img src="Used_art/${text}" loading="lazy">`;
     }
-    for (const text of ['Red%20giant', 'White%20dwarf', 'Neutron%20star', 'Quark%20star', 'Galaxy%20group']) { //Galaxy%20cluster
+    for (const text of ['Red%20giant', 'White%20dwarf', 'Neutron%20star', 'Quark%20star', 'Galaxy%20group']) {
         images += `<img src="Used_art/${text}.png" loading="lazy">`;
     }
     specialHTML.cache.imagesDiv.innerHTML = images;
@@ -920,8 +921,10 @@ export const MDStrangenessPage = (stageIndex: number) => {
 
 export const replayEvent = async() => {
     let last;
-    if (player.stage.true >= 7) {
-        last = player.event ? 10 : 9;
+    if (player.stage.true >= 8) {
+        last = 11;
+    } else if (player.stage.true >= 7) {
+        last = player.buildings[6][1].true >= 6 ? 11 : player.event ? 10 : 9;
     } else if (player.stage.true === 6) {
         last = player.event ? 8 : player.stage.resets >= 1 ? 7 : 6;
     } else {
@@ -939,6 +942,7 @@ export const replayEvent = async() => {
     if (last >= 8) { text += '\nEvent 8: First Merge'; }
     if (last >= 9) { text += '\nEvent 9: Inflation'; }
     if (last >= 10) { text += '\nEvent 10: Supervoid'; }
+    if (last >= 11) { text += '\nEvent 11: Stability'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -979,6 +983,8 @@ export const playEvent = (event: number, replay = true) => {
     } else if (event === 10) {
         if (!replay) { visualTrueStageUnlocks(); }
         text = "Now that there was even more matter to rearrange ‒ the 'Supervoid' was formed. Check it out by clicking on the Void name in the 'Advanced' subtab.\n(Also unlocked 2 new Inflations, Supervoid unlocks are kept through Universe reset)";
+    } else if (event === 11) {
+        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);
@@ -1030,9 +1036,9 @@ export const openVersionInfo = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Will be added later\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Abyss rework\n- Added global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
-        <h6>v0.2.3</h6><p>- Small amount of new content\n- Supervoid rework\n- Abyss small rebalance</p>
+        <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>
         <h6>v0.2.2</h6><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves the game to load it after exiting</p>
         <h6>v0.2.1</h6><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions</p>
         <h6>v0.2.0</h6><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>

@@ -112,6 +112,7 @@ export interface playerType {
         supervoid: number[]
         /** Supervoid progress in the current Universe */
         supervoidMax: number[]
+        stability: number
     }
     toggles: {
         /** Auto Stage switch[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
@@ -413,6 +414,10 @@ export interface globalType {
         color: string
     }, {
         name: string
+        description: () => string
+        effectText: () => string
+        needText: string[]
+        rewardText: string[]
         resetType: 'vacuum'
         time: number
         color: string
@@ -511,7 +516,7 @@ export interface calculateEffectsType {
     S5Upgrade2: (post?: boolean, level?: number) => number
     S5Research2: () => number
     S5Research3: () => number
-    /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][2] if for Stage reset */
+    /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][2] + player.merge.rewards[1] if for Stage reset */
     S5Extra2: (level: number, post?: boolean) => number
     S5Extra4: (level?: number) => number
     element6: () => number

@@ -63,7 +63,7 @@
                             </div>
                             <div id="special2" title="Neutron stars">
                                 <img src="Used_art/Neutron%20star.png" alt="" loading="lazy" draggable="false">
-                                <p class="whiteText"><span id="special2Cur" class="darkvioletText">0</span><span>(+<span id="special2Get">0</span>)</span></p>
+                                <p class="whiteText"><span id="special2Cur">0</span><span>(+<span id="special2Get">0</span>)</span></p>
                             </div>
                             <div id="special3" title="Black holes">
                                 <img src="Used_art/Black%20hole.png" alt="" loading="lazy" draggable="false">
@@ -210,6 +210,7 @@
                             <section id="mergeEffects">
                                 <h3 class="cyanText bigWord">Current effects | Requirements</h3>
                                 <p id="merge1Effect" class="grayText">Groups: <span class="greenText">1</span><span class="info greenText">Boost to Galaxies</span><span> | <span class="greenText">0</span> out of <span class="greenText">50</span> Galaxies</span></p>
+                                <p id="merge2Effect" class="grayText">Clusters: <span class="greenText">1</span><span class="info greenText">Max boost from bonus levels of 'Central dominant Galaxy'</span><span> | <span class="greenText">0</span> out of <span class="greenText">100</span> Galaxies</span></p>
                             </section>
                         </div>
                         <div class="stage6Only">
@@ -217,6 +218,7 @@
                             <section id="mergeScore" class="stage6borderImage" title="Merge score">
                                 <p id="mergeScore0" class="grayText"><span>Galaxies:</span> <span id="mergeScore0Cur" class="greenText">0</span> <span>(<span class="greenText">1</span> per)</span></p>
                                 <p id="mergeScore1" class="grayText"><span>Groups:</span> <span id="mergeScore1Cur" class="greenText">0</span> <span>(<span class="greenText">2</span> per)</span></p>
+                                <p id="mergeScore2" class="grayText"><span>Clusters:</span> <span id="mergeScore2Cur" class="greenText">0</span> <span>(<span class="greenText">0</span> per)</span></p>
                                 <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span>(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
                             </section>
                             <p class="darkvioletText">Inflatons gain on Vacuum resets: <span class="greenText" id="inflatonGainTrue">1</span> (<span class="greenText">true</span>) | <span class="redText" id="inflatonGainFalse">1</span> (<span class="redText">false</span>)</p>
@@ -254,7 +256,11 @@
                                     <button type="button" id="voidReward4" class="hollowButton stage4borderButton orangeText" aria-controls="voidRewardsMultiline">Interstellar</button>
                                     <button type="button" id="voidReward5" class="hollowButton stage5borderButton darkorchidText" aria-controls="voidRewardsMultiline">Intergalactic</button>
                                 </div>
-                                <div id="voidRewardsMultiline" class="whiteText"></div>
+                                <div id="voidRewardsMultiline" class="whiteText challengeRewards"></div>
+                            </section>
+                            <section id="stabilityRewards">
+                                <h3 type="button" class="selectBtn darkorchidText bigWord">Completions rewards:</h3>
+                                <div id="stabilityRewardsMultiline" class="whiteText challengeRewards"></div>
                             </section>
                         </div>
                     </div>
@@ -777,7 +783,7 @@
                                 <p><span id="inflation5Tree1Level">0</span>/<span id="inflation5Tree1Max" class="greenText">1</span></p>
                             </div>
                             <div id="inflation6Tree1" class="whiteText stage2borderImage">
-                                <input type="image" src="Used_art/Offline.png" alt="Better Offline" draggable="false" id="inflation6Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
+                                <input type="image" src="Used_art/Offline.png" alt="Improved Offline" draggable="false" id="inflation6Tree1Image" class="interactiveImage" aria-controls="inflationCost inflationEffect">
                                 <p><span id="inflation6Tree1Level">0</span>/<span id="inflation6Tree1Max" class="greenText">1</span></p>
                             </div>
                         </section>
@@ -791,16 +797,16 @@
                     <div class="descriptionTextMain">
                         <div>
                             <button type="button" id="inflationRefund" class="hollowButton">Refund</button>
-                            <button type="button" id="inflationLoadouts" class="hollowButton" aria-controls="loadoutsMain" aria-expanded="false">Loadouts <span class="downArrow"></span></button>
+                            <button type="button" id="inflationLoadouts" class="hollowButton" aria-controls="loadoutsMain" aria-expanded="false">Loadouts <span class="downArrow"></span></button>
                         </div>
                         <section id="loadoutsMain" class="darkvioletText" data-open="false" style="display: none;" aria-label="Loadouts menu">
                             <div>
-                                <label>Selected: <input type="text" id="loadoutsName" autocomplete="off"></label>
+                                <label style="white-space: nowrap;">Selected: <input type="text" id="loadoutsName" autocomplete="off"></label>
                                 <button type="button" id="loadoutsLoad" class="hollowButton">Load</button>
                                 <button type="button" id="loadoutsSave" class="hollowButton">Save</button>
                                 <button type="button" id="loadoutsDelete" class="hollowButton">Delete</button>
                             </div>
-                            <input type="text" id="loadoutsEdit" autocomplete="off">
+                            <label id="loadoutsEditLabel"><span title="Inflatons required">0</span><input type="text" id="loadoutsEdit" autocomplete="off"></label>
                             <p id="loadoutsList">Saved: <span></span><button type="button" id="loadoutsLoadAuto" class="selectBtn greenText">Auto-generate</button></p>
                             <p class="center">(Can click shift to quick load and refund)</p>
                         </section>
@@ -813,18 +819,18 @@
                 </section>
                 <section id="inflationSubtabMilestones" class="insideTab" style="display: none;" aria-label="Current tab">
                     <div id="inflationMilestones">
-                        <section id="inflationPermanent"><h4>Permanent unlocks:</h4>
-                            <p>Supervoid ‒ Harder version of Void, click the '<span style="text-decoration: underline;">Name</span>' button to change Void type</p>
+                        <section id="inflationSupervoid"><h4>Supervoid unlocks:</h4>
                             <p id="inflationSupervoid1">Improved conservation ‒ Remove Stage requirement from both levels of 'Conservation of Mass' Strangeness</p>
                             <p id="inflationSupervoid2">Indestructible matter ‒ Make self-made Preons and related Energy immune to pre-Stage resets</p>
                             <p id="inflationSupervoid3">Latest Preons ‒ Improve effect scaling of 'Later Preons' Energy Research by 20%</p>
+                            <p>(To toggle the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Name</span>' button)</p>
                         </section>
-                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universes:</h4>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up, ^2 if in the true Vacuum<br>Hardcaps after 5 Universes. True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</section>
+                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universes:</h4>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up, ^2 if in the true Vacuum<br>Hardcaps at 25 Strange quarks. True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</section>
                         <section id="inflationMilestone4"><h4>Unlocked at 4 Universes:</h4>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank and Collapse at level 1</section>
                         <section id="inflationMilestone5"><h4>Unlocked at 5 Universes:</h4>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum</section>
-                        <section id="inflationMilestone6"><h4>Unlocked at 6 Universes:</h4>Start Vacuum resets with 'Strange growth' Strangeness unlocked, and at level 1 for true Vacuum</section>
+                        <section id="inflationMilestone6"><h4>Unlocked at 6 Universes:</h4>Start Vacuum resets with 'Automatic Merge' Strangeness at level 1, including false Vacuum</section>
                     </div>
                 </section>
             </div>
@@ -1015,26 +1021,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
-                <section id="settingsSubtabHistory" class="insideTab" style="display: none;" aria-label="Current tab">
-                    <div id="historyMainDiv">
-                        <section id="vacuumHistory" class="orchidText">
-                            <h3 class="bigWord">Vacuum resets:</h3>
-                            <p><label>Save <input type="number" id="vacuumHistorySave" min="0" max="100" step="1"></label>, <label>show <input type="number" id="vacuumHistoryShow" min="10" max="100" step="1"></label></p>
-                            <ol id="vacuumHistoryList">
-                                <li class="redText">Reference list is empty</li>
-                            </ol>
-                            <p>Best reset: <span id="vacuumHistoryBest" class="whiteText">Missing</span></p>
-                        </section>
-                        <section id="stageHistory" class="stageText">
-                            <h3 class="bigWord">Interstellar Stage resets:</h3>
-                            <p><label>Save <input type="number" id="stageHistorySave" min="0" max="100" step="1"></label>, <label>show <input type="number" id="stageHistoryShow" min="10" max="100" step="1"></label></p>
-                            <ol id="stageHistoryList">
-                                <li class="redText">Reference list is empty</li>
-                            </ol>
-                            <p>Best reset: <span id="stageHistoryBest" class="whiteText">Missing</span></p>
-                        </section>
                     </div>
                 </section>
                 <section id="settingsSubtabStats" class="insideTab" style="display: none;" aria-label="Current tab">
@@ -1236,6 +1222,7 @@
                                 <h3 class="cyanText">Boost after Merge</h3>
                                 <p id="mergeBaseStat" class="grayText">Galaxies: <span class="greenText">1</span></p>
                                 <p id="merge1Stat" class="grayText">Groups: <span class="greenText">1</span></p>
+                                <p id="merge2Stat" class="grayText">Clusters: <span class="greenText">1</span></p>
                                 <h4 class="darkvioletText">Total: <span id="mergeTotal" class="greenText">1</span> ^2</h4>
                             </section>
                             <p id="mergeResets" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max</p>
@@ -1243,6 +1230,26 @@
                             <p class="redText">Self-made Stars: <span id="trueStarsStat" class="orangeText">0</span></p>
                         </div>
                         <p id="maxSolarMassStat" class="cyanText">Highest Solar mass: <span class="orchidText">0.01235</span></p>
+                    </div>
+                </section>
+                <section id="settingsSubtabHistory" class="insideTab" style="display: none;" aria-label="Current tab">
+                    <div id="historyMainDiv">
+                        <section id="vacuumHistory" class="orchidText">
+                            <h3 class="bigWord">Vacuum resets:</h3>
+                            <p><label>Save <input type="number" id="vacuumHistorySave" min="0" max="100" step="1"></label>, <label>show <input type="number" id="vacuumHistoryShow" min="10" max="100" step="1"></label></p>
+                            <ol id="vacuumHistoryList">
+                                <li class="redText">Reference list is empty</li>
+                            </ol>
+                            <p>Best reset: <span id="vacuumHistoryBest" class="whiteText">Missing</span></p>
+                        </section>
+                        <section id="stageHistory" class="stageText">
+                            <h3 class="bigWord">Interstellar Stage resets:</h3>
+                            <p><label>Save <input type="number" id="stageHistorySave" min="0" max="100" step="1"></label>, <label>show <input type="number" id="stageHistoryShow" min="10" max="100" step="1"></label></p>
+                            <ol id="stageHistoryList">
+                                <li class="redText">Reference list is empty</li>
+                            </ol>
+                            <p>Best reset: <span id="stageHistoryBest" class="whiteText">Missing</span></p>
+                        </section>
                     </div>
                 </section>
             </div>
@@ -1289,8 +1296,8 @@
                         <button type="button" id="inflationSubtabBtnResearches" class="tabActive" tabindex="-1" style="display: none;">Researches</button>
                         <button type="button" id="inflationSubtabBtnMilestones" tabindex="-1" style="display: none;">Milestones</button>
                         <button type="button" id="settingsSubtabBtnSettings" class="tabActive" tabindex="-1" style="display: none;">Settings</button>
-                        <button type="button" id="settingsSubtabBtnHistory" tabindex="-1" style="display: none;">History</button>
                         <button type="button" id="settingsSubtabBtnStats" tabindex="-1" style="display: none;">Stats</button>
+                        <button type="button" id="settingsSubtabBtnHistory" tabindex="-1" style="display: none;">History</button>
                     </nav>
                     <div id="phoneHotkeys" style="display: none;"></div> <!-- Its here just in case -->
                 </div>
