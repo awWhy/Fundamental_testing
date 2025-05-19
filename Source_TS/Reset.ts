@@ -303,7 +303,7 @@ export const resetVacuum = (universe = false) => {
     }
 
     if (inflations[1]) {
-        const start = Math.min(Math.ceil(player.buildings[6][1].true ** (vacuum ? 2 : 1.5)), 25);
+        const start = Math.ceil(player.buildings[6][1].true ** (vacuum ? 2 : 1.5));
         player.strange[0].current = start;
         player.strange[0].total = start;
         if (vacuum) { player.strangeness[1][8] = 2; }

@@ -2,12 +2,12 @@ import type Overlimit from './Limit';
 import { getId, getQuery } from './Main';
 import { global, player, playerStart } from './Player';
 import { resetVacuum } from './Reset';
-import { playEvent, specialHTML } from './Special';
+import { globalSave, playEvent, specialHTML } from './Special';
 import { setActiveStage } from './Stage';
 import { addIntoLog, visualTrueStageUnlocks } from './Update';
 
 /** Sets playerStart, global and HTML values */
-export const prepareVacuum = (state: boolean) => { //Must not use direct player values
+export const prepareVacuum = (state: boolean) => { //Must not use direct player values, globalSave is fine probably
     const { buildings } = playerStart;
     const { buildingsInfo, upgradesInfo, researchesInfo, researchesExtraInfo, strangenessInfo } = global;
     const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
@@ -105,8 +105,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('element0').style.display = '';
         getId('strangePeakAllowed').style.display = '';
         getId('strange1Effect1Allowed').style.display = '';
-        const test = getId('strangenessPage5', true); //No idea if global setting should be allowed here
-        (test === null ? getId('strangenessSection5') : test).style.display = '';
+        getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = '';
         getId('strange7Stage1').style.display = '';
         getId('strange7Stage2').style.display = '';
         getId('strange8Stage3').style.display = '';
@@ -176,7 +175,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         global.ASRInfo.costRange[3][3] = 2e30;
 
         strangeness1Cost = [1, 1, 1, 2, 4, 2, 24];
-        strangeness1Scaling = [1, 0.75, 1.5, 2, 0, 0, 0];
+        strangeness1Scaling = [1, 0.5, 1.5, 2, 0, 0, 0];
         strangeness2Cost = [1, 1, 2, 2, 4, 2, 24];
         strangeness2Scaling = [0.5, 0.75, 1, 2, 0, 0, 0];
         strangeness3Cost = [1, 1, 2, 6, 4, 2, 4, 24];

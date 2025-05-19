@@ -86,13 +86,19 @@ export const removeHotkey = (remove: string): string | null => {
     return test;
 };
 
+/** Returns true if only Shift is holded, false if nothing is holded, null if any of Ctrl/Alt/Meta is holded */
+export const detectShift = (check: KeyboardEvent): boolean | null => {
+    if (check.metaKey || check.ctrlKey || check.altKey) { return null; }
+    return check.shiftKey;
+};
+
 export const detectHotkey = (check: KeyboardEvent) => {
     let { shiftKey } = check;
     const { key, code } = check;
     if (shiftKey) { global.hotkeys.shift = true; }
     if (check.ctrlKey) { global.hotkeys.ctrl = true; }
     if (code === 'Tab' || code === 'Enter' || code === 'Space') {
-        if (check.metaKey || check.ctrlKey || check.altKey) { return; }
+        if (detectShift(check) === null) { return; }
         if (code === 'Tab') { global.hotkeys.tab = true; }
         document.body.classList.remove('noFocusOutline');
         return;
@@ -104,8 +110,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
     if (global.hotkeys.disabled) { return; }
 
     if (code === 'Escape') {
-        if (check.metaKey || check.ctrlKey || shiftKey || check.altKey ||
-            specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
+        if (detectShift(check) !== false || specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
         const notification = specialHTML.notifications[0];
         if (notification !== undefined) { notification[1](true); }
         return;
@@ -113,13 +118,9 @@ export const detectHotkey = (check: KeyboardEvent) => {
 
     const numberKey = Number(code.replace('Digit', '').replace('Numpad', ''));
     if (!isNaN(numberKey) && code !== '') {
-        if (check.metaKey || check.ctrlKey || check.altKey) { return; }
-        if (isNaN(Number(key))) {
-            if (!shiftKey) { //Numpad
-                shiftKey = true;
-                check.preventDefault();
-            }
-        }
+        if (detectShift(check) === null) { return; }
+        if (isNaN(Number(key)) && !shiftKey) { shiftKey = true; } //Numpad
+        check.preventDefault();
 
         if (shiftKey) {
             if (check.repeat) { return; }

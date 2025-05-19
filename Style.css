@@ -656,6 +656,13 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 1em;
 }
 
+#voidRewards,
+#stabilityRewards {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 #voidRewards > div:first-of-type {
     display: flex;
     flex-wrap: wrap;
@@ -888,8 +895,6 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #strangenessResearch {
-    display: flex;
-    flex-direction: column;
     border: 2px solid darkgreen;
     border-radius: 6px;
     background-color: var(--window-color);
@@ -997,7 +1002,7 @@ input:-webkit-autofill { /* Chrome related pain */
     border: 2px solid var(--window-border);
     border-radius: 7px;
     min-width: min-content;
-    max-width: 26em;
+    max-width: 28em;
 }
 
 #loadoutsMain > div {

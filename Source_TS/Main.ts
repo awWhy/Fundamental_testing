@@ -1,8 +1,8 @@
 import { player, global, playerStart, updatePlayer, deepClone, cloneArray } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, addIntoLog } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, calculateEffects, collapseResetUser, dischargeResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, rankResetUser, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog, errorNotify } from './Special';
-import { assignHotkeys, detectHotkey, handleTouchHotkeys } from './Hotkeys';
+import { assignHotkeys, detectHotkey, detectShift, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
@@ -53,7 +53,7 @@ const handleOfflineTime = (): number => {
     const timeNow = Date.now();
     const offlineTime = timeNow - player.time.updated;
     player.time.updated = timeNow;
-    player.time.export[0] += offlineTime * 4.8 / (4.8 - player.tree[0][5]);
+    player.time.export[0] += offlineTime * calculateEffects.T0Inflation5();
     return offlineTime;
 };
 export const simulateOffline = async(offline: number) => {
@@ -121,21 +121,20 @@ const offlineEnd = (early = false) => {
     document.body.removeEventListener('keydown', offlineKey);
 };
 const offlineKey = (event: KeyboardEvent) => {
-    if (event.metaKey || event.ctrlKey || event.altKey) { return; }
+    const shift = detectShift(event);
+    if (shift === null) { return; }
     const code = event.code;
     if (code === 'Escape') {
-        if (event.shiftKey) { return; }
-        event.preventDefault();
+        if (shift) { return; }
         offlineCancel();
     } else if (code === 'Enter' || code === 'Space') {
-        if (event.shiftKey || document.activeElement === getId('offlineCancel')) { return; }
-        event.preventDefault();
+        if (shift || document.activeElement === getId('offlineCancel')) { return; }
         offlineAccelerate();
     } else if (code === 'Tab') {
-        event.preventDefault();
         const cancel = getId('offlineCancel');
         (document.activeElement === cancel ? getId('offlineAccelerate') : cancel).focus();
-    }
+    } else { return; }
+    event.preventDefault();
 };
 const offlineCancel = () => (global.offline.speed = 0);
 const offlineAccelerate = () => (global.offline.speed *= 2);
@@ -545,10 +544,11 @@ const loadoutsSave = () => {
 };
 const loadoutsLoad = async(loadout = null as null | string) => {
     const quick = loadout !== null;
-    if (!await inflationRefund(quick || global.hotkeys.shift, true)) { return; }
+    if (global.offline.active || !await inflationRefund(quick || global.hotkeys.shift, true)) { return; }
 
     const array = quick ? player.inflation.loadouts[loadout] : global.loadouts.input;
     for (let i = 0; i < array.length; i++) {
+        if (!checkUpgrade(array[i], 0, 'inflations')) { continue; }
         buyStrangeness(array[i], 0, 'inflations', true);
     }
     if ((getId('loadoutsName') as HTMLInputElement).value === 'Auto-generate') { loadoutsLoadAuto(); }
@@ -1153,13 +1153,16 @@ try { //Start everything
         };
         if (SR) {
             getId('element1').addEventListener('keydown', (event) => {
-                if (event.code !== 'Tab' || !event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) { return; }
+                if (event.code !== 'Tab' || detectShift(event) !== true) { return; }
                 const element = getId('element0');
                 element.tabIndex = 0;
                 element.ariaHidden = 'false';
             });
             button.addEventListener('keydown', (event) => {
-                if (event.code === 'Enter' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { dblclickFunc(); }
+                if (event.code === 'Enter' && detectShift(event) === false) {
+                    event.preventDefault();
+                    dblclickFunc();
+                }
             });
             button.addEventListener('blur', () => {
                 const element = getId('element0');
@@ -1297,8 +1300,11 @@ try { //Start everything
         }
     }
     getId('loadoutsName').addEventListener('keydown', (event) => {
-        if (event.repeat || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
-        if (event.code === 'Enter') { loadoutsSave(); }
+        if (event.repeat || detectShift(event) !== false) { return; }
+        if (event.code === 'Enter') {
+            event.preventDefault();
+            loadoutsSave();
+        }
     });
     getId('inflationRefund').addEventListener('click', () => void inflationRefund(global.hotkeys.shift));
     getId('inflationLoadouts').addEventListener('click', () => {

@@ -479,7 +479,7 @@ export const numbersUpdate = () => {
             const exportReward = player.time.export;
             getId('exportQuarksMax').textContent = format(exportReward[1] / 2.5 + 1, { padding: true });
             getId('exportStrangeletsMax').textContent = format(exportReward[2] / 2.5, { padding: true });
-            getId('exportTimeToMax').textContent = format((86400 - exportReward[0] / 1000) * (4.8 - player.tree[0][5]) / 4.8, { type: 'time' });
+            getId('exportTimeToMax').textContent = format((86400 - exportReward[0] / 1000) / calculateEffects.T0Inflation5(), { type: 'time' });
             getId('exportQuarksStorage').textContent = format(exportReward[1], { padding: true });
             getId('exportStrangeletsStorage').textContent = format(exportReward[2], { padding: true });
             if (active === 1) {
@@ -701,7 +701,7 @@ export const visualUpdate = () => {
                 if (vacuum) {
                     getId('building5').style.display = upgrades[11] === 1 || buildings[5].trueTotal.moreThan('0') ? '' : 'none';
                     getId('dustCap').style.display = player.researchesExtra[3][5] < 1 ? '' : 'none';
-                    getId('submersionBoost').style.display = player.researchesExtra[1][2] >= 2 ? '' : 'none';
+                    getId('submersionBoost').style.display = player.researchesExtra[1][2] >= 2 || (player.challenges.active === 0 && player.challenges.super && player.accretion.rank >= 3) ? '' : 'none';
                 } else { getId('stageInfo').style.display = global.accretionInfo.dustSoft !== 1 ? '' : 'none'; }
                 updateRankInfo();
             } else if (active === 4) {
@@ -969,7 +969,7 @@ export const visualUpdate = () => {
                 getId('strange4Stage5').style.display = firstTwo ? '' : 'none';
                 getId('strange5Stage5').style.display = show1 && milestones[4][1] >= 8 ? '' : 'none';
                 getId('strange6Stage5').style.display = show1 && firstTwo ? '' : 'none';
-                getId('strange10Stage5').style.display = universes.moreOrEqual('6') ? '' : 'none';
+                getId('strange10Stage5').style.display = global.sessionToggles[1] && universes.moreOrEqual('6') ? '' : 'none';
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = strange5 ? '' : 'none';
                 if (globalSave.MDSettings[0] && (global.debug.MDStrangePage === 5 ? !strange5 : (highest < 6 && player.stage.resets < global.debug.MDStrangePage + 3))) { MDStrangenessPage(1); }
             }
@@ -1244,6 +1244,8 @@ export const getUpgradeDescription = (index: number | null, type: 'upgrades' | '
             getId('upgradeCost').textContent = 'Maxed.';
         } else if (stageIndex === 4 && type === 'researches' && global.collapseInfo.unlockR[index] > player.collapse.mass && player.researchesExtra[5][0] < 1) {
             getId('upgradeCost').textContent = `Unlocked at ${format(global.collapseInfo.unlockR[index])} Mass.`;
+        } else if (stageIndex === 5 && type === 'researchesExtra' && player.strangeness[5][3] < 1) {
+            getId('upgradeCost').textContent = "Requires 'Gravitational bound' Strangeness.";
         } else if (notEnoughUniverses) {
             getId('upgradeCost').textContent = `Unlocked at ${global.mergeInfo[`unlock${type === 'researches' ? 'R' : 'E'}`][index]} self-made Universes.`;
         } else {
@@ -1320,7 +1322,7 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
         getId('inflationText').textContent = `${pointer.name[index]}. (Level ${level} out of ${pointer.max[index]})`;
         getId('inflationEffect').textContent = pointer.effectText[index]();
         getId('inflationCost').textContent = level >= pointer.max[index] ? 'Fully activated.' :
-            pointer.cost[index] === 0 ? 'None.' : `${format(pointer.cost[index])} Inflatons.`;
+            pointer.cost[index] === 0 ? 'None.' : `${format(pointer.cost[index])} ${stageIndex === 0 ? 'Inflatons' : '(Not unlocked)'}.`;
         return;
     }
     const stageText = getId(`${type}Stage`);
@@ -1390,18 +1392,21 @@ export const getChallengeDescription = (index: number) => {
     getId('challengeActive').style.display = isActive ? '' : 'none';
 
     const unlocked = index !== 1 || player.stage.true >= 8 || player.buildings[6][1].true >= 6;
+    const time = player.time[info.resetType];
     (nameID.parentElement as HTMLElement).style.display = unlocked ? '' : 'none';
     let text = !unlocked ? '' : `<p class="whiteText">${info.description()}</p>
     <section><h4 class="${info.color}Text bigWord">Effects:</h4>
     <div>${info.effectText()}</section>
-    <p class="blueText">${isActive ? 'Remaining time' : 'Time limit'} is <span class="cyanText">${format(info.time - (isActive ? player.time[info.resetType] : 0), { type: 'time' })}</span></p></div>`;
+    <p class="blueText">${isActive ? 'Remaining time' : 'Time limit'} is <span class="cyanText">${format(info.time - (isActive ? time : 0), { type: 'time' })}</span></p></div>`;
 
     if (index === 1) {
-        const gain = player.inflation.vacuum ? player.buildings[6][1].true + 1 : 1;
+        const vacuum = player.inflation.vacuum;
+        const double = vacuum && player.challenges.stability >= 1;
+        const gain = player.buildings[6][1].true + 1;
         text += `${unlocked ? '<section>' : ''}<h3 class="darkorchidText bigWord">Vacuum information</h3>
-        <p class="orchidText">Vacuum state: <span class="${player.inflation.vacuum ? 'greenText">true' : 'redText">false'}</span> | Resets: <span class="darkorchidText">${player.inflation.resets}</span></p>
-        ${player.stage.true >= 7 || player.event ? `<p class="darkvioletText">Current Inflatons gain: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain, { padding: 'exponent' })}</span> | Rate: <span class="${player.inflation.vacuum ? 'green' : 'red'}Text">${format(gain / player.time.vacuum, { type: 'income' })}</span></p>` : ''}
-        <p class="orchidText">Time since last reset: <span class="darkorchidText">${format(player.inflation.time, { type: 'time' })}</span>${player.inflation.time !== player.time.vacuum ? ` (Real: <span class="darkorchidText">${format(player.time.vacuum, { type: 'time' })}</span>)` : ''}</p>${unlocked ? '</section>' : ''}`;
+        <p class="orchidText">Vacuum state: <span class="${vacuum ? 'greenText">true' : 'redText">false'}</span> | Resets: <span class="darkorchidText">${player.inflation.resets}</span></p>
+        ${player.stage.true >= 7 || player.event ? `<p class="darkvioletText">Current Inflatons gain: <span class="${vacuum ? 'green' : 'red'}Text">${format(vacuum ? gain : 1, { padding: 'exponent' })}</span>${double ? ' + <span class="redText">1</span>' : ''} | Rate: <span class="${vacuum ? 'green' : 'red'}Text">${format((gain + (double ? 1 : 0)) / time, { type: 'income' })}</span></p>` : ''}
+        <p class="orchidText">Time since last reset: <span class="darkorchidText">${format(player.inflation.time, { type: 'time' })}</span>${player.inflation.time !== time ? ` (Real: <span class="darkorchidText">${format(time, { type: 'time' })}</span>)` : ''}</p>${unlocked ? '</section>' : ''}`;
     }
 
     if (specialHTML.cache.innerHTML.get('challengeMultiline') !== text) {
@@ -1609,7 +1614,7 @@ const setRemnants = () => {
         getId('special1Cur').style.color = 'var(--gray-text)';
 
         specialHTML.cache.innerHTML.set('#special2 > img', 'Cluster');
-        (getQuery('#special2 > img') as HTMLImageElement).src = 'Used_art/Missing.png';
+        (getQuery('#special2 > img') as HTMLImageElement).src = 'Used_art/Missing.png'; //Galaxy%20cluster
         getId('special2').title = 'Galaxy clusters';
         getId('special2Cur').style.color = 'var(--gray-text)';
         if (globalSave.SRSettings[0]) { getId('specials').ariaLabel = 'Merge results'; }
@@ -1981,7 +1986,7 @@ export const stageUpdate = (changed = true, offline = false) => {
             getId('extraResearches').style.display = '';
             getId('special3').style.display = 'none';
         } else {
-            getId('reset1Button').textContent = `Requires ${22 + (player.challenges.active === 1 ? player.challenges.stability : 0)} Galaxies`;
+            getId('reset1Button').textContent = `Requires ${calculateEffects.mergeRequirement()} Galaxies`;
             getId('specials').style.display = 'none';
         }
         setRemnants();

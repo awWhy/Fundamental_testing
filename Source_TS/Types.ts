@@ -508,6 +508,7 @@ export interface calculateEffectsType {
     S4Research1: (level?: number, S4Extra1?: number) => number
     S4Research4: (post?: boolean, level?: number) => number
     S4Extra1: () => number
+    mergeRequirement: (stability?: boolean) => number
     mergeMaxResets: () => number
     reward: Array<(post?: boolean) => number>
     mergeScore: (post?: boolean) => number
@@ -527,10 +528,11 @@ export interface calculateEffectsType {
     S5Strange9_stage1: () => number
     S5Strange9_stage2: () => number
     S5Strange9_stage3: () => number
-    inflation0: () => number
-    inflation1_power: (level?: number) => number
-    inflation1: (power?: number) => number
-    inflation3: () => number
+    T0Inflation0: () => number
+    T0Inflation1_power: (level?: number) => number
+    T0Inflation1: (power?: number) => number
+    T0Inflation3: () => number
+    T0Inflation5: (level?: number) => number
     /** Default value for type is 0 or Quarks; Use 1 for Strangelets */
     strangeGain: (interstellar: boolean, type?: 0 | 1) => number
 }

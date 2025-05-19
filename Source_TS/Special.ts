@@ -1,4 +1,4 @@
-import { assignHotkeys, removeHotkey } from './Hotkeys';
+import { assignHotkeys, detectShift, removeHotkey } from './Hotkeys';
 import { getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { deepClone, global, player } from './Player';
 import { assignResetInformation } from './Stage';
@@ -343,7 +343,7 @@ export const preventImageUnload = (): void => {
     for (const text of global.accretionInfo.rankImage) { //Already cached in Accretion stats, this only refreshes it
         images += `<img src="Used_art/${text}" loading="lazy">`;
     }
-    for (const text of ['Red%20giant', 'White%20dwarf', 'Neutron%20star', 'Quark%20star', 'Galaxy%20group']) {
+    for (const text of ['Red%20giant', 'White%20dwarf', 'Neutron%20star', 'Quark%20star', 'Galaxy%20group']) { //Galaxy%20cluster
         images += `<img src="Used_art/${text}.png" loading="lazy">`;
     }
     specialHTML.cache.imagesDiv.innerHTML = images;
@@ -582,16 +582,16 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
         confirm.focus();
 
         const key = async(event: KeyboardEvent) => {
-            if (event.metaKey || event.ctrlKey || event.altKey) { return; }
+            const shift = detectShift(event);
+            if (shift === null) { return; }
             const code = event.code;
             if (code === 'Escape' || code === 'Enter' || code === 'Space') {
-                if (event.shiftKey) { return; }
-                event.preventDefault();
+                if (shift) { return; }
                 close();
             } else if (code === 'Tab') {
-                event.preventDefault();
                 confirm.focus();
-            }
+            } else { return; }
+            event.preventDefault();
         };
         const close = () => {
             if (!globalSave.toggles[2]) { body.classList.add('noTextSelection'); }
@@ -638,20 +638,19 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
             close();
         };
         const key = (event: KeyboardEvent) => {
-            if (event.metaKey || event.ctrlKey || event.altKey) { return; }
+            const shift = detectShift(event);
+            if (shift === null) { return; }
             const code = event.code;
             if (code === 'Escape') {
-                if (event.shiftKey) { return; }
-                event.preventDefault();
+                if (shift) { return; }
                 close();
             } else if (code === 'Enter' || code === 'Space') {
-                if (event.shiftKey || document.activeElement === cancel) { return; }
-                event.preventDefault();
+                if (shift || document.activeElement === cancel) { return; }
                 yes();
             } else if (code === 'Tab') {
-                event.preventDefault();
                 (document.activeElement === cancel ? confirm : cancel).focus();
-            }
+            } else { return; }
+            event.preventDefault();
         };
         const close = () => {
             if (!globalSave.toggles[2]) { body.classList.add('noTextSelection'); }
@@ -705,26 +704,24 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
             close();
         };
         const key = (event: KeyboardEvent) => {
-            if (event.metaKey || event.ctrlKey || event.altKey) { return; }
+            const shift = detectShift(event);
+            if (shift === null) { return; }
             const code = event.code;
             if (code === 'Escape') {
-                if (event.shiftKey) { return; }
-                event.preventDefault();
+                if (shift) { return; }
                 close();
             } else if (code === 'Enter' || code === 'Space') {
                 const active = document.activeElement;
-                if (event.shiftKey || (code === 'Space' && active === input) || active === cancel) { return; }
-                event.preventDefault();
+                if (shift || (code === 'Space' && active === input) || active === cancel) { return; }
                 yes();
             } else if (code === 'Tab') {
-                if (event.shiftKey && document.activeElement === input) {
-                    event.preventDefault();
+                if (shift && document.activeElement === input) {
                     cancel.focus();
-                } else if (!event.shiftKey && document.activeElement === cancel) {
-                    event.preventDefault();
+                } else if (!shift && document.activeElement === cancel) {
                     input.focus();
-                }
-            }
+                } else { return; }
+            } else { return; }
+            event.preventDefault();
         };
         const close = () => {
             if (!globalSave.toggles[2]) { body.classList.add('noTextSelection'); }
@@ -1010,7 +1007,7 @@ const addCloseEvents = (sectionHTML: HTMLElement, firstTargetHTML = null as HTML
     const windowHMTL = getId('bigWindow');
     if (firstTargetHTML === null) { firstTargetHTML = closeButton; }
     const key = (event: KeyboardEvent) => {
-        if (specialHTML.alert[0] !== null || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
+        if (specialHTML.alert[0] !== null || detectShift(event) !== false) { return; }
         const code = event.code;
         if (firstTargetHTML === closeButton ? (code === 'Escape' || code === 'Enter' || code === 'Space') :
             ((!global.hotkeys.disabled && code === 'Escape') || ((code === 'Enter' || code === 'Space') && document.activeElement === closeButton))) {
@@ -1036,7 +1033,7 @@ export const openVersionInfo = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Abyss rework\n- Added global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Abyss rework\n- Added second Challenge\n- Added global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
         <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>
         <h6>v0.2.2</h6><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves the game to load it after exiting</p>
