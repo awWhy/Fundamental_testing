@@ -444,12 +444,12 @@ export const numbersUpdate = () => {
         } else if (subtab.strangenessCurrent === 'Milestones') {
             const { milestonesInfo: info } = global;
             const time = player.time[player.challenges.active === 0 && player.challenges.super ? 'vacuum' : 'stage'];
-            const timeLimited = vacuum || player.tree[0][4] < 1;
+            const noTime = vacuum ? time > global.challengesInfo[0].time : player.tree[0][4] < 1;
             for (let s = 1; s < info.length; s++) {
                 for (let i = 0; i < info[s].need.length; i++) {
                     getId(`milestone${i + 1}Stage${s}Current`).textContent = format(milestoneGetValue(i, s), { padding: true });
                     getId(`milestone${i + 1}Stage${s}Required`).textContent = !vacuum && player.milestones[s][i] >= info[s].max[i] ? 'Maxed' :
-                        timeLimited && time > info[s].time[i] ? 'No time' : format(info[s].need[i], { padding: true });
+                        noTime && (vacuum || time > info[s].time[i]) ? 'No time' : format(info[s].need[i], { padding: true });
                 }
             }
             getStrangenessDescription(global.lastMilestone[0], global.lastMilestone[1], 'milestones');
@@ -1359,7 +1359,7 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
             if (player.inflation.vacuum) {
                 const isActive = player.challenges.active === 0 && player.tree[0][4] >= 1;
                 text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
-                <p class="blueText">Time limit: <span class="greenText">${format(pointer.time[index] - (isActive ? player.time[player.challenges.super ? 'vacuum' : 'stage'] : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to increase this tier within ${player.challenges.super ? 'Supervoid' : 'Void'}.</span></p>
+                <p class="blueText">Time limit: <span class="greenText">${format(global.challengesInfo[0].time - (isActive ? player.time[player.challenges.super ? 'vacuum' : 'stage'] : 0), { type: 'time' })} ${isActive ? 'remains ' : ''}to increase this tier within ${player.challenges.super ? 'Supervoid' : 'Void'}.</span></p>
                 <p class="darkvioletText">Effect: <span class="greenText">${pointer.rewardText[index]()}</span>${player.tree[0][4] < 1 ? ' <span class="redText">(Disabled)</span>' : ''}</p>`;
             } else if (level < pointer.max[index]) {
                 const isActive = global.stageInfo.activeAll.includes(Math.min(stageIndex, 4));

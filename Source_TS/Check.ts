@@ -278,7 +278,7 @@ export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     const pointer = global.milestonesInfo[stageIndex];
     if (player.inflation.vacuum) {
         if (player.challenges.active !== 0 || player.tree[0][4] < 1 ||
-            pointer.time[index] < player.time[player.challenges.super ? 'vacuum' : 'stage']) { return false; }
+            global.challengesInfo[0].time < player.time[player.challenges.super ? 'vacuum' : 'stage']) { return false; }
     } else if (pointer.max[index] <= player.milestones[stageIndex][index] ||
         (player.stage.true < 7 && player.stage.resets < 4) ||
         (stageIndex === 5 && player.milestones[4][index] < 8) ||

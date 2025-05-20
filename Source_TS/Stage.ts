@@ -2661,7 +2661,6 @@ export const assignMilestoneInformation = (index: number, stageIndex: number) =>
     const pointer = global.milestonesInfo[stageIndex];
     const level = player.milestones[stageIndex][index];
     if (player.inflation.vacuum) {
-        pointer.time[index] = global.challengesInfo[0].time;
         if (stageIndex === 1) {
             if (index === 0) {
                 pointer.need[0].setValue('1e32').power(level).multiply('1e32');
