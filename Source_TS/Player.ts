@@ -1629,7 +1629,6 @@ Object.assign(player, {
     ],
     researchesAuto: createArray(global.researchesAutoInfo.costRange.length, 0),
     ASR: createArray(global.ASRInfo.costRange.length, 0),
-    maxASR: createArray(global.ASRInfo.costRange.length, 0),
     elements: createArray(global.elementsInfo.startCost.length, 0),
     strangeness: [
         [],
@@ -1783,6 +1782,7 @@ export const updatePlayer = (load: playerType): string => {
             throw new ReferenceError(`Couldn't update save file ${load.version} to the current game version`);
         }
     }
+    delete load['maxASR' as keyof unknown];
 
     for (let s = 1; s <= 6; s++) {
         for (let i = Math.min(load.buildings[s].length, global.buildingsInfo.maxActive[s]); i < playerStart.buildings[s].length; i++) {
