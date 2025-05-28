@@ -3,7 +3,7 @@ import { getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { deepClone, global, player } from './Player';
 import { assignResetInformation } from './Stage';
 import type { globalSaveType, hotkeysList } from './Types';
-import { format, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
+import { format, stageUpdate, switchTab, visualTrueStageUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -978,7 +978,10 @@ export const playEvent = (event: number, replay = true) => {
     } else if (event === 9) {
         text = "Now that the first Universe is finished, it's time to Inflate a new one and so to unlock the Inflation tab, new Upgrades and more Void rewards to complete\n(Also improve 'Nucleosynthesis' effect to unlock more Elements based on self-made Universes)";
     } else if (event === 10) {
-        if (!replay) { visualTrueStageUnlocks(); }
+        if (!replay) {
+            visualTrueStageUnlocks();
+            switchTab();
+        }
         text = "Now that there was even more matter to rearrange ‒ the 'Supervoid' was formed. Check it out by clicking on the Void name in the 'Advanced' subtab.\n(Also unlocked 2 new Inflations, Supervoid unlocks are kept through Universe reset)";
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
@@ -1033,31 +1036,31 @@ export const openVersionInfo = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Abyss rework\n- Added second Challenge\n- Added global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
         <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>
         <h6>v0.2.2</h6><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves the game to load it after exiting</p>
         <h6>v0.2.1</h6><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions</p>
         <h6>v0.2.0</h6><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
         <h6>v0.1.9</h6><p>- More true Vacuum balance\n- Reworked time related formats\n- Warp and Offline time usage reworked</p>
-        <h6>v0.1.8</h6><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Added copy to the clipboard, load from string save file options</p>
+        <h6>v0.1.8</h6><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Copy to the clipboard, load from string save file options</p>
         <h6>v0.1.7</h6><p>- New content (Void)\n- Further balance changes</p>
         <h6>v0.1.6</h6><p>- Massive rebalance and reworks for all Stages</p>
         <h6>v0.1.5</h6><p>- True Vacuum minor balance\n- Images no longer unload\n- Screen reader support reworked</p>
         <h6>v0.1.4</h6><p>- Custom scrolls\n- Notifications</p>
         <h6>v0.1.3</h6><p>- True Vacuum balance changes\n- Submerged Stage minor balance\n- Replay event button\n\n- History for Stage resets</p>
-        <h6>v0.1.2</h6><p>- New content (Vacuum)\n- Offline time reworked\n- Added version window (removed change log on game load)\n- Permanently removed text movement</p>
+        <h6>v0.1.2</h6><p>- New content (Vacuum)\n- Offline time reworked\n- Version window\n- Permanently removed text movement</p>
         <h6>v0.1.1</h6><p>- More balance changes for late game</p>
         <h6>v0.1.0</h6><p>- New content (Intergalactic)\n- Balance changes for late game</p>
         <h6>v0.0.9</h6><p>- New content (Milestones)\n- More Interstellar and late game balance</p>
         <h6>v0.0.8</h6><p>- Minor speed up to all Stages past Microworld</p>
-        <h6>v0.0.7</h6><p>- New content (Strangeness)\n- Microworld Stage rework\n\n- Added stats for Save file name</p>
+        <h6>v0.0.7</h6><p>- New content (Strangeness)\n- Microworld Stage rework\n\n- Stats for the Save file name</p>
         <h6>v0.0.6</h6><p>- Added hotkeys list\n\n- Option to remove text movement\n- Ability to rename the save file</p>
         <h6>v0.0.5</h6><p>- New content (Interstellar)\n- Basic loading screen\n\n- Added hotkeys</p>
-        <h6>v0.0.4</h6><p>- Speed up to all Stages\n- Added events\n\n- Added numbers format</p>
+        <h6>v0.0.4</h6><p>- Speed up to all Stages\n- Basic events\n\n- Added numbers format</p>
         <h6>v0.0.3</h6><p>- New content (Accretion)\n- Submerged Stage extended\n- Offline time calculated better</p>
         <h6>v0.0.2</h6><p>- Stats subtab</p>
-        <h6>v0.0.1</h6><p>- Submerged Stage rework\n- Added change log on game load\n\n- Mobile device support</p>
+        <h6>v0.0.1</h6><p>- Submerged Stage rework\n\n- Mobile device support</p>
         <h6>v0.0.0</h6><p>- First published version\n\n- Submerged Stage placeholder</p>`;
         mainHTML.ariaLabel = 'Versions menu';
         specialHTML.styleSheet.textContent += `#versionHTML h6 { font-size: 1.18em; }

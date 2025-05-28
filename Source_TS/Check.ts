@@ -211,8 +211,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
         case 'inflations':
             if (stageIndex === 0) {
                 if (upgrade === 0) { return player.stage.true >= 7; }
+                if (upgrade === 3 || upgrade === 4) { return player.stage.true >= 8 || player.event; }
                 if (upgrade === 5) { return player.challenges.supervoid[3] >= 3; }
-                if (upgrade >= 3 && player.stage.true < 8 && !player.event) { return false; }
             } else {
                 if (upgrade === 0) { return player.challenges.supervoid[1] >= 1; }
             }
@@ -279,10 +279,10 @@ export const milestoneCheck = (index: number, stageIndex: number): boolean => {
     if (player.inflation.vacuum) {
         if (player.challenges.active !== 0 || player.tree[0][4] < 1 ||
             global.challengesInfo[0].time < player.time[player.challenges.super ? 'vacuum' : 'stage']) { return false; }
-    } else if (pointer.max[index] <= player.milestones[stageIndex][index] ||
+    } else if (pointer.scaling[index].length <= player.milestones[stageIndex][index] ||
         (player.stage.true < 7 && player.stage.resets < 4) ||
         (stageIndex === 5 && player.milestones[4][index] < 8) ||
-        (player.tree[0][4] < 1 && pointer.time[index] < player.time.stage)
+        (player.tree[0][4] < 1 && pointer.reward[index] < player.time.stage)
     ) { return false; }
     return pointer.need[index].lessOrEqual(milestoneGetValue(index, stageIndex));
 };

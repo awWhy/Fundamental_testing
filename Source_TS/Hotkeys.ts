@@ -206,7 +206,6 @@ const changeStage = (direction: 'left' | 'right') => {
 
 /* preventDefault should not be used here */
 export const handleTouchHotkeys = (event: TouchEvent) => {
-    if (event.changedTouches.length > 1) { return; }
     const horizontal = event.changedTouches[0].clientX - specialHTML.mobileDevice.start[0];
     const vertical = event.changedTouches[0].clientY - specialHTML.mobileDevice.start[1];
 

@@ -194,6 +194,7 @@ export interface globalType {
     offline: {
         active: boolean
         speed: number
+        start: number
         cacheUpdate: boolean
         stageUpdate: null | boolean
     }
@@ -397,10 +398,10 @@ export interface globalType {
         needText: Array<() => string>
         rewardText: Array<() => string>
         need: Overlimit[]
-        time: number[]
+        /** In the false Vacuum used as time */
         reward: number[]
+        /** False Vacuum only */
         scaling: number[][]
-        max: number[]
     }>
     challengesInfo: [{
         name: string

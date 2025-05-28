@@ -76,6 +76,7 @@ export const simulateOffline = async(offline: number) => {
     } else if (offline > 43200_000) { offline = 43200_000; }
     global.offline.stageUpdate = null;
     global.offline.speed = globalSave.intervals.offline;
+    global.offline.start = offline;
 
     const accelerate = getId('offlineAccelerate');
     accelerate.addEventListener('click', offlineAccelerate);
@@ -85,25 +86,28 @@ export const simulateOffline = async(offline: number) => {
     accelerate.focus();
     calculateOffline(offline);
 };
-const calculateOffline = (warpTime: number, start = warpTime) => {
+const calculateOffline = (warpTime: number) => {
     const rate = global.offline.speed;
     const time = rate <= 0 ? warpTime : Math.min(600 * rate, warpTime);
     warpTime -= time;
     try {
-        timeUpdate(Math.max(time / 600, rate), time);
+        timeUpdate(Math.max(time / 600, 20), time);
     } catch (error) {
         offlineEnd();
         const stack = (error as { stack: string }).stack;
         void Alert(`Offline calculation failed due to error:\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 1);
         throw error;
     }
-    if (warpTime > 0) {
-        setTimeout(calculateOffline, 0, warpTime, start);
+    if (warpTime >= 20) {
+        setTimeout(calculateOffline, 0, warpTime);
         getId('offlineTick').textContent = format(rate);
         getId('offlineRemains').textContent = format(warpTime / 1000, { type: 'time' });
-        getId('offlinePercentage').textContent = format(100 - warpTime / start * 100, { padding: true });
-        if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').ariaValueText = `${format(100 - warpTime / start * 100)}% done`; }
-    } else { offlineEnd(); }
+        getId('offlinePercentage').textContent = format(100 - warpTime / global.offline.start * 100, { padding: true });
+        if (globalSave.SRSettings[0]) { getQuery('#offlineMain > div').ariaValueText = `${format(100 - warpTime / global.offline.start * 100)}% done`; }
+    } else {
+        player.time.offline += warpTime;
+        offlineEnd();
+    }
 };
 const offlineEnd = (early = false) => {
     if (global.offline.stageUpdate !== null) {
@@ -254,13 +258,13 @@ const awardExport = () => {
     const { strange } = player;
     const improved = player.tree[0][5] >= 1;
     const conversion = Math.min(exportReward[0] / 86400_000, 1);
-    const quarks = (improved ? exportReward[1] : (exportReward[1] / 2.5 + 1)) * conversion;
+    const quarks = (improved ? exportReward[1] : exportReward[1] / 2.5 + 1) * conversion;
 
     strange[0].current += quarks;
     strange[0].total += quarks;
     exportReward[1] = Math.max(exportReward[1] - quarks, 0);
     if (player.strangeness[5][8] >= 1) {
-        const strangelets = (improved ? exportReward[2] : (exportReward[2] / 2.5)) * conversion;
+        const strangelets = (improved ? exportReward[2] : exportReward[2] / 2.5) * conversion;
         strange[1].current += strangelets;
         strange[1].total += strangelets;
         exportReward[2] -= strangelets;

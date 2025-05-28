@@ -244,14 +244,14 @@ export const player: playerType = {
         total: 0
     }],
     /* Because I'm lazy to write 50+ 0's, all empty [] auto added */
-    upgrades: [],
-    researches: [],
-    researchesExtra: [],
+    upgrades: [[]],
+    researches: [[]],
+    researchesExtra: [[]],
     researchesAuto: [],
     ASR: [],
     elements: [],
-    strangeness: [],
-    milestones: [],
+    strangeness: [[]],
+    milestones: [[]],
     tree: [],
     challenges: {
         active: null,
@@ -265,7 +265,7 @@ export const player: playerType = {
     toggles: {
         normal: [], //class 'toggleNormal'
         confirm: [], //Class 'toggleConfirm'
-        buildings: [], //Class 'toggleBuilding'
+        buildings: [[]], //Class 'toggleBuilding'
         hover: [], //Class 'toggleHover'
         max: [], //Class 'toggleMax'
         auto: [], //Class 'toggleAuto'
@@ -316,6 +316,7 @@ export const global: globalType = {
     offline: {
         active: true,
         speed: 0.2,
+        start: 0,
         cacheUpdate: true,
         stageUpdate: null
     },
@@ -481,7 +482,7 @@ export const global: globalType = {
             [0, 2, 2, 1.11],
             [0, 1.5]
         ],
-        producing: []
+        producing: [[]]
     },
     strangeInfo: {
         name: ['Strange quarks', 'Strangelets'],
@@ -850,7 +851,7 @@ export const global: globalType = {
                 },
                 () => "'Gravitational field' will be able to boost Protoplanets, but at reduced strength. (2x boost)",
                 () => `'Gas' will be ${format(calculateEffects.S3Upgrade1(calculateEffects.S3Upgrade1_power(player.researchesExtra[3][3] + 1)) / calculateEffects.S3Upgrade1(), { padding: true })} times stronger with every level.`,
-                () => `Submerge quicker by boosting Puddles, improved by current Rank.\n(Current boost: ${format(calculateEffects.S3Extra4())} ⟶ ${format(calculateEffects.S3Extra4(player.researchesExtra[3][4] + 1))})`,
+                () => `Submerge quicker by boosting Puddles, improved by current Rank.\n(Current boost: ${format(calculateEffects.S3Extra4(), { padding: true })} ⟶ ${format(calculateEffects.S3Extra4(player.researchesExtra[3][4] + 1), { padding: true })})`,
                 () => `Protect your Mass from being removed by removing Cosmic dust hardcap instead.\nSecond level will redirect delay to the hardcap as a boost to Cosmic dust that ignores softcap.\n(Current hardcap delay is ${format(calculateEffects.dustDelay(), { padding: true })})`
             ],
             cost: [],
@@ -887,7 +888,7 @@ export const global: globalType = {
             ],
             effectText: [
                 () => `Super dense core which will allow creation of a new Structure. That Structure will increase Stage reset reward${player.inflation.vacuum ? ', starting Energy after any Reset' : ''}, boost Nebulas and Star clusters. But creating it will fully reset ${player.inflation.vacuum ? 'all' : 'Interstellar and Intergalactic'} Stages.\nThis Research also removes Solar mass and other Remnant requirements from everything in the Interstellar Stage.`,
-                () => `Unlock a new Result for Merge resets, if to reset with enough self-made Galaxies.${global.researchesExtraInfo[5].max[1] > 1 ? '\nSecond level will allow the use of excess Galaxies from previous Merge resets when forming new Galaxy groups.' : ''}`,
+                () => `Unlock a new Result for the Merge resets, if to reset with enough self-made Galaxies.${global.researchesExtraInfo[5].max[1] > 1 ? '\nSecond level will allow the use of the excess Galaxies from previous Merge resets when forming new Galaxy groups.' : ''}`,
                 () => { //[2]
                     const maxLevel = player.researchesExtra[5][2] + player.merge.rewards[1];
                     const trueLevel = global.mergeInfo.S5Extra2;
@@ -1327,13 +1328,11 @@ export const global: globalType = {
                 () => player.inflation.vacuum ? `Effective Energy increased by ${format(global.milestonesInfo[1].reward[1], { padding: true })}.` : 'Permanent Microworld Stage.'
             ],
             need: [],
-            time: [14400, 14400],
-            reward: [1, 1],
+            reward: [0, 0],
             scaling: [
                 [1e152, 1e158, 1e164, 1e170, 1e178, 1e190],
                 [23800, 24600, 25800, 27000, 28200, 29600]
-            ],
-            max: [6, 6]
+            ]
         }, { //Stage 2
             name: [
                 'A Nebula of Drops',
@@ -1348,13 +1347,11 @@ export const global: globalType = {
                 () => player.inflation.vacuum ? `Puddles strength increased by ${format(global.milestonesInfo[2].reward[1], { padding: true })}.` : 'Permanent Submerged Stage.'
             ],
             need: [],
-            time: [28800, 28800],
-            reward: [1, 1],
+            reward: [0, 0],
             scaling: [
                 [1e30, 1e32, 1e34, 1e36, 1e38, 1e40, 1e44],
                 [1500, 2300, 3100, 3900, 4700, 5500, 6400]
-            ],
-            max: [7, 7]
+            ]
         }, { //Stage 3
             name: [
                 'Cluster of Mass',
@@ -1369,13 +1366,11 @@ export const global: globalType = {
                 () => player.inflation.vacuum ? `Increase effective Rank by +${format(global.milestonesInfo[3].reward[1])}.` : 'Permanent Accretion Stage.'
             ],
             need: [],
-            time: [43200, 43200],
-            reward: [1, 0],
+            reward: [0, 0],
             scaling: [
                 [1e32, 1e34, 1e36, 1e38, 1e40, 1e42, 1e45],
                 [24, 28, 32, 36, 40, 44, 50]
-            ],
-            max: [7, 7]
+            ]
         }, { //Stage 4
             name: [
                 'Remnants of past',
@@ -1390,13 +1385,11 @@ export const global: globalType = {
                 () => player.inflation.vacuum ? `Black holes effect increased by ${format(global.milestonesInfo[4].reward[1], { padding: true })}.` : 'Research to make third Intergalactic Structure and the final Milestone. (Galaxy)'
             ],
             need: [],
-            time: [57600, 57600],
-            reward: [1, 1],
+            reward: [0, 0],
             scaling: [
                 [1e48, 1e49, 1e50, 1e52, 1e54, 1e56, 1e58, 1e60],
                 [9000, 12000, 16000, 22000, 30000, 42000, 60000, 84000]
-            ],
-            max: [8, 8]
+            ]
         }, { //Stage 5
             name: [
                 'Light in the dark',
@@ -1411,13 +1404,11 @@ export const global: globalType = {
                 () => player.inflation.vacuum ? `Boost per Galaxy is increased by +${format(global.milestonesInfo[5].reward[1])}.` : "Unlock a new Intergalactic Upgrade 'Galactic Merger'."
             ],
             need: [],
-            time: [3600, 1200],
-            reward: [1, 0],
+            reward: [0, 0],
             scaling: [
                 [1460, 1540, 1620, 1700, 1780, 1860, 1940, 2020],
                 [1, 2, 4, 6, 10, 14, 18, 22]
-            ],
-            max: [8, 8]
+            ]
         }
     ],
     challengesInfo: [{
@@ -1483,7 +1474,7 @@ export const global: globalType = {
         description: () => 'A more stable, but still the false Vacuum state\n(Entering will force a Vacuum reset, will be reverted after exiting)',
         effectText: () => {
             const completions = player.challenges.stability;
-            return `<p class="orchidText">‒ Global speed is decreased by ${format(2 ** (completions + 1), { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
+            return `<p class="orchidText">‒ Global speed is decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
             <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** Math.max((player.challenges.active === 1 ? player.stage.resets : 0) + completions - 8, 0), { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${4 * (completions + 1)}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Merge requirement is increased by +${completions}, which is equal to ${calculateEffects.mergeRequirement(true)}</p>`;
         },
@@ -1531,7 +1522,7 @@ export const effectsCache = { //Cannot be in Stage.ts due to esbuild file orderi
 //Math.log extension for any base
 export const logAny = (number: number, base: number) => Math.log(number) / Math.log(base);
 
-/** Not for deep copy, works on Overlimit, but not prefered */
+/** Not for the deep copy, works on Overlimit, but not prefered */
 export const cloneArray = <ArrayClone extends Array<number | string | boolean | null | undefined>>(array: ArrayClone) => array.slice(0) as ArrayClone;
 //Actual type is any[], it's because TS is dumb; [...array] will be better after ~>10000 keys
 
@@ -1552,119 +1543,65 @@ export const deepClone = <CloneType>(toClone: CloneType): CloneType => {
     return value;
 };
 
-/** Does not clone given value */
-export const createArray = <startValue extends number | string | boolean | null | undefined>(length: number, value: startValue) => {
-    const array = [];
-    for (let i = 0; i < length; i++) {
-        array.push(value);
-    }
-    return array as startValue[];
-};
+{ //Final preparations for global and player
+    /** Does not clone given value */
+    const createArray = <startValue extends number | string | boolean | null | undefined>(length: number, value: startValue) => {
+        const array = [];
+        for (let i = 0; i < length; i++) { array.push(value); }
+        return array as startValue[];
+    };
 
-for (let s = 0; s < global.buildingsInfo.startCost.length; s++) {
-    global.buildingsInfo.producing[s] = [];
-    for (let i = 0; i < global.buildingsInfo.startCost[s].length; i++) {
-        global.buildingsInfo.producing[s].push(new Overlimit('0'));
-    }
-}
-for (let s = 2; s < global.upgradesInfo.length; s++) {
-    const startCost = global.upgradesInfo[s].startCost;
-    for (let i = 0; i < startCost.length; i++) { startCost[i] = new Overlimit(startCost[i]); }
-}
-for (const upgradeType of ['researches', 'researchesExtra'] as const) {
-    const pointer = global[`${upgradeType}Info`];
-    pointer[1].cost = cloneArray(pointer[1].startCost as number[]);
-    for (let s = 2; s < pointer.length; s++) {
-        for (let i = 0; i < pointer[s].startCost.length; i++) {
-            pointer[s].startCost[i] = new Overlimit(pointer[s].startCost[i]);
-            pointer[s].cost[i] = new Overlimit(pointer[s].startCost[i]);
+    for (let s = 1; s < global.buildingsInfo.startCost.length; s++) {
+        player.toggles.buildings[s] = createArray(player.buildings[s].length, false);
+        global.buildingsInfo.producing[s] = [];
+        for (let i = 0; i < global.buildingsInfo.startCost[s].length; i++) {
+            global.buildingsInfo.producing[s].push(new Overlimit('0'));
         }
     }
-}
-{
-    const startCost = global.elementsInfo.startCost;
-    for (let i = 1; i < startCost.length; i++) { startCost[i] = new Overlimit(startCost[i]); }
-}
-for (let s = 1; s < global.strangenessInfo.length; s++) {
-    global.strangenessInfo[s].cost = cloneArray(global.strangenessInfo[s].startCost);
-}
-for (let s = 1; s < global.milestonesInfo.length; s++) {
-    for (let i = 0; i < global.milestonesInfo[s].needText.length; i++) {
-        global.milestonesInfo[s].need.push(new Overlimit('Infinity'));
+    for (const upgradeType of ['upgrades', 'researches', 'researchesExtra'] as const) {
+        const pointer = global[`${upgradeType as Exclude<typeof upgradeType, 'upgrades'>}Info`];
+        for (let s = 1; s < pointer.length; s++) {
+            const startCost = pointer[s].startCost;
+            player[upgradeType][s] = createArray(startCost.length, 0);
+            if (s === 1) {
+                if (upgradeType !== 'upgrades') { pointer[1].cost = cloneArray(startCost as number[]); }
+                continue;
+            }
+            for (let i = 0; i < startCost.length; i++) {
+                startCost[i] = new Overlimit(startCost[i]);
+                if (upgradeType !== 'upgrades') { pointer[s].cost[i] = new Overlimit(startCost[i]); }
+            }
+        }
     }
+    player.researchesAuto = createArray(global.researchesAutoInfo.costRange.length, 0);
+    player.ASR = createArray(global.ASRInfo.costRange.length, 0);
+    {
+        const startCost = global.elementsInfo.startCost;
+        player.elements = createArray(startCost.length, 0);
+        for (let i = 1; i < startCost.length; i++) { startCost[i] = new Overlimit(startCost[i]); }
+    }
+    for (let s = 1; s < global.strangenessInfo.length; s++) {
+        player.strangeness[s] = createArray(global.strangenessInfo[s].startCost.length, 0);
+        global.strangenessInfo[s].cost = cloneArray(global.strangenessInfo[s].startCost);
+    }
+    for (let s = 1; s < global.milestonesInfo.length; s++) {
+        const pointer = global.milestonesInfo[s];
+        player.milestones[s] = createArray(pointer.needText.length, 0);
+        for (let i = 0; i < pointer.needText.length; i++) {
+            pointer.need.push(new Overlimit('Infinity'));
+        }
+    }
+    for (let s = 0; s < global.treeInfo.length; s++) {
+        player.tree[s] = createArray(global.treeInfo[s].startCost.length, 0);
+        global.treeInfo[s].cost = cloneArray(global.treeInfo[s].startCost);
+    }
+    player.toggles.normal = createArray(document.getElementsByClassName('toggleNormal').length, false);
+    player.toggles.confirm = createArray(document.getElementsByClassName('toggleConfirm').length, 'Safe');
+    player.toggles.hover = createArray(document.getElementsByClassName('toggleHover').length, false);
+    player.toggles.max = createArray(document.getElementsByClassName('toggleMax').length, false);
+    player.toggles.auto = createArray(document.getElementsByClassName('toggleAuto').length, false);
+    player.toggles.normal[1] = true;
 }
-for (let s = 0; s <= 1; s++) {
-    global.treeInfo[s].cost = cloneArray(global.treeInfo[s].startCost);
-
-    player.tree[s] = createArray(global.treeInfo[s].startCost.length, 0);
-}
-
-Object.assign(player, {
-    upgrades: [
-        [],
-        createArray(global.upgradesInfo[1].startCost.length, 0),
-        createArray(global.upgradesInfo[2].startCost.length, 0),
-        createArray(global.upgradesInfo[3].startCost.length, 0),
-        createArray(global.upgradesInfo[4].startCost.length, 0),
-        createArray(global.upgradesInfo[5].startCost.length, 0),
-        createArray(global.upgradesInfo[6].startCost.length, 0)
-    ],
-    researches: [
-        [],
-        createArray(global.researchesInfo[1].startCost.length, 0),
-        createArray(global.researchesInfo[2].startCost.length, 0),
-        createArray(global.researchesInfo[3].startCost.length, 0),
-        createArray(global.researchesInfo[4].startCost.length, 0),
-        createArray(global.researchesInfo[5].startCost.length, 0),
-        createArray(global.researchesInfo[6].startCost.length, 0)
-    ],
-    researchesExtra: [
-        [],
-        createArray(global.researchesExtraInfo[1].startCost.length, 0),
-        createArray(global.researchesExtraInfo[2].startCost.length, 0),
-        createArray(global.researchesExtraInfo[3].startCost.length, 0),
-        createArray(global.researchesExtraInfo[4].startCost.length, 0),
-        createArray(global.researchesExtraInfo[5].startCost.length, 0),
-        createArray(global.researchesExtraInfo[6].startCost.length, 0)
-    ],
-    researchesAuto: createArray(global.researchesAutoInfo.costRange.length, 0),
-    ASR: createArray(global.ASRInfo.costRange.length, 0),
-    elements: createArray(global.elementsInfo.startCost.length, 0),
-    strangeness: [
-        [],
-        createArray(global.strangenessInfo[1].startCost.length, 0),
-        createArray(global.strangenessInfo[2].startCost.length, 0),
-        createArray(global.strangenessInfo[3].startCost.length, 0),
-        createArray(global.strangenessInfo[4].startCost.length, 0),
-        createArray(global.strangenessInfo[5].startCost.length, 0)
-    ],
-    milestones: [
-        [],
-        createArray(global.milestonesInfo[1].need.length, 0),
-        createArray(global.milestonesInfo[2].need.length, 0),
-        createArray(global.milestonesInfo[3].need.length, 0),
-        createArray(global.milestonesInfo[4].need.length, 0),
-        createArray(global.milestonesInfo[5].need.length, 0)
-    ]
-});
-Object.assign(player.toggles, {
-    normal: createArray(document.getElementsByClassName('toggleNormal').length, false),
-    confirm: createArray(document.getElementsByClassName('toggleConfirm').length, 'Safe'),
-    buildings: [
-        [],
-        createArray(player.buildings[1].length, false),
-        createArray(player.buildings[2].length, false),
-        createArray(player.buildings[3].length, false),
-        createArray(player.buildings[4].length, false),
-        createArray(player.buildings[5].length, false),
-        createArray(player.buildings[6].length, false)
-    ],
-    hover: createArray(document.getElementsByClassName('toggleHover').length, false),
-    max: createArray(document.getElementsByClassName('toggleMax').length, false),
-    auto: createArray(document.getElementsByClassName('toggleAuto').length, false)
-});
-player.toggles.normal[1] = true;
-
 //player.example = playerStart.example; Is not allowed (if example is an array or object), instead iterate or create clone
 export const playerStart = deepClone(player);
 
@@ -1761,7 +1698,7 @@ export const updatePlayer = (load: playerType): string => {
             load.challenges.stability = 0;
             load.challenges.supervoidMax = cloneArray(load.challenges.supervoid);
             load.tree = deepClone(playerStart.tree);
-            const old = (load.cosmon as unknown as typeof load.cosmon[0])?.total;
+            const old = (load.cosmon as unknown as playerType['cosmon'][0])?.total;
             load.cosmon = deepClone(playerStart.cosmon);
             if (old !== undefined) {
                 load.cosmon[0].current = old;
@@ -1770,6 +1707,7 @@ export const updatePlayer = (load: playerType): string => {
             load.event = false;
             delete load.inflation['spent' as keyof unknown];
             delete load.inflation['tree' as keyof unknown];
+            delete load['maxASR' as keyof unknown];
 
             /* Can be removed eventually */
             load.fileName = load.fileName.replace('[cosmon]', '[inflaton]');
@@ -1782,7 +1720,6 @@ export const updatePlayer = (load: playerType): string => {
             throw new ReferenceError(`Couldn't update save file ${load.version} to the current game version`);
         }
     }
-    delete load['maxASR' as keyof unknown];
 
     for (let s = 1; s <= 6; s++) {
         for (let i = Math.min(load.buildings[s].length, global.buildingsInfo.maxActive[s]); i < playerStart.buildings[s].length; i++) {
@@ -1874,7 +1811,7 @@ export const updatePlayer = (load: playerType): string => {
 
     /* Restore data post JSON parse */
     load.fileName = new TextDecoder().decode(Uint8Array.from(load.fileName, (c) => c.codePointAt(0) as number));
-    const loadouts = {} as typeof load.inflation.loadouts;
+    const loadouts = {} as playerType['inflation']['loadouts'];
     for (const name in load.inflation.loadouts) {
         loadouts[new TextDecoder().decode(Uint8Array.from(name, (c) => c.codePointAt(0) as number))] = load.inflation.loadouts[name];
     }

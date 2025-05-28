@@ -142,6 +142,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.type[2][0] = 'producing';
         buildingsInfo.type[3][0] = 'producing';
         global.buildingsInfo.producing[4][5].setValue('0');
+        getQuery('#star3Effect > span.info').textContent = 'Boost to the Solar mass gain';
 
         upgrades1Cost = [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800];
         (upgradesInfo[2].startCost[0] as Overlimit).setValue('1e4');
@@ -175,7 +176,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         global.ASRInfo.costRange[3][3] = 2e30;
 
         strangeness1Cost = [1, 1, 1, 2, 4, 2, 24];
-        strangeness1Scaling = [1, 0.5, 1.5, 2, 0, 0, 0];
+        strangeness1Scaling = [1, 0.5, 1, 2, 0, 0, 0];
         strangeness2Cost = [1, 1, 2, 2, 4, 2, 24];
         strangeness2Scaling = [0.5, 0.75, 1, 2, 0, 0, 0];
         strangeness3Cost = [1, 1, 2, 6, 4, 2, 4, 24];
