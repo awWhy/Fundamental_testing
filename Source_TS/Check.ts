@@ -96,6 +96,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 2) { return player.buildings[5][3].true >= 1; }
                 if (upgrade === 3) { return player.inflation.vacuum ? player.accretion.rank >= 7 : player.milestones[5][1] >= 8; }
                 return player.accretion.rank >= 7;
+            } else if (stageIndex === 6) {
+                return player.strangeness[6][3] >= 1;
             }
             break;
         case 'researches':
@@ -188,6 +190,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 9) { return player.challenges.void[3] >= 6; }
                     if (upgrade === 10) { return player.challenges.void[2] >= 3; }
                     if ([0, 1, 5, 7].includes(upgrade)) { return player.strangeness[5][3] >= 1; }
+                } else if (stageIndex === 6) {
+                    return player.challenges.void[5] >= 2;
                 }
             } else {
                 if (player.challenges.active === 1) {
@@ -214,7 +218,10 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 3 || upgrade === 4) { return player.stage.true >= 8 || player.event; }
                 if (upgrade === 5) { return player.challenges.supervoid[3] >= 3; }
             } else {
-                if (upgrade === 0) { return player.challenges.supervoid[1] >= 1; }
+                if (upgrade === 2) { return player.challenges.stability >= 1; }
+                if (upgrade === 3) { return player.challenges.supervoid[1] >= 1; }
+                if (upgrade === 4) { return player.challenges.supervoid[3] >= 4; }
+                if (upgrade === 5) { return player.challenges.supervoid[1] >= 3; }
             }
             return true;
     }

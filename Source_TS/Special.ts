@@ -2,7 +2,7 @@ import { assignHotkeys, detectShift, removeHotkey } from './Hotkeys';
 import { getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { deepClone, global, player } from './Player';
 import { assignResetInformation } from './Stage';
-import type { globalSaveType, hotkeysList } from './Types';
+import type { globalSaveType, hotkeysList, numbersList } from './Types';
 import { format, stageUpdate, switchTab, visualTrueStageUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
@@ -24,13 +24,19 @@ export const globalSave: globalSaveType = {
         toggleAll: ['Shift A', 'Shift A'],
         merge: ['Shift M', 'Shift M'],
         universe: ['Shift U', 'Shift U'],
-        exitChallenge: ['Shift E', 'Shift E'],
+        end: ['Shift E', 'Shift E'],
+        exitChallenge: ['E', 'E'],
         tabRight: ['Arrow Right', 'Arrow Right'],
         tabLeft: ['Arrow Left', 'Arrow Left'],
         subtabUp: ['Arrow Up', 'Arrow Up'],
         subtabDown: ['Arrow Down', 'Arrow Down'],
         stageRight: ['Shift Arrow Right', 'Shift Arrow Right'],
         stageLeft: ['Shift Arrow Left', 'Shift Arrow Left']
+    },
+    numbers: {
+        makeStructure: 'Numbers',
+        toggleStructure: 'Numpad',
+        enterChallenge: 'Shift Numbers'
     },
     toggles: [false, false, false, false, false],
     format: ['.', ''],
@@ -69,7 +75,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 
     if (change) {
         if (reload) {
-            return void (async() => {
+            void (async() => {
                 if (!await Confirm('Changing this setting will reload the page, confirm?\n(Game will not autosave)')) { return; }
                 pauseGame();
                 toggles[number] = !toggles[number];
@@ -77,6 +83,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
                 window.location.reload();
                 void Alert('Awaiting game reload');
             })();
+            return;
         } else {
             toggles[number] = !toggles[number];
             saveGlobalSettings();
@@ -171,7 +178,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG5.png',
             'UpgradeG6.png',
             'Missing.png'
-        ], []
+        ], [
+            'Missing.png'
+        ]
     ],
     longestResearch: 9,
     /** [src, className] */
@@ -255,7 +264,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchCollapse4.png', 'stage6borderImage']
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage'],
-            ['Missing.png', 'stage3borderImage'],
+            ['ResearchGalaxy2.png', 'brownBorderImage'],
             ['ResearchGalaxy3.png', 'stage3borderImage'],
             ['ResearchGalaxy4.png', 'brownBorderImage'],
             ['Missing.png', 'redBorderImage'],
@@ -283,7 +292,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Stars.png', 'redBorderImage redText', 'Stars']
         ], [
             ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter'],
-            ['Missing.png', 'stage6borderImage darkvioletText', 'Inflatons']
+            ['Inflaton.png', 'stage6borderImage darkvioletText', 'Inflatons'],
+            ['Cosmon.png', 'stage6borderImage darkvioletText', 'Cosmons']
         ]
     ],
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
@@ -313,8 +323,11 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     styleSheet: document.createElement('style') //Secondary
 };
 
-export const preventImageUnload = (): void => {
-    if (global.offline.active || global.paused) { return void (global.offline.cacheUpdate = true); }
+export const preventImageUnload = () => {
+    if (global.offline.active || global.paused) {
+        global.offline.cacheUpdate = true;
+        return;
+    }
     const { footerStatsHTML: footer, buildingHTML: build, upgradeHTML: upgrade, researchHTML: research, researchExtraHTML: extra, researchExtraDivHTML: extraDiv } = specialHTML;
 
     let images = '';
@@ -743,7 +756,7 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
 };
 
 /** Start will make it behave as if X duplicates have been detected */
-export const Notify = (text: string, start = 1) => {
+export const Notify = (text: string) => {
     const { notifications } = specialHTML;
 
     let index;
@@ -755,7 +768,7 @@ export const Notify = (text: string, start = 1) => {
     }
 
     if (index === undefined) {
-        let count = start;
+        let count = 1;
         let timeout: number;
 
         const html = document.createElement('p');
@@ -771,7 +784,7 @@ export const Notify = (text: string, start = 1) => {
                 return;
             }
             html.textContent = `${text} | x${++count}`;
-            if (timeout === undefined) { return; } //Required to make it work properly if call happened too early
+            if (timeout === undefined) { return; }
             clearTimeout(timeout);
             timeout = setTimeout(remove, 7200);
         }]) - 1];
@@ -840,27 +853,8 @@ export const changeFontSize = (initial = false) => {
 
     document.documentElement.style.fontSize = size === 16 ? '' : `${size}px`;
     input.value = `${size}`;
-    adjustCSSRules(initial);
-};
-/* Only decent work around media not allowing var() and rem units being bugged */
-const adjustCSSRules = (initial: boolean) => {
-    const styleSheet = (getId('primaryRules') as HTMLStyleElement).sheet;
-    if (styleSheet == null) { //Safari doesn't wait for CSS to load even if script is defered
-        if (initial) {
-            return getId('primaryRules').addEventListener('load', () => {
-                adjustCSSRules(false);
-            }, { once: true });
-        }
-        return Notify(`Due to '${styleSheet}' related Error some font size features will not work`);
-    }
-    const styleLength = styleSheet.cssRules.length - 1;
-    const fontRatio = globalSave.fontSize / 16;
-    const rule1 = styleSheet.cssRules[styleLength - 1] as CSSMediaRule; //Primary phone size
-    const rule2 = styleSheet.cssRules[styleLength] as CSSMediaRule; //Tiny phone size
-    styleSheet.deleteRule(styleLength);
-    styleSheet.deleteRule(styleLength - 1);
-    styleSheet.insertRule(rule1.cssText.replace(rule1.conditionText, `screen and (max-width: ${893 * fontRatio + 32}px)`), styleLength - 1);
-    styleSheet.insertRule(rule2.cssText.replace(rule2.conditionText, `screen and (max-width: ${362 * fontRatio + 32}px)`), styleLength);
+    (getId('phoneStyle') as HTMLLinkElement).media = `screen and (max-width: ${893 * size / 16 + 32}px)`;
+    (getId('miniPhoneStyle') as HTMLLinkElement).media = `screen and (max-width: ${362 * size / 16 + 32}px)`;
 };
 
 export const changeFormat = (point: boolean) => {
@@ -882,32 +876,18 @@ export const changeFormat = (point: boolean) => {
 /** Short is only for hotkeys that can change */
 export const SRHotkeysInfo = (short = false) => {
     const index = globalSave.toggles[0] ? 0 : 1;
+    const hotkeys = globalSave.hotkeys;
     const resetName = specialHTML.resetHTML[player.stage.active];
-    const resetHotkey = globalSave.hotkeys[resetName.toLowerCase() as hotkeysList];
-    const list = [resetHotkey !== undefined ? resetHotkey[index] : ''];
-    if (!short) {
-        list.push(
-            globalSave.hotkeys.tabLeft[index], globalSave.hotkeys.tabRight[index],
-            globalSave.hotkeys.subtabDown[index], globalSave.hotkeys.subtabUp[index],
-            globalSave.hotkeys.stageLeft[index], globalSave.hotkeys.stageRight[index],
-            globalSave.hotkeys.stage[index],
-            globalSave.hotkeys.makeAll[index],
-            globalSave.hotkeys.toggleAll[index]
-        );
-    }
-    for (let i = 0; i < list.length; i++) {
-        if (list[i] == null || list[i] === '') { list[i] = 'None'; }
-    }
     const reset1Id = getId('reset1Main');
     reset1Id.ariaLabel = `${resetName} reset`;
-    reset1Id.ariaDescription = `Hotkey is ${list[0]}`;
+    reset1Id.ariaDescription = `Hotkey is ${hotkeys[resetName.toLowerCase() as hotkeysList] ?? 'None'}`;
     if (short) { return; }
-    getQuery('#footerMain > nav').ariaDescription = `Hotkeys are ${list[1]} and ${list[2]}`;
-    getId('subtabs').ariaDescription = `Hotkeys are ${list[3]} and ${list[4]}`;
-    getId('stageSelect').ariaDescription = `Hotkeys are ${list[5]} and ${list[6]}`;
-    getId('resetStage').ariaDescription = `Hotkey is ${list[7]}`;
-    getId('makeAllStructures').ariaDescription = `Hotkey is ${list[8]}`;
-    getId('toggleBuilding0').ariaDescription = `Hotkey is ${list[9]}`;
+    getQuery('#footerMain > nav').ariaDescription = `Hotkeys are ${hotkeys.tabLeft[index]} and ${hotkeys.tabRight[index]}`;
+    getId('subtabs').ariaDescription = `Hotkeys are ${hotkeys.subtabDown[index]} and ${hotkeys.subtabUp[index]}`;
+    getId('stageSelect').ariaDescription = `Hotkeys are ${hotkeys.stageLeft[index]} and ${hotkeys.stageRight[index]}`;
+    getId('reset0Main').ariaDescription = `Hotkey is ${hotkeys.stage[index]}`;
+    getId('makeAllStructures').ariaDescription = `Hotkey is ${hotkeys.makeAll[index]}`;
+    getId('toggleBuilding0').ariaDescription = `Hotkey is ${hotkeys.toggleAll[index]}`;
 };
 
 export const MDStrangenessPage = (stageIndex: number) => {
@@ -962,7 +942,7 @@ export const playEvent = (event: number, replay = true) => {
             assignResetInformation.maxRank();
             global.debug.rankUpdated = null;
         }
-        text = 'Cannot gain any more Mass with current Rank. A new one has been unlocked, but reaching it will softcap the Mass production';
+        text = 'Cannot gain any more Mass with the current Rank. A new one has been unlocked, but reaching it will softcap the Mass production';
     } else if (event === 4) {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis';
     } else if (event === 5) {
@@ -992,10 +972,11 @@ export const playEvent = (event: number, replay = true) => {
 
 const buildBigWindow = (subWindow: string): null | HTMLElement => {
     if (getId('closeBigWindow', true) === null) {
+        getId('globalToggle0').remove(); //Move it into the cache
         getId('bigWindow').innerHTML = '<div role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></div>';
         specialHTML.styleSheet.textContent += `#bigWindow > div { display: flex; flex-direction: column; align-items: center; width: clamp(20vw, 38em, 80vw); height: clamp(18vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }
             #bigWindow > div > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; }
-            #bigWindow > div > div { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior-y: none; }`;
+            #bigWindow > div > div { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior-y: none; } `;
     }
 
     if (getId(subWindow, true) !== null) { return null; }
@@ -1065,7 +1046,7 @@ export const openVersionInfo = () => {
         mainHTML.ariaLabel = 'Versions menu';
         specialHTML.styleSheet.textContent += `#versionHTML h6 { font-size: 1.18em; }
             #versionHTML p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; }
-            #versionHTML p:last-of-type { margin-bottom: 0; }`;
+            #versionHTML p:last-of-type { margin-bottom: 0; } `;
     }
 
     specialHTML.bigWindow = 'version';
@@ -1076,7 +1057,7 @@ export const openHotkeys = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('hotkeysHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h3 id="hotkeysMessage" class="bigWord" aria-live="assertive">Some hotkeys can be changed by clicking on them</h3>
+        mainHTML.innerHTML = `<h3 id="hotkeysMessage" class="bigWord" aria-live="assertive">Highlighted hotkeys can be modified</h3>
         ${globalSave.MDSettings[0] ? `<p>Left or Right swipe ‒ <span class="whiteText">change current tab</span></p>
         <p>Diagonal Down or Up swipe ‒ <span class="whiteText">change current subtab</span></p>
         <p id="stageSwipe">Long Left or Right swipe ‒ <span class="whiteText">change current active Stage</span></p>` : ''}
@@ -1086,26 +1067,30 @@ export const openHotkeys = () => {
         <label id="subtabDownHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">change subtab to the previous one</span></label>
         <label id="stageRightHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">change active Stage to the next one</span></label>
         <label id="stageLeftHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">change active Stage to the previous one</span></label>
-        <p>Numbers ‒ <span class="whiteText">make a Structure</span></p>
-        <label id="makeAllHotkey">0 <span class="whiteText">or</span> <button type="button" class="selectBtn"></button> ‒ <span class="whiteText">make all Structures</span></label>
-        <p>Shift Numbers ‒ <span class="whiteText">toggle auto Structure</span></p>
-        <label id="toggleAllHotkey">Shift 0 <span class="whiteText">or</span> <button type="button" class="selectBtn"></button> ‒ <span class="whiteText">toggle all auto Structures</span></label>
-        <label id="exitChallengeHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Exit out of current Challenge</span></label>
+        <label id="makeStructureHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">make a Structure</span></label>
+        <p id="makeAllHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">make all Structures</span></label></p>
+        <label id="toggleStructureHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">toggle auto Structure</span></label>
+        <p id="toggleAllHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">toggle all auto Structures</span></label></p>
+        <label id="enterChallengeHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">enter the Challenge</span></label>
+        <p id="exitChallengeHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Exit out of the current Challenge</span></label></p>
         <div>
             <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage reset</span></label>
-            <label id="dischargeHotkey" class="orangeText stage1Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
-            <label id="vaporizationHotkey" class="blueText stage2Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
-            <label id="rankHotkey" class="darkorchidText stage3Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
-            <label id="collapseHotkey" class="orchidText stage4Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Collapse</span></label>
-            <label id="galaxyHotkey" class="grayText stage5Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Galaxy</span></label>
-            <label id="mergeHotkey" class="darkvioletText stage5Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Merge</span></label>
-            <label id="universeHotkey" class="darkvioletText stage6Include"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Universe</span></label>
+            <label id="dischargeHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
+            <label id="vaporizationHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
+            <label id="rankHotkey" class="darkorchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
+            <label id="collapseHotkey" class="orchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Collapse</span></label>
+            <label id="galaxyHotkey" class="grayText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Galaxy</span></label>
+            <label id="mergeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Merge</span></label>
+            <label id="universeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Universe</span></label>
+            <label id="endHotkey" class="redText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">End</span></label>
             <label id="pauseHotkey" class="grayText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">pause</span></label>
         </div>
         <p>Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click selected HTML Element or confirm Alert</span></p>
-        <p>Escape ‒ <span class="whiteText">cancel changing hotkey, close Alert or Notification</span></p>
+        <p>Escape ‒ <span class="whiteText">cancel changing the hotkey, close Alert or Notification</span></p>
         <p>Tab <span class="whiteText">and</span> Shift Tab ‒ <span class="whiteText">select another HTML Element</span></p>
         <p>Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
+        <p>Numlock being ON can break Numpad hotkeys</p>
+        <p>Shift clicking the hotkey will remove it</p>
         <label id="hotkeysToggleLabel" title="Turn ON, if using non-QWERTY layout keyboard">Language dependant hotkeys </label>
         <button type="button" id="restoreHotkeys" class="selectBtn">Restore default hotkeys values</button>`; //Spacebar at the end of label is required
         mainHTML.ariaLabel = 'Hotkeys menu';
@@ -1114,79 +1099,129 @@ export const openHotkeys = () => {
         getId('hotkeysToggleLabel').append(toggle);
         specialHTML.styleSheet.textContent += `#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
             #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; }
-            #hotkeysHTML > div label { justify-self: center; width: max-content; }`;
+            #hotkeysHTML > div label { justify-self: center; width: max-content; } `;
 
-        const changeHotkey = async(disableFirstUp = false): Promise<string[] | null> => {
+        const changeHotkey = async(number: boolean): Promise<string | string[] | null> => {
             return await new Promise((resolve) => {
                 getId('hotkeysMessage').textContent = 'Awaiting new value for the hotkey';
                 const body = document.body;
-                let result: null | string[] = null;
-                const prevent = (event: KeyboardEvent) => {
-                    const code = event.code;
-                    if (code === 'Tab') { return; }
-                    event.preventDefault();
-                    if (code === 'Escape' || ((code === 'Enter' || code === 'Space') && document.activeElement === getId('closeBigWindow'))) {
-                        finish();
-                    }
-                };
+                let result: null | string | string[] = null;
                 const detect = async(event: KeyboardEvent) => {
-                    if (disableFirstUp) { return void (disableFirstUp = false); }
                     const { key, code } = event;
-                    if (code === 'Tab' || code === 'Escape') { return; }
-                    let prefix = event.metaKey ? 'Meta ' : '';
-                    if (event.ctrlKey) { prefix += 'Ctrl '; }
-                    if (event.shiftKey) { prefix += 'Shift '; }
-                    if (event.altKey) { prefix += 'Alt '; }
-                    if ((!isNaN(Number(code.replace('Digit', '').replace('Numpad', ''))) && code !== '') ||
-                        key === 'Meta' || key === 'Control' || key === 'Shift' || key === 'Alt' || code === 'Enter' || code === 'Space') {
-                        getId('hotkeysMessage').textContent = `Value '${prefix}${globalSave.toggles[0] ? key : code}' for hotkeys isn't allowed`;
+                    if (code === 'Tab' || code === 'Enter' || code === 'Space') { return; }
+                    event.preventDefault();
+                    if (code === 'Escape') { return finish(); }
+                    if (key === 'Control' || key === 'Shift' || key === 'Alt') { return; }
+                    if (key === 'Meta' || event.metaKey) {
+                        getId('hotkeysMessage').textContent = "Meta isn't allowed";
                         return;
                     }
-                    result = [`${prefix}${key.length === 1 ? key.toUpperCase() : key.replace('Arrow', 'Arrow ')}`,
-                        `${prefix}${key.length === 1 ? code.replace('Key', '') : code.replace('Arrow', 'Arrow ')}`];
+                    let prefix = event.ctrlKey ? 'Ctrl ' : '';
+                    if (event.shiftKey) { prefix += 'Shift '; }
+                    if (event.altKey) { prefix += 'Alt '; }
+                    if (!isNaN(Number(code.replace('Digit', '').replace('Numpad', ''))) && code !== '') {
+                        if (!number) {
+                            getId('hotkeysMessage').textContent = "Numbers can't used here";
+                            return;
+                        }
+                        result = `${prefix}${code.includes('Numpad') ? 'Numpad' : 'Numbers'}`;
+                        if (result === '') { result = 'None'; }
+                    } else {
+                        if (number) {
+                            if (key !== 'NumLock') { getId('hotkeysMessage').textContent = 'Only numbers can be used here'; }
+                            return;
+                        }
+                        result = [`${prefix}${key.length === 1 ? key.toUpperCase() : key.replaceAll(/([A-Z]+)/g, ' $1').trimStart()}`,
+                            `${prefix}${key.length === 1 ? code.replace('Key', '') : code.replaceAll(/([A-Z]+)/g, ' $1').trimStart()}`];
+                        if (result[0] === '') { result[0] = 'None'; }
+                        if (result[1] === '') { result[1] = 'None'; }
+                    }
                     finish();
                 };
                 const finish = () => {
-                    body.removeEventListener('keydown', prevent);
-                    body.removeEventListener('keyup', detect);
+                    body.removeEventListener('keydown', detect);
                     body.removeEventListener('click', finish, { capture: true });
-                    global.hotkeys.disabled = false;
+                    body.addEventListener('keyup', () => { global.hotkeys.disabled = false; }, { once: true });
                     resolve(result);
                 };
                 global.hotkeys.disabled = true;
-                body.addEventListener('keydown', prevent);
-                body.addEventListener('keyup', detect);
+                body.addEventListener('keydown', detect);
                 body.addEventListener('click', finish, { capture: true });
             });
         };
         const index = globalSave.toggles[0] ? 0 : 1;
         for (const key in globalSaveStart.hotkeys) {
-            const button = getQuery(`#${key}Hotkey > button`) as HTMLButtonElement;
-            const hotkeyTest = globalSave.hotkeys[key as hotkeysList][index];
-            button.textContent = hotkeyTest == null || hotkeyTest === '' ? 'None' : hotkeyTest;
-            button.type = 'button';
+            const button = getQuery(`#${key}Hotkey button`);
+            button.textContent = globalSave.hotkeys[key as hotkeysList][index];
             button.addEventListener('click', async(event) => {
-                const button = getQuery(`#${key}Hotkey > button`);
+                if (event.shiftKey) {
+                    if (removeHotkey(globalSave.hotkeys[key as hotkeysList][globalSave.toggles[0] ? 0 : 1]) !== null) {
+                        button.textContent = 'None';
+                        assignHotkeys();
+                        saveGlobalSettings();
+                    }
+                    return;
+                }
                 button.style.borderBottomStyle = 'dashed';
-                const newHotkey = await changeHotkey(event.clientX === 0); //Check if click was caused by pressing Enter
+                const newHotkey = await changeHotkey(false) as string[];
                 if (newHotkey !== null) {
                     const index = globalSave.toggles[0] ? 0 : 1;
                     const removed = removeHotkey(newHotkey[index]);
-                    if (removed !== null && removed !== key) { getQuery(`#${removed}Hotkey > button`).textContent = 'None'; }
+                    if (removed !== null) { getQuery(`#${removed}Hotkey button`).textContent = 'None'; }
                     button.textContent = newHotkey[index];
                     globalSave.hotkeys[key as hotkeysList] = newHotkey;
                     assignHotkeys();
                     saveGlobalSettings();
                 }
                 button.style.borderBottomStyle = '';
-                getId('hotkeysMessage').textContent = 'Some hotkeys can be changed by clicking on them';
+                getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
+            });
+        }
+        const extraHotkeyName: Record<string, string> = {
+            makeStructure: 'makeAll',
+            toggleStructure: 'toggleAll',
+            enterChallenge: 'exitChallenge'
+        };
+        for (const key in globalSaveStart.numbers) {
+            const button = getQuery(`#${key}Hotkey button`);
+            button.textContent = globalSave.numbers[key as numbersList];
+            getQuery(`#${extraHotkeyName[key]}Hotkey span`).textContent = globalSave.numbers[key as numbersList].replace('Numbers', '0').replace('Numpad', 'Num 0');
+            button.addEventListener('click', async(event) => {
+                if (event.shiftKey) {
+                    if (removeHotkey(globalSave.numbers[key as numbersList], true) !== null) {
+                        button.textContent = 'None';
+                        assignHotkeys();
+                        saveGlobalSettings();
+                    }
+                    return;
+                }
+                button.style.borderBottomStyle = 'dashed';
+                const newHotkey = await changeHotkey(true) as string;
+                if (newHotkey !== null) {
+                    const removed = removeHotkey(newHotkey, true);
+                    if (removed !== null) {
+                        getQuery(`#${removed}Hotkey button`).textContent = 'None';
+                        getQuery(`#${extraHotkeyName[removed]}Hotkey span`).textContent = 'None';
+                    }
+                    button.textContent = newHotkey;
+                    getQuery(`#${extraHotkeyName[key]}Hotkey span`).textContent = newHotkey.replace('Numbers', '0').replace('Numpad', 'Num 0');
+                    globalSave.numbers[key as numbersList] = newHotkey;
+                    assignHotkeys();
+                    saveGlobalSettings();
+                }
+                button.style.borderBottomStyle = '';
+                getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
             });
         }
         getId('restoreHotkeys').addEventListener('click', () => {
             globalSave.hotkeys = deepClone(globalSaveStart.hotkeys);
+            globalSave.numbers = deepClone(globalSaveStart.numbers);
             const index = globalSave.toggles[0] ? 0 : 1;
-            for (const key in globalSave.hotkeys) {
-                getQuery(`#${key}Hotkey > button`).textContent = globalSave.hotkeys[key as hotkeysList][index] as string;
+            for (const key in globalSave.hotkeys) { getQuery(`#${key}Hotkey button`).textContent = globalSave.hotkeys[key as hotkeysList][index]; }
+            for (const key in globalSave.numbers) {
+                const value = globalSave.numbers[key as numbersList];
+                getQuery(`#${key}Hotkey button`).textContent = value;
+                getQuery(`#${extraHotkeyName[key]}Hotkey span`).textContent = value.replace('Numbers', '0').replace('Numpad', 'Num 0');
             }
             assignHotkeys();
             saveGlobalSettings();
@@ -1194,9 +1229,9 @@ export const openHotkeys = () => {
     }
 
     specialHTML.bigWindow = 'hotkeys';
-    addCloseEvents(getId('hotkeysHTML'), getQuery('#tabRightHotkey > button'));
-    stageUpdate(false);
+    addCloseEvents(getId('hotkeysHTML'), getQuery('#tabRightHotkey button'));
     visualTrueStageUnlocks();
+    visualUpdate();
 };
 
 export const openLog = () => {
@@ -1208,9 +1243,8 @@ export const openLog = () => {
         mainHTML.ariaLabel = 'Versions menu';
         specialHTML.styleSheet.textContent += `#logHTML { display: flex; flex-direction: column; }
             #logMain { display: flex; flex-direction: column; text-align: start; border-top: 2px solid; border-bottom: 2px solid; height: 100%; padding: 0.2em 0.4em; margin-top: 0.4em; overflow-y: scroll; overscroll-behavior-y: none; }
-            #logMain > li { list-style: inside "‒ "; }
-            #logMain.bottom { flex-direction: column-reverse; } /* Cheap way to change the order */
-            #logMain.bottom > li:first-of-type { margin-bottom: auto; }`;
+            #logMain > li { list-style: inside "‒ "; white-space: pre-line; }
+            #logMain.bottom { flex-direction: column-reverse; } /* Cheap way to change the order */`;
         getId('logOrder').addEventListener('click', () => {
             const bottom = getId('logMain').classList.toggle('bottom');
             getId('logOrder').textContent = `Entries on ${bottom ? 'bottom' : 'top'} are newer`;

@@ -1,68 +1,89 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { switchTab } from './Update';
-import { buyBuilding, collapseResetUser, dischargeResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
+import { buyBuilding, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGameUser } from './Main';
 import { SRHotkeysInfo, globalSave, specialHTML } from './Special';
-import type { hotkeysList } from './Types';
+import type { hotkeysList, numbersList } from './Types';
 
-export const hotkeys = {} as Record<string, hotkeysList>;
-const hotkeyFunction = {
+const hotkeys = {} as Record<string, hotkeysList | numbersList>;
+const basicFunctions = {
     makeAll: () => buyAll(),
-    stage: (event) => {
-        if (event.repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return; }
+    stage: (repeat) => {
+        if (repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return; }
         void stageResetUser();
     },
     discharge: () => void dischargeResetUser(),
-    vaporization: (event) => {
-        if (event.repeat) { return; }
+    vaporization: (repeat) => {
+        if (repeat) { return; }
         void vaporizationResetUser();
     },
     rank: () => void rankResetUser(),
-    collapse: (event) => {
-        if (event.repeat) { return; }
+    collapse: (repeat) => {
+        if (repeat) { return; }
         void collapseResetUser();
     },
     galaxy: () => buyBuilding(3, 5),
-    pause: (event) => {
-        if (event.repeat) { return; }
+    pause: (repeat) => {
+        if (repeat) { return; }
         pauseGameUser();
     },
-    toggleAll: (event) => {
-        if (event.repeat) { return; }
+    toggleAll: (repeat) => {
+        if (repeat) { return; }
         toggleSwap(0, 'buildings', true);
     },
-    merge: (event) => {
-        if (event.repeat) { return; }
+    merge: (repeat) => {
+        if (repeat) { return; }
         void mergeResetUser();
     },
     universe: () => buyBuilding(1, 6),
-    exitChallenge: () => enterExitChallengeUser(null),
-    tabRight: (event) => {
-        if (event.repeat) { return; }
+    end: () => void endResetUser(),
+    exitChallenge: (repeat) => {
+        if (repeat) { return; }
+        enterExitChallengeUser(null);
+    },
+    tabRight: (repeat) => {
+        if (repeat) { return; }
         changeTab('right');
     },
-    tabLeft: (event) => {
-        if (event.repeat) { return; }
+    tabLeft: (repeat) => {
+        if (repeat) { return; }
         changeTab('left');
     },
-    subtabUp: (event) => {
-        if (event.repeat) { return; }
+    subtabUp: (repeat) => {
+        if (repeat) { return; }
         changeSubtab('up');
     },
-    subtabDown: (event) => {
-        if (event.repeat) { return; }
+    subtabDown: (repeat) => {
+        if (repeat) { return; }
         changeSubtab('down');
     },
-    stageRight: (event) => {
-        if (event.repeat) { return; }
+    stageRight: (repeat) => {
+        if (repeat) { return; }
         changeStage('right');
     },
-    stageLeft: (event) => {
-        if (event.repeat) { return; }
+    stageLeft: (repeat) => {
+        if (repeat) { return; }
         changeStage('left');
     }
-} as Record<hotkeysList, (event: KeyboardEvent) => void>;
+} as Record<hotkeysList, (repeat: boolean) => void>;
+const numberFunctions = {
+    makeStructure: (number) => {
+        if (number !== 0) {
+            buyBuilding(number, player.stage.active);
+        } else { buyAll(); }
+    },
+    toggleStructure: (number, repeat) => {
+        if (repeat) { return; }
+        toggleSwap(number, 'buildings', true);
+    },
+    enterChallenge: (number, repeat) => {
+        if (repeat) { return; }
+        if (number !== 0) {
+            enterExitChallengeUser(number - 1);
+        } else { enterExitChallengeUser(null); }
+    }
+} as Record<numbersList, (number: number, repeat: boolean) => void>;
 
 /** Will remove identical hotkeys from globalSave */
 export const assignHotkeys = () => {
@@ -70,19 +91,30 @@ export const assignHotkeys = () => {
     const index = globalSave.toggles[0] ? 0 : 1;
     for (const key in globalSave.hotkeys) {
         const hotkey = globalSave.hotkeys[key as hotkeysList][index];
-        if (hotkey === '' || hotkey == null) { continue; }
+        if (hotkey === 'None') { continue; }
         if (hotkeys[hotkey] !== undefined) {
-            globalSave.hotkeys[key as hotkeysList] = [];
+            globalSave.hotkeys[key as hotkeysList] = ['None', 'None'];
         } else { hotkeys[hotkey] = key as hotkeysList; }
+    }
+    for (const key in globalSave.numbers) {
+        const hotkey = globalSave.numbers[key as numbersList];
+        if (hotkey === 'None') { continue; }
+        if (hotkeys[hotkey] !== undefined) {
+            globalSave.numbers[key as numbersList] = 'None';
+        } else { hotkeys[hotkey] = key as numbersList; }
     }
     if (globalSave.SRSettings[0]) { SRHotkeysInfo(); }
 };
 
 /** Removes hotkey if exist, returns name of removed hotkey */
-export const removeHotkey = (remove: string): string | null => {
+export const removeHotkey = (remove: string, number = false): string | null => {
     const test = hotkeys[remove];
     if (test === undefined) { return null; }
-    globalSave.hotkeys[test] = [];
+    if (number) {
+        globalSave.numbers[test as numbersList] = 'None';
+    } else {
+        globalSave.hotkeys[test as hotkeysList] = ['None', 'None'];
+    }
     return test;
 };
 
@@ -93,13 +125,13 @@ export const detectShift = (check: KeyboardEvent): boolean | null => {
 };
 
 export const detectHotkey = (check: KeyboardEvent) => {
-    let { shiftKey } = check;
     const { key, code } = check;
-    if (shiftKey) { global.hotkeys.shift = true; }
-    if (check.ctrlKey) { global.hotkeys.ctrl = true; }
+    const info = global.hotkeys;
+    if (check.shiftKey) { info.shift = true; }
+    if (check.ctrlKey) { info.ctrl = true; }
     if (code === 'Tab' || code === 'Enter' || code === 'Space') {
         if (detectShift(check) === null) { return; }
-        if (code === 'Tab') { global.hotkeys.tab = true; }
+        if (code === 'Tab') { info.last = 'Tab'; }
         document.body.classList.remove('noFocusOutline');
         return;
     } else {
@@ -107,39 +139,36 @@ export const detectHotkey = (check: KeyboardEvent) => {
         if (activeType === 'text' || activeType === 'number') { return; }
         document.body.classList.add('noFocusOutline');
     }
-    if (global.hotkeys.disabled) { return; }
+    if (info.disabled) { return; }
 
     if (code === 'Escape') {
         if (detectShift(check) !== false || specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
         const notification = specialHTML.notifications[0];
         if (notification !== undefined) { notification[1](true); }
         return;
-    }
+    } else if (check.metaKey) { return; }
 
+    let name = check.ctrlKey ? 'Ctrl ' : '';
+    if (check.shiftKey) { name += 'Shift '; }
+    if (check.altKey) { name += 'Alt '; }
     const numberKey = Number(code.replace('Digit', '').replace('Numpad', ''));
     if (!isNaN(numberKey) && code !== '') {
-        if (detectShift(check) === null) { return; }
-        if (isNaN(Number(key)) && !shiftKey) { shiftKey = true; } //Numpad
-        check.preventDefault();
-
-        if (shiftKey) {
-            if (check.repeat) { return; }
-            toggleSwap(numberKey, 'buildings', true);
-        } else if (numberKey !== 0) {
-            buyBuilding(numberKey, player.stage.active);
-        } else { buyAll(); }
-    } else {
-        let name = check.metaKey ? 'Meta ' : '';
-        if (check.ctrlKey) { name += 'Ctrl '; }
-        if (shiftKey) { name += 'Shift '; }
-        if (check.altKey) { name += 'Alt '; }
-        name += globalSave.toggles[0] ?
-            (key.length === 1 ? key.toUpperCase() : key.replace('Arrow', 'Arrow ')) :
-            (key.length === 1 ? code.replace('Key', '') : code.replace('Arrow', 'Arrow '));
-        const functionTest = hotkeyFunction[hotkeys[name]];
+        name += code.includes('Numpad') ? 'Numpad' : 'Numbers';
+        const functionTest = numberFunctions[hotkeys[name] as numbersList];
         if (functionTest !== undefined) {
-            functionTest(check);
+            functionTest(numberKey, info.last === name);
             check.preventDefault();
+            info.last = name;
+        }
+    } else {
+        name += globalSave.toggles[0] ?
+            (key.length === 1 ? key.toUpperCase() : key.replaceAll(/([A-Z]+)/g, ' $1').trimStart()) :
+            (key.length === 1 ? code.replace('Key', '') : code.replaceAll(/([A-Z]+)/g, ' $1').trimStart());
+        const functionTest = basicFunctions[hotkeys[name] as hotkeysList];
+        if (functionTest !== undefined) {
+            functionTest(info.last === name);
+            check.preventDefault();
+            info.last = name;
         }
     }
 };

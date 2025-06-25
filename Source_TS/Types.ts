@@ -21,8 +21,8 @@ export interface playerType {
         current: number
     }
     vaporization: {
-        clouds: Overlimit
-        cloudsMax: Overlimit
+        clouds: number
+        cloudsMax: number
         /** [Boost, max] */
         input: [number, number]
     }
@@ -53,6 +53,8 @@ export interface playerType {
         resets: number
         time: number
         age: number
+        /** End resets */
+        ends: number
     }
     time: {
         updated: number
@@ -66,6 +68,7 @@ export interface playerType {
         stage: number
         vacuum: number
         universe: number
+        end: number
     }
     /** .true is how many are self-made \
      * .current is how many are right now \
@@ -118,13 +121,13 @@ export interface playerType {
         /** Auto Stage switch[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
            Auto accept Offline[4] */
         normal: boolean[]
-        /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5] */
+        /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], end[6] */
         confirm: Array<'Safe' | 'None'>
         /** Toggle all[0], Toggle Structure[any] */
         buildings: boolean[][]
-        /** Upgrades/Researches/Elements[0] */
+        /** Upgrades/Researches/Elements[0], Strangeness[1] */
         hover: boolean[]
-        /** Researches[0] */
+        /** Researches[0], Strangeness[1] */
         max: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
            Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9] */
@@ -142,9 +145,9 @@ export interface playerType {
             input: [number, number]
         }
         /** [time, state, inflatons] */
-        vacuum: {
-            best: [number, boolean, number]
-            list: Array<[number, boolean, number]>
+        end: {
+            best: [number, number]
+            list: Array<[number, number]>
             input: [number, number]
         }
     }
@@ -184,7 +187,7 @@ export interface globalType {
         /** How many resets on last update */
         historyStage: number | null
         /** How many resets on last update */
-        historyVacuum: number | null
+        historyEnd: number | null
         /** (Phones only) What page for Strangeness is selected */
         MDStrangePage: number
     }
@@ -195,8 +198,9 @@ export interface globalType {
         active: boolean
         speed: number
         start: number
+        /** [Change into, Stage at the start, Stage update type] */
+        stage: [number | null, number | null, boolean | null]
         cacheUpdate: boolean
-        stageUpdate: null | boolean
     }
     paused: boolean
     log: {
@@ -207,8 +211,8 @@ export interface globalType {
     }
     hotkeys: {
         disabled: boolean
-        /** Used to test if focus was received through keyboard press */
-        tab: boolean
+        /** Check for value being repeated */
+        last: string | null
         shift: boolean
         ctrl: boolean
     }
@@ -242,7 +246,7 @@ export interface globalType {
         S2Research0: number
         S2Research1: number
         S2Extra1: number
-        get: Overlimit
+        get: number
     }
     accretionInfo: {
         /** Upgrade required to unlock Structure */
@@ -274,7 +278,6 @@ export interface globalType {
         trueStars: number
         pointsLoop: number
         solarCap: number
-        timeUntil: number
     }
     mergeInfo: {
         /** Self-made Universes to unlock Upgrade */
@@ -339,7 +342,7 @@ export interface globalType {
         /** Number for Stage 1, Overlimit for rest */
         startCost: number[] | Overlimit[]
         /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
-        scaling: Array<number | string>
+        scaling: number[]
         max: number[]
         maxActive: number
     }>
@@ -351,7 +354,7 @@ export interface globalType {
         /** Number for Stage 1, Overlimit for rest */
         startCost: number[] | Overlimit[]
         /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
-        scaling: Array<number | string>
+        scaling: number[]
         max: number[]
         maxActive: number
     }>
@@ -425,7 +428,7 @@ export interface globalType {
     }]
     historyStorage: {
         stage: Array<[number, number, number]>
-        vacuum: Array<[number, boolean, number]>
+        end: Array<[number, number]>
     }
     loadouts: {
         input: number[]
@@ -444,7 +447,8 @@ export interface globalSaveType {
         autoSave: number
     }
     /** hotkeyFunction: [key, code] */
-    hotkeys: Record<hotkeysList, Array<string | undefined>>
+    hotkeys: Record<hotkeysList, string[]>
+    numbers: Record<numbersList, string>
     /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4] */
     toggles: boolean[]
     /** Point[0], Separator[1] */
@@ -458,7 +462,8 @@ export interface globalSaveType {
     developerMode: boolean
 }
 
-export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'end' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+export type numbersList = 'makeStructure' | 'toggleStructure' | 'enterChallenge';
 
 export interface calculateEffectsType {
     effectiveEnergy: () => number
@@ -477,9 +482,9 @@ export interface calculateEffectsType {
     S1Extra4: (S1Research5?: number) => number
     /** laterPreons are calculateEffects.effectiveEnergy() ** calculateEffects.S1Extra3() */
     preonsHardcap: (laterPreons: number) => number
-    clouds: (post?: boolean) => Overlimit
+    clouds: (post?: boolean) => number
     cloudsGain: () => number
-    S2Upgrade1: () => Overlimit
+    S2Upgrade1: () => number
     S2Upgrade2: () => number
     S2Upgrade3_power: (S2Research2?: number) => number
     S2Upgrade3: (power?: number) => number
@@ -530,10 +535,9 @@ export interface calculateEffectsType {
     S5Strange9_stage2: () => number
     S5Strange9_stage3: () => number
     T0Inflation0: () => number
-    T0Inflation1_power: (level?: number) => number
     T0Inflation1: (power?: number) => number
     T0Inflation3: () => number
     T0Inflation5: (level?: number) => number
     /** Default value for type is 0 or Quarks; Use 1 for Strangelets */
-    strangeGain: (interstellar: boolean, type?: 0 | 1) => number
+    strangeGain: (interstellar: boolean, quarks?: boolean) => number
 }

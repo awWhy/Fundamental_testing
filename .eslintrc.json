@@ -31,6 +31,7 @@
         "no-void": "off", //Bugs, doesn't allow to void promises
         "no-useless-concat": "warn",
         "no-extra-label": "warn",
+        "no-unmodified-loop-condition": "off", //Stupid
         "switch-colon-spacing": "error",
         "generator-star-spacing": "error",
         "no-var": "warn",

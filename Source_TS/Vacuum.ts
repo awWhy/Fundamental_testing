@@ -13,6 +13,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
     const milestone1S2 = getQuery('#milestone1Stage2Div > img') as HTMLImageElement;
     const milestone2S2 = getQuery('#milestone2Stage2Div > img') as HTMLImageElement;
+    const milestone1S3 = getQuery('#milestone1Stage3Div > img') as HTMLImageElement;
     const milestone1S4 = getQuery('#milestone1Stage4Div > img') as HTMLImageElement;
     let upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
 
@@ -44,6 +45,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         upgradesInfo[3].maxActive = 14;
         upgradesInfo[4].maxActive = 5;
         upgradesInfo[5].maxActive = 7;
+        upgradesInfo[6].maxActive = 1;
 
         researches1Cost = [1600, 4800, 16000, 32000, 16000, 24000];
         researches1Scaling = [400, 1200, 8000, 40000, 16000, 16000];
@@ -82,18 +84,19 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[3].maxActive = 10;
         strangenessInfo[4].maxActive = 10;
         strangenessInfo[5].maxActive = 11;
+        strangenessInfo[6].maxActive = 6;
 
-        getId('milestonesExtra').innerHTML = 'Requires <span class="darkvioletText">\'Void Milestones\'</span> Inflation to be active to enable effects';
-        milestone1S1.src = milestone1S1.src.replace('Quarks.png', 'Preon.png');
+        getId('milestonesExtra').innerHTML = 'Requires <span class="darkvioletText">Void Milestones</span> Inflation to be active to enable effects';
+        milestone1S1.src = 'Used_art/Preon.png';
         global.milestonesInfo[2].name[0] = 'Distant Clouds';
         getQuery('#milestone1Stage2Main > span').textContent = 'Distant Clouds';
-        milestone1S2.src = milestone1S2.src.replace('Drop.png', 'Clouds.png');
+        milestone1S2.src = 'Used_art/Clouds.png';
         milestone1S2.alt = 'Distant Clouds';
-        milestone2S2.src = milestone2S2.src.replace('Puddle.png', 'Drop.png');
-        (getQuery('#milestone1Stage3Div > img') as HTMLImageElement).alt = 'Center of gravity';
+        milestone2S2.src = 'Used_art/Drop.png';
+        milestone1S3.alt = 'Center of gravity';
         global.milestonesInfo[3].name[0] = 'Center of gravity';
         getQuery('#milestone1Stage3Main > span').textContent = 'Center of gravity';
-        milestone1S4.src = milestone1S4.src.replace('Main_sequence%20mass.png', 'Black%20hole.png');
+        milestone1S4.src = 'Used_art/Black%20hole.png';
         getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting all self-made <span class="grayText">Galaxies</span> into bonus ones.';
         getQuery('#stageAutoInterstellar span').textContent = 'Stage';
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
@@ -103,7 +106,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('massProduction').style.display = '';
         getId('mainCapHardS5').style.display = '';
         getId('element0').style.display = '';
-        getId('strangePeakAllowed').style.display = '';
+        getId('strangePeak').style.display = '';
+        getId('stageTimeBestReset').style.display = '';
         getId('strange1Effect1Allowed').style.display = '';
         getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = '';
         getId('strange7Stage1').style.display = '';
@@ -117,9 +121,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('stageAutoInterstellar').style.display = '';
         getId('vaporizationLimit').style.display = '';
         getId('collapseCapped').style.display = '';
-        getId('mergeToggleReset').style.display = '';
 
-        getId('strangePeakDisabled').style.display = 'none';
         getId('strange1Effect1Disabled').style.display = 'none';
         getId('stageAutoElse').style.display = 'none';
     } else {
@@ -152,6 +154,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         upgradesInfo[3].maxActive = 13;
         upgradesInfo[4].maxActive = 4;
         upgradesInfo[5].maxActive = 4;
+        upgradesInfo[6].maxActive = 0;
 
         researches1Cost = [600, 2000, 4000, 4000, 6000, 6000];
         researches1Scaling = [200, 400, 2000, 12000, 4000, 6000];
@@ -190,18 +193,19 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[3].maxActive = 8;
         strangenessInfo[4].maxActive = 8;
         strangenessInfo[5].maxActive = 10;
+        strangenessInfo[6].maxActive = 0;
 
         getId('milestonesExtra').innerHTML = 'Completing any tier will award 1 <span class="greenText">Strange quark</span>';
-        milestone1S1.src = milestone1S1.src.replace('Preon.png', 'Quarks.png');
+        milestone1S1.src = 'Used_art/Quarks.png';
         global.milestonesInfo[2].name[0] = 'A Nebula of Drops';
         getQuery('#milestone1Stage2Main > span').textContent = 'A Nebula of Drops';
-        milestone1S2.src = milestone1S2.src.replace('Clouds.png', 'Drop.png');
+        milestone1S2.src = 'Used_art/Drop.png';
         milestone1S2.alt = 'A Nebula of Drops';
-        milestone2S2.src = milestone2S2.src.replace('Drop.png', 'Puddle.png');
-        (getQuery('#milestone1Stage3Div > img') as HTMLImageElement).alt = 'Cluster of Mass';
+        milestone2S2.src = 'Used_art/Puddle.png';
+        milestone1S3.alt = 'Cluster of Mass';
         global.milestonesInfo[3].name[0] = 'Cluster of Mass';
         getQuery('#milestone1Stage3Main > span').textContent = 'Cluster of Mass';
-        milestone1S4.src = milestone1S4.src.replace('Black%20hole.png', 'Main_sequence%20mass.png');
+        milestone1S4.src = 'Used_art/Main_sequence%20mass.png';
         getId('mergeResetText').innerHTML = 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its true state.';
         getQuery('#stageAutoInterstellar span').textContent = 'Interstellar Stage';
         getQuery('#stageHistory > h3').textContent = 'Interstellar Stage resets:';
@@ -226,13 +230,14 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('vaporizationLimit').style.display = 'none';
         getId('collapseCapped').style.display = 'none';
         getId('element0').style.display = 'none';
-        for (let s = 1; s < strangenessInfo.length; s++) {
+        getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = 'none';
+        for (let s = 1; s <= 5; s++) {
             for (let i = strangenessInfo[s].maxActive + 1; i <= strangenessInfo[s].startCost.length; i++) {
                 getId(`strange${i}Stage${s}`).style.display = 'none';
             }
         }
         getId('strange9Stage5').style.display = 'none';
-        getId('toggleAuto9Main').style.display = 'none';
+        getId('toggleAuto9Info').style.display = 'none';
         getId('energyGainStage1Build1').style.display = 'none';
         getId('energyGainStage1Build2').style.display = 'none';
         for (let s = 2; s <= 5; s++) {
@@ -265,26 +270,15 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
 export const switchVacuum = () => {
     if (player.inflation.vacuum) { return; }
-    let income = 0;
     if (player.stage.true >= 7) {
-        income = 1;
-        player.cosmon[0].current += income;
-        player.cosmon[0].total += income;
+        player.cosmon[0].current++;
+        player.cosmon[0].total++;
     } else {
         player.stage.true = 6;
         player.collapse.show = 0;
         player.event = false;
         visualTrueStageUnlocks();
         playEvent(6);
-    }
-
-    const history = player.history.vacuum;
-    const storage = global.historyStorage.vacuum;
-    const realTime = player.time.vacuum;
-    storage.unshift([realTime, false, income]);
-    if (storage.length > 100) { storage.length = 100; }
-    if (income / realTime > history.best[2] / history.best[0]) {
-        history.best = [realTime, false, income];
     }
 
     if ((player.toggles.normal[0] && global.tab !== 'inflation') || player.stage.active < 6) { setActiveStage(1); }
