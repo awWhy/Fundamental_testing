@@ -1076,7 +1076,7 @@ try { //Start everything
         if (PC) {
             label.addEventListener('mouseenter', hoverFunc);
             image.addEventListener('mouseenter', () => {
-                if (player.toggles.hover[0]) { clickFunc(); }
+                if (player.toggles.hover[0]) { buyUpgrades(i, player.stage.active, 'researchesAuto'); }
             });
         }
         if (MD) {

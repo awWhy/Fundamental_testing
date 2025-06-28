@@ -850,12 +850,12 @@ input:-webkit-autofill { /* Chrome related pain */
 
 #element0:hover { opacity: 1; }
 
-.elementType1.awaiting { background: #780000 linear-gradient(45deg, #780000 50%, var(--background-color) 50%); }
-.elementType2.awaiting { background: #a55900 linear-gradient(45deg, #a55900 50%, var(--background-color) 50%); }
-.elementType3.awaiting { background: #0000c1 linear-gradient(45deg, #0000c1 50%, var(--background-color) 50%); }
-.elementType1.created, .elementType1.awaiting:hover { background: #780000; }
-.elementType2.created, .elementType2.awaiting:hover { background: #a55900; }
-.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; }
+input.elementType1.awaiting { background: #780000 linear-gradient(45deg, #780000 50%, var(--background-color) 50%); }
+input.elementType2.awaiting { background: #a55900 linear-gradient(45deg, #a55900 50%, var(--background-color) 50%); }
+input.elementType3.awaiting { background: #0000c1 linear-gradient(45deg, #0000c1 50%, var(--background-color) 50%); }
+input.elementType1.created, .elementType1.awaiting:hover { background: #780000; }
+input.elementType2.created, .elementType2.awaiting:hover { background: #a55900; }
+input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; }
 
 #abyssResources,
 #strangeStructures {
