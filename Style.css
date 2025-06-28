@@ -174,7 +174,7 @@ p > img {
     margin: 0.5em 0.5em 0 0.2em;
 }
 
-.interactiveImage { cursor: pointer; }
+input[type = "image"] { cursor: pointer; }
 
 .stageBorderImage {
     background-image: var(--image-border);
@@ -368,7 +368,7 @@ img, input[type = "image"], button, #load, a {
 
 button:hover, #load:hover { background-color: var(--button-hover); }
 .toggleNormal:hover, .toggleConfirm:hover, .toggleBuilding:hover, .toggleHover:hover, .toggleMax:hover, .toggleAuto:hover,
-.specialToggle:hover, .interactiveImage:hover, .hollowButton:hover { background-color: var(--hollow-hover); }
+.specialToggle:hover, input[type = "image"]:hover, .hollowButton:hover { background-color: var(--hollow-hover); }
 
 button.selectBtn {
     background-color: unset !important;
@@ -647,7 +647,7 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 0.6em;
 }
 
-#challengesMain .interactiveImage {
+#challengesMain input {
     width: 48px;
     height: 48px;
     border-radius: 0;
@@ -761,19 +761,18 @@ input:-webkit-autofill { /* Chrome related pain */
     transition-property: background-color;
 }
 
-.researchesDiv > div {
+.researchesDiv > label {
     display: flex;
     transition-property: background-color;
 }
 
-.researchesDiv img,
-.researchesDiv .interactiveImage {
+.researchesDiv input {
     border-radius: 3px;
     z-index: 2;
     transition-property: background-color;
 }
 
-.researchesDiv p {
+.researchesDiv label > span {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -785,6 +784,7 @@ input:-webkit-autofill { /* Chrome related pain */
     background-color: var(--background-color);
     margin-left: -3px;
     height: 32px;
+    pointer-events: none;
     transition-property: background-color;
 }
 
@@ -830,7 +830,7 @@ input:-webkit-autofill { /* Chrome related pain */
     margin-bottom: -0.6em;
 }
 
-#elementsGrid > .interactiveImage {
+#elementsGrid > input {
     width: 38px;
     height: 38px;
     border-radius: 0;
@@ -857,42 +857,47 @@ input:-webkit-autofill { /* Chrome related pain */
 .elementType2.created, .elementType2.awaiting:hover { background: #a55900; }
 .elementType3.created, .elementType3.awaiting:hover { background: #0000c1; }
 
+#abyssResources,
 #strangeStructures {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    column-gap: 0.6em;
+    gap: 0.6em;
     margin-top: -0.8em;
     margin-bottom: -0.4em;
 }
 
+#abyssResources > section,
 #strangeStructures > section {
     display: flex;
     flex-direction: column;
-    align-items: center;
     text-align: center;
     row-gap: 0.2em;
-    cursor: help;
 }
 
+#strangeStructures > section { cursor: help; }
+#abyssResources div,
 #strangeStructures div { display: flex; }
 
+#abyssResources img,
 #strangeStructures img {
     background-color: black;
     border-radius: 0;
 }
 
+#abyssResources p,
 #strangeStructures p {
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid #006400;
     border-left: none;
-    padding: 0 0.5em;
     background-color: black;
     width: 6em;
     height: 32px;
 }
+
+#abyssResources p { border-color: #5300c1; }
 
 #strangeStructures .popUpMenu {
     margin-top: calc(1.9em + 32px);
@@ -950,7 +955,7 @@ input:-webkit-autofill { /* Chrome related pain */
     flex-grow: 1;
 }
 
-#milestones img {
+#milestones input {
     cursor: help;
     border-radius: 3px;
 }
@@ -985,8 +990,8 @@ input:-webkit-autofill { /* Chrome related pain */
 #inflations {
     display: flex;
     flex-direction: column;
-    background-color: var(--window-color);
-    border: 2px solid var(--stage-image-borderColor);
+    background-color: #01003c;
+    border: 2px solid #5300c1;
     border-radius: 4px;
     padding: 0.5em;
     gap: 0.5em;
@@ -1002,7 +1007,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #inflations > section:not(:first-of-type) {
-    border-top: 2px solid var(--stage-image-borderColor);
+    border-top: 2px solid #5300c1;
     padding-top: 0.5em;
 }
 
@@ -1017,8 +1022,8 @@ input:-webkit-autofill { /* Chrome related pain */
     align-items: center;
     padding: 0.5em 0.6em 0.6em;
     row-gap: 0.4em;
-    background-color: var(--window-color);
-    border: 2px solid var(--window-border);
+    background-color: #01003c;
+    border: 2px solid #5300c1;
     border-radius: 7px;
     min-width: min-content;
     max-width: 28em;
@@ -1267,14 +1272,12 @@ li .hollowButton {
     margin-bottom: 1.2em;
 }
 
-#autoTogglesUpgrades > div {
-    display: flex;
-    align-items: center;
-    column-gap: 0.4em;
-}
-
 #autoTogglesUpgrades label { font-size: 0.92em; }
-#autoTogglesUpgrades button { font-size: 0.8em; }
+
+#autoTogglesUpgrades button {
+    margin-left: 0.46em;
+    font-size: 0.87em;
+}
 
 #themeArea > h3 {
     text-align: center;
@@ -1392,6 +1395,34 @@ li .hollowButton {
     justify-content: center;
 }
 
+.statsDiv > div {
+    display: flex;
+    transition-property: none;
+}
+
+.statsDiv img {
+    border-radius: 3px;
+    background-color: black;
+    transition-property: none;
+    z-index: 2;
+}
+
+.statsDiv p {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    border: 2px solid;
+    border-color: inherit;
+    border-left: none;
+    padding-left: calc(3px + 0.5em);
+    padding-right: 0.5em;
+    background-color: black;
+    margin-left: -3px;
+    height: 32px;
+    white-space: nowrap;
+    transition-property: none;
+}
+
 #globalStats {
     display: flex;
     flex-direction: column;
@@ -1408,16 +1439,10 @@ li .hollowButton {
 }
 
 #globalStats:hover { opacity: 0.2; }
-#globalStats img { background-color: black; }
 
 #globalStats p {
-    text-align: center;
     border-radius: 0 4px 4px 0;
-    background-color: black;
-    padding-left: calc(3px + 0.5em);
-    padding-right: 0.5em;
     width: 100%;
-    white-space: nowrap;
 }
 
 #globalStats span {
@@ -1435,6 +1460,7 @@ li .hollowButton {
     width: 100vw;
     bottom: 0;
     z-index: 6;
+    pointer-events: none;
 }
 
 #footerMain {
@@ -1445,6 +1471,7 @@ li .hollowButton {
     row-gap: min(1.3vh, 0.8em);
     overflow-x: overlay;
     overscroll-behavior-x: none;
+    pointer-events: auto;
 }
 
 #footerStats,
@@ -1468,27 +1495,17 @@ li .hollowButton {
 #strangenessTabBtn.tabActive { border-color: var(--tab-strangeness) !important; }
 #inflationTabBtn.tabActive { border-color: var(--tab-inflation) !important; }
 
-#footer img { background-color: black; }
-
 #footerStats p {
-    text-align: center;
     border-radius: 0 6px 6px 0;
-    background-color: black;
-    padding-left: calc(3px + 0.5em);
-    padding-right: 0.5em;
     z-index: 1; /* Text color issue */
 }
 
-#footerStats span:last-of-type {
-    white-space: nowrap;
-    width: 4.4em;
-}
+#footerStats span:last-of-type { width: 4.4em; }
 
 #footer > div:first-child {
     display: flex;
     align-items: end;
     justify-content: center;
-    pointer-events: none;
 }
 
 #footer > div:first-child button { pointer-events: auto; }
