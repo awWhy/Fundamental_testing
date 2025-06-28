@@ -80,6 +80,7 @@ export const simulateOffline = async(offline: number) => {
     global.offline.stage = [null, null, null];
     global.offline.speed = globalSave.intervals.offline;
     global.offline.start = offline;
+    player.time.online += offline;
 
     const accelerate = getId('offlineAccelerate');
     accelerate.addEventListener('click', offlineAccelerate);
@@ -321,10 +322,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
     return `${name}.txt`;
 };
 
-/* Arguments are not done as '(...data: any) => any, ...data: any' because TS won't do type safety */
-/** If onceInstanly is true, then it will instanly call function once and then try to repeat it after delay */
-const repeatFunction = (repeat: () => any, onceInstanly = false) => {
-    if (onceInstanly) { repeat(); }
+const repeatFunction = (repeat: () => any) => {
     if (global.intervalsId.mouseRepeat !== undefined) { return; }
     global.intervalsId.mouseRepeat = setTimeout(() => {
         global.intervalsId.mouseRepeat = setInterval(repeat, 50);
@@ -349,7 +347,6 @@ const showAndFix = (element: HTMLElement) => {
 };
 
 const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements') => {
-    if (player.toggles.hover[0]) { buyUpgrades(index, player.stage.active, type); }
     if (type === 'elements') {
         global.lastElement = index;
     } else { global.lastUpgrade[player.stage.active] = [index, type]; }
@@ -359,7 +356,6 @@ const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness'
     if (type === 'inflations') {
         global.lastInflation = [index, stageIndex];
     } else if (type === 'strangeness') {
-        if (player.toggles.hover[1]) { buyStrangeness(index, stageIndex, 'strangeness'); }
         global.lastStrangeness = [index, stageIndex];
     } else { global.lastMilestone = [index, stageIndex]; }
     getStrangenessDescription(index, stageIndex, type);
@@ -738,7 +734,7 @@ try { //Start everything
     const save = localStorage.getItem(specialHTML.localStorage.main);
     if (save !== null) {
         const load = JSON.parse(atob(save));
-        if (load.version !== playerStart.version) { throw Error('Prevented save overwrite, if you for some reason using it on wrong website, then export it'); }
+        if (load.version !== playerStart.version && load.version !== 'v0.2.6_temp') { throw Error('Prevented save overwrite, if you for some reason using it on wrong website, then export it'); }
         oldVersion = updatePlayer(load);
     } else {
         prepareVacuum(false); //Set buildings values
@@ -995,11 +991,14 @@ try { //Start everything
     for (let i = 0; i < specialHTML.longestUpgrade; i++) {
         const image = getId(`upgrade${i + 1}`);
         const hoverFunc = () => hoverUpgrades(i, 'upgrades');
+        const clickFunc = () => buyUpgrades(i, player.stage.active, 'upgrades');
         if (PC) { image.addEventListener('mouseenter', hoverFunc); }
         if (MD) {
-            image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
+            image.addEventListener('touchstart', () => {
+                hoverFunc();
+                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+            });
         } else {
-            const clickFunc = () => buyUpgrades(i, player.stage.active, 'upgrades');
             image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
@@ -1011,13 +1010,21 @@ try { //Start everything
         }
     }
     for (let i = 0; i < specialHTML.longestResearch; i++) {
-        const image = getId(`research${i + 1}Image`);
+        const image = getId(`research${i + 1}`);
         const hoverFunc = () => hoverUpgrades(i, 'researches');
-        if (PC) { image.addEventListener('mouseenter', hoverFunc); }
+        const clickFunc = () => buyUpgrades(i, player.stage.active, 'researches');
+        if (PC) {
+            image.addEventListener('mouseenter', hoverFunc);
+            getQuery(`#research${i + 1} > input`).addEventListener('mouseenter', () => {
+                if (player.toggles.hover[0]) { clickFunc(); }
+            });
+        }
         if (MD) {
-            image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
+            image.addEventListener('touchstart', () => {
+                hoverFunc();
+                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+            });
         } else {
-            const clickFunc = () => buyUpgrades(i, player.stage.active, 'researches');
             image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
@@ -1029,13 +1036,21 @@ try { //Start everything
         }
     }
     for (let i = 0; i < specialHTML.longestResearchExtra; i++) {
-        const image = getId(`researchExtra${i + 1}Image`);
+        const image = getId(`researchExtra${i + 1}`);
         const hoverFunc = () => hoverUpgrades(i, 'researchesExtra');
-        if (PC) { image.addEventListener('mouseenter', hoverFunc); }
+        const clickFunc = () => buyUpgrades(i, player.stage.active, 'researchesExtra');
+        if (PC) {
+            image.addEventListener('mouseenter', hoverFunc);
+            getQuery(`#researchExtra${i + 1} > input`).addEventListener('mouseenter', () => {
+                if (player.toggles.hover[0]) { clickFunc(); }
+            });
+        }
         if (MD) {
-            image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
+            image.addEventListener('touchstart', () => {
+                hoverFunc();
+                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+            });
         } else {
-            const clickFunc = () => buyUpgrades(i, player.stage.active, 'researchesExtra');
             image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
@@ -1047,13 +1062,21 @@ try { //Start everything
         }
     }
     for (let i = 0; i < playerStart.researchesAuto.length; i++) {
-        const image = getId(`researchAuto${i + 1}Image`);
+        const image = getId(`researchAuto${i + 1}`);
         const hoverFunc = () => hoverUpgrades(i, 'researchesAuto');
-        if (PC) { image.addEventListener('mouseenter', hoverFunc); }
+        const clickFunc = () => handleAutoResearchCreation(i);
+        if (PC) {
+            image.addEventListener('mouseenter', hoverFunc);
+            getQuery(`#researchAuto${i + 1} > input`).addEventListener('mouseenter', () => {
+                if (player.toggles.hover[0]) { clickFunc(); }
+            });
+        }
         if (MD) {
-            image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
+            image.addEventListener('touchstart', () => {
+                hoverFunc();
+                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+            });
         } else {
-            const clickFunc = () => handleAutoResearchCreation(i);
             image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
@@ -1064,13 +1087,21 @@ try { //Start everything
             });
         }
     } {
-        const image = getId('ASRImage');
+        const image = getId('ASR');
         const hoverFunc = () => hoverUpgrades(0, 'ASR');
-        if (PC) { image.addEventListener('mouseenter', hoverFunc); }
+        const clickFunc = () => buyUpgrades(0, player.stage.active, 'ASR');
+        if (PC) {
+            image.addEventListener('mouseenter', hoverFunc);
+            getQuery('#ASR > input').addEventListener('mouseenter', () => {
+                if (player.toggles.hover[0]) { clickFunc(); }
+            });
+        }
         if (MD) {
-            image.addEventListener('touchstart', () => repeatFunction(hoverFunc, true));
+            image.addEventListener('touchstart', () => {
+                hoverFunc();
+                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+            });
         } else {
-            const clickFunc = () => buyUpgrades(0, player.stage.active, 'ASR');
             image.addEventListener('click', clickFunc);
             image.addEventListener('mousedown', () => repeatFunction(clickFunc));
         }
@@ -1176,13 +1207,21 @@ try { //Start everything
     for (let s = 1; s < playerStart.strangeness.length; s++) {
         if (MD) { getId(`strangenessPage${s}`).addEventListener('click', () => MDStrangenessPage(s)); }
         for (let i = 0; i < playerStart.strangeness[s].length; i++) {
-            const image = getId(`strange${i + 1}Stage${s}Image`);
+            const image = getId(`strange${i + 1}Stage${s}`);
             const hoverFunc = () => hoverStrangeness(i, s, 'strangeness');
-            if (PC) { image.addEventListener('mouseenter', hoverFunc); }
+            const clickFunc = () => buyStrangeness(i, s, 'strangeness');
+            if (PC) {
+                image.addEventListener('mouseenter', hoverFunc);
+                getQuery(`#strange${i + 1}Stage${s} > input`).addEventListener('mouseenter', () => {
+                    if (player.toggles.hover[1]) { clickFunc(); }
+                });
+            }
             if (MD) {
-                image.addEventListener('touchstart', () => { repeatFunction(hoverFunc, true); });
+                image.addEventListener('touchstart', () => {
+                    hoverFunc();
+                    if (player.toggles.hover[1]) { repeatFunction(clickFunc); }
+                });
             } else {
-                const clickFunc = () => buyStrangeness(i, s, 'strangeness');
                 image.addEventListener('click', clickFunc);
                 image.addEventListener('mousedown', () => repeatFunction(clickFunc));
             }
@@ -1212,7 +1251,7 @@ try { //Start everything
 
     for (let s = 1; s < playerStart.milestones.length; s++) {
         for (let i = 0; i < playerStart.milestones[s].length; i++) {
-            const image = getQuery(`#milestone${i + 1}Stage${s}Div > img`);
+            const image = getQuery(`#milestone${i + 1}Stage${s}Div > input`);
             const hoverFunc = () => hoverStrangeness(i, s, 'milestones');
             if (PC) { image.addEventListener('mouseenter', hoverFunc); }
             if (MD) { image.addEventListener('touchstart', hoverFunc); }
@@ -1228,11 +1267,11 @@ try { //Start everything
     /* Inflation tab */
     for (let s = 0; s <= 1; s++) {
         for (let i = 0; i < playerStart.tree[s].length; i++) {
-            const image = getId(`inflation${i + 1}Tree${s + 1}Image`);
+            const image = getId(`inflation${i + 1}Tree${s + 1}`);
             const hoverFunc = () => hoverStrangeness(i, s, 'inflations');
             if (PC) { image.addEventListener('mouseenter', hoverFunc); }
             if (MD) {
-                image.addEventListener('touchstart', () => { /*repeatFunction(*/hoverFunc(); /*, true);*/ });
+                image.addEventListener('touchstart', hoverFunc);
             } else {
                 const clickFunc = () => buyStrangeness(i, s, 'inflations');
                 image.addEventListener('click', clickFunc);

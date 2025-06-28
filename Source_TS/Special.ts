@@ -291,9 +291,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Main_sequence%20mass.png', 'stage1borderImage cyanText', 'Mass'],
             ['Stars.png', 'redBorderImage redText', 'Stars']
         ], [
-            ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter'],
-            ['Inflaton.png', 'stage6borderImage darkvioletText', 'Inflatons'],
-            ['Cosmon.png', 'stage6borderImage darkvioletText', 'Cosmons']
+            ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter']
         ]
     ],
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
@@ -379,7 +377,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
         getId(`switchTheme${theme ?? 0}`).style.textDecoration = 'underline';
     } else { theme = globalSave.theme; }
 
-    const upgradeTypes = ['upgrade', 'element', 'inflation'];
+    const upgradeTypes = ['upgrade', 'element'];
     const properties = {
         '--background-color': '#030012',
         '--window-color': '#12121c',
@@ -826,12 +824,12 @@ export const resetMinSizes = (full = true) => {
         element.style.minWidth = '';
     }
     for (let i = 0; i < global.researchesInfo[player.stage.active].maxActive; i++) {
-        const element = getQuery(`#research${i + 1} > p`);
+        const element = getQuery(`#research${i + 1} span`);
         specialHTML.cache.innerHTML.set(element, '');
         element.style.minWidth = '';
     }
     for (let i = 0; i < global.researchesExtraInfo[player.stage.active].maxActive; i++) {
-        const element = getQuery(`#researchExtra${i + 1} > p`);
+        const element = getQuery(`#researchExtra${i + 1} span`);
         specialHTML.cache.innerHTML.set(element, '');
         element.style.minWidth = '';
     }

@@ -213,8 +213,6 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
 /** Level 0 is Vacuum reset, level 1 is Universe reset, level 2 is End reset */
 export const resetVacuum = (level = 0) => {
     const vacuum = player.inflation.vacuum;
-    const inflations = [false];
-    for (let i = 1; i <= 6; i++) { inflations[i] = player.buildings[6][1].current.moreOrEqual(i); }
     if (level >= 2) {
         const universe = player.buildings[6][1];
         const start = 1;
@@ -239,6 +237,8 @@ export const resetVacuum = (level = 0) => {
         player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoid);
         global.inflationInfo.totalSuper = 0;
     }
+    const inflations = [false];
+    for (let i = 1; i <= 6; i++) { inflations[i] = player.buildings[6][1].current.moreOrEqual(i); }
     for (let s = 1; s <= 6; s++) {
         const buildings = player.buildings[s];
         const buildingResetValue = playerStart.buildings[s][0].current;

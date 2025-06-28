@@ -6,7 +6,7 @@ import { format, switchTab, updateCollapsePoints, visualTrueStageUnlocks } from 
 import { prepareVacuum } from './Vacuum';
 
 export const player: playerType = {
-    version: 'v0.2.6_temp',
+    version: 'v0.2.6_temp2',
     fileName: 'Fundamental, [dateD.M.Y] [timeH-M-S], [stage]',
     stage: {
         true: 1,
@@ -1103,7 +1103,7 @@ export const global: globalType = {
             ],
             cost: [],
             startCost: [1, 1, 1, 2, 12, 2, 24, 2, 12, 15600],
-            scaling: [2.46, 2, 6, 4, 400, 1, 1, 6, 10, 1],
+            scaling: [2.46, 2, 6, 4, 400, 1, 1, 6, 10, 1e308],
             max: [6, 4, 4, 2, 1, 1, 1, 2, 2, 1],
             maxActive: 7
         }, { //Stage 2
@@ -1145,7 +1145,7 @@ export const global: globalType = {
             ],
             cost: [],
             startCost: [1, 1, 2, 2, 12, 4, 24, 18, 800, 9600],
-            scaling: [2.46, 2, 3, 4, 800, 1, 1, 3.4, 3, 1],
+            scaling: [2.46, 2, 3, 4, 800, 1, 1, 3.4, 3, 1e308],
             max: [4, 8, 3, 2, 1, 1, 1, 6, 3, 1],
             maxActive: 7
         }, { //Stage 3
@@ -1184,7 +1184,7 @@ export const global: globalType = {
             ],
             cost: [],
             startCost: [1, 2, 2, 24, 12, 4, 4, 24, 18000, 2.16e6],
-            scaling: [2, 3.4, 3, 1, 100, 1, 1.74, 1, 2.46, 1],
+            scaling: [2, 3.4, 3, 1, 100, 1, 1.74, 1, 2.46, 1e308],
             max: [8, 4, 3, 1, 1, 1, 3, 1, 6, 1],
             maxActive: 8
         }, { //Stage 4
@@ -1325,12 +1325,12 @@ export const global: globalType = {
             () => 'For false Vacuum it will remove time limit from Milestones.\nFor true Vacuum it will unlock Void Milestones. Their effects are active, only when this Inflation is active.',
             () => {
                 const level = player.tree[0][5];
-                return `Allow for Export storage to be increased by ${(2 + 2 * level) * level}%${level < 4 ? ` ⟶ ${(4 + 2 * level) * (level + 1)}%` : ''} of the Stage reset value and to claim entire storage at once, but without bonus +1 to the Strange quarks base. Also increases Export time gain by ${format(calculateEffects.T0Inflation5(), { padding: level < 4 })}${level < 4 ? ` ⟶ ${format(calculateEffects.T0Inflation5(level + 1), { padding: true })}` : ''}, if inside any Challenge, then its further increased by 4.\nIf inside any Challenge, then it will also boost global speed by ${format(6 / (6 - level))}${level < 4 ? ` ⟶ ${format(6 / (5 - level))}` : ''}, but decrease the time limit for some of the challenges by same amount. (Affected challenges are normal Void and Vacuum stability)`;
+                return `Allow for Export storage to be increased by ${(2 + 2 * level) * level}%${level < 4 ? ` ⟶ ${(4 + 2 * level) * (level + 1)}%` : ''} of the Stage reset value and to claim entire storage at once, but without bonus +1 to the Strange quarks base. Also increases Export time gain by ${format(calculateEffects.T0Inflation5(), { padding: level < 4 })}${level < 4 ? ` ⟶ ${format(calculateEffects.T0Inflation5(level + 1), { padding: true })}` : ''}, if inside any Challenge, then its further increased by 4.\nIf inside any Challenge, then it will also boost global speed by ${format(6 / (6 - level))}${level < 4 ? ` ⟶ ${format(6 / (5 - level))}` : ''}, but decrease the time limit for the Challenges by the same amount.`;
             }
         ],
         cost: [],
         startCost: [0, 1, 1, 2, 4, 1],
-        scaling: [2, 0.75, 0.5, 2, 0, 1.75],
+        scaling: [2, 0.75, 0.5, 2, 0, 1],
         max: [2, 6, 8, 4, 1, 4]
     }, { //Non-refindable
         name: [
@@ -1342,20 +1342,20 @@ export const global: globalType = {
             'Conservation of Resources'
         ],
         effectText: [
-            () => `Boost global speed again by ${format(1.2)}.`,
-            () => `Boost Strange quarks from Stage reset again by ${format(1.1)}.`,
+            () => `Boost global speed again by ${format(1.4)}.`,
+            () => `Boost Strange quarks from Stage reset again by ${format(1.2)}.`,
             () => "First level removes all negative effects and time limit from 'Overboost' Inflation.\nFurther levels will instead increase its max level by +1.",
             () => `True Vacuum only, gain +1 free Goals and decrease requirement scaling by -${format(0.5)} with every level.\nAlso improve Discharge base by +${format(0.5)} (before the softcap), but only inside any Void.`,
-            () => 'Placeholder.',
-            () => { //[5] //No effect
+            () => `True Vacuum only, make effective Rank boost even more per Rank: +${format(0.5)} Discharge goals at level 1, +1 extra level of 'Planetary system' at level 2 and ${format(1.01)}x to the Solar mass gain at level 3.`,
+            () => { //[5]
                 const level = Math.min(player.tree[1][5] + 1, 4);
                 return `Keep more of ${global.stageInfo.word[level]}${level === 4 ? ' and Intergalactic' : ''} Resources by making all of its Structures${level === 4 ? "(doesn't include Galaxies)" : ''} not spend them on creation.`;
             }
         ],
         cost: [],
-        startCost: [1, 1, 4, 0, Infinity, 2],
-        scaling: [1, 1, 2, 2, 999, 2],
-        max: [8, 8, 5, 2, 0, 4]
+        startCost: [1, 1, 2, 0, 1, 2],
+        scaling: [1, 1, 2, 1, 1.5, 1.4],
+        max: [8, 8, 5, 2, 3, 4]
     }],
     milestonesInfo: [
         {} as globalType['milestonesInfo'][0], { //Stage 1
@@ -1384,7 +1384,7 @@ export const global: globalType = {
             ],
             needText: [
                 () => `${player.inflation.vacuum ? 'Vaporize to' : 'Produce'} at least ${format(global.milestonesInfo[2].need[0])} ${player.inflation.vacuum ? 'Clouds' : 'Drops this reset'}.`,
-                () => `${player.inflation.vacuum ? 'Produce' : 'Have'} at least ${format(global.milestonesInfo[2].need[1])} ${player.inflation.vacuum ? 'Drops this reset' : 'Puddles at same time'}.`
+                () => `${player.inflation.vacuum ? 'Produce' : 'Have'} at least ${format(global.milestonesInfo[2].need[1])} ${player.inflation.vacuum ? 'Drops this reset' : 'Puddles at the same time'}.`
             ],
             rewardText: [
                 () => player.inflation.vacuum ? `Decrease Drops requirement to get a Cloud by ${format(global.milestonesInfo[2].reward[0], { padding: true })}.` : 'First Intergalactic Structure. (Nebula)',
@@ -1461,8 +1461,8 @@ export const global: globalType = {
         effectText: () => {
             const progress = player.challenges.voidCheck;
             let text = `<p class="orangeText">‒ Microworld Structures are 4 times weaker${progress[1] >= 1 ? `\n‒ Discharge base is raised to the root of 2 (^${format(0.5)})` : ''}${progress[1] >= 2 ? '\n‒ Energy gain from Submerged and Accretion Stages is divided by 2' : ''}\n${progress[3] >= 5 ? '‒ Energy gain from Interstellar and Intergalactic Stages is divided by 4' : 'More nerfs will be shown with more rewards'}</p>`;
-            if (progress[1] >= 3) { text += `<p class="blueText">‒ Effective Drops amount is hardcapped at 1\n‒ Puddles are ${format(8000)} times weaker\n${progress[2] >= 1 ? `‒ Clouds gain is decreased by ^${format(0.8)}` : 'More nerfs will be shown with more rewards'}</p>`; }
-            if (progress[1] >= 2) { text += `<p class="grayText">‒ Cosmic dust is softcapped (^${format(0.9)})\n${progress[3] >= 4 ? `‒ Softcap is stronger after reaching 'Jovian planet' Rank (^${format(0.8)})` : 'More nerfs will be shown with more rewards'}${player.challenges.super ? (player.challenges.supervoid[3] >= 2 ? `\n‒ Effective Drops for the Submersion boost are decreased by ${format(1e4)} ^(Rank - 2)` : '\nMore nerfs will be shown with more rewards') : ''}</p>`; }
+            if (progress[1] >= 3) { text += `<p class="blueText">‒ Drops above 1 do not increase their own production\n‒ Puddles are ${format(8000)} times weaker\n${progress[2] >= 1 ? `‒ Clouds gain is decreased by ^${format(0.8)}` : 'More nerfs will be shown with more rewards'}</p>`; }
+            if (progress[1] >= 2) { text += `<p class="grayText">‒ Cosmic dust is softcapped (^${format(0.9)})\n${progress[3] >= 4 ? `‒ Softcap is stronger after reaching 'Jovian planet' Rank (^${format(0.8)})` : 'More nerfs will be shown with more rewards'}${player.challenges.super ? (player.challenges.supervoid[3] >= 1 ? "\n‒ Increasing Rank doesn't increase effective Rank" : '\nMore nerfs will be shown with more rewards') : ''}</p>`; }
             if (progress[3] >= 5) { text += `<p class="orchidText">‒ Stars are ${format(8000)} times weaker${progress[4] >= 1 ? '\n‒ Solar mass gain is 2 times smaller' : ''}${progress[4] >= 2 ? `\n‒ Solar mass effect is softcapped ^${format(0.2)} after 1` : ''}\n${progress[4] >= 5 ? "‒ Can't create or gain Quasi-stars" : 'More nerfs will be shown with more rewards'}</p>`; }
             if (progress[3] >= 1) { text += `<p class="cyanText">${player.challenges.super ? '‒ Global speed is decreased by 5\n' : ''}‒ All resets affect all ${player.stage.true >= 7 ? 'pre-Abyss ' : ''}Stages\n${progress[5] >= 1 ? `‒ Galaxies cost scaling increased by +${format(0.05)}` : 'More nerfs will be shown with more rewards'}</p>`; }
             return text;
@@ -1481,7 +1481,7 @@ export const global: globalType = {
                 () => "Reach 'Asteroid' Rank",
                 () => "Reach 'Planet' Rank",
                 () => "Reach 'Jovian planet' Rank",
-                () => `Reach 'Protostar' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}`,
+                () => "Reach 'Protostar' Rank",
                 () => player.stage.true >= 7 ? `Reach 'Protogalaxy' Rank${global.sessionToggles[0] ? ' (WIP)' : ''}` : null
             ], [
                 () => `Cause the Collapse${global.sessionToggles[0] ? ' (WIP)' : ''}`,
@@ -1507,7 +1507,7 @@ export const global: globalType = {
             [],
             ["'Discharge improvement' (Non-refundable)", "'Improved conservation' (Milestone)", "'Conservation of Resources' (Non-refundable)"],
             ['Missing', 'Missing', 'Missing'],
-            ["'Indestructible matter' (Milestone)", "'Latest Preons' (Milestone)", "'Improved Offline' (Refundable)", "'Rank improvement' (Non-refundable)", 'Missing', 'Missing'],
+            ["'Indestructible matter' (Milestone)", "'Latest Preons' (Milestone)", "'Improved Offline' (Refundable)", "'Rank improvement' (Non-refundable)", 'Placeholder (WIP)', 'Missing'],
             ['Missing', 'Missing', 'Missing', 'Missing', 'Missing'],
             ['Missing', 'Missing', 'Missing', 'Missing']
         ]],
@@ -1520,7 +1520,7 @@ export const global: globalType = {
         effectText: () => {
             const completions = player.challenges.stability;
             return `<p class="orchidText">‒ Global speed is decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
-            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** Math.max((player.challenges.active === 1 ? player.stage.resets : 0) + completions - 7, 0), { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${4 * (completions + 1)}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset</p>
+            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** Math.max((player.challenges.active === 1 ? player.stage.resets : 0) - 7, 0) * 2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by 4\n‒ Stage resets above 8 decrease Strange quarks from Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Merge requirement is increased by +${completions}, which is equal to ${calculateEffects.mergeRequirement(true)}</p>`;
         },
         needText: ['1 Completion'],
@@ -1712,9 +1712,6 @@ export const updatePlayer = (load: playerType): string => {
             load.merge = deepClone(playerStart.merge);
             if (load.clone.depth !== undefined) { load.clone.merge = deepClone(playerStart.merge); }
             load.inflation.loadouts = {};
-
-            /* Can be removed eventually */
-            load.time.online *= 1000;
         }
         if (load.version === 'v0.2.4') {
             load.version = 'v0.2.5';
@@ -1739,7 +1736,7 @@ export const updatePlayer = (load: playerType): string => {
             delete load.merge['reward' as keyof unknown];
         }
         if (load.version === 'v0.2.5') {
-            load.version = playerStart.version;
+            load.version = 'v0.2.6_temp';
             load.strangeness[6] = cloneArray(playerStart.strangeness[6]);
             if (load.clone.depth !== undefined) {
                 load.clone.vaporization.clouds = Number(load.clone.vaporization.clouds); //Also can be shortened
@@ -1749,12 +1746,35 @@ export const updatePlayer = (load: playerType): string => {
             load.inflation.ends = 0;
 
             /* Can be removed eventually */
+            // if (load.challenges.stability === 2) {
+            //     load.challenges.stability = 1;
+            //     load.cosmon[0].current--;
+            //     load.cosmon[0].total--;
+            // }
             load.history.end = deepClone(playerStart.history.end);
             load.vaporization.clouds = Number(load.vaporization.clouds);
             load.vaporization.cloudsMax = load.vaporization.clouds;
-            load.tree[1] = cloneArray(playerStart.tree[1]);
-            load.time.end = load.time.online;
+            // load.tree[1] = cloneArray(playerStart.tree[1]);
+            // load.time.end = load.time.online / 1000;
             delete load.history['vacuum' as keyof unknown];
+        }
+        if (load.version === 'v0.2.6_temp') {
+            load.version = 'v0.2.6_temp2';
+            load.tree[1] = cloneArray(playerStart.tree[1]);
+            load.cosmon[1].current = load.cosmon[1].total;
+            if (load.time.end === undefined) {
+                load.time.end = load.time.online / 1000;
+            } else if (load.inflation.ends === 0) {
+                load.time.end /= 1000;
+            } else {
+                load.history.end.list[0][0] /= 1000;
+                load.history.end.best[0] /= 1000;
+            }
+            if (load.challenges.stability === 2) {
+                load.challenges.stability = 1;
+                load.cosmon[0].current--;
+                load.cosmon[0].total--;
+            }
         }
 
         if (load.version !== playerStart.version) {

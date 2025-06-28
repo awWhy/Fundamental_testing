@@ -10,11 +10,11 @@ import { addIntoLog, visualTrueStageUnlocks } from './Update';
 export const prepareVacuum = (state: boolean) => { //Must not use direct player values, globalSave is fine probably
     const { buildings } = playerStart;
     const { buildingsInfo, upgradesInfo, researchesInfo, researchesExtraInfo, strangenessInfo } = global;
-    const milestone1S1 = getQuery('#milestone1Stage1Div > img') as HTMLImageElement;
-    const milestone1S2 = getQuery('#milestone1Stage2Div > img') as HTMLImageElement;
-    const milestone2S2 = getQuery('#milestone2Stage2Div > img') as HTMLImageElement;
-    const milestone1S3 = getQuery('#milestone1Stage3Div > img') as HTMLImageElement;
-    const milestone1S4 = getQuery('#milestone1Stage4Div > img') as HTMLImageElement;
+    const milestone1S1 = getQuery('#milestone1Stage1Div > input') as HTMLImageElement;
+    const milestone1S2 = getQuery('#milestone1Stage2Div > input') as HTMLImageElement;
+    const milestone2S2 = getQuery('#milestone2Stage2Div > input') as HTMLImageElement;
+    const milestone1S3 = getQuery('#milestone1Stage3Div > input') as HTMLImageElement;
+    const milestone2S4 = getQuery('#milestone2Stage4Div > input') as HTMLImageElement;
     let upgrades1Cost, researches1Cost, researches1Scaling, strangeness1Cost, strangeness1Scaling, strangeness2Cost, strangeness2Scaling, strangeness3Cost, strangeness3Scaling, strangeness4Cost, strangeness4Scaling, strangeness5Cost, strangeness5Scaling;
 
     if (state) {
@@ -96,7 +96,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestone1S3.alt = 'Center of gravity';
         global.milestonesInfo[3].name[0] = 'Center of gravity';
         getQuery('#milestone1Stage3Main > span').textContent = 'Center of gravity';
-        milestone1S4.src = 'Used_art/Black%20hole.png';
+        milestone2S4.src = 'Used_art/Black%20hole.png';
         getId('mergeResetText').innerHTML = '<span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting all self-made <span class="grayText">Galaxies</span> into bonus ones.';
         getQuery('#stageAutoInterstellar span').textContent = 'Stage';
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
@@ -205,7 +205,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestone1S3.alt = 'Cluster of Mass';
         global.milestonesInfo[3].name[0] = 'Cluster of Mass';
         getQuery('#milestone1Stage3Main > span').textContent = 'Cluster of Mass';
-        milestone1S4.src = 'Used_art/Main_sequence%20mass.png';
+        milestone2S4.src = 'Used_art/Main_sequence%20mass.png';
         getId('mergeResetText').innerHTML = 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its true state.';
         getQuery('#stageAutoInterstellar span').textContent = 'Interstellar Stage';
         getQuery('#stageHistory > h3').textContent = 'Interstellar Stage resets:';

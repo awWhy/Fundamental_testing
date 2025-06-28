@@ -75,12 +75,6 @@ export const switchTab = (tab = null as null | gameTab, subtab = null as null | 
             }
             return;
         }
-    } else if (tab === 'inflation') {
-        if (active !== 6) {
-            setActiveStage(6, global.trueActive);
-            stageUpdate();
-            return;
-        }
     } else if (global.trueActive !== active) {
         setActiveStage(global.stageInfo.activeAll.includes(global.trueActive) ? global.trueActive : Math.min(player.stage.current, 5));
         stageUpdate();
@@ -151,8 +145,6 @@ export const numbersUpdate = () => {
         }
     } else if (active === 6) {
         getId('footerStat1Span').textContent = format(buildings[0].current, { padding: true });
-        getId('footerStat2Span').textContent = format(player.cosmon[0].current, { padding: 'exponent' });
-        getId('footerStat3Span').textContent = format(player.cosmon[1].current, { padding: 'exponent' });
     }
 
     if (tab === 'stage') {
@@ -379,7 +371,6 @@ export const numbersUpdate = () => {
                     getQuery('#mergeResetsS6 > span').textContent = `${player.merge.resets}`;
                     getQuery('#mergeResetsS6 > span:last-of-type').textContent = `${calculateEffects.mergeMaxResets()}`;
                 }
-                getId('inflatonGainTrue').textContent = format(buildings[1].true + 1, { padding: 'exponent' });
                 getQuery('#universeTime > span').textContent = format(player.inflation.age, { type: 'time' });
                 getQuery('#universeTime > span:last-of-type').textContent = format(player.time.universe, { type: 'time' });
             }
@@ -464,6 +455,11 @@ export const numbersUpdate = () => {
         }
     } else if (tab === 'inflation') {
         if (subtab.inflationCurrent === 'Researches') {
+            getId('cosmon0Span').textContent = format(player.cosmon[0].current, { padding: 'exponent' });
+            getId('cosmon1Span').textContent = format(player.cosmon[1].current, { padding: 'exponent' });
+            getId('inflatonGainTrue').textContent = format(player.buildings[6][1].true + 1, { padding: 'exponent' });
+            getQuery('#endTime > span').textContent = format(player.time.end, { type: 'time' });
+            getId('endResets').textContent = `${player.inflation.ends}`;
             for (let s = 0; s <= 1; s++) {
                 for (let i = 0; i < global.treeInfo[s].name.length; i++) { visualUpdateResearches(i, s, 'inflations'); }
             }
@@ -576,8 +572,6 @@ export const numbersUpdate = () => {
                         getId('mergeTotal').textContent = format(base * reward1 * reward2, { padding: true });
                     }
                 }
-            } else if (active === 6) {
-                getQuery('#endResets > span').textContent = `${player.inflation.ends}`;
             }
             for (let i = 0; i < global.buildingsInfo.maxActive[active]; i++) {
                 getId(`building${i}StatTotal`).textContent = format(buildings[i].total, { padding: true });
@@ -724,7 +718,7 @@ export const visualUpdate = () => {
                 if (vacuum) {
                     getId('building5').style.display = upgrades[11] === 1 || buildings[5].trueTotal.moreThan('0') ? '' : 'none';
                     getId('dustCap').style.display = player.researchesExtra[3][5] < 1 ? '' : 'none';
-                    getId('submersionBoost').style.display = player.researchesExtra[1][2] >= 2 || (player.challenges.active === 0 && player.challenges.super && player.accretion.rank >= 3) ? '' : 'none';
+                    getId('submersionBoost').style.display = player.researchesExtra[1][2] >= 2 ? '' : 'none';
                 } else { getId('stageInfo').style.display = global.accretionInfo.dustSoft !== 1 ? '' : 'none'; }
                 updateRankInfo();
             } else if (active === 4) {
@@ -1000,6 +994,7 @@ export const visualUpdate = () => {
                 getId('strange10Stage5').style.display = global.sessionToggles[1] && universes.moreOrEqual('6') ? '' : 'none';
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = strange5 ? '' : 'none';
                 if (globalSave.MDSettings[0] && (global.debug.MDStrangePage === 5 ? !strange5 : (highest < 6 && player.stage.resets < global.debug.MDStrangePage + 3))) { MDStrangenessPage(1); }
+                if (highest < 6) { getId('strange0').style.cursor = player.milestones[4][0] < 8 ? 'unset' : ''; }
             }
             getId('strange6Stage1').style.display = show1 ? '' : 'none';
             getId('strange6Stage2').style.display = show1 ? '' : 'none';
@@ -1168,6 +1163,7 @@ export const visualTrueStageUnlocks = () => {
     getId('strange1GlobalSpeedInfo').style.display = highest >= 7 ? '' : 'none';
     getQuery('#strangenessHeader > span:last-of-type').style.display = highest >= 7 ? '' : 'none';
     getId('strangenessToggles').style.display = superUnlocked ? '' : 'none';
+    getId('cosmon1').style.display = highest >= 8 ? '' : 'none';
     getId('inflation4Tree1').style.display = superUnlocked ? '' : 'none';
     getId('inflation5Tree1').style.display = superUnlocked ? '' : 'none';
     getId('inflation1Tree2').style.display = highest >= 8 ? '' : 'none';
@@ -1189,7 +1185,7 @@ export const visualTrueStageUnlocks = () => {
     getId('autoStageSwitch').style.display = highest >= 5 ? '' : 'none';
     getId('inflatonStat').style.display = highest >= 7 ? '' : 'none';
     getId('cosmon1Stat').style.display = highest >= 8 ? '' : 'none';
-    getId('endResets').style.display = highest >= 8 ? '' : 'none';
+    getId('endTime').style.display = highest >= 8 ? '' : 'none';
     getId('endHistory').style.display = highest >= 8 ? '' : 'none';
     if (highest >= 2) {
         getId('toggleBuilding0').style.display = '';
@@ -1200,6 +1196,7 @@ export const visualTrueStageUnlocks = () => {
         getId('elementsAsTab').style.display = '';
     }
     if (highest >= 6) {
+        getId('strange0').style.cursor = '';
         getId('saveFileNameGalaxy').style.display = '';
         for (let s = 2; s <= 4; s++) {
             getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}${s}`).style.display = '';
@@ -1591,15 +1588,15 @@ const visualUpdateResearches = (index: number, stageIndex: number, type: 'resear
         const extra = type === 'researches' ? '' : 'Extra';
         upgradeHTML = getId(`research${extra}${index + 1}Level`);
         getId(`research${extra}${index + 1}Max`).textContent = `${max}`;
-        image = getId(`research${extra}${index + 1}Image`);
-        mainQuery = getQuery(`#research${type === 'researchesExtra' ? 'Extra' : ''}${index + 1} > p`);
+        image = getQuery(`#research${extra}${index + 1} > input`);
+        mainQuery = getQuery(`#research${type === 'researchesExtra' ? 'Extra' : ''}${index + 1} span`);
     } else if (type === 'researchesAuto') {
         max = global.researchesAutoInfo.max[index];
         level = player.researchesAuto[index];
 
         upgradeHTML = getId(`researchAuto${index + 1}Level`);
         getId(`researchAuto${index + 1}Max`).textContent = `${max}`;
-        image = getId(`researchAuto${index + 1}Image`);
+        image = getQuery(`#researchAuto${index + 1} > input`);
     } else if (type === 'ASR') {
         if (stageIndex !== player.stage.active) { return; }
         max = global.ASRInfo.max[stageIndex];
@@ -1607,21 +1604,21 @@ const visualUpdateResearches = (index: number, stageIndex: number, type: 'resear
 
         upgradeHTML = getId('ASRLevel');
         getId('ASRMax').textContent = `${max}`;
-        image = getId('ASRImage');
+        image = getQuery('#ASR > input');
     } else if (type === 'strangeness') {
         max = global.strangenessInfo[stageIndex].max[index];
         level = player.strangeness[stageIndex][index];
 
         upgradeHTML = getId(`strange${index + 1}Stage${stageIndex}Level`);
         getId(`strange${index + 1}Stage${stageIndex}Max`).textContent = `${max}`;
-        image = getId(`strange${index + 1}Stage${stageIndex}Image`);
+        image = getQuery(`#strange${index + 1}Stage${stageIndex} > input`);
     } else /*if (type === 'inflations')*/ {
         max = global.treeInfo[stageIndex].max[index];
         level = player.tree[stageIndex][index];
 
         upgradeHTML = getId(`inflation${index + 1}Tree${stageIndex + 1}Level`);
         getId(`inflation${index + 1}Tree${stageIndex + 1}Max`).textContent = `${max}`;
-        image = getId(`inflation${index + 1}Tree${stageIndex + 1}Image`);
+        image = getQuery(`#inflation${index + 1}Tree${stageIndex + 1} > input`);
     }
 
     upgradeHTML.textContent = `${level}`;
@@ -2077,12 +2074,11 @@ export const stageUpdate = (changed = true, ignoreOffline = false) => {
         }
         setRemnants();
     } else if (active === 6) {
-        showF.push(0, 1);
+        showF.push(0);
         getId('stageInfo').style.display = '';
         getId('autoWaitMain').style.display = '';
         getId('specials').style.display = 'none';
         getId('extraResearches').style.display = 'none';
-        getId('footerStat3').style.display = highest >= 8 ? '' : 'none';
         if (!vacuum) { getId('reset1Main').style.display = 'none'; }
     }
     getId('buildings').style.display = '';
@@ -2120,7 +2116,7 @@ export const stageUpdate = (changed = true, ignoreOffline = false) => {
         const main = getId(`research${i + 1}`);
         if (showR.includes(i)) { main.style.display = ''; }
         main.className = researchHTML[i][1];
-        const image = getId(`research${i + 1}Image`) as HTMLInputElement;
+        const image = getQuery(`#research${i + 1} > input`) as HTMLInputElement;
         image.src = `Used_art/${researchHTML[i][0]}`;
         image.alt = researchesInfo.name[i];
     }
@@ -2130,7 +2126,7 @@ export const stageUpdate = (changed = true, ignoreOffline = false) => {
         const main = getId(`researchExtra${i + 1}`);
         if (showRE.includes(i)) { main.style.display = ''; }
         main.className = researchExtraHTML[i][1];
-        const image = getId(`researchExtra${i + 1}Image`) as HTMLInputElement;
+        const image = getQuery(`#researchExtra${i + 1} > input`) as HTMLInputElement;
         image.src = `Used_art/${researchExtraHTML[i][0]}`;
         image.alt = researchesExtraInfo.name[i];
     }
