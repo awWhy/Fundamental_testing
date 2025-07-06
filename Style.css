@@ -316,19 +316,19 @@ h1, h2, h3, h4, h5, h6 { font-weight: normal; }
     overflow-wrap: break-word;
     pointer-events: auto;
     user-select: none;
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 #notifications > p:not(:first-of-type) { margin-top: -1px; }
 
 .hasTitle { cursor: help; }
-label { cursor: pointer; }
-label:has(input[type = "number"], input[type = "text"]) { cursor: text; }
+label { cursor: pointer !important; }
+label:has(input[type = "number"], input[type = "text"]) { cursor: text !important; }
 button, input { appearance: none; }
 
 #load, button {
     height: 2.08em;
-    cursor: pointer;
+    cursor: pointer !important;
     background-color: var(--button-color);
     border: 2px solid var(--button-border);
     color: var(--button-text);
@@ -383,7 +383,7 @@ button.selectBtn {
 }
 
 button.selectBtn:disabled {
-    cursor: default;
+    cursor: default !important;
     border: none;
 }
 
@@ -594,7 +594,7 @@ input:-webkit-autofill { /* Chrome related pain */
     border-radius: 8px;
     padding: 0.3em 0.8em 0.4em;
     margin-top: 0.38em;
-    cursor: default;
+    cursor: default !important;
 }
 
 #buildingToggles div { position: relative; }
@@ -706,6 +706,7 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 0.2em;
 }
 
+.challengeRewards p { white-space: pre-line; }
 #voidRewards > .challengeRewards { margin-top: 0.6em; }
 
 .togglesDiv {
@@ -916,6 +917,11 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     list-style: inside "− ";
     line-height: 1.2em;
     text-align: start;
+}
+
+#strangenessHeader {
+    display: flex;
+    flex-direction: column;
 }
 
 #strangenessResearch {
@@ -1427,7 +1433,7 @@ li .hollowButton {
     display: flex;
     flex-direction: column;
     position: fixed;
-    bottom: calc(32px + min(3.9vh, 2.4em) + 2.02em + 0.4vw);
+    bottom: calc(32px + min(3.9vh, 2.4em) + 3.7672em + 0.8vw);
     right: 3vw;
     background-color: var(--window-color);
     border: 2px solid var(--window-border);
@@ -1520,7 +1526,7 @@ li .hollowButton {
     gap: 0.4vw;
 }
 
-#phoneHotkeys {
+#shortcuts {
     display: flex;
     flex-wrap: wrap-reverse;
     justify-content: end;
@@ -1530,7 +1536,7 @@ li .hollowButton {
     gap: 0.4vw;
 }
 
-#phoneHotkeys button,
+#shortcuts button,
 #subtabs button {
     min-width: 5.5em;
     background-color: var(--background-color);

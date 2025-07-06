@@ -1,9 +1,9 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
-import { switchTab } from './Update';
-import { buyBuilding, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSwap, vaporizationResetUser } from './Stage';
+import { numbersUpdate, switchTab } from './Update';
+import { buyBuilding, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGameUser } from './Main';
-import { SRHotkeysInfo, globalSave, specialHTML } from './Special';
+import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
 
 const hotkeys = {} as Record<string, hotkeysList | numbersList>;
@@ -38,6 +38,12 @@ const basicFunctions = {
     },
     universe: () => buyBuilding(1, 6),
     end: () => void endResetUser(),
+    supervoid: (repeat) => {
+        if (repeat) { return; }
+        const old = player.challenges.super;
+        toggleSupervoid(true);
+        if (old !== player.challenges.super) { Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`); }
+    },
     exitChallenge: (repeat) => {
         if (repeat) { return; }
         enterExitChallengeUser(null);
@@ -103,7 +109,6 @@ export const assignHotkeys = () => {
             globalSave.numbers[key as numbersList] = 'None';
         } else { hotkeys[hotkey] = key as numbersList; }
     }
-    if (globalSave.SRSettings[0]) { SRHotkeysInfo(); }
 };
 
 /** Removes hotkey if exist, returns name of removed hotkey */
@@ -127,8 +132,14 @@ export const detectShift = (check: KeyboardEvent): boolean | null => {
 export const detectHotkey = (check: KeyboardEvent) => {
     const { key, code } = check;
     const info = global.hotkeys;
-    if (check.shiftKey) { info.shift = true; }
-    if (check.ctrlKey) { info.ctrl = true; }
+    if (check.shiftKey && !info.shift) {
+        info.shift = true;
+        numbersUpdate();
+    }
+    if (check.ctrlKey && !info.ctrl) {
+        info.ctrl = true;
+        numbersUpdate();
+    }
     if (code === 'Tab' || code === 'Enter' || code === 'Space') {
         if (detectShift(check) === null) { return; }
         if (code === 'Tab') { info.last = 'Tab'; }
@@ -174,8 +185,8 @@ export const detectHotkey = (check: KeyboardEvent) => {
 };
 
 const changeTab = (direction: 'left' | 'right') => {
-    const tabs = global.tabList.tabs;
-    let index = tabs.indexOf(global.tab);
+    const tabs = global.tabs.list;
+    let index = tabs.indexOf(global.tabs.current);
 
     if (direction === 'left') {
         do {
@@ -195,10 +206,10 @@ const changeTab = (direction: 'left' | 'right') => {
 
 /** Through a hotkey */
 export const changeSubtab = (direction: 'down' | 'up') => {
-    const tab = global.tab;
-    const subtabs = global.tabList[`${tab}Subtabs`] as string[];
-    if (subtabs.length < 2) { return; } //To remove never[]
-    let index = subtabs.indexOf(global.subtab[`${tab}Current`]);
+    const tab = global.tabs.current;
+    const subtabs = global.tabs[tab].list;
+    if (subtabs.length < 2) { return; } //Required
+    let index = subtabs.indexOf(global.tabs[tab].current);
 
     if (direction === 'down') {
         do {

@@ -83,7 +83,7 @@ html { --elements-columns-phone: min(var(--elements-columns), 9); }
 #themeArea > div > div { width: 80vw !important; }
 
 #globalStats {
-    bottom: calc(32px + min(3.9vh, 2.4em) + 2.02em + 0.8vw);
+    bottom: calc(32px + min(3.9vh, 2.4em) + 7.2616em + 3.2vw);
     right: 1vw;
 }
 
@@ -105,7 +105,7 @@ html { --elements-columns-phone: min(var(--elements-columns), 9); }
     gap: 0.8vw;
 }
 
-#phoneHotkeys {
+#shortcuts {
     flex-direction: column;
     max-width: unset;
     margin-right: 2vw;
@@ -113,5 +113,5 @@ html { --elements-columns-phone: min(var(--elements-columns), 9); }
     gap: 0.8vw;
 }
 
-#phoneHotkeys button,
+#shortcuts button,
 #subtabs button { width: 100%; }

@@ -24,8 +24,9 @@ export const globalSave: globalSaveType = {
         toggleAll: ['Shift A', 'Shift A'],
         merge: ['Shift M', 'Shift M'],
         universe: ['Shift U', 'Shift U'],
-        end: ['Shift E', 'Shift E'],
-        exitChallenge: ['E', 'E'],
+        end: ['Shift B', 'Shift B'],
+        supervoid: ['Shift S', 'Shift S'],
+        exitChallenge: ['Shift E', 'Shift E'],
         tabRight: ['Arrow Right', 'Arrow Right'],
         tabLeft: ['Arrow Left', 'Arrow Left'],
         subtabUp: ['Arrow Up', 'Arrow Up'],
@@ -307,7 +308,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     cache: {
         imagesDiv: document.createElement('div'), //Saved just in case
         /** Lazy way to optimize HTML, without it can't properly detect changes */
-        innerHTML: new Map<string | HTMLElement, string | number>(),
+        innerHTML: new Map<string | HTMLElement, any>(),
         idMap: new Map<string, HTMLElement>(),
         classMap: new Map<string, HTMLCollectionOf<HTMLElement>>(),
         queryMap: new Map<string, HTMLElement>()
@@ -871,23 +872,6 @@ export const changeFormat = (point: boolean) => {
     saveGlobalSettings();
 };
 
-/** Short is only for hotkeys that can change */
-export const SRHotkeysInfo = (short = false) => {
-    const index = globalSave.toggles[0] ? 0 : 1;
-    const hotkeys = globalSave.hotkeys;
-    const resetName = specialHTML.resetHTML[player.stage.active];
-    const reset1Id = getId('reset1Main');
-    reset1Id.ariaLabel = `${resetName} reset`;
-    reset1Id.ariaDescription = `Hotkey is ${hotkeys[resetName.toLowerCase() as hotkeysList] ?? 'None'}`;
-    if (short) { return; }
-    getQuery('#footerMain > nav').ariaDescription = `Hotkeys are ${hotkeys.tabLeft[index]} and ${hotkeys.tabRight[index]}`;
-    getId('subtabs').ariaDescription = `Hotkeys are ${hotkeys.subtabDown[index]} and ${hotkeys.subtabUp[index]}`;
-    getId('stageSelect').ariaDescription = `Hotkeys are ${hotkeys.stageLeft[index]} and ${hotkeys.stageRight[index]}`;
-    getId('reset0Main').ariaDescription = `Hotkey is ${hotkeys.stage[index]}`;
-    getId('makeAllStructures').ariaDescription = `Hotkey is ${hotkeys.makeAll[index]}`;
-    getId('toggleBuilding0').ariaDescription = `Hotkey is ${hotkeys.toggleAll[index]}`;
-};
-
 export const MDStrangenessPage = (stageIndex: number) => {
     getId(`strangenessSection${global.debug.MDStrangePage}`).style.display = 'none';
     getId(`strangenessSection${stageIndex}`).style.display = '';
@@ -1072,7 +1056,7 @@ export const openHotkeys = () => {
         <label id="enterChallengeHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">enter the Challenge</span></label>
         <p id="exitChallengeHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Exit out of the current Challenge</span></label></p>
         <div>
-            <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage reset</span></label>
+            <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage</span></label>
             <label id="dischargeHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
             <label id="vaporizationHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
             <label id="rankHotkey" class="darkorchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
@@ -1081,6 +1065,7 @@ export const openHotkeys = () => {
             <label id="mergeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Merge</span></label>
             <label id="universeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Universe</span></label>
             <label id="endHotkey" class="redText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">End</span></label>
+            <label id="supervoidHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Supervoid</span></label>
             <label id="pauseHotkey" class="grayText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">pause</span></label>
         </div>
         <p>Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click selected HTML Element or confirm Alert</span></p>

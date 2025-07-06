@@ -1,8 +1,8 @@
 import Overlimit from './Limit';
 import { global, player } from './Player';
-import type { gameTab } from './Types';
+import type { gameSubtab, gameTab } from './Types';
 
-export const checkTab = (tab: gameTab, subtab = null as null | string): boolean => {
+export const checkTab = (tab: gameTab, subtab = null as null | gameSubtab): boolean => {
     switch (tab) {
         case 'stage':
             if (subtab === 'Advanced') { return player.stage.true >= 6; }
@@ -18,7 +18,7 @@ export const checkTab = (tab: gameTab, subtab = null as null | string): boolean 
             return subtab === 'Matter' || subtab === null;
         case 'inflation':
             if (player.stage.true < 7) { return false; }
-            return subtab === 'Researches' || subtab === 'Milestones' || subtab === null;
+            return subtab === 'Inflations' || subtab === 'Milestones' || subtab === null;
         case 'settings':
             if (subtab === 'History') { return player.stage.true >= 7 || player.strange[0].total > 0; }
             return subtab === 'Settings' || subtab === 'Stats' || subtab === null;
@@ -47,7 +47,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.researchesExtra[4][0] >= 1; }
         if (index === 3) { return player.researchesExtra[4][0] >= 2; }
         if (index === 4) { return player.researchesExtra[4][0] >= 3; }
-        if (index === 5) { return player.elements[26] >= 1 && player.challenges.active !== 0; }
+        if (index === 5) { return player.elements[26] >= 1 && (player.challenges.active !== 0 || player.buildings[6][1].current.moreOrEqual('7')); }
     } else if (stageIndex === 5) {
         if (index === 1) { return player.inflation.vacuum || player.milestones[2][0] >= 7; }
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }

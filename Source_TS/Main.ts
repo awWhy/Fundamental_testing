@@ -77,7 +77,7 @@ export const simulateOffline = async(offline: number) => {
         numbersUpdate();
         return;
     } else if (offline > 43200_000) { offline = 43200_000; }
-    global.offline.stage = [null, null, null];
+    global.offline.stage = [null, player.stage.active, null];
     global.offline.speed = globalSave.intervals.offline;
     global.offline.start = offline;
     player.time.online += offline;
@@ -116,13 +116,13 @@ const calculateOffline = (warpTime: number) => {
 };
 const offlineEnd = () => {
     pauseGame(false);
-    const offline = global.offline;
-    if (offline.stage[0] !== null) {
-        if (offline.stage[1] !== null) { player.stage.active = offline.stage[1]; }
-        setActiveStage(offline.stage[0]);
+    const stage = global.offline.stage;
+    if (stage[0] !== null) {
+        player.stage.active = stage[1];
+        setActiveStage(stage[0]);
     }
-    if (offline.stage[2] !== null) {
-        stageUpdate(offline.stage[2]);
+    if (stage[2] !== null) {
+        stageUpdate(stage[2]);
     } else {
         visualUpdate();
         numbersUpdate();
@@ -402,8 +402,8 @@ export const buyAll = () => {
 export const loadoutsVisual = (loadout: number[]) => {
     if (getId('loadoutsMain').style.display === 'none') { return; }
     const appeared = {} as Record<number, number>;
-    const { startCost, scaling } = global.treeInfo[0];
-    const calculate = (index: number) => Math.floor(Math.round((startCost[index] + scaling[index] * appeared[index]) * 100) / 100);
+    const { firstCost, scaling } = global.treeInfo[0];
+    const calculate = (index: number) => Math.floor(Math.round((firstCost[index] + scaling[index] * appeared[index]) * 100) / 100);
 
     let cost = 0;
     let string = '';
@@ -455,7 +455,7 @@ const loadoutsSave = () => {
     if (name.length < 1 || name.trim() !== name || name === 'Auto-generate') { return Notify(`Loadout name: '${name}' is not allowed`); }
     player.inflation.loadouts[name] = global.loadouts.input;
     loadoutsRecreate();
-    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = `Saved the '${name}' loadout`; }
+    Notify(`Saved loadout as '${name}'`);
 };
 const loadoutsLoad = async(loadout = null as null | string) => {
     const quick = loadout !== null;
@@ -516,7 +516,7 @@ try { //Start everything
         const fake2 = document.createElement('div');
         fake2.style.height = 'max(calc(6.08em + 32px), 7.92em)';
         getId('body').prepend(getId('footer'), fake2);
-        getId('fakeFooter').after(getId('phoneHotkeys'));
+        getId('fakeFooter').after(getId('shortcuts'));
         const div = document.createElement('div');
         div.append(getId('footerStats'), getQuery('#footerMain > nav'), getId('stageSelect'));
         getId('footerMain').append(div, getId('subtabs'));
@@ -528,10 +528,10 @@ try { //Start everything
             #footerStats { justify-content: center; column-gap: 0.6em; margin: 0; }
             #stageSelect { position: unset; margin: 0; max-width: unset; }
             #subtabs { flex-flow: column-reverse wrap; gap: 0.6em !important; align-self: end; margin: 0 auto 0 0 !important; max-height: 6.72em; width: 0; /* min-width: 7em; */ }
-            #footerMain button, #phoneHotkeys button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; }
+            #footerMain button, #shortcuts button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; }
             #subtabs button { width: 100%; min-width: 7em; }
-            #globalStats { bottom: 0.6em; right: calc(50vw - 6.325em); }
-            #phoneHotkeys { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100vw; max-width: unset; bottom: 0.6em; margin: 0; }
+            #globalStats { bottom: 3.04em; right: calc(50vw - 6.325em); }
+            #shortcuts { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100vw; max-width: unset; bottom: 0.6em; margin: 0; }
             #fakeFooter { height: 3.04em; } `;
     }
     if (globalSave.toggles[2]) { document.body.classList.remove('noTextSelection'); }
@@ -545,10 +545,12 @@ try { //Start everything
         elementsButton.classList.add('stage4Include');
         getId('upgradeTabBtn').after(elementsButton);
 
-        const tabList = global.tabList;
-        tabList.ElementsSubtabs = [];
-        tabList.upgradeSubtabs.splice(tabList.upgradeSubtabs.indexOf('Elements'), 1);
-        tabList.tabs.splice(tabList.tabs.indexOf('upgrade') + 1, 0, 'Elements');
+        global.tabs.Elements = {
+            current: 'Elements',
+            list: []
+        };
+        global.tabs.upgrade.list.splice(global.tabs.upgrade.list.indexOf('Elements'), 1);
+        global.tabs.list.splice(global.tabs.list.indexOf('upgrade') + 1, 0, 'Elements');
     }
 
     if (globalSave.MDSettings[0]) {
@@ -556,8 +558,7 @@ try { //Start everything
         (document.getElementById('MDMessage1') as HTMLElement).remove();
         specialHTML.styleSheet.textContent += `body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p { -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
-            #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */
-            #globalStats { ${globalSave.toggles[3] ? 'bottom: 3.04em;' : 'bottom: calc(32px + min(3.9vh, 2.4em) + 9.6744em + 3.6vw); right: calc(50vw - 6.325em);'} } `;
+            #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
         (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
         global.debug.MDStrangePage = 1;
 
@@ -579,36 +580,6 @@ try { //Start everything
             #resets > section > button:last-of-type { display: flex; justify-content: center; align-items: center; width: 2.2em; margin-left: -2px; }
             #resets .downArrow { width: 1.24em; height: 1.24em; }
             #resets p { position: absolute; width: 17.4em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(100% - 2px); z-index: 2; box-sizing: content-box; } `;
-
-        const structuresButton = document.createElement('button');
-        structuresButton.textContent = 'Structures';
-        structuresButton.id = 'structuresFooter';
-        structuresButton.type = 'button';
-        const stageButton = document.createElement('button');
-        stageButton.textContent = 'Stage';
-        stageButton.id = 'reset0Footer';
-        stageButton.type = 'button';
-        const reset1Button = document.createElement('button');
-        reset1Button.id = 'reset1Footer';
-        reset1Button.type = 'button';
-        const resetCollapse = document.createElement('button');
-        resetCollapse.textContent = 'Collapse';
-        resetCollapse.id = 'resetCollapseFooter';
-        resetCollapse.type = 'button';
-        resetCollapse.className = 'stage5Only';
-        const resetGalaxy = document.createElement('button');
-        resetGalaxy.textContent = 'Galaxy';
-        resetGalaxy.id = 'resetGalaxyFooter';
-        resetGalaxy.type = 'button';
-        resetGalaxy.className = 'stage4Only';
-        const resetMerge = document.createElement('button');
-        resetMerge.textContent = 'Merge';
-        resetMerge.id = 'resetMergeFooter';
-        resetMerge.type = 'button';
-        resetMerge.className = 'stage6Only';
-        const hotkeysMain = getId('phoneHotkeys');
-        hotkeysMain.prepend(resetGalaxy, reset1Button, resetMerge, resetCollapse, stageButton, structuresButton);
-        hotkeysMain.style.display = '';
 
         const createUpgButton = document.createElement('button');
         createUpgButton.className = 'hollowButton';
@@ -704,9 +675,9 @@ try { //Start everything
                 getId(`toggleBuilding${i}`).tabIndex = newTab;
             }
             getId('toggleBuilding0').tabIndex = newTab;
-            for (const tabText of global.tabList.tabs) {
+            for (const tabText of global.tabs.list) {
                 getId(`${tabText}TabBtn`).tabIndex = newTab;
-                for (const subtabText of global.tabList[`${tabText}Subtabs`]) {
+                for (const subtabText of global.tabs[tabText].list) {
                     getId(`${tabText}SubtabBtn${subtabText}`).tabIndex = newTab;
                 }
             }
@@ -749,8 +720,14 @@ try { //Start everything
     const htmlHTML = document.documentElement;
     const releaseHotkey = (event: KeyboardEvent | null) => {
         const hotkeys = global.hotkeys;
-        if (hotkeys.shift) { hotkeys.shift = event === null ? false : event.shiftKey; }
-        if (hotkeys.ctrl) { hotkeys.ctrl = event === null ? false : event.ctrlKey; }
+        if (hotkeys.shift && (event === null || event.key === 'Shift')) {
+            hotkeys.shift = false;
+            numbersUpdate();
+        }
+        if (hotkeys.ctrl && (event === null || event.key === 'Control')) {
+            hotkeys.ctrl = false;
+            numbersUpdate();
+        }
         hotkeys.last = null;
     };
     htmlHTML.addEventListener('contextmenu', (event) => {
@@ -856,21 +833,25 @@ try { //Start everything
 
     /* Stage tab */
     {
-        const clickHoldFunc = () => {
+        const button = getId('reset0Button');
+        const footer = getId('reset0Footer');
+        const repeatFunc = () => repeatFunction(() => {
             if (player.inflation.vacuum || player.stage.active >= 4) { return; }
             void stageResetUser();
-        };
-        const stageButton = getId('reset0Button');
-        stageButton.addEventListener('click', stageResetUser);
-        if (PC) { stageButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+        });
+        button.addEventListener('click', stageResetUser);
+        footer.addEventListener('click', stageResetUser);
+        if (PC) {
+            button.addEventListener('mousedown', repeatFunc);
+            footer.addEventListener('mousedown', repeatFunc);
+        }
         if (MD) {
-            stageButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
-            const footerButton = getId('reset0Footer');
-            footerButton.addEventListener('click', stageResetUser);
-            footerButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
-            if (PC) { footerButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
+            button.addEventListener('touchstart', repeatFunc);
+            footer.addEventListener('touchstart', repeatFunc);
         }
     } {
+        const button = getId('reset1Button');
+        const footer = getId('reset1Footer');
         const clickFunc = () => {
             const active = player.stage.active;
             if (active === 1) {
@@ -887,28 +868,41 @@ try { //Start everything
                 void endResetUser();
             }
         };
-        const clickHoldFunc = () => {
-            if (player.stage.active !== 1 && player.stage.active !== 3) { return; }
+        const repeatFunc = () => repeatFunction(() => {
+            if (player.stage.active !== 1 && player.stage.active !== 3 && player.stage.active !== 6) { return; }
             clickFunc();
-        };
-        const resetButton = getId('reset1Button');
-        resetButton.addEventListener('click', clickFunc);
-        if (PC) { resetButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
-        if (MD) {
-            resetButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
-            const footerButton = getId('reset1Footer');
-            footerButton.addEventListener('click', clickFunc);
-            footerButton.addEventListener('touchstart', () => repeatFunction(clickHoldFunc));
-            if (PC) { footerButton.addEventListener('mousedown', () => repeatFunction(clickHoldFunc)); }
-            getId('resetCollapseFooter').addEventListener('click', collapseResetUser);
-            getId('resetMergeFooter').addEventListener('click', mergeResetUser);
-
-            const clickGalaxy = () => buyBuilding(3, 5);
-            const galaxyButton = getId('resetGalaxyFooter');
-            galaxyButton.addEventListener('click', clickGalaxy);
-            galaxyButton.addEventListener('touchstart', () => repeatFunction(clickGalaxy));
-            if (PC) { galaxyButton.addEventListener('mousedown', () => repeatFunction(clickGalaxy)); }
+        });
+        button.addEventListener('click', clickFunc);
+        footer.addEventListener('click', clickFunc);
+        if (PC) {
+            button.addEventListener('mousedown', repeatFunc);
+            footer.addEventListener('mousedown', repeatFunc);
         }
+        if (MD) {
+            button.addEventListener('touchstart', repeatFunc);
+            footer.addEventListener('touchstart', repeatFunc);
+        }
+    } {
+        const button = getId('resetExtraFooter');
+        const clickFunc = () => {
+            const active = player.stage.active;
+            if (active === 4) {
+                buyBuilding(3, 5);
+            } else if (active === 5) {
+                void collapseResetUser();
+            } else if (active === 6) {
+                void mergeResetUser();
+            }
+        };
+        const repeatFunc = () => {
+            repeatFunction(() => {
+                if (player.stage.active !== 4) { return; }
+                clickFunc();
+            });
+        };
+        button.addEventListener('click', clickFunc);
+        if (PC) { button.addEventListener('mousedown', repeatFunc); }
+        if (MD) { button.addEventListener('touchstart', repeatFunc); }
     }
     const getMakeCount = () => global.hotkeys.shift ? (global.hotkeys.ctrl ? 100 : 1) : global.hotkeys.ctrl ? 10 : undefined;
     for (let i = 1; i < specialHTML.longestBuilding; i++) {
@@ -919,14 +913,24 @@ try { //Start everything
         if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
     } {
         const button = getId('makeAllStructures');
+        const footer = getId('structuresFooter');
         button.addEventListener('click', buyAll);
-        if (PC) { button.addEventListener('mousedown', () => repeatFunction(buyAll)); }
+        footer.addEventListener('click', () => {
+            if (global.hotkeys.shift) {
+                toggleSwap(0, 'buildings', true);
+            } else { buyAll(); }
+        });
+        if (PC) {
+            button.addEventListener('mousedown', () => repeatFunction(buyAll));
+            footer.addEventListener('mousedown', () => {
+                if (!global.hotkeys.shift) { repeatFunction(buyAll); }
+            });
+        }
         if (MD) {
             button.addEventListener('touchstart', () => repeatFunction(buyAll));
-            const footer = getId('structuresFooter');
-            footer.addEventListener('click', buyAll);
-            footer.addEventListener('touchstart', () => repeatFunction(buyAll));
-            if (PC) { footer.addEventListener('mousedown', () => repeatFunction(buyAll)); }
+            footer.addEventListener('touchstart', () => {
+                if (!global.hotkeys.shift) { repeatFunction(buyAll); }
+            });
         }
     }
     getId('buyAnyInput').addEventListener('focus', () => {
@@ -1702,15 +1706,19 @@ try { //Start everything
         if (PC) { getId('globalStats').addEventListener('mousedown', startEvent); }
         if (MD) { getId('globalStats').addEventListener('touchstart', startEvent, { capture: true }); }
     }
-    for (const tabText of global.tabList.tabs) {
+    for (const tabText of global.tabs.list) {
         getId(`${tabText}TabBtn`).addEventListener('click', () => switchTab(tabText));
-        for (const subtabText of global.tabList[`${tabText}Subtabs`]) {
+        for (const subtabText of global.tabs[tabText].list) {
             getId(`${tabText}SubtabBtn${subtabText}`).addEventListener('click', () => switchTab(tabText, subtabText));
         }
     }
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`stageSwitch${i}`).addEventListener('click', () => switchStage(i));
     }
+    getId('shiftFooter').addEventListener('click', () => {
+        global.hotkeys.shift = !global.hotkeys.shift;
+        numbersUpdate();
+    });
 
     /* Post */
     document.head.append(specialHTML.styleSheet);

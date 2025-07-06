@@ -21,6 +21,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         specialHTML.footerStatsHTML[1][0] = ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'];
         buildingsInfo.hoverText[2][0] = 'Tritium';
         buildingsInfo.hoverText[3][0] = 'Preons hardcap';
+        buildingsInfo.type[2][0] = 'improving';
+        buildingsInfo.type[3][0] = 'delaying';
         buildings[1][0].current.setValue('5.476e-3');
         buildings[2][0].current.setValue('0');
         buildings[3][0].current.setValue('9.76185667392e-36');
@@ -33,13 +35,11 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
             buildingsInfo.name[1].unshift('Mass', 'Preons');
             buildingsInfo.hoverText[1].unshift('Mass', 'Preons');
         }
-        buildingsInfo.startCost[1] = [0, 0.005476, 6, 3, 24, 3];
-        buildingsInfo.type[2][0] = 'improving';
-        buildingsInfo.type[3][0] = 'delaying';
+        buildingsInfo.firstCost[1] = [0, 0.005476, 6, 3, 24, 3];
 
         upgrades1Cost = [40, 60, 100, 120, 180, 360, 1200, 3600, 12000, 80000];
-        (upgradesInfo[2].startCost[0] as Overlimit).setValue('10');
-        (upgradesInfo[5].startCost[3] as Overlimit).setValue('1e160');
+        (upgradesInfo[2].cost[0] as Overlimit).setValue('10');
+        (upgradesInfo[5].cost[3] as Overlimit).setValue('1e160');
         upgradesInfo[1].maxActive = 11;
         upgradesInfo[2].maxActive = 9;
         upgradesInfo[3].maxActive = 14;
@@ -63,8 +63,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[4].maxActive = 4;
         researchesExtraInfo[5].maxActive = 6;
 
-        global.elementsInfo.startCost[27].setValue('1e54');
-        global.elementsInfo.startCost[28].setValue('1e58');
+        global.elementsInfo.cost[27].setValue('1e54');
+        global.elementsInfo.cost[28].setValue('1e58');
 
         global.ASRInfo.costRange[1] = [2000, 8000, 16000, 32000, 56000];
         global.ASRInfo.costRange[3][3] = 2.45576045e31;
@@ -140,15 +140,15 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.maxActive[2] = 6;
         buildingsInfo.maxActive[3] = 5;
         buildingsInfo.maxActive[4] = 5;
-        buildingsInfo.startCost[1] = [0, 3, 24, 3];
+        buildingsInfo.firstCost[1] = [0, 3, 24, 3];
         buildingsInfo.type[2][0] = 'producing';
         buildingsInfo.type[3][0] = 'producing';
         global.buildingsInfo.producing[4][5].setValue('0');
         getQuery('#star3Effect > span.info').textContent = 'Boost to the Solar mass gain';
 
         upgrades1Cost = [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800];
-        (upgradesInfo[2].startCost[0] as Overlimit).setValue('1e4');
-        (upgradesInfo[5].startCost[3] as Overlimit).setValue('1e150');
+        (upgradesInfo[2].cost[0] as Overlimit).setValue('1e4');
+        (upgradesInfo[5].cost[3] as Overlimit).setValue('1e150');
         upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 8;
         upgradesInfo[3].maxActive = 13;
@@ -172,8 +172,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[4].maxActive = 3;
         researchesExtraInfo[5].maxActive = 1;
 
-        global.elementsInfo.startCost[27].setValue('1e52');
-        global.elementsInfo.startCost[28].setValue('1e54');
+        global.elementsInfo.cost[27].setValue('1e52');
+        global.elementsInfo.cost[28].setValue('1e54');
 
         global.ASRInfo.costRange[1] = [2000, 8000, 16000];
         global.ASRInfo.costRange[3][3] = 2e30;
@@ -232,7 +232,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('element0').style.display = 'none';
         getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = 'none';
         for (let s = 1; s <= 5; s++) {
-            for (let i = strangenessInfo[s].maxActive + 1; i <= strangenessInfo[s].startCost.length; i++) {
+            for (let i = strangenessInfo[s].maxActive + 1; i <= strangenessInfo[s].firstCost.length; i++) {
                 getId(`strange${i}Stage${s}`).style.display = 'none';
             }
         }
@@ -248,18 +248,23 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('mergeResetsS6').style.display = 'none';
     }
 
-    upgradesInfo[1].startCost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
-    researchesInfo[1].startCost.splice(0, researches1Cost.length, ...researches1Cost);
+    if (global.collapseInfo.supervoid) {
+        (upgradesInfo[5].cost[3] as Overlimit).multiply('1e2');
+        global.elementsInfo.cost[27].multiply('1e2');
+        global.elementsInfo.cost[28].multiply('1e2');
+    }
+    upgradesInfo[1].cost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
+    researchesInfo[1].firstCost.splice(0, researches1Cost.length, ...researches1Cost);
     researchesInfo[1].scaling.splice(0, researches1Scaling.length, ...researches1Scaling);
-    strangenessInfo[1].startCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
+    strangenessInfo[1].firstCost.splice(0, strangeness1Cost.length, ...strangeness1Cost);
     strangenessInfo[1].scaling.splice(0, strangeness1Scaling.length, ...strangeness1Scaling);
-    strangenessInfo[2].startCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
+    strangenessInfo[2].firstCost.splice(0, strangeness2Cost.length, ...strangeness2Cost);
     strangenessInfo[2].scaling.splice(0, strangeness2Scaling.length, ...strangeness2Scaling);
-    strangenessInfo[3].startCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
+    strangenessInfo[3].firstCost.splice(0, strangeness3Cost.length, ...strangeness3Cost);
     strangenessInfo[3].scaling.splice(0, strangeness3Scaling.length, ...strangeness3Scaling);
-    strangenessInfo[4].startCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
+    strangenessInfo[4].firstCost.splice(0, strangeness4Cost.length, ...strangeness4Cost);
     strangenessInfo[4].scaling.splice(0, strangeness4Scaling.length, ...strangeness4Scaling);
-    strangenessInfo[5].startCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
+    strangenessInfo[5].firstCost.splice(0, strangeness5Cost.length, ...strangeness5Cost);
     strangenessInfo[5].scaling.splice(0, strangeness5Scaling.length, ...strangeness5Scaling);
     for (let s = 1; s <= 3; s++) {
         const newValue = buildings[s][0].current;
@@ -281,9 +286,11 @@ export const switchVacuum = () => {
         playEvent(6);
     }
 
-    if ((player.toggles.normal[0] && global.tab !== 'inflation') || player.stage.active < 6) { setActiveStage(1); }
+    if (player.stage.active < 6) { setActiveStage(1); }
     player.inflation.vacuum = true;
     player.inflation.resets++;
+    player.time.export[1] = 0;
+    player.time.export[2] = 0;
     player.challenges.active = null;
     player.clone = {};
     prepareVacuum(true);

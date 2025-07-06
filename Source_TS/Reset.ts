@@ -234,8 +234,10 @@ export const resetVacuum = (level = 0) => {
     if (level >= 1) {
         player.inflation.age = 0;
         player.time.universe = 0;
-        player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoid);
-        global.inflationInfo.totalSuper = 0;
+        if (player.challenges.stability < 2 || level > 1) {
+            player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoid);
+            global.inflationInfo.totalSuper = 0;
+        }
     }
     const inflations = [false];
     for (let i = 1; i <= 6; i++) { inflations[i] = player.buildings[6][1].current.moreOrEqual(i); }
@@ -312,8 +314,6 @@ export const resetVacuum = (level = 0) => {
     player.history.stage.best = [3.1556952e16, 0, 0];
     global.lastStrangeness = [null, 0];
     global.lastMilestone = [null, 0];
-    player.time.export[1] = 0;
-    player.time.export[2] = 0;
     for (let i = 0; i < playerStart.strange.length; i++) {
         player.strange[i].current = 0;
         player.strange[i].total = 0;
@@ -451,7 +451,6 @@ export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {
             vacuum: player.inflation.vacuum,
             time: player.inflation.time
         };
-        clone.time.export = cloneArray(player.time.export);
         clone.time.vacuum = player.time.vacuum;
         clone.stage.resets = player.stage.resets;
         clone.discharge.energyMax = player.discharge.energyMax;
@@ -522,8 +521,6 @@ export const loadFromClone = () => {
             player.strange[i].total = clone.strange[i].total;
         }
         player.stage.resets = clone.stage.resets;
-        player.time.export[1] = clone.time.export[1];
-        player.time.export[2] = clone.time.export[2];
         player.time.vacuum = clone.time.vacuum;
         player.inflation.time = clone.inflation.time;
         global.historyStorage.stage = clone.history.stage.list;

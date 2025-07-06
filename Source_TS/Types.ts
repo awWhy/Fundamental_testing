@@ -127,7 +127,7 @@ export interface playerType {
         buildings: boolean[][]
         /** Upgrades/Researches/Elements[0], Strangeness[1] */
         hover: boolean[]
-        /** Researches[0], Strangeness[1] */
+        /** Researches[0], Strangeness[1], Inflations[2] */
         max: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
            Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9] */
@@ -159,25 +159,21 @@ export interface playerType {
 }
 
 export type gameTab = 'stage' | 'upgrade' | 'Elements' | 'strangeness' | 'inflation' | 'settings';
+export type gameSubtab = 'Structures' | 'Advanced' | //Stage tab
+    'Upgrades' | 'Elements' | //Upgrade tab
+    'Matter' | 'Milestones' | //Strangeness tab
+    'Inflations' | 'Milestones' | //Inflation tab
+    'Settings' | 'Stats' | 'History'; //Settings tab
 
 export interface globalType {
-    tab: gameTab
-    subtab: {
-        stageCurrent: string
-        settingsCurrent: string
-        upgradeCurrent: string
-        ElementsCurrent: never
-        strangenessCurrent: string
-        inflationCurrent: string
-    }
-    tabList: {
-        tabs: gameTab[]
-        stageSubtabs: string[]
-        settingsSubtabs: string[]
-        upgradeSubtabs: string[]
-        ElementsSubtabs: never[]
-        strangenessSubtabs: string[]
-        inflationSubtabs: string[]
+    tabs: {
+        current: gameTab
+        list: gameTab[]
+    } & {
+        [subtab in gameTab]: {
+            current: gameSubtab
+            list: gameSubtab[]
+        }
     }
     debug: {
         /** Notify about reaching time limit */
@@ -198,8 +194,8 @@ export interface globalType {
         active: boolean
         speed: number
         start: number
-        /** [Change into, Stage at the start, Stage update type] */
-        stage: [number | null, number | null, boolean | null]
+        /** [Change into, started, update type] */
+        stage: [number | null, number, boolean | null]
         cacheUpdate: boolean
     }
     paused: boolean
@@ -273,6 +269,8 @@ export interface globalType {
         unlockU: number[]
         /** Solar mass required to unlock Research */
         unlockR: number[]
+        /** Test for Interstellar upgrades already being modified */
+        supervoid: boolean
         newMass: number
         starCheck: [number, number, number]
         trueStars: number
@@ -316,7 +314,7 @@ export interface globalType {
         name: string[][]
         hoverText: string[][]
         type: Array<Array<'producing' | 'improving' | 'delaying'>>
-        startCost: number[][]
+        firstCost: number[][]
         increase: number[][]
         producing: Overlimit[][]
     }
@@ -331,7 +329,7 @@ export interface globalType {
         name: string[]
         effectText: Array<() => string>
         /** Number for Stage 1, Overlimit for rest */
-        startCost: number[] | Overlimit[]
+        cost: number[] | Overlimit[]
         maxActive: number
     }>
     researchesInfo: Array<{
@@ -340,7 +338,7 @@ export interface globalType {
         /** Number for Stage 1, Overlimit for rest */
         cost: number[] | Overlimit[]
         /** Number for Stage 1, Overlimit for rest */
-        startCost: number[] | Overlimit[]
+        firstCost: number[] | Overlimit[]
         /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
         scaling: number[]
         max: number[]
@@ -352,7 +350,7 @@ export interface globalType {
         /** Number for Stage 1, Overlimit for rest */
         cost: number[] | Overlimit[]
         /** Number for Stage 1, Overlimit for rest */
-        startCost: number[] | Overlimit[]
+        firstCost: number[] | Overlimit[]
         /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
         scaling: number[]
         max: number[]
@@ -376,13 +374,13 @@ export interface globalType {
     elementsInfo: {
         name: string[]
         effectText: Array<() => string>
-        startCost: Overlimit[]
+        cost: Overlimit[]
     }
     strangenessInfo: Array<{
         name: string[]
         effectText: Array<() => string>
         cost: number[]
-        startCost: number[]
+        firstCost: number[]
         scaling: number[]
         max: number[]
         maxActive: number
@@ -392,7 +390,7 @@ export interface globalType {
         name: string[]
         effectText: Array<() => string>
         cost: number[]
-        startCost: number[]
+        firstCost: number[]
         scaling: number[]
         max: number[]
     }>
@@ -462,7 +460,7 @@ export interface globalSaveType {
     developerMode: boolean
 }
 
-export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'end' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'end' | 'supervoid' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
 export type numbersList = 'makeStructure' | 'toggleStructure' | 'enterChallenge';
 
 export interface calculateEffectsType {
