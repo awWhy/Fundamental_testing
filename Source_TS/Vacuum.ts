@@ -30,6 +30,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.maxActive[2] = 7;
         buildingsInfo.maxActive[3] = 6;
         buildingsInfo.maxActive[4] = 6;
+        buildingsInfo.maxActive[6] = 2;
         if (buildingsInfo.name[1][0] !== 'Mass') {
             specialHTML.buildingHTML[1].unshift('Preon.png', 'Quarks.png');
             buildingsInfo.name[1].unshift('Mass', 'Preons');
@@ -51,11 +52,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researches1Scaling = [400, 1200, 8000, 40000, 16000, 16000];
         researchesInfo[2].scaling[2] = 1e2;
         researchesInfo[2].scaling[3] = 1e3;
-        //researchesInfo[1].maxActive = 6;
-        //researchesInfo[2].maxActive = 6;
-        //researchesInfo[3].maxActive = 9;
+        //researchesInfo[2].maxActive = 7;
         researchesInfo[4].maxActive = 6;
         researchesInfo[5].maxActive = 5;
+        researchesInfo[6].maxActive = 4;
 
         researchesExtraInfo[1].maxActive = 6;
         researchesExtraInfo[2].maxActive = 5;
@@ -123,7 +123,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('collapseCapped').style.display = '';
 
         getId('strange1Effect1Disabled').style.display = 'none';
-        getId('stageAutoElse').style.display = 'none';
+        getQuery('#stageAutoElse > span').textContent = 'Auto disable if still capable to do more Merges';
+        getQuery('#stageAutoElse > span:last-of-type').style.display = 'none';
     } else {
         specialHTML.footerStatsHTML[1][0] = ['Quarks.png', 'stage1borderImage cyanText', 'Quarks'];
         buildingsInfo.hoverText[2][0] = 'Moles';
@@ -140,6 +141,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.maxActive[2] = 6;
         buildingsInfo.maxActive[3] = 5;
         buildingsInfo.maxActive[4] = 5;
+        buildingsInfo.maxActive[6] = 1;
         buildingsInfo.firstCost[1] = [0, 3, 24, 3];
         buildingsInfo.type[2][0] = 'producing';
         buildingsInfo.type[3][0] = 'producing';
@@ -160,17 +162,17 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researches1Scaling = [200, 400, 2000, 12000, 4000, 6000];
         researchesInfo[2].scaling[2] = 1e3;
         researchesInfo[2].scaling[3] = 1e2;
-        researchesInfo[1].maxActive = 6;
-        researchesInfo[2].maxActive = 6;
-        researchesInfo[3].maxActive = 9;
+        //researchesInfo[2].maxActive = 6;
         researchesInfo[4].maxActive = 5;
         researchesInfo[5].maxActive = 2;
+        researchesInfo[6].maxActive = 0;
 
         researchesExtraInfo[1].maxActive = 0;
         researchesExtraInfo[2].maxActive = 3;
         researchesExtraInfo[3].maxActive = 4;
         researchesExtraInfo[4].maxActive = 3;
         researchesExtraInfo[5].maxActive = 1;
+        //researchesExtraInfo[6].maxActive = 0;
 
         global.elementsInfo.cost[27].setValue('1e52');
         global.elementsInfo.cost[28].setValue('1e54');
@@ -213,6 +215,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('strange8Stage5').style.display = '';
         getId('milestonesProgressArea').style.display = '';
         getId('stageAutoElse').style.display = '';
+        getQuery('#stageAutoElse > span').textContent = 'Reset pre-Interstellar Stages only if all Milestones are maxed';
+        getQuery('#stageAutoElse > span:last-of-type').style.display = '';
         getId('rankStat0').style.display = '';
 
         getId('preonCap').style.display = 'none';

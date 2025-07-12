@@ -315,7 +315,6 @@ h1, h2, h3, h4, h5, h6 { font-weight: normal; }
     width: clamp(25vw, 29rem, 95vw);
     overflow-wrap: break-word;
     pointer-events: auto;
-    user-select: none;
     cursor: pointer !important;
 }
 
@@ -335,7 +334,7 @@ button, input { appearance: none; }
     font-size: 0.84em;
 }
 
-.toggleNormal, .toggleConfirm, .toggleBuilding, .toggleHover, .toggleMax, .toggleAuto, .specialToggle {
+.toggleNormal, .toggleConfirm, .toggleHover, .toggleMax, .toggleAuto, .specialToggle {
     color: var(--green-text);
     border-color: forestgreen;
     background-color: var(--background-color);
@@ -361,13 +360,12 @@ button, input { appearance: none; }
 
 .hollowButton { background-color: var(--background-color); }
 
-img, input[type = "image"], button, #load, a {
-    user-select: none;
+img, input[type = "image"], button, #load, #logoLinks > a {
     transition-duration: var(--transition-buttons);
 }
 
 button:hover, #load:hover { background-color: var(--button-hover); }
-.toggleNormal:hover, .toggleConfirm:hover, .toggleBuilding:hover, .toggleHover:hover, .toggleMax:hover, .toggleAuto:hover,
+.toggleNormal:hover, .toggleConfirm:hover, .toggleHover:hover, .toggleMax:hover, .toggleAuto:hover,
 .specialToggle:hover, input[type = "image"]:hover, .hollowButton:hover { background-color: var(--hollow-hover); }
 
 button.selectBtn {
@@ -380,6 +378,7 @@ button.selectBtn {
     color: inherit;
     font-size: unset;
     height: unset;
+    transition-duration: var(--transition-all);
 }
 
 button.selectBtn:disabled {
@@ -557,12 +556,12 @@ input:-webkit-autofill { /* Chrome related pain */
     width: 15em;
 }
 
-.toggleBuilding {
+#buildings .specialToggle {
     width: 5.8em;
     height: 1.95em;
 }
 
-.buyBuilding .toggleBuilding {
+.buyBuilding .specialToggle {
     grid-area: toggle;
     margin-left: 0.4em;
 }
@@ -1032,7 +1031,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     border: 2px solid #5300c1;
     border-radius: 7px;
     min-width: min-content;
-    max-width: 28em;
+    max-width: 30em;
 }
 
 #loadoutsMain > div {

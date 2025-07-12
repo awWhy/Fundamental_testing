@@ -13,7 +13,7 @@ export interface playerType {
         peak: number
         /** Interstellar only */
         peakedAt: number
-        input: [number, number]
+        input: number
     }
     discharge: {
         energy: number
@@ -48,13 +48,13 @@ export interface playerType {
         since: number
     }
     inflation: {
-        loadouts: Record<string, number[]>
+        loadouts: Array<[string, number[]]>
         vacuum: boolean
         resets: number
         time: number
         age: number
-        /** End resets */
-        ends: number
+        /** End resets info [resets, min Universe, max Universe] */
+        ends: [number, number, number]
     }
     time: {
         updated: number
@@ -87,6 +87,10 @@ export interface playerType {
             trueTotal: Overlimit
         }>
     ]>
+    verses: Array<{
+        true: number
+        current: number
+    }>
     strange: Array<{
         current: number
         total: number
@@ -121,10 +125,8 @@ export interface playerType {
         /** Auto Stage switch[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
            Auto accept Offline[4] */
         normal: boolean[]
-        /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], end[6] */
+        /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6] */
         confirm: Array<'Safe' | 'None'>
-        /** Toggle all[0], Toggle Structure[any] */
-        buildings: boolean[][]
         /** Upgrades/Researches/Elements[0], Strangeness[1] */
         hover: boolean[]
         /** Researches[0], Strangeness[1], Inflations[2] */
@@ -132,6 +134,9 @@ export interface playerType {
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
            Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9] */
         auto: boolean[]
+        /** [0] is toggle all */
+        buildings: boolean[][]
+        verses: boolean[]
         shop: {
             input: number
             wait: number[]
@@ -192,10 +197,8 @@ export interface globalType {
     lastSave: number
     offline: {
         active: boolean
-        speed: number
-        start: number
-        /** [Change into, started, update type] */
-        stage: [number | null, number, boolean | null]
+        /** [Change into, update type] */
+        stage: [number | null, boolean | null]
         cacheUpdate: boolean
     }
     paused: boolean
@@ -207,10 +210,10 @@ export interface globalType {
     }
     hotkeys: {
         disabled: boolean
-        /** Check for value being repeated */
-        last: string | null
+        repeat: boolean
         shift: boolean
         ctrl: boolean
+        tab: boolean
     }
     lastUpgrade: Array<[number | null, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
     lastElement: number | null
@@ -229,6 +232,14 @@ export interface globalType {
         /** /Researches Extra */
         autoE: number[][]
         elements: number[]
+    }
+    stageInfo: {
+        word: string[]
+        textColor: string[]
+        buttonBorder: string[]
+        imageBorderColor: string[]
+        costName: string[]
+        activeAll: number[]
     }
     dischargeInfo: {
         energyType: number[][]
@@ -300,14 +311,6 @@ export interface globalType {
         autoSave: number | undefined
         mouseRepeat: number | undefined
     }
-    stageInfo: {
-        word: string[]
-        textColor: string[]
-        buttonBorder: string[]
-        imageBorderColor: string[]
-        costName: string[]
-        activeAll: number[]
-    }
     buildingsInfo: {
         /** Counts index [0] */
         maxActive: number[]
@@ -317,6 +320,12 @@ export interface globalType {
         firstCost: number[][]
         increase: number[][]
         producing: Overlimit[][]
+    }
+    versesInfo: {
+        firstCost: number[]
+        cost: number[]
+        increase: number[]
+        producing: number[]
     }
     strangeInfo: {
         name: string[]
@@ -430,10 +439,8 @@ export interface globalType {
     }
     loadouts: {
         input: number[]
-        buttons: Record<string, {
-            html: HTMLElement
-            event: () => void
-        }>
+        /** Only used to remove events */
+        buttons: Array<[HTMLElement, () => void]>
     }
 }
 
@@ -528,6 +535,7 @@ export interface calculateEffectsType {
     element24_power: () => number
     element24: () => Overlimit
     element26: () => number
+    darkHardcap: (delay: number) => number
     S2Strange9: () => number
     S5Strange9_stage1: () => number
     S5Strange9_stage2: () => number

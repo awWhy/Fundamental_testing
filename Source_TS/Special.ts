@@ -76,7 +76,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 
     if (change) {
         if (reload) {
-            void (async() => {
+            return void (async() => {
                 if (!await Confirm('Changing this setting will reload the page, confirm?\n(Game will not autosave)')) { return; }
                 pauseGame();
                 toggles[number] = !toggles[number];
@@ -84,7 +84,6 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
                 window.location.reload();
                 void Alert('Awaiting game reload');
             })();
-            return;
         } else {
             toggles[number] = !toggles[number];
             saveGlobalSettings();
@@ -113,7 +112,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 
 export const specialHTML = { //Images here are from true vacuum for easier cache
     /** [textContent] */
-    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', ''],
+    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', 'End'],
     longestBuilding: 7, //+1
     /** [src] */
     buildingHTML: [
@@ -123,7 +122,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Cosmic%20dust.png', 'Planetesimal.png', 'Protoplanet.png', 'Natural%20satellite.png', 'Subsatellite.png'],
         ['Brown%20dwarf.png', 'Orange%20dwarf.png', 'Red%20supergiant.png', 'Blue%20hypergiant.png', 'Quasi%20star.png'],
         ['Nebula.png', 'Star%20cluster.png', 'Galaxy.png'],
-        ['Universe.png']
+        ['Missing.png']
     ],
     longestUpgrade: 14,
     /** [src] */
@@ -180,6 +179,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG6.png',
             'Missing.png'
         ], [
+            'Missing.png',
             'Missing.png'
         ]
     ],
@@ -223,18 +223,23 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchG3.png', 'stage6borderImage'],
             ['ResearchG4.png', 'stage4borderImage'],
             ['Missing.png', 'redBorderImage']
-        ], []
+        ], [
+            ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage']
+        ]
     ],
     longestResearchExtra: 6,
-    /** [src, className] */
+    /** [src, className, hoverText] */
     researchExtraDivHTML: [
         [],
-        ['Energy%20Researches.png', 'stage4borderImage'],
-        ['Cloud%20Researches.png', 'stage2borderImage'],
-        ['Rank%20Researches.png', 'stage6borderImage'],
-        ['Collapse%20Researches.png', 'stage6borderImage'],
-        ['Galaxy%20Researches.png', 'stage3borderImage'],
-        ['Missing.png', 'redBorderImage']
+        ['Energy%20Researches.png', 'stage4borderImage', 'Energy'],
+        ['Cloud%20Researches.png', 'stage2borderImage', 'Clouds'],
+        ['Rank%20Researches.png', 'stage6borderImage', 'Rank'],
+        ['Collapse%20Researches.png', 'stage6borderImage', 'Collapse'],
+        ['Galaxy%20Researches.png', 'stage3borderImage', 'Galaxy'],
+        ['Missing.png', 'redBorderImage', '']
     ],
     /** [src, className] */
     researchExtraHTML: [
@@ -561,14 +566,14 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
     }
 
     const body = document.documentElement.style;
-    body.setProperty('--transition-all', '800ms');
-    body.setProperty('--transition-buttons', '600ms');
+    body.setProperty('--transition-all', '500ms');
+    body.setProperty('--transition-buttons', '500ms');
     for (const property in properties) { body.setProperty(property, properties[property as '--main-text']); }
 
     setTimeout(() => {
         body.setProperty('--transition-all', '0ms');
         body.setProperty('--transition-buttons', '100ms');
-    }, 800);
+    }, 500);
 };
 
 export const Alert = async(text: string, priority = 0): Promise<void> => {
@@ -883,7 +888,7 @@ export const replayEvent = async() => {
     if (player.stage.true >= 8) {
         last = 11;
     } else if (player.stage.true >= 7) {
-        last = player.buildings[6][1].true >= 6 ? 11 : player.event ? 10 : 9;
+        last = player.verses[0].true >= 6 ? 11 : player.event ? 10 : 9;
     } else if (player.stage.true === 6) {
         last = player.event ? 8 : player.stage.resets >= 1 ? 7 : 6;
     } else {
@@ -929,7 +934,7 @@ export const playEvent = (event: number, replay = true) => {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis';
     } else if (event === 5) {
         if (!replay) { stageUpdate(false); }
-        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within previous Stages. Stage resets and exports will now award Strange quarks, '[26] Iron' Element will use new effect to improve Stage reset reward.\n(Stars in Intergalactic are just Stars from Interstellar)";
+        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, '[26] Iron' Element will use new effect to improve Stage reset reward.\n(Stars in Intergalactic are just Stars from Interstellar)";
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state';
     } else if (event === 7) {
@@ -1121,15 +1126,18 @@ export const openHotkeys = () => {
                     }
                     finish();
                 };
-                const finish = () => {
+                const clickClose = () => finish(false);
+                const finish = (keyboard = true) => {
                     body.removeEventListener('keydown', detect);
-                    body.removeEventListener('click', finish, { capture: true });
-                    body.addEventListener('keyup', () => { global.hotkeys.disabled = false; }, { once: true });
+                    body.removeEventListener('click', clickClose, { capture: true });
+                    if (keyboard) {
+                        body.addEventListener('keyup', () => { global.hotkeys.disabled = false; }, { once: true });
+                    }
                     resolve(result);
                 };
                 global.hotkeys.disabled = true;
                 body.addEventListener('keydown', detect);
-                body.addEventListener('click', finish, { capture: true });
+                body.addEventListener('click', clickClose, { capture: true });
             });
         };
         const index = globalSave.toggles[0] ? 0 : 1;
