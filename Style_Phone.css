@@ -45,7 +45,7 @@ html { --elements-columns-phone: min(var(--elements-columns), 9); }
     height: 1.78em;
 }
 
-.buyBuilding .toggleBuilding { margin-left: auto; }
+.buyBuilding .specialToggle { margin-left: auto; }
 .buyBuilding > div > div > div { display: none; }
 .availableBuilding > div > div > p { border-color: var(--building-afford); }
 
