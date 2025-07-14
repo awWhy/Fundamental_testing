@@ -1679,7 +1679,7 @@ export const updatePlayer = (load: playerType): string => {
                 if (uni < load.inflation.ends[1]) { load.inflation.ends[1] = uni; }
                 if (uni > load.inflation.ends[2]) { load.inflation.ends[2] = uni; }
             }
-            load.verses[0].current += load.inflation.ends[2] - load.inflation.ends[1];
+            load.verses[0].current += Math.max(load.inflation.ends[2] - load.inflation.ends[1], 0);
         }
 
         if (load.version !== playerStart.version) {
