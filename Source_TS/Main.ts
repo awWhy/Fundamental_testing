@@ -1,6 +1,6 @@
 import { player, global, playerStart, updatePlayer, deepClone } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, addIntoLog, updateCollapsePoints } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, calculateEffects, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, calculateEffects, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog, errorNotify } from './Special';
 import { assignHotkeys, detectHotkey, detectShift, handleTouchHotkeys } from './Hotkeys';
 import { prepareVacuum } from './Vacuum';
@@ -577,18 +577,14 @@ try { //Start everything
         (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
         global.debug.MDStrangePage = 1;
 
-        const arrowStage = document.createElement('button');
-        arrowStage.innerHTML = '<span class="downArrow"></span>';
-        arrowStage.type = 'button';
-        const arrowReset1 = document.createElement('button');
-        arrowReset1.innerHTML = '<span class="downArrow"></span>';
-        arrowReset1.type = 'button';
-        getId('reset0Main').append(arrowStage);
-        arrowStage.addEventListener('click', () => getId('reset0Main').classList.toggle('open'));
-        arrowStage.addEventListener('blur', () => getId('reset0Main').classList.remove('open'));
-        getId('reset1Main').append(arrowReset1);
-        arrowReset1.addEventListener('click', () => getId('reset1Main').classList.toggle('open'));
-        arrowReset1.addEventListener('blur', () => getId('reset1Main').classList.remove('open'));
+        for (let i = 0; i <= 2; i++) {
+            const arrow = document.createElement('button');
+            arrow.innerHTML = '<span class="downArrow"></span>';
+            arrow.type = 'button';
+            getId(`reset${i}Main`).append(arrow);
+            arrow.addEventListener('click', () => getId(`reset${i}Main`).classList.toggle('open'));
+            arrow.addEventListener('blur', () => getId(`reset${i}Main`).classList.remove('open'));
+        }
         specialHTML.styleSheet.textContent += `#resets { row-gap: 1em; }
             #resets > section { position: relative; flex-direction: row; justify-content: center; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; }
             #resets > section:not(.open) > p { display: none !important; }
@@ -683,13 +679,6 @@ try { //Start everything
 
         const primaryIndex = () => {
             const newTab = globalSave.SRSettings[2] ? 0 : -1;
-            getId('reset0Button').tabIndex = newTab;
-            getId('reset1Button').tabIndex = newTab;
-            for (let i = 1; i < specialHTML.longestBuilding; i++) {
-                getId(`building${i}Btn`).tabIndex = newTab;
-                getId(`toggleBuilding${i}`).tabIndex = newTab;
-            }
-            getId('toggleBuilding0').tabIndex = newTab;
             for (const tabText of global.tabs.list) {
                 getId(`${tabText}TabBtn`).tabIndex = newTab;
                 for (const subtabText of global.tabs[tabText].list) {
@@ -719,8 +708,8 @@ try { //Start everything
     let oldVersion = player.version;
     const save = localStorage.getItem(specialHTML.localStorage.main);
     if (save !== null) {
-        const load = JSON.parse(atob(save));
-        if (load.version !== playerStart.version && load.version !== 'v0.2.6_temp' && load.version !== 'v0.2.6_temp2') { throw Error('Prevented save overwrite, if you for some reason using it on wrong website, then export it'); }
+        const load = JSON.parse(atob(save)) as typeof player;
+        if (!load.version.includes('v0.2.6_temp')) { throw Error('Prevented save overwrite, if you for some reason using it on wrong website, then export it'); }
         oldVersion = updatePlayer(load);
     } else {
         prepareVacuum(false); //Set buildings values
@@ -847,8 +836,22 @@ try { //Start everything
 
     /* Stage tab */
     {
-        const button = getId('reset0Button');
-        const footer = getId('reset0Footer');
+        const button = getId('reset2Button');
+        const footer = getId('reset2Footer');
+        const repeatFunc = () => repeatFunction(endResetUser);
+        button.addEventListener('click', endResetUser);
+        footer.addEventListener('click', endResetUser);
+        if (PC) {
+            button.addEventListener('mousedown', repeatFunc);
+            footer.addEventListener('mousedown', repeatFunc);
+        }
+        if (MD) {
+            button.addEventListener('touchstart', repeatFunc);
+            footer.addEventListener('touchstart', repeatFunc);
+        }
+    } {
+        const button = getId('reset1Button');
+        const footer = getId('reset1Footer');
         const repeatFunc = () => repeatFunction(() => {
             if (player.inflation.vacuum || player.stage.active >= 4) { return; }
             void stageResetUser();
@@ -864,8 +867,8 @@ try { //Start everything
             footer.addEventListener('touchstart', repeatFunc);
         }
     } {
-        const button = getId('reset1Button');
-        const footer = getId('reset1Footer');
+        const button = getId('reset0Button');
+        const footer = getId('reset0Footer');
         const clickFunc = () => {
             const active = player.stage.active;
             if (active === 1) {
@@ -879,7 +882,7 @@ try { //Start everything
             } else if (active === 5) {
                 void mergeResetUser();
             } else if (active === 6) {
-                void endResetUser();
+                void nucleationResetUser();
             }
         };
         const repeatFunc = () => repeatFunction(() => {
@@ -1006,7 +1009,7 @@ try { //Start everything
         image.addEventListener('mouseenter', clickFunc);
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 clickFunc();
             });
         }
@@ -1034,7 +1037,7 @@ try { //Start everything
         }
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 hoverFunc();
             });
         }
@@ -1061,7 +1064,7 @@ try { //Start everything
         }
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 hoverFunc();
             });
         }
@@ -1088,7 +1091,7 @@ try { //Start everything
         }
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 hoverFunc();
             });
         }
@@ -1115,7 +1118,7 @@ try { //Start everything
         }
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 hoverFunc();
             });
         }
@@ -1141,7 +1144,7 @@ try { //Start everything
         }
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 hoverFunc();
             });
         }
@@ -1214,7 +1217,7 @@ try { //Start everything
         } else { image.addEventListener('click', clickFunc); }
         if (PC || SR) {
             image.addEventListener('focus', () => {
-                if (global.hotkeys.tab) { return; }
+                if (!global.hotkeys.tab) { return; }
                 hoverFunc();
             });
         }
@@ -1265,7 +1268,7 @@ try { //Start everything
             }
             if (PC || SR) {
                 image.addEventListener('focus', () => {
-                    if (global.hotkeys.tab) { return; }
+                    if (!global.hotkeys.tab) { return; }
                     hoverFunc();
                 });
             }
@@ -1295,7 +1298,7 @@ try { //Start everything
             if (MD) { image.addEventListener('touchstart', hoverFunc); }
             if (PC || SR) {
                 image.addEventListener('focus', () => {
-                    if (global.hotkeys.tab) { return; }
+                    if (!global.hotkeys.tab) { return; }
                     hoverFunc();
                 });
             }
@@ -1318,7 +1321,7 @@ try { //Start everything
             }
             if (PC || SR) {
                 image.addEventListener('focus', () => {
-                    if (global.hotkeys.tab) { return; }
+                    if (!global.hotkeys.tab) { return; }
                     hoverFunc();
                 });
             }

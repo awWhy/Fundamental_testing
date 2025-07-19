@@ -1379,6 +1379,7 @@ li .hollowButton {
     margin: 0.2em 0;
 }
 
+#energyGainStage6,
 #energyGainStats section {
     display: grid;
     grid-template-columns: max-content 4.4em max-content;
@@ -1388,7 +1389,9 @@ li .hollowButton {
     padding: 0 0.4em;
 }
 
+#energyGainStage6 p,
 #energyGainStats section > p { display: contents; }
+#energyGainStage6 p > span:nth-of-type(2),
 #energyGainStats p > span:nth-of-type(2) { text-align: center; }
 
 .imageList {

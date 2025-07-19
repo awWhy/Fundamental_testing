@@ -116,7 +116,7 @@ export default class Overlimit extends Array<number> {
             if (technical.less(result, after)) { result = after; }
         }
 
-        return this.privateSet(result);
+        return result === this ? this : this.privateSet(result);
     }
     /** Set original number to the smallest of provided arguments */
     min(...compare: allowedTypes[]) {
@@ -128,7 +128,7 @@ export default class Overlimit extends Array<number> {
             if (technical.more(result, after)) { result = after; }
         }
 
-        return this.privateSet(result);
+        return result === this ? this : this.privateSet(result);
     }
 
     /** Returns formatted string, takes object as arqument

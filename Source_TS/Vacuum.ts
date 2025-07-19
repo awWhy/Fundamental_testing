@@ -46,7 +46,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         upgradesInfo[3].maxActive = 14;
         upgradesInfo[4].maxActive = 5;
         upgradesInfo[5].maxActive = 7;
-        upgradesInfo[6].maxActive = 1;
+        upgradesInfo[6].maxActive = 2;
 
         researches1Cost = [1600, 4800, 16000, 32000, 16000, 24000];
         researches1Scaling = [400, 1200, 8000, 40000, 16000, 16000];
@@ -62,6 +62,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[3].maxActive = 6;
         researchesExtraInfo[4].maxActive = 4;
         researchesExtraInfo[5].maxActive = 6;
+        researchesExtraInfo[6].maxActive = 4;
 
         global.elementsInfo.cost[27].setValue('1e54');
         global.elementsInfo.cost[28].setValue('1e58');
@@ -172,7 +173,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[3].maxActive = 4;
         researchesExtraInfo[4].maxActive = 3;
         researchesExtraInfo[5].maxActive = 1;
-        //researchesExtraInfo[6].maxActive = 0;
+        researchesExtraInfo[6].maxActive = 0;
 
         global.elementsInfo.cost[27].setValue('1e52');
         global.elementsInfo.cost[28].setValue('1e54');
@@ -229,6 +230,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('mergeBoost').style.display = 'none';
         getId('mergeEffects').style.display = 'none';
         getId('mergeBoostTotal').style.display = 'none';
+        getId('darkEnergySpent').style.display = 'none';
+        getId('nucleationBoostTotal').style.display = 'none';
         getId('researchAuto1').style.display = 'none';
         getId('researchAuto2').style.display = 'none';
         getId('vaporizationLimit').style.display = 'none';

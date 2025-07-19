@@ -47,6 +47,10 @@ export interface playerType {
         /** How much real time passed since last Galaxy */
         since: number
     }
+    darkness: {
+        energy: number
+        fluid: number
+    }
     inflation: {
         loadouts: Array<[string, number[]]>
         vacuum: boolean
@@ -125,7 +129,7 @@ export interface playerType {
         /** Auto Stage switch[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
            Auto accept Offline[4] */
         normal: boolean[]
-        /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6] */
+        /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6], Nucleation[7] */
         confirm: Array<'Safe' | 'None'>
         /** Upgrades/Researches/Elements[0], Strangeness[1] */
         hover: boolean[]
@@ -303,6 +307,7 @@ export interface globalType {
         globalSpeed: number
         /** In the current Universe */
         totalSuper: number
+        newFluid: number
     }
     intervalsId: {
         main: number | undefined
@@ -319,7 +324,16 @@ export interface globalType {
         type: Array<Array<'producing' | 'improving' | 'delaying'>>
         firstCost: number[][]
         increase: number[][]
-        producing: Overlimit[][]
+        /** [0] type is never[] */
+        producing: [
+            Array<number | Overlimit>,
+            Overlimit[],
+            number[],
+            number[],
+            Overlimit[],
+            Overlimit[],
+            number[]
+        ]
     }
     versesInfo: {
         firstCost: number[]
@@ -467,7 +481,7 @@ export interface globalSaveType {
     developerMode: boolean
 }
 
-export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'end' | 'supervoid' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'nucleation' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'end' | 'supervoid' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
 export type numbersList = 'makeStructure' | 'toggleStructure' | 'enterChallenge';
 
 export interface calculateEffectsType {
@@ -522,7 +536,7 @@ export interface calculateEffectsType {
     mergeRequirement: (stability?: boolean) => number
     mergeMaxResets: () => number
     reward: Array<(post?: boolean) => number>
-    mergeScore: (post?: boolean) => number
+    mergeScore: () => number
     S5Upgrade0: () => number
     S5Upgrade1: () => number
     S5Upgrade2: (post?: boolean, level?: number) => number
@@ -535,13 +549,14 @@ export interface calculateEffectsType {
     element24_power: () => number
     element24: () => Overlimit
     element26: () => number
-    darkHardcap: (delay: number) => number
+    darkHardcap: () => number
+    darkFluid: (post?: boolean) => number
     S2Strange9: () => number
     S5Strange9_stage1: () => number
     S5Strange9_stage2: () => number
     S5Strange9_stage3: () => number
     T0Inflation0: () => number
-    T0Inflation1: (power?: number) => number
+    T0Inflation1: () => number
     T0Inflation3: () => number
     T0Inflation5: (level?: number) => number
     /** Default value for type is 0 or Quarks; Use 1 for Strangelets */

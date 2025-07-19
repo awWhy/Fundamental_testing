@@ -19,6 +19,7 @@ export const globalSave: globalSaveType = {
         rank: ['R', 'R'],
         collapse: ['C', 'C'],
         galaxy: ['G', 'G'],
+        nucleation: ['N', 'N'],
         pause: ['P', 'P'],
         makeAll: ['M', 'M'],
         toggleAll: ['Shift A', 'Shift A'],
@@ -112,7 +113,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 
 export const specialHTML = { //Images here are from true vacuum for easier cache
     /** [textContent] */
-    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', 'End'],
+    resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', 'Nucleation'],
     longestBuilding: 7, //+1
     /** [src] */
     buildingHTML: [
@@ -239,7 +240,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Rank%20Researches.png', 'stage6borderImage', 'Rank'],
         ['Collapse%20Researches.png', 'stage6borderImage', 'Collapse'],
         ['Galaxy%20Researches.png', 'stage3borderImage', 'Galaxy'],
-        ['Missing.png', 'redBorderImage', '']
+        ['Missing.png', 'stage3borderImage', 'Darkness']
     ],
     /** [src, className] */
     researchExtraHTML: [
@@ -275,7 +276,12 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchGalaxy4.png', 'brownBorderImage'],
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
-        ], []
+        ], [
+            ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage']
+        ]
     ],
     longestFooterStats: 3,
     /** [src, className, textcontent] */
@@ -297,7 +303,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Main_sequence%20mass.png', 'stage1borderImage cyanText', 'Mass'],
             ['Stars.png', 'redBorderImage redText', 'Stars']
         ], [
-            ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter']
+            ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter'],
+            ['Missing.png', 'stage3borderImage grayText', 'Energy'],
+            ['Missing.png', 'stage6borderImage darkvioletText', 'Fluid']
         ]
     ],
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
@@ -886,7 +894,7 @@ export const MDStrangenessPage = (stageIndex: number) => {
 export const replayEvent = async() => {
     let last;
     if (player.stage.true >= 8) {
-        last = 11;
+        last = 12;
     } else if (player.stage.true >= 7) {
         last = player.verses[0].true >= 6 ? 11 : player.event ? 10 : 9;
     } else if (player.stage.true === 6) {
@@ -907,6 +915,7 @@ export const replayEvent = async() => {
     if (last >= 9) { text += '\nEvent 9: Inflation'; }
     if (last >= 10) { text += '\nEvent 10: Supervoid'; }
     if (last >= 11) { text += '\nEvent 11: Stability'; }
+    if (last >= 12) { text += '\nEvent 12: Big rip'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -952,6 +961,8 @@ export const playEvent = (event: number, replay = true) => {
         text = "Now that there was even more matter to rearrange ‒ the 'Supervoid' was formed. Check it out by clicking on the Void name in the 'Advanced' subtab.\n(Also unlocked 2 new Inflations, Supervoid unlocks are kept through Universe reset)";
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
+    } else if (event === 12) {
+        text = "Unlocked ability to End everything:\nBy converting Dark energy into the Phantom energy, you can now trigger the scenario known as 'Big Rip', meaning that everything up to this point is going to be converted into Cosmons.";
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);
@@ -1061,16 +1072,17 @@ export const openHotkeys = () => {
         <label id="enterChallengeHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">enter the Challenge</span></label>
         <p id="exitChallengeHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Exit out of the current Challenge</span></label></p>
         <div>
-            <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage</span></label>
             <label id="dischargeHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
             <label id="vaporizationHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
             <label id="rankHotkey" class="darkorchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
             <label id="collapseHotkey" class="orchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Collapse</span></label>
             <label id="galaxyHotkey" class="grayText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Galaxy</span></label>
             <label id="mergeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Merge</span></label>
+            <label id="nucleationHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Nucleation</span></label>
+            <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage</span></label>
             <label id="universeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Universe</span></label>
-            <label id="endHotkey" class="redText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">End</span></label>
             <label id="supervoidHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Supervoid</span></label>
+            <label id="endHotkey" class="redText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">End</span></label>
             <label id="pauseHotkey" class="grayText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">pause</span></label>
         </div>
         <p>Enter <span class="whiteText">or</span> Space ‒ <span class="whiteText">click selected HTML Element or confirm Alert</span></p>

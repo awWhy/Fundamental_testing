@@ -53,7 +53,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
         if (index === 3) { return player.researchesExtra[5][0] >= 1; }
     } else if (stageIndex === 6) {
-        if (index === 1) { return player.researches[6][0] >= 8; }
+        if (index === 1) { return player.upgrades[6][0] === 1 || player.researches[6][0] >= 8; }
     }
 
     return false;
@@ -152,6 +152,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (player.verses[0].true < global.mergeInfo.unlockE[upgrade]) { return false; }
                 if (upgrade === 0) { return (player.inflation.vacuum || player.milestones[4][1] >= 8) && player.strangeness[5][3] >= 1; }
                 return player.accretion.rank >= 7;
+            } else if (stageIndex === 6) {
+                return player.upgrades[6][0] === 1;
             }
             break;
         case 'researchesAuto': {
@@ -247,6 +249,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             if (stageIndex === 2) { return check !== 2; }
             if (stageIndex === 4) { return false; }
             if (stageIndex === 5) { return check !== 3; }
+            if (stageIndex === 6) { return check !== 0; }
             break;
         case 'researches':
             if (stageIndex === 1) { return check !== 3; }
@@ -256,6 +259,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             if (stageIndex === 2) { return check > 2; }
             if (stageIndex === 4) { return check !== 0; }
             if (stageIndex === 5) { return false; }
+            if (stageIndex === 6) { return false; }
             break;
         case 'elements':
             return ![26, 29, 30].includes(check);

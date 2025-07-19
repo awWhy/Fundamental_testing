@@ -1,7 +1,7 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { numbersUpdate, switchTab } from './Update';
-import { buyBuilding, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, rankResetUser, stageResetUser, switchStage, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { buyBuilding, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
 import { buyAll, pauseGameUser } from './Main';
 import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
@@ -38,6 +38,11 @@ const basicFunctions: Record<hotkeysList, () => boolean> = {
     galaxy: () => {
         buyBuilding(3, 5);
         return false;
+    },
+    nucleation: () => {
+        if (global.hotkeys.repeat) { return false; }
+        void nucleationResetUser();
+        return true;
     },
     pause: () => {
         if (global.hotkeys.repeat) { return false; }
