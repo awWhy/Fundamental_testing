@@ -52,7 +52,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researches1Scaling = [400, 1200, 8000, 40000, 16000, 16000];
         researchesInfo[2].scaling[2] = 1e2;
         researchesInfo[2].scaling[3] = 1e3;
-        //researchesInfo[2].maxActive = 7;
+        researchesInfo[2].maxActive = 7;
         researchesInfo[4].maxActive = 6;
         researchesInfo[5].maxActive = 5;
         researchesInfo[6].maxActive = 4;
@@ -163,7 +163,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researches1Scaling = [200, 400, 2000, 12000, 4000, 6000];
         researchesInfo[2].scaling[2] = 1e3;
         researchesInfo[2].scaling[3] = 1e2;
-        //researchesInfo[2].maxActive = 6;
+        researchesInfo[2].maxActive = 6;
         researchesInfo[4].maxActive = 5;
         researchesInfo[5].maxActive = 2;
         researchesInfo[6].maxActive = 0;
@@ -215,7 +215,6 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
         getId('strange8Stage5').style.display = '';
         getId('milestonesProgressArea').style.display = '';
-        getId('stageAutoElse').style.display = '';
         getQuery('#stageAutoElse > span').textContent = 'Reset pre-Interstellar Stages only if all Milestones are maxed';
         getQuery('#stageAutoElse > span:last-of-type').style.display = '';
         getId('rankStat0').style.display = '';
@@ -298,8 +297,6 @@ export const switchVacuum = () => {
     player.inflation.resets++;
     player.time.export[1] = 0;
     player.time.export[2] = 0;
-    player.challenges.active = null;
-    player.clone = {};
     prepareVacuum(true);
     resetVacuum();
     addIntoLog('Vacuum reset');

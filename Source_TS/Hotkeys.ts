@@ -71,7 +71,7 @@ const basicFunctions: Record<hotkeysList, () => boolean> = {
         if (global.hotkeys.repeat) { return false; }
         const old = player.challenges.super;
         toggleSupervoid(true);
-        if (old === player.challenges.super) { return false; }
+        if (old === player.challenges.super) { return true; }
         Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`);
         return true;
     },
@@ -114,7 +114,9 @@ const basicFunctions: Record<hotkeysList, () => boolean> = {
 const numberFunctions: Record<numbersList, (number: number) => boolean> = {
     makeStructure: (number) => {
         if (number !== 0) {
-            buyBuilding(number, player.stage.active);
+            if (player.stage.active === 6 && player.strangeness[6][3] < 1) {
+                buyVerse(number - 1);
+            } else { buyBuilding(number, player.stage.active); }
         } else { buyAll(); }
         return false;
     },
@@ -184,12 +186,12 @@ export const detectHotkey = (check: KeyboardEvent) => {
     if (code === 'Tab' || code === 'Enter' || code === 'Space') {
         if (detectShift(check) === null) { return; }
         if (code === 'Tab') { info.tab = true; }
-        document.body.classList.remove('noFocusOutline');
+        document.documentElement.classList.remove('noFocusOutline');
         return;
     } else {
         const activeType = (document.activeElement as HTMLInputElement)?.type;
         if (activeType === 'text' || activeType === 'number') { return; }
-        document.body.classList.add('noFocusOutline');
+        document.documentElement.classList.add('noFocusOutline');
     }
     if (info.disabled) { return; }
 

@@ -123,7 +123,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Cosmic%20dust.png', 'Planetesimal.png', 'Protoplanet.png', 'Natural%20satellite.png', 'Subsatellite.png'],
         ['Brown%20dwarf.png', 'Orange%20dwarf.png', 'Red%20supergiant.png', 'Blue%20hypergiant.png', 'Quasi%20star.png'],
         ['Nebula.png', 'Star%20cluster.png', 'Galaxy.png'],
-        ['Missing.png']
+        ['Dark%20planet.png']
     ],
     longestUpgrade: 14,
     /** [src] */
@@ -200,7 +200,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchW3.png', 'stage2borderImage'],
             ['ResearchW4.png', 'stage2borderImage'],
             ['ResearchW5.png', 'stage2borderImage'],
-            ['ResearchW6.png', 'stage2borderImage']
+            ['ResearchW6.png', 'stage2borderImage'],
+            ['Missing.png', 'stage2borderImage']
         ], [
             ['ResearchA1.png', 'stage3borderImage'],
             ['ResearchA2.png', 'stage2borderImage'],
@@ -304,8 +305,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Stars.png', 'redBorderImage redText', 'Stars']
         ], [
             ['Dark%20matter.png', 'stage3borderImage grayText', 'Matter'],
-            ['Missing.png', 'stage3borderImage grayText', 'Energy'],
-            ['Missing.png', 'stage6borderImage darkvioletText', 'Fluid']
+            ['Dark%20energy.png', 'stage3borderImage grayText', 'Energy'],
+            ['Dark%20fluid.png', 'stage6borderImage darkvioletText', 'Fluid']
         ]
     ],
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
@@ -573,14 +574,14 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             properties['--yellow-text'] = 'var(--green-text)';
     }
 
-    const body = document.documentElement.style;
-    body.setProperty('--transition-all', '500ms');
-    body.setProperty('--transition-buttons', '500ms');
-    for (const property in properties) { body.setProperty(property, properties[property as '--main-text']); }
+    const bodyStyle = document.documentElement.style;
+    bodyStyle.setProperty('--transition-all', '500ms');
+    bodyStyle.setProperty('--transition-buttons', '500ms');
+    for (const property in properties) { bodyStyle.setProperty(property, properties[property as '--main-text']); }
 
     setTimeout(() => {
-        body.setProperty('--transition-all', '0ms');
-        body.setProperty('--transition-buttons', '100ms');
+        bodyStyle.setProperty('--transition-all', '0ms');
+        bodyStyle.setProperty('--transition-buttons', '100ms');
     }, 500);
 };
 
@@ -598,7 +599,7 @@ export const Alert = async(text: string, priority = 0): Promise<void> => {
         }
 
         getId('alertText').textContent = text;
-        const body = document.body;
+        const body = document.documentElement;
         const blocker = getId('alertMain');
         const confirm = getId('alertConfirm');
         blocker.style.display = '';
@@ -647,7 +648,7 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
         }
 
         getId('alertText').textContent = text;
-        const body = document.body;
+        const body = document.documentElement;
         const blocker = getId('alertMain');
         const cancel = getId('alertCancel');
         const confirm = getId('alertConfirm');
@@ -709,7 +710,7 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
         }
 
         getId('alertText').textContent = text;
-        const body = document.body;
+        const body = document.documentElement;
         const blocker = getId('alertMain');
         const input = getId('alertInput') as HTMLInputElement;
         const cancel = getId('alertCancel');
@@ -894,7 +895,7 @@ export const MDStrangenessPage = (stageIndex: number) => {
 export const replayEvent = async() => {
     let last;
     if (player.stage.true >= 8) {
-        last = 12;
+        last = player.event ? 13 : 12;
     } else if (player.stage.true >= 7) {
         last = player.verses[0].true >= 6 ? 11 : player.event ? 10 : 9;
     } else if (player.stage.true === 6) {
@@ -916,6 +917,7 @@ export const replayEvent = async() => {
     if (last >= 10) { text += '\nEvent 10: Supervoid'; }
     if (last >= 11) { text += '\nEvent 11: Stability'; }
     if (last >= 12) { text += '\nEvent 12: Big rip'; }
+    if (last >= 13) { text += '\nEvent 13: Void Universes'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -963,6 +965,8 @@ export const playEvent = (event: number, replay = true) => {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
     } else if (event === 12) {
         text = "Unlocked ability to End everything:\nBy converting Dark energy into the Phantom energy, you can now trigger the scenario known as 'Big Rip', meaning that everything up to this point is going to be converted into Cosmons.";
+    } else if (event === 13) {
+        text = 'Void Universes are weaker version of self-made Universes. They do not count as self-made, but still award Inflatons. They can only be created under the Void time limit, creating them forces Void (Vacuum) reset.';
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);
@@ -970,7 +974,6 @@ export const playEvent = (event: number, replay = true) => {
 
 const buildBigWindow = (subWindow: string): null | HTMLElement => {
     if (getId('closeBigWindow', true) === null) {
-        getId('globalToggle0').remove(); //Move it into the cache
         getId('bigWindow').innerHTML = '<div role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></div>';
         specialHTML.styleSheet.textContent += `#bigWindow > div { display: flex; flex-direction: column; align-items: center; width: clamp(20vw, 38em, 80vw); height: clamp(18vh, 36em, 90vh); background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }
             #bigWindow > div > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; }
@@ -985,6 +988,7 @@ const buildBigWindow = (subWindow: string): null | HTMLElement => {
     return mainHTML;
 };
 const addCloseEvents = (sectionHTML: HTMLElement, firstTargetHTML = null as HTMLElement | null) => {
+    const body = document.documentElement;
     const closeButton = getId('closeBigWindow');
     const windowHMTL = getId('bigWindow');
     if (firstTargetHTML === null) { firstTargetHTML = closeButton; }
@@ -1001,10 +1005,10 @@ const addCloseEvents = (sectionHTML: HTMLElement, firstTargetHTML = null as HTML
         specialHTML.bigWindow = null;
         windowHMTL.style.display = 'none';
         sectionHTML.style.display = 'none';
-        document.body.removeEventListener('keydown', key);
+        body.removeEventListener('keydown', key);
         closeButton.removeEventListener('click', close);
     };
-    document.body.addEventListener('keydown', key);
+    body.addEventListener('keydown', key);
     closeButton.addEventListener('click', close);
     sectionHTML.style.display = '';
     windowHMTL.style.display = '';
@@ -1015,7 +1019,8 @@ export const openVersionInfo = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `<h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Number hotkeys can now be changed\n- Improved hover text\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
         <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>
         <h6>v0.2.2</h6><p>- New content (Supervoid)\n- Better Offline calculation and more options related to it\n- Entering Void now saves the game to load it after exiting</p>
@@ -1095,8 +1100,8 @@ export const openHotkeys = () => {
         <button type="button" id="restoreHotkeys" class="selectBtn">Restore default hotkeys values</button>`; //Spacebar at the end of label is required
         mainHTML.ariaLabel = 'Hotkeys menu';
         const toggle = getId('globalToggle0');
-        toggle.style.display = '';
         getId('hotkeysToggleLabel').append(toggle);
+        toggle.style.display = '';
         specialHTML.styleSheet.textContent += `#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
             #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; }
             #hotkeysHTML > div label { justify-self: center; width: max-content; } `;
@@ -1104,7 +1109,7 @@ export const openHotkeys = () => {
         const changeHotkey = async(number: boolean): Promise<string | string[] | null> => {
             return await new Promise((resolve) => {
                 getId('hotkeysMessage').textContent = 'Awaiting new value for the hotkey';
-                const body = document.body;
+                const body = document.documentElement;
                 let result: null | string | string[] = null;
                 const detect = async(event: KeyboardEvent) => {
                     const { key, code } = event;

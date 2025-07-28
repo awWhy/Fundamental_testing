@@ -85,7 +85,7 @@ export const simulateOffline = async(offline: number) => {
     info.stage[1] = null;
     player.time.online += offline;
 
-    const body = document.body;
+    const body = document.documentElement;
     const mainHTML = getId('offlineMain');
     const accelBtn = getId('offlineAccelerate');
     const deaccelBtn = getId('offlineDeaccelerate');
@@ -409,7 +409,7 @@ export const buyAll = () => {
     } else {
         for (let i = max - 1; i >= 1; i--) { buyBuilding(i, active, 0); }
     }
-    if (active === 6) {
+    if (active === 6 && player.strangeness[6][3] < 1) {
         for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
     }
 };
@@ -450,7 +450,7 @@ export const loadoutsRecreate = () => {
         const event = () => {
             if (global.hotkeys.shift) { return void loadoutsLoad(i); }
             (getId('loadoutsName') as HTMLInputElement).value = player.inflation.loadouts[i][0];
-            loadoutsVisual((global.loadouts.input = player.inflation.loadouts[i][1]));
+            loadoutsVisual(global.loadouts.input = player.inflation.loadouts[i][1]);
         };
         newOld[i] = [button, event];
         listHTML.append(button, ', ');
@@ -488,6 +488,7 @@ const loadoutsLoad = async(loadout = null as null | number) => {
 
 export const globalSaveStart = deepClone(globalSave);
 try { //Start everything
+    const body = document.documentElement;
     const globalSettings = localStorage.getItem(specialHTML.localStorage.settings);
     if (globalSettings !== null) {
         try {
@@ -549,7 +550,7 @@ try { //Start everything
             #shortcuts { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100vw; max-width: unset; bottom: 0.6em; margin: 0; }
             #fakeFooter { height: 3.04em; } `;
     }
-    if (globalSave.toggles[2]) { document.body.classList.remove('noTextSelection'); }
+    if (globalSave.toggles[2]) { body.classList.remove('noTextSelection'); }
     if (globalSave.toggles[1]) {
         const elementsArea = getId('upgradeSubtabElements');
         elementsArea.id = 'ElementsTab';
@@ -571,7 +572,7 @@ try { //Start everything
     if (globalSave.MDSettings[0]) {
         toggleSpecial(0, 'mobile');
         (document.getElementById('MDMessage1') as HTMLElement).remove();
-        specialHTML.styleSheet.textContent += `body.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
+        specialHTML.styleSheet.textContent += `html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
             #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
         (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
@@ -660,11 +661,7 @@ try { //Start everything
         }
         specialHTML.styleSheet.textContent += `#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }
             #starEffects, #mergeEffects { cursor: default; } `;
-        for (let i = 0; i < playerStart.strange.length; i++) {
-            const html = getId(`strange${i}`);
-            html.classList.add('noFocusOutline');
-            html.tabIndex = 0;
-        }
+        for (let i = 0; i < playerStart.strange.length; i++) { getId(`strange${i}`).tabIndex = 0; }
 
         const SRMainDiv = document.createElement('article');
         SRMainDiv.innerHTML = '<h5>Information for the Screen reader</h5><p id="SRTab" aria-live="polite"></p><p id="SRStage" aria-live="polite"></p><p id="SRMain" aria-live="assertive"></p>';
@@ -708,12 +705,11 @@ try { //Start everything
     let oldVersion = player.version;
     const save = localStorage.getItem(specialHTML.localStorage.main);
     if (save !== null) {
-        const load = JSON.parse(atob(save)) as typeof player;
-        if (!load.version.includes('v0.2.6_temp')) { throw Error('Prevented save overwrite, if you for some reason using it on wrong website, then export it'); }
-        oldVersion = updatePlayer(load);
+        oldVersion = updatePlayer(JSON.parse(atob(save)));
     } else {
         prepareVacuum(false); //Set buildings values
         updatePlayer(deepClone(playerStart));
+        player.buildings[3][0].current.setValue('5.9722e27');
     }
 
     /* Global */
@@ -721,7 +717,6 @@ try { //Start everything
     const MD = globalSave.MDSettings[0];
     const SR = globalSave.SRSettings[0];
     const PC = !MD || globalSave.MDSettings[1];
-    const htmlHTML = document.documentElement;
     const releaseHotkey = (event: KeyboardEvent | null) => {
         const hotkeys = global.hotkeys;
         if (hotkeys.shift && (event === null || event.key === 'Shift')) {
@@ -735,24 +730,24 @@ try { //Start everything
         hotkeys.repeat = false;
         hotkeys.tab = false;
     };
-    htmlHTML.addEventListener('contextmenu', (event) => {
+    body.addEventListener('contextmenu', (event) => {
         const activeType = (document.activeElement as HTMLInputElement)?.type;
         if (activeType !== 'text' && activeType !== 'number' && !globalSave.developerMode) { event.preventDefault(); }
     });
-    htmlHTML.addEventListener('keydown', (key) => detectHotkey(key));
-    htmlHTML.addEventListener('keyup', releaseHotkey);
+    body.addEventListener('keydown', (key) => detectHotkey(key));
+    body.addEventListener('keyup', releaseHotkey);
     if (PC) {
-        htmlHTML.addEventListener('mouseup', cancelRepeat);
-        htmlHTML.addEventListener('mouseleave', () => {
+        body.addEventListener('mouseup', cancelRepeat);
+        body.addEventListener('mouseleave', () => {
             releaseHotkey(null);
             cancelRepeat();
         });
     }
     if (MD) {
-        htmlHTML.addEventListener('touchstart', (event) => {
+        body.addEventListener('touchstart', (event) => {
             specialHTML.mobileDevice.start = [event.touches[0].clientX, event.touches[0].clientY];
         });
-        htmlHTML.addEventListener('touchend', (event) => {
+        body.addEventListener('touchend', (event) => {
             cancelRepeat();
             const notAllowed = [getId('globalStats'), getId('footerMain')]; //[0] Shouldn't be changed
             for (let target = event.target as HTMLElement; target != null; target = target.parentElement as HTMLElement) {
@@ -764,16 +759,21 @@ try { //Start everything
             notAllowed[0].style.opacity = '1';
             handleTouchHotkeys(event);
         });
-        htmlHTML.addEventListener('touchcancel', () => {
+        body.addEventListener('touchcancel', () => {
             releaseHotkey(null);
             cancelRepeat();
         });
     }
-    for (const element of getClass('hasTitle')) {
-        const open = (event: MouseEvent) => {
+    {
+        const hoverEvent = (event: MouseEvent) => {
+            const element = event.currentTarget as HTMLElement;
             const window = getId('hoverWindow');
             window.textContent = element.dataset.title as string;
             window.style.display = '';
+            const position = (event: MouseEvent) => {
+                window.style.left = `${Math.min(event.clientX, document.documentElement.clientWidth - window.getBoundingClientRect().width)}px`;
+                window.style.top = `${event.clientY}px`;
+            };
             position(event);
             element.addEventListener('mousemove', position);
             element.addEventListener('mouseleave', () => {
@@ -781,12 +781,7 @@ try { //Start everything
                 element.removeEventListener('mousemove', position);
             }, { once: true });
         };
-        const position = (event: MouseEvent) => {
-            const window = getId('hoverWindow');
-            window.style.left = `${Math.min(event.clientX, document.documentElement.clientWidth - window.getBoundingClientRect().width)}px`;
-            window.style.top = `${event.clientY}px`;
-        };
-        element.addEventListener('mouseenter', open);
+        for (const element of getClass('hasTitle')) { element.addEventListener('mouseenter', hoverEvent); }
     }
     for (let i = 0; i < globalSaveStart.toggles.length; i++) {
         getId(`globalToggle${i}`).addEventListener('click', () => {
@@ -796,7 +791,7 @@ try { //Start everything
                 const index = globalSave.toggles[0] ? 0 : 1;
                 for (const key in globalSaveStart.hotkeys) { getQuery(`#${key}Hotkey button`).textContent = globalSave.hotkeys[key as hotkeysList][index]; }
             } else if (i === 2) {
-                document.body.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
+                document.documentElement.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
             } else if (i === 4) {
                 getId('globalStats').style.display = !globalSave.toggles[4] ? '' : 'none';
                 visualUpdate();
@@ -886,7 +881,7 @@ try { //Start everything
             }
         };
         const repeatFunc = () => repeatFunction(() => {
-            if (player.stage.active !== 1 && player.stage.active !== 3 && player.stage.active !== 6) { return; }
+            if (player.stage.active !== 1 && player.stage.active !== 3) { return; }
             clickFunc();
         });
         button.addEventListener('click', clickFunc);
@@ -1229,18 +1224,23 @@ try { //Start everything
         const open = (focus = false) => {
             if (i === 0 && player.stage.true < 6 && player.milestones[4][0] < 8) { return; }
             const html = getId(`strange${i}EffectsMain`);
+            if (html.dataset.focus === 'true') { return; }
             const button = getId(`strange${i}`);
             if (focus) {
-                button.removeEventListener('mouseleave', close);
-                button.addEventListener('blur', close, { once: true });
+                html.dataset.focus = 'true';
+                button.addEventListener('blur', () => {
+                    html.style.display = 'none';
+                    html.dataset.focus = '';
+                }, { once: true });
             } else {
-                if (html.style.display !== 'none') { return; }
-                button.addEventListener('mouseleave', close, { once: true });
+                button.addEventListener('mouseleave', () => {
+                    if (html.dataset.focus === 'true') { return; }
+                    html.style.display = 'none';
+                }, { once: true });
             }
             html.style.display = '';
             numbersUpdate();
         };
-        const close = () => { getId(`strange${i}EffectsMain`).style.display = 'none'; };
         button.addEventListener('mouseenter', () => open());
         if (SR) { button.addEventListener('focus', () => open(true)); }
     }
@@ -1425,26 +1425,27 @@ try { //Start everything
         const button = getId(`toggleAuto${number}Info`);
         const open = (hover = false) => {
             const html = getId(`toggleAuto${number}Menu`);
+            if (html.dataset.click === 'true') { return; }
             const button = getId(`toggleAuto${number}Info`);
+            const body = document.documentElement;
             if (hover) {
-                if (html.style.display !== 'none') { return; }
-                button.addEventListener('mouseleave', close, { once: true });
+                button.addEventListener('mouseleave', () => {
+                    if (html.dataset.click === 'true') { return; }
+                    html.style.display = 'none';
+                }, { once: true });
             } else {
-                const body = document.body;
-                button.removeEventListener('mouseleave', close);
-                body.removeEventListener('click', fullClose, { capture: true });
+                html.dataset.click = 'true';
+                const fullClose = (event: MouseEvent) => {
+                    for (let target = event.target as HTMLElement; target != null; target = target.parentElement as HTMLElement) {
+                        if (html === target) { return; }
+                    }
+                    body.removeEventListener('click', fullClose, { capture: true });
+                    html.style.display = 'none';
+                    html.dataset.click = '';
+                };
                 body.addEventListener('click', fullClose, { capture: true });
             }
             showAndFix(html);
-        };
-        const close = () => { getId(`toggleAuto${number}Menu`).style.display = 'none'; };
-        const fullClose = (event: MouseEvent) => {
-            const html = getId(`toggleAuto${number}Menu`);
-            for (let target = event.target as HTMLElement; target != null; target = target.parentElement as HTMLElement) {
-                if (html === target) { return; }
-            }
-            document.body.removeEventListener('click', fullClose, { capture: true });
-            html.style.display = 'none';
         };
         button.addEventListener('click', () => open());
         if (PC) { button.addEventListener('mouseenter', () => open(true)); }
@@ -1616,33 +1617,32 @@ try { //Start everything
     getId('switchTheme0').addEventListener('click', () => setTheme(null));
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`switchTheme${i}`).addEventListener('click', () => setTheme(i));
-    } {
-        getId('saveFileNameInput').addEventListener('focus', () => {
-            const window = getId('saveFileNameLabel');
-            showAndFix(window);
-            changePreview();
-            const input = getId('saveFileNameInput') as HTMLInputElement;
-            const change = () => {
-                let testValue = input.value.trim();
-                if (testValue.length < 1) {
-                    testValue = playerStart.fileName;
-                    input.value = testValue;
-                }
-                player.fileName = testValue;
-            };
-            input.addEventListener('change', change);
-            input.addEventListener('input', changePreview);
-            input.addEventListener('blur', () => {
-                window.style.display = 'none';
-                input.removeEventListener('input', changePreview);
-                input.removeEventListener('change', change);
-            }, { once: true });
-        });
+    }
+    getId('saveFileNameInput').addEventListener('focus', () => {
+        const window = getId('saveFileNameLabel');
+        const input = getId('saveFileNameInput') as HTMLInputElement;
         const changePreview = () => {
-            const value = (getId('saveFileNameInput') as HTMLInputElement).value.trim();
+            const value = input.value.trim();
             getId('saveFileNamePreview').textContent = replaceSaveFileSpecials(value.length < 1 ? playerStart.fileName : value);
         };
-    }
+        showAndFix(window);
+        changePreview();
+        const change = () => {
+            let testValue = input.value.trim();
+            if (testValue.length < 1) {
+                testValue = playerStart.fileName;
+                input.value = testValue;
+            }
+            player.fileName = testValue;
+        };
+        input.addEventListener('change', change);
+        input.addEventListener('input', changePreview);
+        input.addEventListener('blur', () => {
+            window.style.display = 'none';
+            input.removeEventListener('input', changePreview);
+            input.removeEventListener('change', change);
+        }, { once: true });
+    });
     getId('offlineInterval').addEventListener('change', () => {
         const input = getId('offlineInterval') as HTMLInputElement;
         globalSave.intervals.offline = Math.min(Math.max(Math.trunc(Number(input.value)), 20), 6000);
@@ -1713,11 +1713,11 @@ try { //Start everything
     {
         const startEvent = (event: MouseEvent | TouchEvent) => {
             const mouse = event instanceof MouseEvent;
-            const bodyMain = document.documentElement;
-            const screenWidth = bodyMain.clientWidth;
-            const screenHeight = bodyMain.clientHeight;
+            const body = document.documentElement;
+            const screenWidth = body.clientWidth;
+            const screenHeight = body.clientHeight;
 
-            const html = getId('globalStats');
+            const html = event.currentTarget as HTMLElement;
             let lastX = mouse ? event.clientX : event.changedTouches[0].clientX;
             let lastY = mouse ? event.clientY : event.changedTouches[0].clientY;
             const move = (event: MouseEvent | TouchEvent) => {
@@ -1732,25 +1732,25 @@ try { //Start everything
                 if (!mouse) { html.style.opacity = '1'; }
             };
             const removeEvents = mouse ? () => {
-                bodyMain.removeEventListener('mousemove', move);
-                bodyMain.removeEventListener('mouseup', removeEvents);
-                bodyMain.removeEventListener('mouseleave', removeEvents);
+                body.removeEventListener('mousemove', move);
+                body.removeEventListener('mouseup', removeEvents);
+                body.removeEventListener('mouseleave', removeEvents);
                 html.style.opacity = '';
             } : () => {
-                bodyMain.removeEventListener('touchmove', move);
-                bodyMain.removeEventListener('touchend', removeEvents);
-                bodyMain.removeEventListener('touchcancel', removeEvents);
+                body.removeEventListener('touchmove', move);
+                body.removeEventListener('touchend', removeEvents);
+                body.removeEventListener('touchcancel', removeEvents);
             };
             if (mouse) {
-                bodyMain.addEventListener('mousemove', move);
-                bodyMain.addEventListener('mouseup', removeEvents);
-                bodyMain.addEventListener('mouseleave', removeEvents);
+                body.addEventListener('mousemove', move);
+                body.addEventListener('mouseup', removeEvents);
+                body.addEventListener('mouseleave', removeEvents);
                 html.style.opacity = '1';
             } else {
                 event.preventDefault(); //To prevent scrolling, doesn't work sometimes
-                bodyMain.addEventListener('touchmove', move);
-                bodyMain.addEventListener('touchend', removeEvents);
-                bodyMain.addEventListener('touchcancel', removeEvents);
+                body.addEventListener('touchmove', move);
+                body.addEventListener('touchend', removeEvents);
+                body.addEventListener('touchcancel', removeEvents);
                 html.style.opacity = '0.2';
             }
         };

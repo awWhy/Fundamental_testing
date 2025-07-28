@@ -49,7 +49,6 @@ html { --elements-columns-phone: min(var(--elements-columns), 9); }
 .buyBuilding > div > div > div { display: none; }
 .availableBuilding > div > div > p { border-color: var(--building-afford); }
 
-.descriptionText { max-width: 90vw; }
 
 #challengesMain > div {
     flex-direction: column;

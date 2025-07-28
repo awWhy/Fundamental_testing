@@ -50,15 +50,17 @@ export interface playerType {
     darkness: {
         energy: number
         fluid: number
+        input: number
     }
     inflation: {
         loadouts: Array<[string, number[]]>
         vacuum: boolean
+        voidVerses: number
         resets: number
-        time: number
-        age: number
         /** End resets info [resets, min Universe, max Universe] */
         ends: [number, number, number]
+        time: number
+        age: number
     }
     time: {
         updated: number
@@ -136,7 +138,7 @@ export interface playerType {
         /** Researches[0], Strangeness[1], Inflations[2] */
         max: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
-           Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9] */
+           Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9], Nucleation[10, no ID yet] */
         auto: boolean[]
         /** [0] is toggle all */
         buildings: boolean[][]
@@ -308,6 +310,7 @@ export interface globalType {
         /** In the current Universe */
         totalSuper: number
         newFluid: number
+        disableAuto: boolean
     }
     intervalsId: {
         main: number | undefined
@@ -337,7 +340,6 @@ export interface globalType {
     }
     versesInfo: {
         firstCost: number[]
-        cost: number[]
         increase: number[]
         producing: number[]
     }
@@ -550,6 +552,7 @@ export interface calculateEffectsType {
     element24: () => Overlimit
     element26: () => number
     darkHardcap: () => number
+    effectiveDarkEnergy: () => number
     darkFluid: (post?: boolean) => number
     S2Strange9: () => number
     S5Strange9_stage1: () => number
