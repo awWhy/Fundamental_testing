@@ -2495,7 +2495,7 @@ const dischargeReset = (freeGoals = false) => {
 
 /** Returns true for Auto, only if reset happened */
 const vaporizationResetCheck = (clouds = null as number | null): boolean => {
-    if (player.upgrades[2][2] < 1 || assignResetInformation.newClouds() <= 0) { return false; }
+    if (player.upgrades[2][2] !== 1 || assignResetInformation.newClouds() <= 0) { return false; }
 
     if (clouds !== null) {
         const level = player.strangeness[2][4];
@@ -2621,7 +2621,7 @@ const rankReset = () => {
 
 /** Returns true for Auto, only if reset happened */
 const collapseResetCheck = (remnants = false): boolean => {
-    if (player.upgrades[4][0] < 1) { return false; }
+    if (player.upgrades[4][0] !== 1) { return false; }
     assignResetInformation.newStars();
     assignResetInformation.newMass();
     const info = global.collapseInfo;

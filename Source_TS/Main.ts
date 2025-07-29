@@ -1034,6 +1034,7 @@ try { //Start everything
             image.addEventListener('focus', () => {
                 if (!global.hotkeys.tab) { return; }
                 hoverFunc();
+                if (player.toggles.hover[0]) { clickFunc(); }
             });
         }
     }
@@ -1061,6 +1062,7 @@ try { //Start everything
             image.addEventListener('focus', () => {
                 if (!global.hotkeys.tab) { return; }
                 hoverFunc();
+                if (player.toggles.hover[0]) { clickFunc(); }
             });
         }
     }
@@ -1088,6 +1090,7 @@ try { //Start everything
             image.addEventListener('focus', () => {
                 if (!global.hotkeys.tab) { return; }
                 hoverFunc();
+                if (player.toggles.hover[0]) { clickFunc(); }
             });
         }
     }
@@ -1115,6 +1118,7 @@ try { //Start everything
             image.addEventListener('focus', () => {
                 if (!global.hotkeys.tab) { return; }
                 hoverFunc();
+                if (player.toggles.hover[0]) { buyUpgrades(i, player.stage.active, 'researchesAuto'); }
             });
         }
     } {
@@ -1141,6 +1145,7 @@ try { //Start everything
             image.addEventListener('focus', () => {
                 if (!global.hotkeys.tab) { return; }
                 hoverFunc();
+                if (player.toggles.hover[0]) { clickFunc(); }
             });
         }
     }
@@ -1214,6 +1219,7 @@ try { //Start everything
             image.addEventListener('focus', () => {
                 if (!global.hotkeys.tab) { return; }
                 hoverFunc();
+                if (player.toggles.hover[0]) { clickFunc(); }
             });
         }
     }
@@ -1270,6 +1276,7 @@ try { //Start everything
                 image.addEventListener('focus', () => {
                     if (!global.hotkeys.tab) { return; }
                     hoverFunc();
+                    if (player.toggles.hover[1]) { clickFunc(); }
                 });
             }
         }
