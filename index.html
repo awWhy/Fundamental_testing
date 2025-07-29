@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="noFocusOutline noTextSelection" lang="en">
     <head>
         <meta charset="utf-8">
         <title>Fundamental</title>
@@ -11,15 +11,14 @@
         <meta name="description" content="Explore the Universe with this idle-game">
         <script src="Code.js" defer></script>
     </head>
-    <body class="noFocusOutline noTextSelection">
+    <body>
         <aside id="loading">
             <h1 class="biggerWord">Fundamental</h1>
             <p class="whiteText">Game is loading. If it won't load (after trying to reload at least once), then can try to report it on <a href="https://discord.gg/JftTEJW83d" target="_blank" rel="noopener noreferrer">discord</a> or <a href="https://github.com/awWhy/Fundamental/issues" target="_blank" rel="noopener noreferrer">github</a></p>
             <noscript>Java Script disabled, game will not work without it</noscript>
         </aside>
-        <div id="bigWindow" style="display: none;">
-            <button type="button" id="globalToggle0" class="specialToggle" style="display: none;">OFF</button>
-        </div>
+        <button type="button" id="globalToggle0" class="specialToggle" style="display: none;">OFF</button>
+        <div id="bigWindow" style="display: none;"></div>
         <div id="alertMain" style="display: none;">
             <div role="alertdialog" aria-modal="true" aria-label="Alert window">
                 <p id="alertText" aria-live="assertive">Welcome back</p>
@@ -173,7 +172,7 @@
                         <section id="verse0" class="buyBuilding darkvioletText stage6Only" aria-label="Universes">
                             <img src="Used_art/Universe.png" alt="" loading="lazy" draggable="false">
                             <div>
-                                <p>Universes: <span id="verse0Cur" class="whiteText">0</span> <span id="verse0True" class="yellowText">[0]</span></p>
+                                <p>Universes: <span id="verse0Cur" class="whiteText">0</span> <span id="verse0True" class="yellowText">[<span class="hasTitle" data-title="Self-made">0</span> + <span class="hasTitle" id="voidVerses" data-title="Void">0</span>]</span></p>
                                 <p class="hasTitle" data-title="Dark matter">producing: <span id="verse0Prod" class="whiteText">0</span></p>
                             </div>
                             <div>
@@ -286,7 +285,7 @@
                                 <div id="voidRewardsMultiline" class="whiteText challengeRewards"></div>
                             </section>
                             <section id="stabilityRewards">
-                                <h3 type="button" class="selectBtn darkorchidText bigWord">Completions rewards:</h3>
+                                <h3 class="darkorchidText bigWord">Completions rewards:</h3>
                                 <div id="stabilityRewardsMultiline" class="whiteText challengeRewards"></div>
                             </section>
                         </div>
@@ -462,6 +461,7 @@
                         <input type="image" src="Used_art/Element33.png" alt="[33] Arsenic" draggable="false" id="element33" class="elementType2" aria-controls="elementCost elementEffect">
                         <input type="image" src="Used_art/Element34.png" alt="[34] Selenium" draggable="false" id="element34" class="elementType2" aria-controls="elementCost elementEffect">
                         <input type="image" src="Used_art/Element35.png" alt="[35] Bromine" draggable="false" id="element35" class="elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element36.png" alt="[36] Krypton" draggable="false" id="element36" class="elementType2" aria-controls="elementCost elementEffect">
                     </section>
                     <div class="descriptionText">
                         <h3>Element: <span id="elementText">Hover to see.</span></h3>
@@ -741,7 +741,7 @@
                                 <span><span id="strange3Stage6Level">0</span>/<span id="strange3Stage6Max" class="greenText">1</span></span>
                             </label>
                             <label id="strange4Stage6" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Dark Upgrades" draggable="false" aria-controls="strangenessCost strangenessEffect">
+                                <input type="image" src="Used_art/Missing.png" alt="Darkness" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span><span id="strange4Stage6Level">0</span>/<span id="strange4Stage6Max" class="greenText">1</span></span>
                             </label>
                             <label id="strange5Stage6" class="whiteText redBorderImage">
@@ -841,7 +841,7 @@
                     </article>
                     <h2 class="darkvioletText bigWord">Inflations</h2>
                     <article id="inflations" aria-labelledby="inflationsHeader">
-                        <section id="inflationsTree1" class="researchesDiv" aria-label="Refundable">
+                        <section id="inflationsTree1" class="researchesDiv" aria-label="Basic">
                             <label id="inflation1Tree1" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Time%20fast.png" alt="Overboost" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation1Tree1Level">0</span>/<span id="inflation1Tree1Max" class="greenText">1</span></span>
@@ -867,42 +867,38 @@
                                 <span><span id="inflation6Tree1Level">0</span>/<span id="inflation6Tree1Max" class="greenText">1</span></span>
                             </label>
                         </section>
-                        <section id="inflationsTree2" class="researchesDiv" aria-label="Non-refundable">
-                            <label id="inflation1Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="More speed" draggable="false" aria-controls="inflationCost inflationEffect">
+                        <section id="inflationsTree2" class="researchesDiv" aria-label="Advanced">
+                            <label id="inflation1Tree2" class="whiteText stage4borderImage">
+                                <input type="image" src="Used_art/Time.png" alt="More speed" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation1Tree2Level">0</span>/<span id="inflation1Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation2Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="More Strange quarks" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation2Tree2" class="whiteText greenBorderImage">
+                                <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="More Strange quarks" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation2Tree2Level">0</span>/<span id="inflation2Tree2Max" class="greenText">1</span></span>
                             </label>
                             <label id="inflation3Tree2" class="whiteText redBorderImage">
                                 <input type="image" src="Used_art/Missing.png" alt="Stability" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation3Tree2Level">0</span>/<span id="inflation3Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation4Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Stranger gain" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation4Tree2" class="whiteText greenBorderImage">
+                                <input type="image" src="Used_art/Strangelets%20many.png" alt="Stranger gain" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation4Tree2Level">0</span>/<span id="inflation4Tree2Max" class="greenText">1</span></span>
                             </label>
                             <label id="inflation5Tree2" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/ResearchQ5.png" alt="Discharge improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation5Tree2Level">0</span>/<span id="inflation5Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation6Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Vaporization improvement" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation6Tree2" class="whiteText stage2borderImage">
+                                <input type="image" src="Used_art/Vaporization%20improvement.png" alt="Vaporization improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation6Tree2Level">0</span>/<span id="inflation6Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation7Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Rank improvement" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation7Tree2" class="whiteText stage3borderImage">
+                                <input type="image" src="Used_art/Rank%20improvement.png" alt="Rank improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation7Tree2Level">0</span>/<span id="inflation7Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation8Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Conservation of Resources" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation8Tree2" class="whiteText stage2borderImage">
+                                <input type="image" src="Used_art/Drops%20recycle.png" alt="Conservation of Resources" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation8Tree2Level">0</span>/<span id="inflation8Tree2Max" class="greenText">1</span></span>
-                            </label>
-                            <label id="inflation9Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="Auto Strangeness" draggable="false" aria-controls="inflationCost inflationEffect">
-                                <span><span id="inflation9Tree2Level">0</span>/<span id="inflation9Tree2Max" class="greenText">1</span></span>
                             </label>
                         </section>
                     </article>
@@ -939,7 +935,7 @@
                             <p id="inflationSupervoid3">Latest Preons ‒ Improve effect scaling of 'Later Preons' Energy Research by 20%</p>
                             <p>(To toggle the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Name</span>' button)</p>
                         </section>
-                        <section id="endMilestone1"><h4>Unlocked after first End reset:</h4>Start End resets with Universes equal to 1 + highest Universe - lowest Universe from which End was caused</section>
+                        <section id="endMilestone1"><h4>Unlocked after 1 End:</h4>Start End resets with extra Universes equal to 1 + highest - lowest self-made Universe from which End was caused</section>
                         <section id="inflationMilestone1"><h4>Unlocked at 1 Universes:</h4>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up, ^2 if in the true Vacuum<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4>Start Vacuum resets with all 'Auto Structures' Strangeness maxed and 'Automatic Galaxy' at level 1</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4>Start Vacuum resets with 'Upgrade automatization' Strangeness maxed and 'Element automatization' at level 2<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</section>
@@ -947,8 +943,6 @@
                         <section id="inflationMilestone5"><h4>Unlocked at 5 Universes:</h4>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum</section>
                         <section id="inflationMilestone6"><h4>Unlocked at 6 Universes:</h4>Start Vacuum resets with 'Automatic Merge' Strangeness at level 1, includes false Vacuum</section>
                         <section id="inflationMilestone7"><h4>Unlocked at 7 Universes:</h4>Unlock Quasi-stars for the Void, but they won't produce anything and will scale in cost like Satellites</section>
-                        <section id="inflationMilestone8" class="uncompleted"><h4>Unlocked at 8 Universes: (WIP)</h4>Unlock Strangelets for the false Vacuum</section>
-                        <section id="inflationMilestone9" class="uncompleted"><h4>Unlocked at 10 Universes: (WIP)</h4>Unlock new Abyss Structure</section>
                     </div>
                 </section>
             </div>
@@ -987,7 +981,7 @@
                                     <button type="button" id="toggleAuto2Info" class="hollowButton stage2borderButton" aria-label="Settings" aria-haspopup="menu" aria-controls="toggleAuto2Menu">!</button>
                                     <div id="toggleAuto2Menu" class="popUpMenu" style="display: none;" role="menu" aria-label="Settings menu">
                                         <p><label>Vaporize when boost from new Clouds has reached at least <input type="number" id="vaporizationInput" step="any"></label><label id="vaporizationLimit"> until <input type="number" id="vaporizationInputMax" step="any" inputmode="text"> Clouds, ignored if set to 0</label></p>
-                                        <label id="vaporizationExtra">(Automatically turn off if auto is level 2 or above <button type="button" id="toggleNormal1" class="toggleNormal">ON</button>)</label>
+                                        <label id="vaporizationExtra">(Automatically disable if passively gaining Clouds <button type="button" id="toggleNormal1" class="toggleNormal">ON</button>)</label>
                                     </div>
                                 </div>
                                 <button type="button" id="toggleAuto2" class="toggleAuto">Auto OFF</button>
@@ -1034,11 +1028,11 @@
                             <img src="Used_art/SVG/Discord.svg" alt="" loading="lazy" draggable="false">
                             Discord
                         </a>
-                        <button type="button" id="hotkeysButton" aria-haspopup="dialog" aria-controls="hotkeysHTML">
+                        <button type="button" id="hotkeysButton" aria-haspopup="dialog">
                             <img src="Used_art/SVG/Keyboard.svg" alt="" loading="lazy">
                             Hotkeys
                         </button>
-                        <button type="button" id="versionButton" aria-haspopup="dialog" aria-controls="versionHTML">
+                        <button type="button" id="versionButton" aria-haspopup="dialog">
                             <img src="Used_art/SVG/Files.svg" alt="" loading="lazy" draggable="false">
                             Version
                         </button>
@@ -1088,7 +1082,7 @@
                                 </div>
                             </li>
                             <li><label>Starting Offline tick interval <input type="number" id="offlineInterval" min="20" max="6000" step="1"> ms</label><button type="button" id="pauseButton" class="hollowButton">Pause</button></li>
-                            <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label><button type="button" id="showLog" class="hollowButton" aria-haspopup="dialog" aria-controls="logHTML">Log</button></li>
+                            <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label><button type="button" id="showLog" class="hollowButton" aria-haspopup="dialog">Log</button></li>
                             <li><label>Visual update interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
                             <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="4" max="1800" step="1"> s</label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
                             <li><label>Auto accept Offline time<button type="button" id="toggleNormal4" class="toggleNormal">OFF</button></label></li>
@@ -1340,10 +1334,13 @@
                             <p id="galaxyBase" class="grayText">Galaxy base: <span class="orangeText">0</span></p>
                             <p class="redText">Self-made Stars: <span id="trueStarsStat" class="orangeText">0</span></p>
                         </div>
+                        <div class="stats stage6Only">
+                            <p id="effectiveDarkEnergyStat" class="grayText">Effective Dark Energy: <span class="orangeText">0</span></p>
+                            <section id="energyGainStage6" class="darkvioletText stage6borderImage" aria-label="Dark energy gain">
+                                <p id="energyGainStage6Build1"><span>Planets:</span> <span id="energyGainStage6Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage6Build1Per" class="greenText">0</span> per)</span></p>
+                            </section>
+                        </div>
                         <p id="maxSolarMassStat" class="cyanText">Highest Solar mass: <span class="orchidText">0.01235</span></p>
-                        <section id="energyGainStage6" class="darkvioletText stage6borderImage stage6Only" aria-label="Dark energy gain">
-                            <p id="energyGainStage6Build1"><span>Planets:</span> <span id="energyGainStage6Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage6Build1Per" class="greenText">0</span> per)</span></p>
-                        </section>
                     </div>
                 </section>
                 <section id="settingsSubtabHistory" class="insideTab" style="display: none;" aria-label="Current tab">
