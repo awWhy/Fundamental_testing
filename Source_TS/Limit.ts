@@ -526,7 +526,7 @@ const technical = {
     },
     /* Left and right are readonly */
     equal: (left: Overlimit, right: [number, number] | Overlimit): boolean => {
-        return left[1] === right[1] || left[0] === right[0];
+        return left[1] === right[1] && left[0] === right[0];
     },
     /* Left and right are readonly */
     notEqual: (left: Overlimit, right: [number, number] | Overlimit): boolean => {

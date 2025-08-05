@@ -1414,7 +1414,7 @@ export const buyUpgrades = (upgrade: number, stageIndex: number, type: 'upgrades
             } else if (stageIndex === 6) {
                 if (upgrade === 4) {
                     assignResetInformation.trueEnergy();
-                    if (player.stage.true < 8 && level[upgrade] >= 8) {
+                    if (player.stage.true < 8 && level[upgrade] >= 4) {
                         player.stage.true = 8;
                         player.event = false;
                         visualTrueStageUnlocks();

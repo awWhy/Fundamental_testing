@@ -228,7 +228,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ], [
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage'],
-            ['Missing.png', 'redBorderImage'],
+            ['ResearchD3.png', 'stage2borderImage'],
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
         ]
@@ -279,7 +279,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
         ], [
-            ['Missing.png', 'redBorderImage'],
+            ['ResearchDark1.png', 'stage6borderImage'],
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']

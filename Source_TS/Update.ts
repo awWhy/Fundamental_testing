@@ -605,6 +605,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     }
                 }
             } else if (active === 6) {
+                assignResetInformation.newFluid();
                 const post = calculateEffects.darkFluid(true);
                 const base = post / effectsCache.fluid;
                 getQuery('#darkFluidStat > span').textContent = format(base, { padding: true });
