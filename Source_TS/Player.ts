@@ -290,7 +290,7 @@ export const global: globalType = {
             ['Preons hardcap', 'Cosmic dust', 'Planetesimals', 'Protoplanets', 'Satellites'],
             ['Stardust', 'Stardust', 'Stardust', 'Stardust', 'Stardust'],
             ['Interstellar Stars', 'Interstellar Stars', 'Nebulas and Star clusters'],
-            ['Dark matter hardcap']
+            ['Dark matter softcap']
         ],
         type: [
             [],
@@ -377,10 +377,7 @@ export const global: globalType = {
             effectText: [
                 () => `Drops will ${player.inflation.vacuum ? 'improve Tritium' : 'produce Moles'} ${format(player.inflation.vacuum ? 1.02 : 1.04)} times ${player.inflation.vacuum ? 'more' : 'faster'} for every self-made Drop.`,
                 () => `Spread water faster with every Puddle, current formula is ${format(player.challenges.active === 0 && player.challenges.super ? 1.01 : 1.02)} ^ effective Puddles.\nPuddles after 200 and non-self-made ones are raised to the power of ${format(0.7)}.\n(Total effect: ${format(calculateEffects.S2Upgrade1(), { padding: true })})`,
-                () => { //[2]
-                    const softcap = format(calculateEffects.cloudsGain());
-                    return `Gain ability to convert Drops into Clouds. Cloud gain formula: (Clouds ^ (1 / ${softcap}) + (Drops / ${format(calculateEffects.S2Upgrade2())})) ^ ${softcap} - Clouds.`;
-                },
+                () => `Gain ability to convert Drops into Clouds. Cloud gain formula: (Drops / ${format(calculateEffects.S2Upgrade2())})) ^${format(calculateEffects.cloudsGain())}, gain is reduced with Clouds.`,
                 () => `Puddles will get a boost based on Moles ^${format(calculateEffects.S2Upgrade3_power())}.\n(Boost: ${format(calculateEffects.S2Upgrade3(), { padding: true })})`,
                 () => `Puddles will get a boost based on Drops ^${format(calculateEffects.S2Upgrade4_power())}.\n(Boost: ${format(calculateEffects.S2Upgrade4(), { padding: true })})`,
                 () => `Ponds will increase current Puddle amount. (${1 + player.researches[2][4]} extra Puddles per Pond)`,
@@ -469,8 +466,8 @@ export const global: globalType = {
                 'Galactic boost'
             ],
             effectText: [
-                () => `Unlock a new Dark reset, it will start the formation of the new Dark resources by modifing existing physics.\n(Formula for Dark fluid gain is (log10(Dark matter) + Dark energy) ^${format(0.2)} - 1. Dark fluid boost Dark matter production and effective Dark energy)`,
-                () => `Boost Dark matter production by current Galaxies.\n(Boost is equal to ${format((global.mergeInfo.galaxies + 1) ** 0.5, { padding: true })})`
+                () => `Unlock a new Dark reset, it will start the formation of the new Dark resources by modifing existing physics.\n(Formula for Dark fluid gain is (log10(Dark matter / ${format(1e8)}) + Dark energy) ^${format(calculateEffects.S6Upgrade0())} - 1, gain is reduced with more Dark fluid. Dark fluid boost Dark matter production and effective Dark energy)`,
+                () => `Boost Dark matter production by current Galaxies.\n(Boost is equal to ${format((global.mergeInfo.galaxies + 1) / 100, { padding: true })})`
             ],
             cost: [8e12, 2e16],
             maxActive: 0
@@ -613,18 +610,20 @@ export const global: globalType = {
                 'Dark aggregation',
                 'Faster aggregation',
                 'Time dilation',
-                'Self-interaction'
+                'Self-interaction',
+                'Composition'
             ],
             effectText: [
-                () => `Boost production of Dark matter by 2.${player.upgrades[6][0] !== 1 ? '\nFinal level will also unlock a new minor Dark Structure.' : ''}`,
+                () => `Boost production of Dark matter by 2.\nFinal level will also unlock a new minor Dark Structure.${player.upgrades[6][0] === 1 ? ' (Already unlocked)' : ''}`,
                 () => 'Boost production of Dark matter again by 2.',
-                () => `Boost global speed by ${format(1.1)}.\nAlso delays Dark matter hardcap by 1 + level.`,
-                () => `Make self-made Dark planets boost each other by 1 + ${format(0.01)} * level and scale in cost slower by -${format(0.05)} * level.`
+                () => `Boost global speed by ${format(1.1)}.\nAlso delays Dark matter softcap by 1 + level.`,
+                () => `Make self-made Dark planets boost each other by 1 + ${format(0.01)} * level and scale in cost slower by -${format(0.05)} * level.`,
+                () => 'Have more Dark energy by increasing its gain by 1 + level.'
             ],
             cost: [],
-            firstCost: [4e5, 2e8, 1e9, 4e9],
-            scaling: [2, 2, 2, 3],
-            max: [8, 14, 9, 5],
+            firstCost: [4e5, 2e8, 1e9, 4e9, 1e16],
+            scaling: [2, 2, 2, 3, 16],
+            max: [8, 14, 9, 5, 4],
             maxActive: 0
         }
     ],
@@ -772,19 +771,25 @@ export const global: globalType = {
             name: [
                 'Acceleration',
                 'Expansion',
-                'Composition',
-                'Quintessence'
+                'Quintessence',
+                'Stability'
             ],
             effectText: [
                 () => `Boost global speed by ${format(1.2)}.\nAlso increases max level of 'Faster aggregation' by +1.`,
-                () => `Delay Dark matter hardcap by current Dark energy ^(${format(0.5)} * level).`,
-                () => 'Have more Dark energy by increasing its gain by 1 + level.',
-                () => `Change the ratio of kinetic and potential Dark energy.\nThis will make Dark matter hardcap ^(${format(0.125)} * level) to buff the Universes and to be based on 20 seconds worth of Dark matter production.`
+                () => { //[1]
+                    const energy = calculateEffects.effectiveDarkEnergy();
+                    return `Delay Dark matter softcap by current Dark energy ^(${format(0.5)} * level).\n(Current delay: ${format(energy ** (player.researchesExtra[6][1] / 2), { padding: true })} ⟶ ${format(energy ** ((player.researchesExtra[6][1] + 1) / 2), { padding: true })})`;
+                },
+                () => { //[2]
+                    const delay = calculateEffects.darkHardcap(true);
+                    return `Buff Universes by Dark matter softcap ^(${format(0.03125)} * level) by changing the ratio of kinetic and potential Dark energy.\n(Current effect: ${format(delay ** (player.researchesExtra[6][2] / 32), { padding: true })} ⟶ ${format(delay ** ((player.researchesExtra[6][2] + 1) / 32), { padding: true })})`;
+                },
+                () => `Increase Dark fluid gain by +^${format(0.05)} and weaken Dark matter softcap by +^${format(0.04)}.`
             ],
             cost: [],
-            firstCost: [20, 40, 100, 200],
-            scaling: [20, 40, 200, 200],
-            max: [4, 2, 3, 4],
+            firstCost: [25, 50, 100, 100],
+            scaling: [25, 50, 100, 200],
+            max: [4, 2, 8, 4],
             maxActive: 0
         }
     ],
@@ -823,9 +828,9 @@ export const global: globalType = {
             if (player.stage.true < 6) {
                 if (stageIndex === 3 && player.stage.resets < 5) {
                     if (index === 2) {
-                        unlocked = player.upgrades[3][2] === 1 || player.buildings[3][2].trueTotal.moreThan('0');
+                        unlocked = player.upgrades[3][2] === 1 || player.buildings[3][2].trueTotal.moreThan(0);
                     } else if (index === 3) {
-                        unlocked = player.upgrades[3][4] === 1 || player.buildings[3][3].trueTotal.moreThan('0');
+                        unlocked = player.upgrades[3][4] === 1 || player.buildings[3][3].trueTotal.moreThan(0);
                     }
                 } else if (stageIndex === 5) {
                     if (index === 1) {
@@ -839,7 +844,7 @@ export const global: globalType = {
             } else if (player.stage.true < 7) {
                 if (player.stage.resets < 2 && index === 5) {
                     if (stageIndex === 3) {
-                        unlocked = player.upgrades[3][11] === 1 || player.buildings[3][5].trueTotal.moreThan('0');
+                        unlocked = player.upgrades[3][11] === 1 || player.buildings[3][5].trueTotal.moreThan(0);
                     } else if (stageIndex === 4) {
                         unlocked = player.elements[26] >= 1;
                     }
@@ -858,7 +863,7 @@ export const global: globalType = {
             [1e-7, 1e10, 5e29, 2e30, 2e36],
             [1e6, 1e17, 1e28, 1e39, 1e52],
             [1e56, 1e60, 1e100],
-            [1e18]
+            [1e16]
         ],
         max: [0, 3, 5, 4, 4, 3, 0]
     },
@@ -975,11 +980,11 @@ export const global: globalType = {
                     const improved = player.challenges.supervoid[1] >= 2;
                     return `No Mass will be lost when creating Preons${improved ? '' : ', only works when Accretion Stage is unlocked'}.\nSecond level will disable auto Accretion Structures, if Cosmic dust is hardcapped, until will have enough Mass for the highest Solar mass conversion${improved ? " or to increase current Rank, if its below 'Protostar' and 'Automatic Rank' level is below 2" : ', only works if Interstellar Stage is unlocked'}.${global.strangenessInfo[1].max[8] > 2 ? '\nThird level will make auto Structures ignore wait value for Dark Structures if Dark matter is hardcapped.' : ''}`;
                 },
-                () => `No Energy will be lost when creating Upgrades or Researches${player.challenges.supervoid[4] < 1 ? ', only works when Interstellar Stage is unlocked' : ''}.`
+                () => `No Energy${global.strangenessInfo[1].max[9] > 1 ? '(and Dark energy at level 2)' : ''} will be lost when creating Upgrades or Researches${player.challenges.supervoid[4] < 1 ? ', only works when Interstellar Stage is unlocked' : ''}.`
             ],
             cost: [],
             firstCost: [1, 1, 1, 2, 12, 2, 24, 2, 12, 15600],
-            scaling: [2.46, 2, 6, 4, 400, 1, 1, 6, 10, 1],
+            scaling: [2.46, 2, 6, 4, 400, 1, 1, 6, 10, 1e308],
             max: [6, 4, 4, 2, 1, 1, 1, 2, 2, 1],
             maxActive: 7
         }, { //Stage 2
@@ -1053,7 +1058,7 @@ export const global: globalType = {
                 },
                 () => `Automatically increase Rank when possible. (Needs to be enabled in Settings)${global.strangenessInfo[3].max[4] > 1 ? '\nSecond level will make Rank increase use Mass produced this reset instead of current.' : ''}`,
                 () => 'Make auto for all Accretion Structures permanent.',
-                () => `Always automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.strangeness[3][6], 2)]} from any Stage${player.strangeness[6][3] < 4 && player.strangeness[6][3] >= 1 ? ' before Abyss' : !player.inflation.vacuum && player.strangeness[5][3] < 1 && player.verses[0].current < 3 ? ' before Intergalactic' : ''}. (Needs to be enabled in Settings)`,
+                () => `Always automatically create all ${['Upgrades', 'Stage Researches', 'Special Researches'][Math.min(player.strangeness[3][6], 2)]} from any Stage${!player.inflation.vacuum && player.strangeness[5][3] < 1 && player.verses[0].current < 3 ? ' before Intergalactic' : ''}. (Needs to be enabled in Settings)`,
                 () => `Unspent Strange quarks will boost Accretion by making its Structures cheaper.\n(Formula: Strange quarks ^${format(player.inflation.vacuum ? 0.68 : 0.76)} | Effect: ${format(global.strangeInfo.stageBoost[3], { padding: true })})`,
                 () => `Delay Cosmic dust hardcap by ${format(1.4)} per level.`,
                 () => { //[9]
@@ -1161,9 +1166,7 @@ export const global: globalType = {
                 'Global boost',
                 'Stranger gain',
                 'More Strangeness',
-                'Darkness',
-                'Strange boost',
-                'Stranger boost'
+                'Darkness'
             ],
             effectText: [
                 () => `Boost global speed by ${format(1.4)}.`,
@@ -1172,24 +1175,22 @@ export const global: globalType = {
                     let extraText = 'none';
                     if (player.strangeness[6][2] >= 1) { extraText = "'Automatic Collapse' (+1)"; }
                     if (player.strangeness[6][2] >= 2) { extraText += ", 'Hotter Stars' (+4)"; }
-                    if (player.strangeness[6][2] >= 3) { extraText += ", 'Conservation of Mass' (+1)"; }
-                    if (player.strangeness[6][2] >= 4) { extraText += ", 'Main giants' (+4)"; }
+                    if (player.strangeness[6][2] >= 3) { extraText += ", 'Main giants' (+4)"; }
                     return `Increase max level for the Strangeness or unlock new one.\n(Current unlocks: ${extraText})`;
                 },
                 () => { //[3]
                     let extraText = 'none';
-                    if (player.strangeness[6][3] >= 2) { extraText = 'Keep Auto Structures'; }
-                    if (player.strangeness[6][3] >= 3) { extraText += `, Auto Upgrades and ${player.strangeness[6][3] >= 4 ? 'all' : 'Stage'} Researches`; }
-                    if (player.strangeness[6][3] >= 5) { extraText += ', Auto Nucleation (WIP)'; }
-                    return `Unlock Dark matter Upgrades. (And disable basic hotkeys for Universes)\nFurther levels unlock more automatizations for Dark matter.\n(Unlocked automatization: ${extraText})`;
-                },
-                () => 'Unspent Strange quarks will boost Dark matter gain. (WIP)',
-                () => 'Strangelets will boost global speed. (WIP)'
+                    if (player.strangeness[6][3] >= 2) { extraText = `Increase max level of 'Conservation of Mass'${player.strangeness[6][3] >= 6 ? " and 'Conservation of Energy'" : ''} (+1), Keep Auto Structures`; }
+                    if (player.strangeness[6][3] >= 3) { extraText += `, Auto Upgrades and ${player.strangeness[6][3] >= 5 ? 'all' : 'Stage'} Researches`; }
+                    if (player.strangeness[6][3] >= 4) { extraText += ', Auto Nucleation'; }
+                    if (player.strangeness[6][3] >= 6) { extraText += ', Passive Dark fluid gain (10%)'; }
+                    return `Expand Darkness Stage by unlocking Dark matter Upgrades. (And disable basic hotkeys for Universes)\nFurther levels unlock more automatizations for Dark matter.\n(Unlocked automatization: ${extraText})`;
+                }
             ],
             cost: [],
-            firstCost: [2.4e17, 1.6e17, 8e16, 5e15, Infinity, Infinity],
-            scaling: [3, 3, 4, 32, 1, 1],
-            max: [8, 8, 4, 4, 1, 1],
+            firstCost: [2.4e17, 1.6e17, 8e16, 5e15],
+            scaling: [3, 3, 4, 16],
+            max: [8, 8, 3, 5],
             maxActive: 0
         }
     ],
@@ -1246,7 +1247,7 @@ export const global: globalType = {
         ],
         cost: [],
         firstCost: [1, 1, 2, 2, 0, 1, 1, 2],
-        scaling: [1, 1, 2, 2, 1, 1.4, 1.5, 1.4],
+        scaling: [1, 1, 2, 2, 1, 1.4, 2.5, 1.4],
         max: [9, 9, 3, 4, 4, 4, 4, 4]
     }],
     milestonesInfo: [
@@ -1418,9 +1419,9 @@ export const global: globalType = {
         needText: ['1 Completion', '2 Completions', '3 Completions', '4 Completions'],
         rewardText: [
             "'Stability' (Advanced Inflation)", //1
-            "'Instability' Inflation will be immune to the Universe resets", //2
-            "Start Vacuum resets with Void equal to the 'Instability' Supervoid (WIP)", //3
-            'Strangelets first effect will use peak Strange quarks rate (WIP)' //4
+            "Make 'Instability' Inflation immune to the Universe resets", //2
+            'Start Vacuum resets with Void equal to the Supervoid (WIP)', //3
+            'Make Strangelets first effect use peak Strange quarks rate (WIP)' //4
         ],
         resetType: 'vacuum',
         time: 7200,
@@ -1503,14 +1504,14 @@ const fillMissingValues = <ArrayType extends any[]>(test: ArrayType, start: Arra
         player.toggles.buildings[s] = createArray(global.buildingsInfo.firstCost[s].length, false);
         global.buildingsInfo.producing[s] = [];
         for (let i = 0; i < global.buildingsInfo.firstCost[s].length; i++) {
-            const start = i === 0 && s === 4 ? '1' : '0';
+            const start = i === 0 && s === 4 ? 1 : 0;
             player.buildings[s][i] = {
                 current: new Overlimit(start),
                 total: new Overlimit(start),
                 trueTotal: new Overlimit(start)
             };
             if (i !== 0) { player.buildings[s][i as 1].true = 0; }
-            global.buildingsInfo.producing[s as 0].push(i === 0 ? 0 : new Overlimit('0'));
+            global.buildingsInfo.producing[s as 0].push(i === 0 ? 0 : new Overlimit(0));
         }
     }
     player.toggles.verses = createArray(player.verses.length, false);
@@ -1557,7 +1558,7 @@ const fillMissingValues = <ArrayType extends any[]>(test: ArrayType, start: Arra
         const pointer = global.milestonesInfo[s];
         player.milestones[s] = createArray(pointer.needText.length, 0);
         for (let i = 0; i < pointer.needText.length; i++) {
-            pointer.need.push(new Overlimit('Infinity'));
+            pointer.need.push(new Overlimit(Infinity));
         }
     }
     for (let s = 0; s < global.treeInfo.length; s++) {
@@ -1702,6 +1703,9 @@ export const updatePlayer = (load: playerType): string => {
             throw new ReferenceError(`Save file version ${load.version} is not allowed`);
         }
     }
+    /*if (load.version === 'v0.2.6_beta1') {
+        load.version = 'v0.2.6';
+    }*/
 
     for (let s = 1; s <= 6; s++) {
         fillMissingValues(load.buildings[s], playerStart.buildings[s]);

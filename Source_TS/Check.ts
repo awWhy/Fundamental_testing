@@ -70,8 +70,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             if (global.upgradesInfo[stageIndex].maxActive < upgrade + 1) { return false; }
             if (stageIndex === 1) {
                 if (upgrade === 0 || upgrade === 1) { return player.inflation.vacuum; }
-                if (upgrade === 3) { return player.upgrades[1][5] === 1 || player.buildings[1][player.inflation.vacuum ? 4 : 2].total.moreThan('0'); }
-                if (upgrade === 4) { return player.upgrades[1][5] === 1 || player.buildings[1][player.inflation.vacuum ? 5 : 3].total.moreThan('0'); }
+                if (upgrade === 3) { return player.upgrades[1][5] === 1 || player.buildings[1][player.inflation.vacuum ? 4 : 2].total.moreThan(0); }
+                if (upgrade === 4) { return player.upgrades[1][5] === 1 || player.buildings[1][player.inflation.vacuum ? 5 : 3].total.moreThan(0); }
                 if (upgrade > 5) {
                     if (player.upgrades[1][5] !== 1) { return false; }
                     if (upgrade === 10) { return player.strangeness[5][10] >= 1; }
@@ -256,6 +256,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             break;
         case 'researches':
             if (stageIndex === 1) { return check !== 3; }
+            if (stageIndex === 6) { return check !== 4; }
             break;
         case 'researchesExtra':
             if (stageIndex === 1) { return check !== 2; }
@@ -288,7 +289,7 @@ export const milestoneGetValue = (index: number, stageIndex: number): number | O
         if (index === 0) {
             if (!player.inflation.vacuum) { return global.collapseInfo.trueStars; }
             const stars = player.buildings[4];
-            return new Overlimit(stars[1].total).plus(stars[2].total, stars[3].total, stars[4].total, stars[5].total);
+            return new Overlimit(stars[1].total).allPlus(stars[2].total, stars[3].total, stars[4].total, stars[5].total);
         }
         if (index === 1) { return player.buildings[5][3].true; }
     }

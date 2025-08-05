@@ -709,7 +709,7 @@ try { //Start everything
     } else {
         prepareVacuum(false); //Set buildings values
         updatePlayer(deepClone(playerStart));
-        player.buildings[3][0].current.setValue('5.9722e27');
+        player.buildings[3][0].current.setValue(5.9722e27);
     }
 
     /* Global */
@@ -1457,6 +1457,11 @@ try { //Start everything
         button.addEventListener('click', () => open());
         if (PC) { button.addEventListener('mouseenter', () => open(true)); }
     }
+    getId('stageInput').addEventListener('change', () => {
+        const input = getId('stageInput') as HTMLInputElement;
+        if (!global.offline.active) { player.stage.input = Math.max(Number(input.value), 0); }
+        input.value = format(player.stage.input, { type: 'input' });
+    });
     getId('vaporizationInput').addEventListener('change', () => {
         const input = getId('vaporizationInput') as HTMLInputElement;
         if (!global.offline.active) { player.vaporization.input[0] = Math.max(Number(input.value), 0); }
@@ -1510,10 +1515,10 @@ try { //Start everything
         if (!global.offline.active) { player.merge.input[1] = Number(input.value); }
         input.value = format(player.merge.input[1], { type: 'input' });
     });
-    getId('stageInput').addEventListener('change', () => {
-        const input = getId('stageInput') as HTMLInputElement;
-        if (!global.offline.active) { player.stage.input = Math.max(Number(input.value), 0); }
-        input.value = format(player.stage.input, { type: 'input' });
+    getId('nucleationInput').addEventListener('change', () => {
+        const input = getId('nucleationInput') as HTMLInputElement;
+        if (!global.offline.active) { player.darkness.input = Math.max(Number(input.value), 0); }
+        input.value = format(player.darkness.input, { type: 'input' });
     });
     getId('versionButton').addEventListener('click', openVersionInfo);
     getId('hotkeysButton').addEventListener('click', openHotkeys);

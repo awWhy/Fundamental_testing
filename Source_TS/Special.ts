@@ -229,6 +229,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage'],
+            ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
         ]
     ],
@@ -241,7 +242,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Rank%20Researches.png', 'stage6borderImage', 'Rank'],
         ['Collapse%20Researches.png', 'stage6borderImage', 'Collapse'],
         ['Galaxy%20Researches.png', 'stage3borderImage', 'Galaxy'],
-        ['Missing.png', 'stage3borderImage', 'Darkness']
+        ['Missing.png', 'stage3borderImage', 'Dark']
     ],
     /** [src, className] */
     researchExtraHTML: [
@@ -966,7 +967,7 @@ export const playEvent = (event: number, replay = true) => {
     } else if (event === 12) {
         text = "Unlocked ability to End everything:\nBy converting Dark energy into the Phantom energy, you can now trigger the scenario known as 'Big Rip', meaning that everything up to this point is going to be converted into Cosmons.";
     } else if (event === 13) {
-        text = 'Void Universes are weaker version of self-made Universes. They do not count as self-made, but still award Inflatons. They can only be created under the Void time limit, creating them forces Void (Vacuum) reset.';
+        text = "Void Universes are weaker version of self-made Universes. They do not count as self-made, but still award Inflatons. They can be created only under the Void time limit, creating them doesn't set Vacuum to false.";
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);

@@ -327,7 +327,7 @@ export interface globalType {
         type: Array<Array<'producing' | 'improving' | 'delaying'>>
         firstCost: number[][]
         increase: number[][]
-        /** [0] type is never[] */
+        /** Visual only, [0] type is never[] */
         producing: [
             Array<number | Overlimit>,
             Overlimit[],
@@ -341,6 +341,7 @@ export interface globalType {
     versesInfo: {
         firstCost: number[]
         increase: number[]
+        /** Visual only */
         producing: number[]
     }
     strangeInfo: {
@@ -551,9 +552,11 @@ export interface calculateEffectsType {
     element24_power: () => number
     element24: () => Overlimit
     element26: () => number
-    darkHardcap: () => number
-    effectiveDarkEnergy: () => number
+    darkSoftcap: () => number
+    darkHardcap: (delayOnly?: boolean) => number
+    effectiveDarkEnergy: (fluid?: number) => number
     darkFluid: (post?: boolean) => number
+    S6Upgrade0: () => number
     S2Strange9: () => number
     S5Strange9_stage1: () => number
     S5Strange9_stage2: () => number

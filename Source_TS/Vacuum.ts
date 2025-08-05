@@ -23,9 +23,9 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.hoverText[3][0] = 'Preons hardcap';
         buildingsInfo.type[2][0] = 'improving';
         buildingsInfo.type[3][0] = 'delaying';
-        buildings[1][0].current.setValue('5.476e-3');
-        buildings[2][0].current.setValue('0');
-        buildings[3][0].current.setValue('9.76185667392e-36');
+        buildings[1][0].current.setValue(5.476e-3);
+        buildings[2][0].current.setValue(0);
+        buildings[3][0].current.setValue(9.76185667392e-36);
         buildingsInfo.maxActive[1] = 6;
         buildingsInfo.maxActive[2] = 7;
         buildingsInfo.maxActive[3] = 6;
@@ -39,8 +39,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.firstCost[1] = [0, 0.005476, 6, 3, 24, 3];
 
         upgrades1Cost = [40, 60, 100, 120, 180, 360, 1200, 3600, 12000, 80000];
-        (upgradesInfo[2].cost[0] as Overlimit).setValue('10');
-        (upgradesInfo[5].cost[3] as Overlimit).setValue('1e160');
+        (upgradesInfo[2].cost[0] as Overlimit).setValue(10);
+        (upgradesInfo[5].cost[3] as Overlimit).setValue(1e160);
         upgradesInfo[1].maxActive = 11;
         upgradesInfo[2].maxActive = 9;
         upgradesInfo[3].maxActive = 14;
@@ -55,7 +55,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesInfo[2].maxActive = 7;
         researchesInfo[4].maxActive = 6;
         researchesInfo[5].maxActive = 5;
-        researchesInfo[6].maxActive = 4;
+        researchesInfo[6].maxActive = 5;
 
         researchesExtraInfo[1].maxActive = 6;
         researchesExtraInfo[2].maxActive = 5;
@@ -64,8 +64,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[5].maxActive = 6;
         researchesExtraInfo[6].maxActive = 4;
 
-        global.elementsInfo.cost[27].setValue('1e54');
-        global.elementsInfo.cost[28].setValue('1e58');
+        global.elementsInfo.cost[27].setValue(1e54);
+        global.elementsInfo.cost[28].setValue(1e58);
 
         global.ASRInfo.costRange[1] = [2000, 8000, 16000, 32000, 56000];
         global.ASRInfo.costRange[3][3] = 2.45576045e31;
@@ -85,7 +85,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[3].maxActive = 10;
         strangenessInfo[4].maxActive = 10;
         strangenessInfo[5].maxActive = 11;
-        strangenessInfo[6].maxActive = 6;
+        strangenessInfo[6].maxActive = 4;
 
         getId('milestonesExtra').innerHTML = 'Requires <span class="darkvioletText">Void Milestones</span> Inflation to be active to enable effects';
         milestone1S1.src = 'Used_art/Preon.png';
@@ -130,9 +130,9 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         specialHTML.footerStatsHTML[1][0] = ['Quarks.png', 'stage1borderImage cyanText', 'Quarks'];
         buildingsInfo.hoverText[2][0] = 'Moles';
         buildingsInfo.hoverText[3][0] = 'Mass';
-        buildings[1][0].current.setValue('3');
-        buildings[2][0].current.setValue('2.7753108348135e-3');
-        buildings[3][0].current.setValue('1e-19');
+        buildings[1][0].current.setValue(3);
+        buildings[2][0].current.setValue(2.7753108348135e-3);
+        buildings[3][0].current.setValue(1e-19);
         if (buildingsInfo.name[1][0] === 'Mass') {
             specialHTML.buildingHTML[1].splice(0, 2);
             buildingsInfo.name[1].splice(0, 2);
@@ -146,12 +146,12 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.firstCost[1] = [0, 3, 24, 3];
         buildingsInfo.type[2][0] = 'producing';
         buildingsInfo.type[3][0] = 'producing';
-        global.buildingsInfo.producing[4][5].setValue('0');
+        global.buildingsInfo.producing[4][5].setValue(0);
         getQuery('#star3Effect > span.info').textContent = 'Boost to the Solar mass gain';
 
         upgrades1Cost = [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800];
-        (upgradesInfo[2].cost[0] as Overlimit).setValue('1e4');
-        (upgradesInfo[5].cost[3] as Overlimit).setValue('1e150');
+        (upgradesInfo[2].cost[0] as Overlimit).setValue(1e4);
+        (upgradesInfo[5].cost[3] as Overlimit).setValue(1e150);
         upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 8;
         upgradesInfo[3].maxActive = 13;
@@ -175,8 +175,8 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[5].maxActive = 1;
         researchesExtraInfo[6].maxActive = 0;
 
-        global.elementsInfo.cost[27].setValue('1e52');
-        global.elementsInfo.cost[28].setValue('1e54');
+        global.elementsInfo.cost[27].setValue(1e52);
+        global.elementsInfo.cost[28].setValue(1e54);
 
         global.ASRInfo.costRange[1] = [2000, 8000, 16000];
         global.ASRInfo.costRange[3][3] = 2e30;
@@ -255,9 +255,9 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     }
 
     if (global.collapseInfo.supervoid) {
-        (upgradesInfo[5].cost[3] as Overlimit).multiply('1e2');
-        global.elementsInfo.cost[27].multiply('1e2');
-        global.elementsInfo.cost[28].multiply('1e2');
+        (upgradesInfo[5].cost[3] as Overlimit).multiply(1e2);
+        global.elementsInfo.cost[27].multiply(1e2);
+        global.elementsInfo.cost[28].multiply(1e2);
     }
     upgradesInfo[1].cost.splice(0, upgrades1Cost.length, ...upgrades1Cost);
     researchesInfo[1].firstCost.splice(0, researches1Cost.length, ...researches1Cost);
