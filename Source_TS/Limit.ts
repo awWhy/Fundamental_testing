@@ -1,5 +1,6 @@
 import { globalSave } from './Special';
 
+export const test = { called: false };
 type allowedTypes = string | number | bigint | [number, number] | Overlimit;
 /** To test number for being Overlimit can use: typeof number === 'object'; Array.isArray(number); number instanceof Overlimit
  * @param number allowed types are string, number, bigint, Overlimit and [number, number]; If Array is used, then must not contain any mistakes (example and proper way: [11, 0] > [1.1, 1]; [1, NaN] > [NaN, NaN]; [1, 1.4] > [1, 1])
@@ -110,7 +111,10 @@ export default class Overlimit extends Array<number> { //This is version is slig
     /** Returns value as Array, doesn't change original number */
     toArray(): [number, number] { return [this[0], this[1]]; }
     /** Automatically called with JSON.stringify. It will call toString to preserve NaN and Infinity */
-    toJSON(): string { return technical.turnString(this); }
+    toJSON(): string {
+        test.called = true;
+        return technical.turnString(this);
+    }
 
     allPlus(...numbers: allowedTypes[]): this {
         for (let i = 0; i < numbers.length; i++) {

@@ -6,6 +6,7 @@ import { assignHotkeys, detectHotkey, detectShift, handleTouchHotkeys } from './
 import { prepareVacuum } from './Vacuum';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
+import { test } from './Limit';
 
 /** Only for static HTML, by default (false) throws error if id is null */
 export const getId = (id: string, noError = false): HTMLElement => {
@@ -228,7 +229,9 @@ const saveGame = (noSaving = false): string | null => {
         for (let i = 0; i < clone.inflation.loadouts.length; i++) {
             clone.inflation.loadouts[i][0] = String.fromCharCode(...new TextEncoder().encode(clone.inflation.loadouts[i][0]));
         }
+        test.called = false;
         const save = btoa(JSON.stringify(clone));
+        if (!test.called) { Notify('toJSON wasn\'t called!'); }
         if (!noSaving) {
             localStorage.setItem(specialHTML.localStorage.main, save);
             clearInterval(global.intervalsId.autoSave);
