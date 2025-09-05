@@ -65,16 +65,18 @@ export interface playerType {
     time: {
         updated: number
         started: number
+        /** Tick excess, in milliseconds */
+        excess: number
         /** [Milliseconds, Strange quarks, Strangelets] */
         export: [number, number, number]
-        /** In milliseconds */
+        /** Offline storage, in milliseconds */
         offline: number
         /** In milliseconds */
         online: number
-        stage: number
-        vacuum: number
-        universe: number
         end: number
+        universe: number
+        vacuum: number
+        stage: number
     }
     /** .true is how many are self-made \
      * .current is how many are right now \
@@ -133,14 +135,14 @@ export interface playerType {
         normal: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6], Nucleation[7] */
         confirm: Array<'Safe' | 'None'>
-        /** Upgrades/Researches/Elements[0], Strangeness[1] */
+        /** Upgrades/Researches/Elements[0], Strangeness[1], Inflations[2] */
         hover: boolean[]
         /** Researches[0], Strangeness[1], Inflations[2] */
         max: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4],
-           Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9], Nucleation[10, no ID yet] */
+           Upgrades[5], Researches[6], ResearchesExtra[7], Elements[8], Merge[9], Nucleation[10] */
         auto: boolean[]
-        /** [0] is toggle all */
+        /** [0] is not used */
         buildings: boolean[][]
         verses: boolean[]
         shop: {
@@ -349,7 +351,8 @@ export interface globalType {
         stageBoost: number[]
         /** [Producing, Improving] */
         strangeletsInfo: [number, number]
-        quarksGain: number
+        strange0Gain: number
+        strange1Gain: number
     }
     upgradesInfo: Array<{
         name: string[]
@@ -401,6 +404,8 @@ export interface globalType {
         name: string[]
         effectText: Array<() => string>
         cost: Overlimit[]
+        /** Counts index [0] */
+        maxActive: number
     }
     strangenessInfo: Array<{
         name: string[]
@@ -456,6 +461,7 @@ export interface globalType {
     }
     loadouts: {
         input: number[]
+        open: boolean
         /** Only used to remove events */
         buttons: Array<[HTMLElement, () => void]>
     }
@@ -479,12 +485,17 @@ export interface globalSaveType {
     fontSize: number
     /** Status[0], Mouse events[1], Enable zoom[2] */
     MDSettings: boolean[]
-    /** Status[0], Tabindex Upgrades[1], Tabindex primary[2] */
+    /** Status[0], Keep tabindex on Upgrades[1] */
     SRSettings: boolean[]
     developerMode: boolean
 }
 
-export type hotkeysList = 'makeAll' | 'stage' | 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy' | 'nucleation' | 'pause' | 'toggleAll' | 'merge' | 'universe' | 'end' | 'supervoid' | 'exitChallenge' | 'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+export type hotkeysList = 'makeAll' | 'toggleAll' | 'createAll' | 'toggleUpgrades' |
+    'discharge' | 'vaporization' | 'rank' | 'collapse' | 'nucleation' | 'merge' | 'stage' | 'end' |
+    'toggleDischarge' | 'toggleVaporization' | 'toggleRank' | 'toggleCollapse' | 'toggleMerge' | 'toggleNucleation' | 'toggleStage' |
+    'galaxy' | 'universe' | 'exitChallenge' | 'supervoid' | 'warp' | 'pause' |
+    'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
+
 export type numbersList = 'makeStructure' | 'toggleStructure' | 'enterChallenge';
 
 export interface calculateEffectsType {
@@ -564,7 +575,6 @@ export interface calculateEffectsType {
     T0Inflation0: () => number
     T0Inflation1: () => number
     T0Inflation3: () => number
-    T0Inflation5: (level?: number) => number
     /** Default value for type is 0 or Quarks; Use 1 for Strangelets */
     strangeGain: (interstellar: boolean, quarks?: boolean) => number
 }

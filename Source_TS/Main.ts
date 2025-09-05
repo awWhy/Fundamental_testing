@@ -1,12 +1,32 @@
-import { player, global, playerStart, updatePlayer, deepClone } from './Player';
+import { player, global, updatePlayer, prepareVacuum } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, addIntoLog, updateCollapsePoints } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, calculateEffects, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, loadoutsLoadAuto, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleConfirm, toggleSupervoid, toggleSwap, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, openLog, errorNotify } from './Special';
-import { assignHotkeys, detectHotkey, detectShift, handleTouchHotkeys } from './Hotkeys';
-import { prepareVacuum } from './Vacuum';
+import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, toggleAll } from './Hotkeys';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
-import { test } from './Limit';
+import Overlimit from './Limit';
+
+/** Not for the deep copy, works on Overlimit, but not prefered */
+export const cloneArray = <ArrayClone extends Array<number | string | boolean | null | undefined>>(array: ArrayClone) => array.slice(0) as ArrayClone;
+//Actual type is any[], it's because TS is dumb; [...array] will be better after ~>10000 keys
+
+/** For non deep clone use { ...object } or cloneArray when possible */
+export const deepClone = <CloneType>(toClone: CloneType): CloneType => {
+    if (typeof toClone !== 'object' || toClone === null) { return toClone; }
+
+    let value: any;
+    if (Array.isArray(toClone)) {
+        if (toClone instanceof Overlimit) { return new Overlimit(toClone) as CloneType; }
+
+        value = []; //Faster this way
+        for (let i = 0; i < toClone.length; i++) { value.push(deepClone(toClone[i])); }
+    } else {
+        value = {};
+        for (const check in toClone) { value[check] = deepClone(toClone[check]); }
+    }
+    return value;
+};
 
 /** Only for static HTML, by default (false) throws error if id is null */
 export const getId = (id: string, noError = false): HTMLElement => {
@@ -54,31 +74,33 @@ const handleOfflineTime = (): number => {
     const timeNow = Date.now();
     const offlineTime = timeNow - player.time.updated;
     player.time.updated = timeNow;
-    player.time.export[0] += offlineTime * calculateEffects.T0Inflation5();
+    player.time.export[0] += offlineTime;
     return offlineTime;
 };
-export const simulateOffline = async(offline: number) => {
+export const simulateOffline = async(offline: number, autoConfirm = player.toggles.normal[4]) => {
     const info = global.offline;
     if (!info.active) { pauseGame(); }
-    offline += player.time.offline;
-    player.time.offline = 0;
+    offline += player.time.excess;
+    player.time.excess = 0;
 
     let decline = false;
-    if (offline >= 20 && !player.toggles.normal[4]) {
-        decline = !await Confirm(`Claim ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of Offline time?\n(Includes time spent to click any of the buttons)`, 2) &&
-            (globalSave.developerMode || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to keep it"));
+    if (offline >= 20 && !autoConfirm) {
+        decline = !await Confirm(`Consume ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of offline time?\n(Includes time spent to click any of the buttons)`, 2) &&
+            (globalSave.developerMode || player.tree[0][5] >= 1 || !await Confirm("Press 'Cancel' again to confirm losing offline time, 'Confirm' to consume it"));
         const extra = handleOfflineTime();
         global.lastSave += extra;
         offline += extra;
     }
+    if (offline > 43200_000) { offline = 43200_000; }
     if (decline || offline < 20) {
-        if (offline < 0) { player.time.offline = offline - 20; }
-        timeUpdate(20, 20); //Just in case
+        if (decline) { player.time.offline = Math.min(player.time.offline + offline * (player.tree[0][5] / 4), 43200_000); }
+        if (offline < 0) { player.time.excess = offline - 20; }
         pauseGame(false);
+        timeUpdate(20, 20); //Just in case
         visualUpdate();
         numbersUpdate();
         return;
-    } else if (offline > 43200_000) { offline = 43200_000; }
+    }
     let tick = globalSave.intervals.offline;
     const startValue = offline;
     const startStage = player.stage.active;
@@ -150,7 +172,7 @@ export const simulateOffline = async(offline: number) => {
             timeUpdate(Math.max(time / 600, 20), time);
         } catch (error) {
             end();
-            const stack = (error as { stack: string }).stack;
+            const stack = (error as { stack?: string }).stack;
             void Alert(`Offline calculation failed due to error:\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 1);
             throw error;
         }
@@ -160,7 +182,7 @@ export const simulateOffline = async(offline: number) => {
             remainsHTML.textContent = format(offline / 1000, { type: 'time' });
             percentageHTML.textContent = format(100 - offline / startValue * 100, { padding: true });
         } else {
-            player.time.offline += offline;
+            player.time.excess += offline;
             end();
         }
     };
@@ -229,9 +251,7 @@ const saveGame = (noSaving = false): string | null => {
         for (let i = 0; i < clone.inflation.loadouts.length; i++) {
             clone.inflation.loadouts[i][0] = String.fromCharCode(...new TextEncoder().encode(clone.inflation.loadouts[i][0]));
         }
-        test.called = false;
         const save = btoa(JSON.stringify(clone));
-        if (!test.called) { Notify('toJSON wasn\'t called!'); }
         if (!noSaving) {
             localStorage.setItem(specialHTML.localStorage.main, save);
             clearInterval(global.intervalsId.autoSave);
@@ -241,7 +261,7 @@ const saveGame = (noSaving = false): string | null => {
         }
         return save;
     } catch (error) {
-        const stack = (error as { stack: string }).stack;
+        const stack = (error as { stack?: string }).stack;
         void Alert(`Failed to save the game\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 1);
         throw error;
     }
@@ -328,13 +348,67 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         format(player.cosmon[0].total, { type: 'input', padding: 'exponent' }),
         format(player.cosmon[1].total, { type: 'input', padding: 'exponent' }),
         `${player.inflation.vacuum}`,
-        format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' }),
-        format(player.verses[0].current, { type: 'input', padding: 'exponent' })
+        `${format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' })} [${player.buildings[5][3].true}]`,
+        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })}${player.stage.true >= 8 ? ` [${player.verses[0].true} + ${player.inflation.voidVerses}]` : ''}`
     ];
     for (let i = 0; i < special.length; i++) {
         name = name.replace(special[i], replaceWith[i]);
     }
     return `${name}.txt`;
+};
+
+export const toggleSwap = (number: number, type: 'buildings' | 'verses' | 'normal' | 'hover' | 'max' | 'auto', change = false) => {
+    const toggles = type === 'buildings' ? player.toggles.buildings[player.stage.active] : player.toggles[type];
+
+    if (change) {
+        if (global.offline.active) { return; }
+        toggles[number] = !toggles[number];
+    }
+
+    let extraText;
+    let toggleHTML;
+    if (type === 'buildings' || type === 'verses') {
+        toggleHTML = getId(`toggle${type === 'buildings' ? 'Building' : 'Verse'}${number}`);
+        extraText = 'Auto ';
+        if (change) { visualUpdate(); }
+    } else if (type === 'hover') {
+        toggleHTML = getId(`toggleHover${number}`);
+        extraText = 'Hover to create ';
+    } else if (type === 'max') {
+        toggleHTML = getId(`toggleMax${number}`);
+        extraText = 'Max create ';
+    } else if (type === 'auto') {
+        toggleHTML = getId(`toggleAuto${number}`);
+        extraText = 'Auto ';
+    } else {
+        toggleHTML = getId(`toggleNormal${number}`);
+        extraText = '';
+    }
+
+    if (!toggles[number]) {
+        toggleHTML.style.color = '';
+        toggleHTML.style.borderColor = '';
+        toggleHTML.textContent = `${extraText}OFF`;
+    } else {
+        toggleHTML.style.color = 'var(--green-text)';
+        toggleHTML.style.borderColor = 'forestgreen';
+        toggleHTML.textContent = `${extraText}ON`;
+    }
+};
+
+export const toggleConfirm = (number: number, change = false) => {
+    const toggles = player.toggles.confirm;
+    if (change) { toggles[number] = toggles[number] === 'Safe' ? 'None' : 'Safe'; }
+
+    const toggleHTML = getId(`toggleConfirm${number}`);
+    toggleHTML.textContent = toggles[number];
+    if (toggles[number] === 'Safe') {
+        toggleHTML.style.color = 'var(--green-text)';
+        toggleHTML.style.borderColor = 'forestgreen';
+    } else {
+        toggleHTML.style.color = '';
+        toggleHTML.style.borderColor = '';
+    }
 };
 
 const repeatFunction = (repeat: () => any) => {
@@ -404,42 +478,34 @@ const handleAutoResearchCreation = (index: number) => {
     switchStage(autoStage, stageIndex);
 };
 
-export const buyAll = () => {
-    const active = player.stage.active;
-    const max = global.buildingsInfo.maxActive[active];
-    if (active === 3) {
-        for (let i = 1; i < max; i++) { buyBuilding(i, active, 0); }
-    } else {
-        for (let i = max - 1; i >= 1; i--) { buyBuilding(i, active, 0); }
-    }
-    if (active === 6 && player.strangeness[6][3] < 1) {
-        for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
-    }
-};
-
-export const loadoutsVisual = (loadout: number[]) => {
-    if (getId('loadoutsMain').style.display === 'none') { return; }
+/** Sets selected loadout to provided */
+export const loadoutsFinal = (load: number[]) => {
+    if (!global.loadouts.open) { return; }
     const appeared = {} as Record<number, number>;
-    const { firstCost, scaling } = global.treeInfo[0];
-    const calculate = (index: number) => Math.floor(Math.round((firstCost[index] + scaling[index] * appeared[index]) * 100) / 100);
+    const { firstCost, scaling, max } = global.treeInfo[0];
 
     let cost = 0;
     let string = '';
-    for (let i = 0, dupes = 1; i < loadout.length; i += dupes, dupes = 1) {
-        const current = loadout[i];
-        appeared[current] = appeared[current] === undefined ? 0 : appeared[current] + 1;
-        cost += calculate(current);
-        while (loadout[i + dupes] === current) {
-            appeared[current]++;
-            cost += calculate(current);
+    for (let i = 0, dupes = 0; i < load.length; i += dupes, dupes = 0) {
+        const current = load[i];
+        appeared[current] ??= 0;
+        do {
+            if (appeared[current] >= max[current]) {
+                load.splice(i + dupes, 1);
+                continue;
+            }
+            cost += Math.floor(Math.round((firstCost[current] + scaling[current] * appeared[current]) * 100) / 100);
+            appeared[current] += 1;
             dupes++;
-        }
-        string += `${i > 0 ? ', ' : ''}${current + 1}${dupes > 1 ? `x${dupes}` : ''}`;
+        } while (load[i + dupes] === current);
+        if (dupes < 1) { continue; }
+        string += `${i > 0 ? ', ' : ''}${current + 1}${dupes !== 1 ? `x${dupes}` : ''}`;
     }
+    global.loadouts.input = load;
     getQuery('#loadoutsEditLabel > span').textContent = format(cost, { padding: 'exponent' });
     (getId('loadoutsEdit') as HTMLInputElement).value = string;
 };
-export const loadoutsRecreate = () => {
+const loadoutsRecreate = () => {
     const old = global.loadouts.buttons;
     for (let i = 0; i < old.length; i++) { old[i][0].removeEventListener('click', old[i][1]); }
     const newOld: typeof old = [];
@@ -451,9 +517,10 @@ export const loadoutsRecreate = () => {
         button.className = 'selectBtn redText';
         button.type = 'button';
         const event = () => {
-            if (global.hotkeys.shift) { return void loadoutsLoad(i); }
-            (getId('loadoutsName') as HTMLInputElement).value = player.inflation.loadouts[i][0];
-            loadoutsVisual(global.loadouts.input = player.inflation.loadouts[i][1]);
+            const loadout = player.inflation.loadouts[i];
+            (getId('loadoutsName') as HTMLInputElement).value = loadout[0];
+            loadoutsFinal(cloneArray(loadout[1]));
+            if (global.hotkeys.shift) { void loadoutsLoad(loadout[1]); }
         };
         newOld[i] = [button, event];
         listHTML.append(button, ', ');
@@ -472,24 +539,114 @@ const loadoutsSave = () => {
             break;
         }
     }
-    loadouts[index] = [name, global.loadouts.input];
+    loadouts[index] = [name, cloneArray(global.loadouts.input)];
     loadoutsRecreate();
     Notify(`Saved loadout as '${name}'`);
 };
-const loadoutsLoad = async(loadout = null as null | number) => {
+const loadoutsLoad = async(loadout = null as null | number[]) => {
     if (global.offline.active || !await inflationRefund(loadout !== null || global.hotkeys.shift, true)) { return; }
 
-    const array = loadout !== null ? player.inflation.loadouts[loadout][1] : global.loadouts.input;
-    for (let i = 0; i < array.length; i++) {
-        if (!checkUpgrade(array[i], 0, 'inflations')) { continue; }
-        buyStrangeness(array[i], 0, 'inflations', true);
+    if (loadout === null) { loadout = global.loadouts.input; }
+    for (let i = 0; i < loadout.length; i++) {
+        if (!checkUpgrade(loadout[i], 0, 'inflations')) { continue; }
+        buyStrangeness(loadout[i], 0, 'inflations', true);
     }
-    if ((getId('loadoutsName') as HTMLInputElement).value === 'Auto-generate') { loadoutsLoadAuto(); }
     numbersUpdate();
     if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Loaded loadout'; }
 };
+const loadoutsLoadAuto = () => {
+    const array = [];
+    for (let i = 0; i < player.tree[0].length; i++) {
+        for (let r = player.tree[0][i]; r > 0; r--) { array.push(i); }
+    }
+    loadoutsFinal(array);
+};
 
+{ //Final preparations
+    /** Does not clone given value */
+    const createArray = <startValue extends number | string | boolean | null | undefined>(length: number, value: startValue) => {
+        //Doing 'new Array(length)' is faster, but will force array to be holey type (and using .fill will make it slower)
+        const array = [];
+        for (let i = 0; i < length; i++) { array.push(value); }
+        return array as startValue[];
+    };
+
+    for (let s = 1; s < global.buildingsInfo.firstCost.length; s++) {
+        player.buildings[s] = [] as unknown as typeof player.buildings[0];
+        player.toggles.buildings[s] = createArray(global.buildingsInfo.firstCost[s].length, false);
+        global.buildingsInfo.producing[s] = [];
+        for (let i = 0; i < global.buildingsInfo.firstCost[s].length; i++) {
+            const start = i === 0 && s === 4 ? 1 : 0;
+            player.buildings[s][i] = {
+                current: new Overlimit(start),
+                total: new Overlimit(start),
+                trueTotal: new Overlimit(start)
+            };
+            if (i !== 0) { player.buildings[s][i as 1].true = 0; }
+            global.buildingsInfo.producing[s as 0].push(i === 0 ? 0 : new Overlimit(0));
+        }
+    }
+    player.toggles.verses = createArray(player.verses.length, false);
+    {
+        const pointer = global.upgradesInfo;
+        for (let s = 1; s < pointer.length; s++) {
+            const cost = pointer[s].cost;
+            player.upgrades[s] = createArray(cost.length, 0);
+            global.automatization.autoU = [];
+            global.automatization.autoR = [];
+            global.automatization.autoE = [];
+            global.lastUpgrade[s] = [null, 'upgrades'];
+            if (s === 1) { continue; }
+            for (let i = 0; i < cost.length; i++) { cost[i] = new Overlimit(cost[i]); }
+        }
+    }
+    for (const upgradeType of ['researches', 'researchesExtra'] as const) {
+        const pointer = global[`${upgradeType}Info`];
+        for (let s = 1; s < pointer.length; s++) {
+            const firstCost = pointer[s].firstCost;
+            player[upgradeType][s] = createArray(firstCost.length, 0);
+            if (s === 1 || (s === 6 && upgradeType === 'researchesExtra')) {
+                pointer[s].cost = cloneArray(firstCost as number[]);
+                continue;
+            }
+            for (let i = 0; i < firstCost.length; i++) {
+                firstCost[i] = new Overlimit(firstCost[i]);
+                pointer[s].cost[i] = new Overlimit(firstCost[i]);
+            }
+        }
+    }
+    player.researchesAuto = createArray(global.researchesAutoInfo.costRange.length, 0);
+    player.ASR = createArray(global.ASRInfo.costRange.length, 0);
+    {
+        const cost = global.elementsInfo.cost;
+        player.elements = createArray(cost.length, 0);
+        for (let i = 1; i < cost.length; i++) { cost[i] = new Overlimit(cost[i]); }
+    }
+    for (let s = 1; s < global.strangenessInfo.length; s++) {
+        player.strangeness[s] = createArray(global.strangenessInfo[s].firstCost.length, 0);
+        global.strangenessInfo[s].cost = cloneArray(global.strangenessInfo[s].firstCost);
+    }
+    for (let s = 1; s < global.milestonesInfo.length; s++) {
+        const pointer = global.milestonesInfo[s];
+        player.milestones[s] = createArray(pointer.needText.length, 0);
+        for (let i = 0; i < pointer.needText.length; i++) {
+            pointer.need.push(new Overlimit(Infinity));
+        }
+    }
+    for (let s = 0; s < global.treeInfo.length; s++) {
+        player.tree[s] = createArray(global.treeInfo[s].firstCost.length, 0);
+        global.treeInfo[s].cost = cloneArray(global.treeInfo[s].firstCost);
+    }
+    player.toggles.normal = createArray(document.getElementsByClassName('toggleNormal').length, false);
+    player.toggles.confirm = createArray(document.getElementsByClassName('toggleConfirm').length, 'Safe');
+    player.toggles.hover = createArray(document.getElementsByClassName('toggleHover').length, false);
+    player.toggles.max = createArray(document.getElementsByClassName('toggleMax').length, false);
+    player.toggles.auto = createArray(document.getElementsByClassName('toggleAuto').length, false);
+    player.toggles.normal[1] = true;
+}
+export const playerStart = deepClone(player);
 export const globalSaveStart = deepClone(globalSave);
+
 try { //Start everything
     const body = document.documentElement;
     const globalSettings = localStorage.getItem(specialHTML.localStorage.settings);
@@ -503,7 +660,11 @@ try { //Start everything
                     array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
                 }
             }
-            if (!(globalSave.intervals.offline >= 20)) { globalSave.intervals.offline = 20; } //Fix NaN and undefined
+            //if (!(globalSave.intervals.offline >= 20)) { globalSave.intervals.offline = 20; } //Fix NaN and undefined
+            if (globalSave.intervals.offline !== 20) {
+                globalSave.intervals.offline = 20;
+                Notify('Starting offline tick value has been set to 20ms\n(this forced check will soon be removed)');
+            }
             for (let i = globalSave.toggles.length; i < globalSaveStart.toggles.length; i++) {
                 globalSave.toggles[i] = false;
             }
@@ -571,9 +732,10 @@ try { //Start everything
         global.tabs.upgrade.list.splice(global.tabs.upgrade.list.indexOf('Elements'), 1);
         global.tabs.list.splice(global.tabs.list.indexOf('upgrade') + 1, 0, 'Elements');
     }
+    toggleSpecial(0, 'mobile');
+    toggleSpecial(0, 'reader');
 
     if (globalSave.MDSettings[0]) {
-        toggleSpecial(0, 'mobile');
         (document.getElementById('MDMessage1') as HTMLElement).remove();
         specialHTML.styleSheet.textContent += `html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
@@ -601,7 +763,7 @@ try { //Start everything
         createUpgButton.textContent = 'Create';
         createUpgButton.id = 'upgradeCreate';
         createUpgButton.type = 'button';
-        getId('toggleHover0').after(createUpgButton);
+        getId('createAllUpgrades').before(createUpgButton);
 
         const createInfButton = document.createElement('button');
         createInfButton.className = 'hollowButton';
@@ -612,18 +774,23 @@ try { //Start everything
 
         const pages = document.createElement('div');
         pages.id = 'strangenessPages';
-        pages.innerHTML = '<button type="button" id="strangenessPage1" class="stage1borderImage hollowButton">1</button><button type="button" id="strangenessPage2" class="stage2borderImage hollowButton">2</button><button type="button" id="strangenessPage3" class="stage3borderImage hollowButton">3</button><button type="button" id="strangenessPage4" class="stage4borderImage hollowButton">4</button><button type="button" id="strangenessPage5" class="stage5borderImage hollowButton">5</button><button type="button" id="strangenessPage6" class="stage6borderImage hollowButton">6</button><button type="button" id="strangenessCreate" class="hollowButton">Create</button>';
+        pages.innerHTML = '<button type="button" id="strangenessPage1" class="stage1borderImage hollowButton">1</button><button type="button" id="strangenessPage2" class="stage2borderImage hollowButton">2</button><button type="button" id="strangenessPage3" class="stage3borderImage hollowButton">3</button><button type="button" id="strangenessPage4" class="stage4borderImage hollowButton">4</button><button type="button" id="strangenessPage5" class="stage5borderImage hollowButton">5</button><button type="button" id="strangenessPage6" class="stage6borderImage hollowButton">6</button>';
         specialHTML.styleSheet.textContent += `#strangenessPages { display: flex; justify-content: center; column-gap: 0.36em; }
-            #strangenessPages button { width: 2.08em; height: calc(2.08em - 2px); border-top: none; border-radius: 0 0 4px 4px; }
-            #strangenessCreate { width: unset !important; padding: 0 0.4em; } `;
+            #strangenessPages button { width: 2.08em; height: calc(2.08em - 2px); border-top: none; border-radius: 0 0 4px 4px; }`;
         getId('strangenessResearch').append(pages);
+        const createStrButton = document.createElement('button');
+        createStrButton.className = 'hollowButton';
+        createStrButton.textContent = 'Create';
+        createStrButton.id = 'strangenessCreate';
+        createStrButton.type = 'button';
+        getId('createAllStrangeness').before(createStrButton);
+        getId('strangenessToggles').style.display = '';
 
-        const mainLi = getId('MDLi');
         const MDToggle1 = document.createElement('li');
         MDToggle1.innerHTML = '<label>Keep mouse events<button type="button" id="MDToggle1" class="specialToggle">OFF</button></label>';
         const MDToggle2 = document.createElement('li');
         MDToggle2.innerHTML = '<label>Allow zoom<button type="button" id="MDToggle2" class="specialToggle">OFF</button></label>';
-        mainLi.after(MDToggle1, MDToggle2);
+        getId('MDLi').after(MDToggle1, MDToggle2);
         for (let i = 1; i < globalSaveStart.MDSettings.length; i++) {
             getId(`MDToggle${i}`).addEventListener('click', () => {
                 toggleSpecial(i, 'mobile', true, i === 1);
@@ -634,36 +801,12 @@ try { //Start everything
             toggleSpecial(i, 'mobile');
         }
         if (globalSave.MDSettings[2]) { (getId('viewportMeta') as HTMLMetaElement).content = 'width=device-width, initial-scale=1.0'; }
-
-        const refreshButton = document.createElement('button');
-        refreshButton.className = 'hollowButton';
-        refreshButton.textContent = 'Reload';
-        refreshButton.type = 'button';
-        mainLi.append(refreshButton);
-        refreshButton.addEventListener('click', async() => {
-            if (await Confirm('Reload the page?\n(Game will not autosave)')) { window.location.reload(); }
-        });
     }
     if (globalSave.SRSettings[0]) {
-        toggleSpecial(0, 'reader');
         const message = getId('SRMessage1');
         message.textContent = 'Screen reader support is enabled, disable it if its not required';
         message.className = 'greenText';
         message.ariaHidden = 'true';
-        for (let i = 0; i <= 3; i++) {
-            const effectID = getQuery(`#${i === 0 ? 'solarMass' : `star${i}`}Effect > span.info`);
-            effectID.classList.remove('greenText');
-            effectID.before(' (');
-            effectID.after(')');
-        }
-        for (let i = 1; i <= 2; i++) {
-            const effectID = getQuery(`#merge${i}Effect > span.info`);
-            effectID.classList.remove('greenText');
-            effectID.before(' (');
-            effectID.after(')');
-        }
-        specialHTML.styleSheet.textContent += `#starEffects > p > span, #mergeEffects > p > span { display: unset !important; }
-            #starEffects, #mergeEffects { cursor: default; } `;
         for (let i = 0; i < playerStart.strange.length; i++) { getId(`strange${i}`).tabIndex = 0; }
 
         const SRMainDiv = document.createElement('article');
@@ -673,32 +816,12 @@ try { //Start everything
 
         const SRToggle1 = document.createElement('li');
         SRToggle1.innerHTML = '<label>Keep tab index on created Upgrades<button type="button" id="SRToggle1" class="specialToggle">OFF</button></label>';
-        const SRToggle2 = document.createElement('li');
-        SRToggle2.innerHTML = '<label>Keep tab index on primary buttons<button type="button" id="SRToggle2" class="specialToggle">OFF</button></label>';
-        getId('SRLi').after(SRToggle1, SRToggle2);
+        getId('SRLi').after(SRToggle1);
 
-        const primaryIndex = () => {
-            const newTab = globalSave.SRSettings[2] ? 0 : -1;
-            for (const tabText of global.tabs.list) {
-                getId(`${tabText}TabBtn`).tabIndex = newTab;
-                for (const subtabText of global.tabs[tabText].list) {
-                    getId(`${tabText}SubtabBtn${subtabText}`).tabIndex = newTab;
-                }
-            }
-            for (let i = 1; i < global.stageInfo.word.length; i++) {
-                getId(`stageSwitch${i}`).tabIndex = newTab;
-            }
-        };
         for (let i = 1; i < globalSaveStart.SRSettings.length; i++) {
-            getId(`SRToggle${i}`).addEventListener('click', () => {
-                toggleSpecial(i, 'reader', true);
-                if (i === 2) {
-                    primaryIndex();
-                }
-            });
+            getId(`SRToggle${i}`).addEventListener('click', () => { toggleSpecial(i, 'reader', true); });
             toggleSpecial(i, 'reader');
         }
-        if (globalSave.SRSettings[2]) { primaryIndex(); }
     } else {
         const index = globalSave.toggles[0] ? 0 : 1;
         getQuery('#SRMessage1 span').textContent = `${globalSave.hotkeys.tabLeft[index]} and ${globalSave.hotkeys.tabRight[index]}`;
@@ -708,11 +831,12 @@ try { //Start everything
     let oldVersion = player.version;
     const save = localStorage.getItem(specialHTML.localStorage.main);
     if (save !== null) {
-        oldVersion = updatePlayer(JSON.parse(atob(save)));
+        const load = JSON.parse(atob(save));
+        if (load.version !== playerStart.version) { throw Error('Testing will be reused for new testing, export save file if required and play from main website instead'); }
+        oldVersion = updatePlayer(load);
     } else {
         prepareVacuum(false); //Set buildings values
         updatePlayer(deepClone(playerStart));
-        player.buildings[3][0].current.setValue(5.9722e27);
     }
 
     /* Global */
@@ -774,7 +898,7 @@ try { //Start everything
             window.textContent = element.dataset.title as string;
             window.style.display = '';
             const position = (event: MouseEvent) => {
-                window.style.left = `${Math.min(event.clientX, document.documentElement.clientWidth - window.getBoundingClientRect().width)}px`;
+                window.style.left = `${Math.min(event.clientX, document.documentElement.clientWidth - window.getBoundingClientRect().width - globalSave.fontSize / 2)}px`;
                 window.style.top = `${event.clientY}px`;
             };
             position(event);
@@ -802,14 +926,17 @@ try { //Start everything
             }
         });
     }
+    for (let i = 1; i < specialHTML.longestBuilding; i++) {
+        getId(`toggleBuilding${i}`).addEventListener('click', () => toggleSwap(i, 'buildings', true));
+    }
+    for (let i = 0; i < playerStart.toggles.verses.length; i++) {
+        getId(`toggleVerse${i}`).addEventListener('click', () => toggleSwap(i, 'verses', true));
+    }
     for (let i = 0; i < playerStart.toggles.normal.length; i++) {
         getId(`toggleNormal${i}`).addEventListener('click', () => toggleSwap(i, 'normal', true));
     }
     for (let i = 0; i < playerStart.toggles.confirm.length; i++) {
         getId(`toggleConfirm${i}`).addEventListener('click', () => toggleConfirm(i, true));
-    }
-    for (let i = 0; i < specialHTML.longestBuilding; i++) {
-        getId(`toggleBuilding${i}`).addEventListener('click', () => toggleSwap(i, 'buildings', true));
     }
     for (let i = 0; i < playerStart.toggles.hover.length; i++) {
         getId(`toggleHover${i}`).addEventListener('click', () => toggleSwap(i, 'hover', true));
@@ -935,13 +1062,9 @@ try { //Start everything
         if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
     } {
         const button = getId('makeAllStructures');
-        const footer = getId('structuresFooter');
+        const footer = getId('makeAllFooter');
         button.addEventListener('click', buyAll);
-        footer.addEventListener('click', () => {
-            if (global.hotkeys.shift) {
-                toggleSwap(0, 'buildings', true);
-            } else { buyAll(); }
-        });
+        footer.addEventListener('click', () => { (global.hotkeys.shift ? createAll : buyAll)(); });
         if (PC) {
             button.addEventListener('mousedown', () => repeatFunction(buyAll));
             footer.addEventListener('mousedown', () => {
@@ -955,6 +1078,7 @@ try { //Start everything
             });
         }
     }
+    getId('toggleAll').addEventListener('click', toggleAll);
     getId('buyAnyInput').addEventListener('focus', () => {
         const window = getQuery('#buyAnyMain > label');
         showAndFix(window);
@@ -1027,7 +1151,10 @@ try { //Start everything
         if (MD) {
             image.addEventListener('touchstart', () => {
                 hoverFunc();
-                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+                if (player.toggles.hover[0]) {
+                    clickFunc();
+                    repeatFunction(clickFunc);
+                }
             });
         } else {
             image.addEventListener('click', clickFunc);
@@ -1055,7 +1182,10 @@ try { //Start everything
         if (MD) {
             label.addEventListener('touchstart', () => {
                 hoverFunc();
-                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+                if (player.toggles.hover[0]) {
+                    clickFunc();
+                    repeatFunction(clickFunc);
+                }
             });
         } else {
             label.addEventListener('mousedown', () => repeatFunction(clickFunc));
@@ -1083,7 +1213,10 @@ try { //Start everything
         if (MD) {
             label.addEventListener('touchstart', () => {
                 hoverFunc();
-                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+                if (player.toggles.hover[0]) {
+                    clickFunc();
+                    repeatFunction(clickFunc);
+                }
             });
         } else {
             label.addEventListener('mousedown', () => repeatFunction(clickFunc));
@@ -1111,7 +1244,10 @@ try { //Start everything
         if (MD) {
             label.addEventListener('touchstart', () => {
                 hoverFunc();
-                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+                if (player.toggles.hover[0]) {
+                    clickFunc();
+                    repeatFunction(clickFunc);
+                }
             });
         } else {
             label.addEventListener('mousedown', () => repeatFunction(clickFunc));
@@ -1138,7 +1274,10 @@ try { //Start everything
         if (MD) {
             label.addEventListener('touchstart', () => {
                 hoverFunc();
-                if (player.toggles.hover[0]) { repeatFunction(clickFunc); }
+                if (player.toggles.hover[0]) {
+                    clickFunc();
+                    repeatFunction(clickFunc);
+                }
             });
         } else {
             label.addEventListener('mousedown', () => repeatFunction(clickFunc));
@@ -1165,6 +1304,11 @@ try { //Start everything
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
+    } {
+        const button = getId('createAllUpgrades');
+        button.addEventListener('click', createAll);
+        if (PC) { button.addEventListener('mousedown', () => repeatFunction(createAll)); }
+        if (MD) { button.addEventListener('touchstart', () => repeatFunction(createAll)); }
     }
 
     {
@@ -1269,7 +1413,10 @@ try { //Start everything
             if (MD) {
                 label.addEventListener('touchstart', () => {
                     hoverFunc();
-                    if (player.toggles.hover[1]) { repeatFunction(clickFunc); }
+                    if (player.toggles.hover[1]) {
+                        clickFunc();
+                        repeatFunction(clickFunc);
+                    }
                 });
             } else {
                 label.addEventListener('mousedown', () => repeatFunction(clickFunc));
@@ -1293,6 +1440,21 @@ try { //Start everything
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
+    } {
+        const button = getId('createAllStrangeness');
+        const clickFunc = () => {
+            if (globalSave.MDSettings[0]) {
+                const s = global.debug.MDStrangePage;
+                for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangeness(i, s, 'strangeness'); }
+            } else {
+                for (let s = 1; s < global.strangenessInfo.length; s++) {
+                    for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangeness(i, s, 'strangeness'); }
+                }
+            }
+        };
+        button.addEventListener('click', clickFunc);
+        if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
+        if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
     }
     getId('strangenessVisibility').addEventListener('click', () => {
         global.sessionToggles[1] = !global.sessionToggles[1];
@@ -1321,11 +1483,22 @@ try { //Start everything
             const label = getId(`inflation${i + 1}Tree${s + 1}`);
             const image = getQuery(`#inflation${i + 1}Tree${s + 1} > input`);
             const hoverFunc = () => hoverStrangeness(i, s, 'inflations');
-            if (PC) { label.addEventListener('mouseenter', hoverFunc); }
+            const clickFunc = () => buyStrangeness(i, s, 'inflations');
+            if (PC) {
+                label.addEventListener('mouseenter', hoverFunc);
+                image.addEventListener('mouseenter', () => {
+                    if (player.toggles.hover[2]) { clickFunc(); }
+                });
+            }
             if (MD) {
-                label.addEventListener('touchstart', hoverFunc);
+                label.addEventListener('touchstart', () => {
+                    hoverFunc();
+                    if (player.toggles.hover[2]) {
+                        clickFunc();
+                        repeatFunction(clickFunc);
+                    }
+                });
             } else {
-                const clickFunc = () => buyStrangeness(i, s, 'inflations');
                 label.addEventListener('mousedown', () => repeatFunction(clickFunc));
                 image.addEventListener('click', clickFunc);
             }
@@ -1333,13 +1506,17 @@ try { //Start everything
                 image.addEventListener('focus', () => {
                     if (!global.hotkeys.tab) { return; }
                     hoverFunc();
+                    if (player.toggles.hover[2]) { clickFunc(); }
                 });
             }
         }
     }
     {
         const button = getId('loadoutsName');
-        button.addEventListener('change', () => { (getId('loadoutsName') as HTMLInputElement).value = (getId('loadoutsName') as HTMLInputElement).value.trim(); });
+        button.addEventListener('change', () => {
+            const input = getId('loadoutsName') as HTMLInputElement;
+            input.value = input.value.trim();
+        });
         button.addEventListener('keydown', (event) => {
             if (detectShift(event) === false && event.code === 'Enter') {
                 event.preventDefault();
@@ -1349,18 +1526,16 @@ try { //Start everything
     }
     getId('inflationRefund').addEventListener('click', () => void inflationRefund(global.hotkeys.shift));
     getId('inflationLoadouts').addEventListener('click', () => {
-        const windowHTML = getId('loadoutsMain');
-        const status = windowHTML.style.display === 'none';
-        if (status) {
-            windowHTML.style.display = '';
-            loadoutsVisual(global.loadouts.input);
-        } else { windowHTML.style.display = 'none'; }
-        if (globalSave.SRSettings[0]) { getId('inflationLoadouts').ariaExpanded = `${status}`; }
+        if ((global.loadouts.open = !global.loadouts.open)) {
+            getId('loadoutsMain').style.display = '';
+            (getId('loadoutsName') as HTMLInputElement).value = 'Auto-generate';
+            loadoutsLoadAuto();
+            loadoutsRecreate();
+        } else { getId('loadoutsMain').style.display = 'none'; }
+        if (globalSave.SRSettings[0]) { getId('inflationLoadouts').ariaExpanded = `${global.loadouts.open}`; }
     });
     getId('loadoutsEdit').addEventListener('change', () => {
         const first = (getId('loadoutsEdit') as HTMLInputElement).value.split(',');
-        const appeared = {} as Record<number, number>;
-        const max = global.treeInfo[0].max;
         const final = [];
         for (let i = 0; i < first.length; i++) {
             const index = first[i].indexOf('x');
@@ -1370,20 +1545,13 @@ try { //Start everything
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
-            const inside = appeared[number] ?? 0;
-            const maxRepeats = max[number] - inside;
-            if (repeat > maxRepeats) { repeat = maxRepeats; }
-            if (isNaN(maxRepeats) || isNaN(repeat) || repeat < 1) { continue; }
-            appeared[number] = inside + repeat;
+            if (!checkUpgrade(number, 0, 'inflations') || isNaN(repeat)) { continue; }
+            if (repeat > 99) { repeat = 99; }
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
-        global.loadouts.input = final;
-        loadoutsVisual(final);
+        loadoutsFinal(final);
     });
-    getId('loadoutsLoadAuto').addEventListener('click', () => {
-        if (!global.hotkeys.shift) { (getId('loadoutsName') as HTMLInputElement).value = 'Auto-generate'; }
-        loadoutsLoadAuto();
-    });
+    getId('loadoutsLoadAuto').addEventListener('click', loadoutsLoadAuto);
     getId('loadoutsSave').addEventListener('click', loadoutsSave);
     getId('loadoutsLoad').addEventListener('click', () => void loadoutsLoad());
     getId('loadoutsMove').addEventListener('click', () => {
@@ -1431,7 +1599,7 @@ try { //Start everything
     }
 
     /* Settings tab */
-    for (const number of [0, 2, 4, 9]) {
+    for (const number of [0, 2, 4, 9, 10]) {
         const button = getId(`toggleAuto${number}Info`);
         const open = (hover = false) => {
             const html = getId(`toggleAuto${number}Menu`);
@@ -1462,7 +1630,7 @@ try { //Start everything
     }
     getId('stageInput').addEventListener('change', () => {
         const input = getId('stageInput') as HTMLInputElement;
-        if (!global.offline.active) { player.stage.input = Math.max(Number(input.value), 0); }
+        if (!global.offline.active) { player.stage.input = Number(input.value); }
         input.value = format(player.stage.input, { type: 'input' });
     });
     getId('vaporizationInput').addEventListener('change', () => {
@@ -1472,7 +1640,7 @@ try { //Start everything
     });
     getId('vaporizationInputMax').addEventListener('change', () => {
         const input = getId('vaporizationInputMax') as HTMLInputElement;
-        if (!global.offline.active) { player.vaporization.input[1] = Math.max(Number(input.value), 0); }
+        if (!global.offline.active) { player.vaporization.input[1] = Number(input.value); }
         input.value = format(player.vaporization.input[1], { type: 'input' });
     });
     getId('collapseInput').addEventListener('change', () => {
@@ -1510,7 +1678,7 @@ try { //Start everything
     });
     getId('mergeInput').addEventListener('change', () => {
         const input = getId('mergeInput') as HTMLInputElement;
-        if (!global.offline.active) { player.merge.input[0] = Math.max(Math.trunc(Number(input.value)), 0); }
+        if (!global.offline.active) { player.merge.input[0] = Math.trunc(Number(input.value)); }
         input.value = format(player.merge.input[0], { type: 'input' });
     });
     getId('mergeInputSince').addEventListener('change', () => {
@@ -1536,15 +1704,15 @@ try { //Start everything
         const exportReward = player.time.export;
         if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
             const { strange } = player;
-            const improved = player.tree[0][5] >= 1;
-            const conversion = Math.min(exportReward[0] / 86400_000, 1);
-            const quarks = (improved ? exportReward[1] : exportReward[1] / 2.5 + 1) * conversion;
+            const divide = player.stage.true >= 7 ? 1 : 2.5;
+            const conversion = Math.min(exportReward[0] / (player.stage.true >= 8 ? 21600_000 : 86400_000), 1);
+            const quarks = (exportReward[1] / divide + 1) * conversion;
 
             strange[0].current += quarks;
             strange[0].total += quarks;
             exportReward[1] = Math.max(exportReward[1] - quarks, 0);
             if (player.strangeness[5][8] >= 1) {
-                const strangelets = (improved ? exportReward[2] : exportReward[2] / 2.5) * conversion;
+                const strangelets = exportReward[2] / divide * conversion;
                 strange[1].current += strangelets;
                 strange[1].total += strangelets;
                 exportReward[2] -= strangelets;
@@ -1598,8 +1766,7 @@ try { //Start everything
             window.location.reload();
             void Alert('Awaiting game reload');
         } else if (value === 'devMode') {
-            globalSave.developerMode = !globalSave.developerMode;
-            Notify(`Developer mode is ${globalSave.developerMode ? 'now' : 'no longer'} active`);
+            Notify(`Developer mode is ${((globalSave.developerMode = !globalSave.developerMode)) ? 'now' : 'no longer'} active`);
             saveGlobalSettings();
         } else if (lower === 'achievement') {
             Notify('Unlocked a new Achievement! (If there were any)');
@@ -1697,6 +1864,7 @@ try { //Start everything
             void document.documentElement.requestFullscreen({ navigationUI: 'hide' });
         } else { void document.exitFullscreen(); }
     });
+    getId('warpButton').addEventListener('click', offlineWarp);
     getId('customFontSize').addEventListener('change', () => changeFontSize());
 
     getId('stageHistorySave').addEventListener('change', () => {
@@ -1733,16 +1901,13 @@ try { //Start everything
             const screenHeight = body.clientHeight;
 
             const html = event.currentTarget as HTMLElement;
-            let lastX = mouse ? event.clientX : event.changedTouches[0].clientX;
-            let lastY = mouse ? event.clientY : event.changedTouches[0].clientY;
+            const current = html.getBoundingClientRect();
+            const offsetX = current.right - (mouse ? event.clientX : event.changedTouches[0].clientX);
+            const offsetY = current.bottom - (mouse ? event.clientY : event.changedTouches[0].clientY);
             const move = (event: MouseEvent | TouchEvent) => {
-                const newX = mouse ? (event as MouseEvent).clientX : (event as TouchEvent).changedTouches[0].clientX;
-                const newY = mouse ? (event as MouseEvent).clientY : (event as TouchEvent).changedTouches[0].clientY;
                 const current = html.getBoundingClientRect();
-                html.style.right = `${(1 - Math.min(Math.max(current.right + newX - lastX, current.width), screenWidth) / screenWidth) * 100}%`;
-                html.style.bottom = `${(1 - Math.min(Math.max(current.bottom + newY - lastY, current.height), screenHeight) / screenHeight) * 100}%`;
-                lastX = newX;
-                lastY = newY;
+                html.style.right = `${Math.max(1 - Math.max((mouse ? (event as MouseEvent).clientX : (event as TouchEvent).changedTouches[0].clientX) + offsetX, current.width) / screenWidth, 0) * 100}%`;
+                html.style.bottom = `${Math.max(1 - Math.max((mouse ? (event as MouseEvent).clientY : (event as TouchEvent).changedTouches[0].clientY) + offsetY, current.height) / screenHeight, 0) * 100}%`;
 
                 if (!mouse) { html.style.opacity = '1'; }
             };
@@ -1801,9 +1966,7 @@ try { //Start everything
             `\nGame loaded after ${format((Date.now() - playerStart.time.started) / 1000, { type: 'time', padding: false })}` : ''}
         `);
         void simulateOffline(global.lastSave);
-    } else {
-        pauseGame(false);
-    }
+    } else { pauseGame(false); }
     getId('body').style.display = '';
     getId('loading').style.display = 'none';
     document.title = `Fundamental ${playerStart.version}`;
@@ -1811,7 +1974,7 @@ try { //Start everything
     specialHTML.cache.queryMap.clear();
     specialHTML.cache.classMap.clear();
 } catch (error) {
-    const stack = (error as { stack: string }).stack;
+    const stack = (error as { stack?: string }).stack;
     void Alert(`Game failed to load\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 2);
     const buttonDiv = document.createElement('div');
     buttonDiv.innerHTML = '<button type="button" id="exportError" style="width: 7em;">Export save</button><button type="button" id="deleteError" style="width: 7em;">Delete save</button>';

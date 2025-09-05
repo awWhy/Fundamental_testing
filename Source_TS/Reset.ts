@@ -1,5 +1,6 @@
 import { allowedToBeReset } from './Check';
-import { cloneArray, global, player, playerStart } from './Player';
+import { cloneArray, playerStart } from './Main';
+import { global, player } from './Player';
 import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, autoElementsSet, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation } from './Stage';
 import { stageUpdate, switchTab } from './Update';
 
@@ -11,7 +12,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     if (type === 'galaxy') {
         const { elements } = player;
 
-        for (let i = 1; i < playerStart.elements.length; i++) {
+        for (let i = 1; i < global.elementsInfo.maxActive; i++) {
             if (!allowedToBeReset(i, 4, 'elements')) { continue; }
             elements[i] = 0;
         }
@@ -179,6 +180,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
             autoElementsSet();
             global.lastElement = null;
         } else if (s === 5) {
+            global.mergeInfo.galaxies = 0;
             player.merge.rewards = [0, 0, 0, 0];
             player.merge.resets = 0;
             player.merge.since = 0;
@@ -219,17 +221,19 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
 export const resetVacuum = (level = 0) => {
     const vacuum = player.inflation.vacuum;
     if (level >= 2) {
+        const startUniverse = 1 + player.inflation.ends[2] - player.inflation.ends[1];
         player.inflation.voidVerses = 0;
         for (let i = 0; i < playerStart.verses.length; i++) {
             player.verses[i].true = 0;
-            player.verses[i].current = 1 + player.inflation.ends[2] - player.inflation.ends[1];
+            player.verses[i].current = startUniverse;
         }
         for (let i = 0; i < playerStart.tree[0].length; i++) {
             player.tree[0][i] = 0;
             calculateResearchCost(i, 0, 'inflations');
         }
         const supervoid = player.challenges.supervoid;
-        const total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5];
+        let total = (startUniverse * player.tree[1][9]) + player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5];
+        if (player.inflation.vacuum) { total++; }
         player.cosmon[0].current = total;
         player.cosmon[0].total = total;
         player.inflation.resets = 0;
@@ -238,8 +242,8 @@ export const resetVacuum = (level = 0) => {
     if (level >= 1) {
         player.inflation.age = 0;
         player.time.universe = 0;
-        if (player.challenges.stability < 2 || level > 1) {
-            player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoid);
+        if (player.challenges.stability < 3) {
+            player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoidMax);
             global.inflationInfo.totalSuper = 0;
         }
     }
@@ -283,7 +287,6 @@ export const resetVacuum = (level = 0) => {
 
     for (let i = 0; i < playerStart.strange.length; i++) {
         player.strange[i].current = 0;
-        player.strange[i].total = 0;
     }
     player.discharge.energy = 0;
     player.discharge.energyMax = 0;
@@ -306,19 +309,23 @@ export const resetVacuum = (level = 0) => {
     assignBuildingsProduction.S4Levels(false);
     player.elements = cloneArray(playerStart.elements);
     global.lastElement = null;
+    global.mergeInfo.galaxies = 0;
     player.merge.since = 0;
     player.merge.resets = 0;
     player.merge.rewards = [0, 0, 0, 0];
     global.lastStrangeness = [null, 0];
     global.lastMilestone = [null, 0];
-    player.challenges.void = cloneArray(playerStart.challenges.void);
     player.darkness.energy = 0;
     player.darkness.fluid = 0;
 
+    if (vacuum && player.challenges.stability >= 2) {
+        const supervoid = player.challenges.supervoid;
+        player.challenges.void = cloneArray(supervoid);
+        const total = supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5];
+        player.strange[0].current = total * (1 + total) / 2;
+    } else { player.challenges.void = cloneArray(playerStart.challenges.void); }
     if (universes >= 1) {
-        const start = Math.ceil(player.verses[0].true ** (vacuum ? 2 : 1.5));
-        player.strange[0].current = start;
-        player.strange[0].total = start;
+        player.strange[0].current += Math.ceil(player.verses[0].true ** (vacuum ? 2 : 1.5));
         if (vacuum) { player.strangeness[1][8] = 2; }
     }
     if (universes >= 2) { player.strangeness[5][4] = 1; }
@@ -328,6 +335,8 @@ export const resetVacuum = (level = 0) => {
     }
     if (universes >= 5) { player.strangeness[5][6] = vacuum ? 1 : 2; }
     if (universes >= 6) { player.strangeness[5][9] = 1; }
+    if (universes >= 8) { player.strange[1].current = 2 ** player.inflation.voidVerses - 1; }
+    for (let i = 0; i < playerStart.strange.length; i++) { player.strange[i].total = player.strange[0].current; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 6; s++) {
@@ -509,6 +518,7 @@ export const loadFromClone = () => {
     assignBuildingsProduction.S4Levels(true);
     player.elements = clone.elements;
     global.lastElement = null;
+    global.mergeInfo.galaxies = player.buildings[5][3].current.toNumber();
     player.merge.rewards = clone.merge.rewards;
     player.merge.resets = clone.merge.resets;
     player.merge.since = clone.merge.since;
