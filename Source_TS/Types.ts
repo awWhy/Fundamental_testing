@@ -41,6 +41,8 @@ export interface playerType {
     }
     merge: {
         rewards: [number, number, number, number]
+        /** Prevents auto Merge level 2 from breaking */
+        claimed: [number, number]
         resets: number
         /** [Min Galaxies, time since last Galaxy] */
         input: [number, number]
@@ -78,26 +80,27 @@ export interface playerType {
         vacuum: number
         stage: number
     }
-    /** .true is how many are self-made \
-     * .current is how many are right now \
-     * .total is how many was produced this reset \
-     * .trueTotal is how many was produced this Stage
-     */
     buildings: Array<[
         {
             current: Overlimit
+            /** This pre-Stage reset */
             total: Overlimit
+            /** This Stage */
             trueTotal: Overlimit
         }, ...Array<{
+            /** Self-made */
             true: number
             current: Overlimit
+            /** This pre-Stage reset */
             total: Overlimit
+            /** This Stage */
             trueTotal: Overlimit
         }>
     ]>
     verses: Array<{
         true: number
         current: number
+        total: number
     }>
     strange: Array<{
         current: number
@@ -151,16 +154,16 @@ export interface playerType {
         }
     }
     history: {
-        /** [time, quarks, strangelets] */
         stage: {
-            best: [number, number, number]
-            list: Array<[number, number, number]>
+            best: [number, number, number, number, number]
+            /** [time, quarks, strangelets, peak, peakedAt] */
+            list: Array<playerType['history']['stage']['best']>
             input: [number, number]
         }
-        /** [time, state, inflatons] */
         end: {
-            best: [number, number]
-            list: Array<[number, number]>
+            best: [number, number] //, number
+            /** [time, inflatons] */ //, type
+            list: Array<playerType['history']['end']['best']>
             input: [number, number]
         }
     }
@@ -203,6 +206,8 @@ export interface globalType {
     trueActive: number
     /** In milliseconds */
     lastSave: number
+    /** Game update, in milliseconds */
+    lastUpdate: number | null
     offline: {
         active: boolean
         /** [Change into, update type] */
@@ -456,8 +461,8 @@ export interface globalType {
         color: string
     }]
     historyStorage: {
-        stage: Array<[number, number, number]>
-        end: Array<[number, number]>
+        stage: playerType['history']['stage']['list']
+        end: playerType['history']['end']['list']
     }
     loadouts: {
         input: number[]
@@ -477,7 +482,7 @@ export interface globalSaveType {
     /** hotkeyFunction: [key, code] */
     hotkeys: Record<hotkeysList, string[]>
     numbers: Record<numbersList, string>
-    /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4] */
+    /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4], Hide main scrollbar[5], Milestone notifications[6] */
     toggles: boolean[]
     /** Point[0], Separator[1] */
     format: [string, string]
@@ -550,6 +555,7 @@ export interface calculateEffectsType {
     mergeRequirement: (stability?: boolean) => number
     mergeMaxResets: () => number
     reward: Array<(post?: boolean) => number>
+    groupsCost: () => number
     mergeScore: () => number
     S5Upgrade0: () => number
     S5Upgrade1: () => number
@@ -569,9 +575,7 @@ export interface calculateEffectsType {
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
     S2Strange9: () => number
-    S5Strange9_stage1: () => number
     S5Strange9_stage2: () => number
-    S5Strange9_stage3: () => number
     T0Inflation0: () => number
     T0Inflation1: () => number
     T0Inflation3: () => number

@@ -50,7 +50,7 @@ export const globalSave: globalSaveType = {
         toggleStructure: 'Numpad',
         enterChallenge: 'Shift Numbers'
     },
-    toggles: [false, false, false, false, false],
+    toggles: [false, false, false, false, false, false, true],
     format: ['.', ''],
     theme: null,
     fontSize: 16,
@@ -180,7 +180,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeS2.png',
             'UpgradeS3.png',
             'UpgradeS4.png',
-            'UpgradeS5.png'
+            'UpgradeS5.png',
+            'Missing.png'
         ], [
             'UpgradeG1.png',
             'UpgradeG2.png',
@@ -228,7 +229,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchS3.png', 'redBorderImage'],
             ['ResearchS4.png', 'stage5borderImage'],
             ['ResearchS5.png', 'stage6borderImage'],
-            ['ResearchS6.png', 'stage4borderImage']
+            ['ResearchS6.png', 'stage4borderImage'],
+            ['Missing.png', 'redBorderImage']
         ], [
             ['ResearchG1.png', 'stage1borderImage'],
             ['ResearchG2.png', 'stage6borderImage'],
@@ -280,7 +282,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchCollapse1.png', 'stage6borderImage'],
             ['ResearchCollapse2.png', 'redBorderImage'],
             ['ResearchCollapse3.png', 'stage1borderImage'],
-            ['ResearchCollapse4.png', 'stage6borderImage']
+            ['ResearchCollapse4.png', 'stage6borderImage'],
+            ['Missing.png', 'redBorderImage']
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage'],
             ['ResearchGalaxy2.png', 'brownBorderImage'],
@@ -565,7 +568,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             }
             properties['--background-color'] = 'black';
             properties['--window-color'] = '#01003c';
-            properties['--window-border'] = '#7100ff';
+            properties['--window-border'] = '#6500e0';
             properties['--footer-color'] = '#00007a';
             properties['--button-color'] = '#2b0095';
             properties['--button-border'] = '#6c1ad1';
@@ -975,7 +978,7 @@ export const playEvent = (event: number, replay = true) => {
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
     } else if (event === 12) {
-        text = "By converting Dark energy into the Phantom energy, you have triggered the scenario known as 'Big Rip', meaning that everything up to this point had been converted into Cosmons.\n(Also time required for a max Export reward is now reduced by 4)";
+        text = "By converting Dark energy into the Phantom energy, you have triggered the scenario known as 'Big Rip', meaning that everything up to this point had been converted into Cosmons.\n(Unlocked new Inflation Milestone and time required for a max Export reward is now reduced by 4)";
     } else if (event === 13) {
         text = 'Void Universes are weaker version of self-made Universes. They unlock and award mostly the same stuff, but do not count as self-made. They can be created only under the Void time limit.';
     }
@@ -1030,7 +1033,8 @@ export const openVersionInfo = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
+        <h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
         <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>

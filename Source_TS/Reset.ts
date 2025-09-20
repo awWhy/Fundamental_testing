@@ -1,7 +1,7 @@
 import { allowedToBeReset } from './Check';
 import { cloneArray, playerStart } from './Main';
 import { global, player } from './Player';
-import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, autoElementsSet, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation } from './Stage';
+import { autoResearchesSet, autoUpgradesSet, calculateMaxLevel, calculateResearchCost, autoElementsSet, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation } from './Stage';
 import { stageUpdate, switchTab } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
@@ -184,6 +184,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
             player.merge.rewards = [0, 0, 0, 0];
             player.merge.resets = 0;
             player.merge.since = 0;
+            player.merge.claimed = [0, 0];
         } else if (s === 6) {
             player.darkness.energy = 0;
             player.darkness.fluid = 0;
@@ -199,13 +200,15 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         player.researchesAuto[1] = strangeness[4][6];
         player.researchesAuto[2] = player.inflation.vacuum ? (strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : strangeness[5][9] < 1 ? 4 : 5) :
             (strangeness[Math.min(player.stage.current, 4)][4] >= 1 ? 1 : 0);
-    } else { assignBuildingsProduction.globalCache(); }
+    }
     if (player.inflation.vacuum || stageIndex.includes(1)) { assignResetInformation.trueEnergy(true); }
 
     for (const s of stageIndex) { //Less errors if do it separatly
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
-        if (s === 6 ? strangeness[6][3] < 2 : strangeness[s][5] < 1) { player.ASR[s] = 0; }
+        if (s === 6) {
+            player.ASR[s] = strangeness[6][3] >= 2 ? 1 : 0;
+        } else if (strangeness[s][5] < 1) { player.ASR[s] = 0; }
 
         autoUpgradesSet(s);
         autoResearchesSet('researches', s);
@@ -238,6 +241,8 @@ export const resetVacuum = (level = 0) => {
         player.cosmon[0].total = total;
         player.inflation.resets = 0;
         player.time.end = 0;
+
+        for (let i = 0; i < global.challengesInfo.length; i++) { assignChallengeInformation(i); }
     }
     if (level >= 1) {
         player.inflation.age = 0;
@@ -283,7 +288,7 @@ export const resetVacuum = (level = 0) => {
     player.inflation.time = 0;
     global.debug.timeLimit = false;
     global.historyStorage.stage = [];
-    player.history.stage.best = [3.1556952e16, 0, 0];
+    player.history.stage.best = cloneArray(playerStart.history.stage.best);
 
     for (let i = 0; i < playerStart.strange.length; i++) {
         player.strange[i].current = 0;
@@ -313,6 +318,7 @@ export const resetVacuum = (level = 0) => {
     player.merge.since = 0;
     player.merge.resets = 0;
     player.merge.rewards = [0, 0, 0, 0];
+    player.merge.claimed = [0, 0];
     global.lastStrangeness = [null, 0];
     global.lastMilestone = [null, 0];
     player.darkness.energy = 0;
@@ -430,6 +436,7 @@ export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {
     clone.elements = cloneArray(player.elements);
     clone.merge = {
         rewards: cloneArray(player.merge.rewards),
+        claimed: cloneArray(player.merge.claimed),
         resets: player.merge.resets,
         since: player.merge.since
     };
@@ -520,6 +527,7 @@ export const loadFromClone = () => {
     global.lastElement = null;
     global.mergeInfo.galaxies = player.buildings[5][3].current.toNumber();
     player.merge.rewards = clone.merge.rewards;
+    player.merge.claimed = clone.merge.claimed;
     player.merge.resets = clone.merge.resets;
     player.merge.since = clone.merge.since;
     player.darkness.energy = clone.darkness.energy;
