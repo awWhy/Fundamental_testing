@@ -319,7 +319,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: normal; }
     cursor: pointer !important;
 }
 
-#notifications > p:not(:first-of-type) { margin-top: -1px; }
+#notifications > p:not(:first-of-type) { margin-top: -2px; }
 
 .hasTitle { cursor: help; }
 label { cursor: pointer !important; }
@@ -993,7 +993,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     display: flex;
     flex-direction: column;
     background-color: #01003c;
-    border: 2px solid #5300c1;
+    border: 2px solid #6500e0;
     border-radius: 4px;
     padding: 0.5em;
     gap: 0.5em;
@@ -1025,7 +1025,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     padding: 0.5em 0.6em 0.6em;
     row-gap: 0.4em;
     background-color: #01003c;
-    border: 2px solid #5300c1;
+    border: 2px solid #6500e0;
     border-radius: 7px;
     min-width: min-content;
     max-width: 30em;
@@ -1091,6 +1091,12 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     background-color: #4d0000;
     color: var(--red-text);
     border-color: darkred;
+}
+
+#inflationMilestones > #inflationSupervoid {
+    background-color: #01003c;
+    color: var(--darkviolet-text);
+    border-color: #6500e0;
 }
 
 #settingsSubtabSettings {
@@ -1331,7 +1337,10 @@ li .hollowButton {
     height: 7.5em;
     max-height: 70vh;
     resize: vertical;
+    white-space: pre-line;
 }
+
+#historyMainDiv p { white-space: pre-line; }
 
 #historyMainDiv input {
     height: 1.7em;
@@ -1366,7 +1375,7 @@ li .hollowButton {
 .statsWindows p { margin-bottom: 0.08em; }
 
 #strangeAllStats > section { border-color: darkgreen; }
-#inflatonStat > section { border-color: #7100ff; }
+#inflatonStat > section { border-color: #6500e0; }
 
 #energyGainStats > div {
     display: flex;
