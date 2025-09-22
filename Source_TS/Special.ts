@@ -978,7 +978,7 @@ export const playEvent = (event: number, replay = true) => {
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
     } else if (event === 12) {
-        text = "By converting Dark energy into the Phantom energy, you have triggered the scenario known as 'Big Rip', meaning that everything up to this point had been converted into Cosmons.\n(Unlocked new Inflation Milestone and time required for a max Export reward is now reduced by 4)";
+        text = "By converting Dark energy into the Phantom energy, you have triggered the scenario known as 'Big Rip', meaning that everything up to this point had been converted into Cosmons.\n(Unlocked new Inflation Milestones and time required for a max Export reward is now reduced by 4)";
     } else if (event === 13) {
         text = 'Void Universes are weaker version of self-made Universes. They unlock and award mostly the same stuff, but do not count as self-made. They can be created only under the Void time limit.';
     }

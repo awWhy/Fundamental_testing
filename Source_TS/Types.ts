@@ -348,8 +348,6 @@ export interface globalType {
     versesInfo: {
         firstCost: number[]
         increase: number[]
-        /** Visual only */
-        producing: number[]
     }
     strangeInfo: {
         name: string[]
@@ -509,7 +507,6 @@ export interface calculateEffectsType {
     dischargeScaling: (S1Research3?: number, S1Strange2?: number) => number
     dischargeCost: (scaling?: number) => number
     dischargeBase: (S1research4?: number) => number
-    /** Result need to be divided by 100 */
     S1Upgrade6: () => number
     S1Upgrade7: (preons?: boolean) => number
     S1Upgrade9: () => number

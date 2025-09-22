@@ -1,7 +1,7 @@
 import { checkTab, milestoneGetValue } from './Check';
 import { changeSubtab } from './Hotkeys';
 import Overlimit from './Limit';
-import { cloneArray, getClass, getId, getQuery, toggleSwap } from './Main';
+import { getClass, getId, getQuery, toggleSwap } from './Main';
 import { effectsCache, global, player } from './Player';
 import { MDStrangenessPage, Notify, errorNotify, globalSave, playEvent, resetMinSizes, setTheme, specialHTML } from './Special';
 import { calculateBuildingsCost, stageResetCheck, setActiveStage, calculateEffects, assignBuildingsProduction, assignResetInformation, calculateVerseCost } from './Stage';
@@ -345,7 +345,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                 getId('darkSoft').textContent = format(soft);
                 getId('darkHardcap').textContent = format(calculateEffects.darkHardcap(), { padding: true });
                 const mergeScore = calculateEffects.mergeScore();
-                const producings = cloneArray(global.versesInfo.producing);
+                const producings = [assignBuildingsProduction.verse0()];
 
                 const hardcap = calculateEffects.darkHardcap();
                 const current = buildings[0].current.toNumber();
@@ -1341,6 +1341,8 @@ export const visualTrueStageUnlocks = () => {
     getId('inflation2Tree2').style.display = highest >= 8 ? '' : 'none';
     getId('inflationSupervoid').style.display = superUnlocked ? '' : 'none';
     getId('endMilestone1').style.display = highest >= 8 ? '' : 'none';
+    getId('inflationMilestone7').style.display = highest >= 8 ? '' : 'none';
+    getId('inflationMilestone8').style.display = highest >= 8 ? '' : 'none';
     getQuery('#resetToggles > h2 > span').style.display = highest >= 5 ? '' : 'none';
     getId('themeArea').style.display = highest >= 2 || globalSave.theme !== null ? '' : 'none';
     getId('switchTheme2').style.display = highest >= 2 ? '' : 'none';

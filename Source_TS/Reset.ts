@@ -226,10 +226,8 @@ export const resetVacuum = (level = 0) => {
     if (level >= 2) {
         const startUniverse = 1 + player.inflation.ends[2] - player.inflation.ends[1];
         player.inflation.voidVerses = 0;
-        for (let i = 0; i < playerStart.verses.length; i++) {
-            player.verses[i].true = 0;
-            player.verses[i].current = startUniverse;
-        }
+        player.verses[0].true = 0;
+        player.verses[0].current = startUniverse;
         for (let i = 0; i < playerStart.tree[0].length; i++) {
             player.tree[0][i] = 0;
             calculateResearchCost(i, 0, 'inflations');

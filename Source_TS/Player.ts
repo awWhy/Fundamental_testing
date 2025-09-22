@@ -327,8 +327,7 @@ export const global: globalType = {
     },
     versesInfo: {
         firstCost: [120],
-        increase: [1.5],
-        producing: [0]
+        increase: [1.5]
     },
     strangeInfo: {
         name: ['Strange quarks', 'Strangelets'],
@@ -359,7 +358,7 @@ export const global: globalType = {
                 () => `Atoms will produce ${player.inflation.vacuum ? 6 : 4} times more Particles.`,
                 () => 'Molecules will produce 4 times more Atoms.',
                 () => `Ability to regain spent Energy and if had enough Energy, it will also boost production of all ${player.inflation.vacuum ? 'Microworld ' : ''}Structures by ${format(global.dischargeInfo.base, { padding: true })}.${player.inflation.vacuum ? `\n(In true Vacuum it will also reset resources and all non-self-made Structures from all Stages${player.stage.true >= 7 ? ' before Abyss' : ''}, and enough self-made Structures to fully regain spent Energy)` : ''}`,
-                () => `Decrease Structures cost scaling by -${format(calculateEffects.S1Upgrade6() / 100)}.`,
+                () => `Decrease Structures cost scaling by -${format(calculateEffects.S1Upgrade6())}.`,
                 () => `Make self-made Structures boost themselves by ${format(calculateEffects.S1Upgrade7())}.${player.inflation.vacuum ? `\n(Self-made Preons boost themselves by ${format(calculateEffects.S1Upgrade7(true), { padding: true })} instead, softcaps instantly and gets completely disabled after ${format(1001)} Preons)` : ''}`,
                 () => `Molecules will produce Molecules, at a reduced rate.\n(${format(new Overlimit(effectsCache.tritium).multiply(global.inflationInfo.globalSpeed), { padding: true })} Molecules per second)`,
                 () => `Unspent Energy ${player.upgrades[1][10] === 1 ? '' : `^${format(0.5)}`} will boost 'Tritium' production of Molecules.\n(Boost: ${format(calculateEffects.S1Upgrade9(), { padding: true })})`,
@@ -1000,7 +999,7 @@ export const global: globalType = {
             () => `Combined and ready to make all self-made Red supergiants count as Red giants and improve '[24] Chromium' Element by +^${format(0.01)}.`,
             () => "Slow to react, but will increase max level of 'Star system' by +1.",
             () => `Does not need to be prepared to increase Stage reset reward base by Arithmetic progression with step of ${format(0.01)}.`,
-            () => `First of new Elements to come, increases max allowed Merge resets by +1 for every new Element past '[29] Copper'${player.upgrades[4][5] === 1 ? ` until '${global.elementsInfo.name[29 + player.verses[0].true]}'` : ''}.\n(Currently highest created Element in the current Stage reset is '${global.elementsInfo.name[player.collapse.maxElement]}', equals to +${Math.max(player.collapse.maxElement - 29, 0)} allowed Merges)`,
+            () => `First of new Elements to come, increases max allowed Merge resets by +1 for every new Element past '[29] Copper'${player.upgrades[4][5] === 1 ? ` until '${global.elementsInfo.name[29 + player.verses[0].true]}'` : ''}.\n(Currently highest created Element in the current Stage reset is '${global.elementsInfo.name[player.collapse.maxElement]}', equals to +${Math.max(Math.min(player.collapse.maxElement, 29 + player.verses[0].true) - 29, 0)} allowed Merges)`,
             () => "Will melt in the palm of your hand to increase max level of 'Star system' by +1.",
             () => `Too late to appear, but it will make all Galaxies cost scale slower by ${format(-0.01)} anyway.`,
             () => 'Toxic enough to buff only Quasi-stars with Black holes effect.',
@@ -1163,7 +1162,12 @@ export const global: globalType = {
                     if (player.strangeness[4][2] >= 4) { extraText += ", 'Microquasar' (Stage Research)"; }
                     return `Unlock a new Upgrade, its pretty good.\n(Current unlocks: ${extraText})`;
                 },
-                () => `${player.challenges.supervoid[4] >= 3 ? 20 : 10}% of Brown dwarfs will be able to turn into Red giants after Collapse${player.challenges.supervoid[4] >= 3 ? ' and 20% of Main-sequence into Neutron stars' : ''}.`,
+                () => { //[3]
+                    const mainStars = player.inflation.vacuum && player.challenges.supervoid[4] >= 3;
+                    const conversion = mainStars ? (5 + 5 * player.strangeness[4][3]) * player.strangeness[4][3] : 10;
+                    const after = (10 + 5 * player.strangeness[4][3]) * (1 + player.strangeness[4][3]);
+                    return `${conversion}%${mainStars ? ` ⟶ ${after}%` : ''} of Brown dwarfs will be able to turn into Red giants after Collapse.${mainStars ? `\nAlso ${conversion}% ⟶ ${after}% of Main-sequence into Neutron stars.` : ''}`;
+                },
                 () => `Automatically Collapse once reached enough boost or Solar mass. (Needs to be enabled in Settings)${global.strangenessInfo[4].max[4] > 1 ? `\nSecond level will unlock an automatic Star remnants${global.strangenessInfo[4].max[4] > 2 ? ' (and Solar mass with third level)' : ''} without needing to reset.` : ''}`,
                 () => 'Make auto for all Interstellar Structures permanent.',
                 () => `Elements will no longer require Collapse for activation${player.inflation.vacuum ? ' and related automatization Research will cost as if its level is -1' : ''}.\nSecond level will unlock auto creation of Elements. (${global.strangenessInfo[4].max[6] > 1 ? 'Needs to be enabled in settings' : 'Not yet unlocked for Interstellar space'})`,
@@ -1224,7 +1228,7 @@ export const global: globalType = {
                     }
                     if (player.strangeness[5][10] >= 4) {
                         if (player.tree[1][7] >= 3) { passive += `, boost Solar mass gain by ${format(global.mergeInfo.galaxies / 1000 + 1, { padding: true })}`; }
-                        upgrades += ", 'Proton capture' (Intestellar Upgrade), 'White holes' (Collapse Research)";
+                        upgrades += ", 'Proton capture' (Interstellar Upgrade), 'White holes' (Collapse Research)";
                     }
                     return `Boost lower Stages based on current Galaxies and unlock new Upgrades for them.\n(Passive effects: ${passive})\n(New Upgrades: ${upgrades})`;
                 }
