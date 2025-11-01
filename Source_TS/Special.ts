@@ -1,13 +1,12 @@
 import { assignHotkeys, detectShift, removeHotkey } from './Hotkeys';
 import { deepClone, getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { global, player } from './Player';
-import { assignResetInformation } from './Stage';
+import { assignResetInformation, setActiveStage } from './Stage';
 import type { globalSaveType, hotkeysList, numbersList } from './Types';
-import { format, stageUpdate, switchTab, visualTrueStageUnlocks, visualUpdate } from './Update';
+import { format, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
-        offline: 20,
         numbers: 80,
         visual: 800,
         autoSave: 20000
@@ -50,7 +49,7 @@ export const globalSave: globalSaveType = {
         toggleStructure: 'Numpad',
         enterChallenge: 'Shift Numbers'
     },
-    toggles: [false, false, false, false, false, false, true],
+    toggles: [false, false, false, false, false, false, true, true],
     format: ['.', ''],
     theme: null,
     fontSize: 16,
@@ -229,8 +228,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchS3.png', 'redBorderImage'],
             ['ResearchS4.png', 'stage5borderImage'],
             ['ResearchS5.png', 'stage6borderImage'],
-            ['ResearchS6.png', 'stage4borderImage'],
-            ['Missing.png', 'redBorderImage']
+            ['ResearchS6.png', 'stage4borderImage']
         ], [
             ['ResearchG1.png', 'stage1borderImage'],
             ['ResearchG2.png', 'stage6borderImage'],
@@ -329,7 +327,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     },
     localStorage: {
         /** Index for game's primary save slot */
-        main: 'testing_save',
+        main: 'save',
         /** Index for global game settings */
         settings: 'fundamentalSettings'
     },
@@ -346,7 +344,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     notifications: [] as Array<[string, (instantClose?: boolean) => void]>,
     /** [priority, closeFunc] */
     alert: [null, null] as [number | null, (() => void) | null],
-    bigWindow: null as 'version' | 'hotkeys' | 'log' | null,
+    bigWindow: null as 'version' | 'hotkeys' | null,
     styleSheet: document.createElement('style') //Secondary
 };
 
@@ -782,7 +780,6 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
     });
 };
 
-/** Start will make it behave as if X duplicates have been detected */
 export const Notify = (text: string) => {
     const { notifications } = specialHTML;
 
@@ -907,17 +904,10 @@ export const MDStrangenessPage = (stageIndex: number) => {
 };
 
 export const replayEvent = async() => {
-    let last;
-    if (player.stage.true >= 8) {
-        last = player.event ? 13 : 12;
-    } else if (player.stage.true >= 7) {
-        last = player.verses[0].true >= 6 ? 11 : player.event ? 10 : 9;
-    } else if (player.stage.true === 6) {
-        last = player.event ? 8 : player.stage.resets >= 1 ? 7 : 6;
-    } else {
-        last = player.stage.true - (player.event ? 0 : 1);
-        if (last < 1) { return void Alert('There are no unlocked events'); }
-    }
+    const last = player.stage.true >= 7 ? 9 :
+        player.stage.true === 6 ? (player.event ? 8 : player.stage.resets >= 1 ? 7 : 6) :
+        player.stage.true - (player.event ? 0 : 1);
+    if (last < 1) { return void Alert('There are no unlocked events'); }
 
     let text = 'Which event do you want to see again?\nEvent 1: Stage reset';
     if (last >= 2) { text += '\nEvent 2: Clouds softcap'; }
@@ -928,10 +918,6 @@ export const replayEvent = async() => {
     if (last >= 7) { text += '\nEvent 7: Void unlocked'; }
     if (last >= 8) { text += '\nEvent 8: First Merge'; }
     if (last >= 9) { text += '\nEvent 9: Inflation'; }
-    if (last >= 10) { text += '\nEvent 10: Supervoid'; }
-    if (last >= 11) { text += '\nEvent 11: Stability'; }
-    if (last >= 12) { text += '\nEvent 12: Big rip'; }
-    if (last >= 13) { text += '\nEvent 13: Void Universes'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -944,43 +930,36 @@ export const playEvent = (event: number, replay = true) => {
     if (global.offline.active || specialHTML.alert[0] !== null) { return; }
     if (!replay) { player.event = true; }
 
-    let text = 'No such event';
+    let text = 'No such event.';
     if (event === 1) {
-        text = 'A new reset tier has been unlocked. It will allow the creation of higher tier Structures, but for the price of everything else';
+        text = 'A new reset tier has been unlocked. It will allow the creation of higher tier Structures, but for the price of everything else.';
     } else if (event === 2) {
-        text = `Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to the softcap`;
+        text = `Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to the softcap.`;
     } else if (event === 3) {
         if (!replay) {
-            assignResetInformation.maxRank();
+            assignResetInformation.rankInformation();
             global.debug.rankUpdated = null;
         }
-        text = 'Cannot gain any more Mass with the current Rank. A new one has been unlocked, but reaching it will softcap the Mass production';
+        text = 'Cannot gain any more Mass with the current Rank. A new one has been unlocked, but reaching it will softcap the Mass production.';
     } else if (event === 4) {
-        text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis';
+        text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis.';
     } else if (event === 5) {
         if (!replay) { stageUpdate(false); }
         text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, '[26] Iron' Element will use new effect to improve Stage reset reward.\n(Stars in Intergalactic are just Stars from Interstellar)";
     } else if (event === 6) {
-        text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state';
+        text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
-        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab";
+        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab.";
     } else if (event === 8) {
-        if (!replay) { stageUpdate(false); }
-        text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure - the 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
-    } else if (event === 9) {
-        text = "Now that the first Universe is finished, it's time to Inflate a new one and so to unlock the Inflation tab, new Upgrades and more Void rewards to complete\n(Also improve 'Nucleosynthesis' effect to unlock more Elements for every self-made Universe and exports will now fully claim their storage)";
-    } else if (event === 10) {
         if (!replay) {
-            visualTrueStageUnlocks();
-            switchTab();
+            setTimeout(() => {
+                setActiveStage(6, player.stage.active);
+                stageUpdate(true);
+            });
         }
-        text = "Now that there was even more matter to rearrange ‒ the 'Supervoid' was formed. Check it out by clicking on the Void name in the 'Advanced' subtab.\n(Also unlocked 2 new Inflations, Supervoid unlocks are kept through Universe reset)";
-    } else if (event === 11) {
-        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, which had unlocked a new Challenge ‒ 'Vacuum stability'";
-    } else if (event === 12) {
-        text = "By converting Dark energy into the Phantom energy, you have triggered the scenario known as 'Big Rip', meaning that everything up to this point had been converted into Cosmons.\n(Unlocked new Inflation Milestones and time required for a max Export reward is now reduced by 4)";
-    } else if (event === 13) {
-        text = 'Void Universes are weaker version of self-made Universes. They unlock and award mostly the same stuff, but do not count as self-made. They can be created only under the Void time limit.';
+        text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ the 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
+    } else if (event === 9) {
+        text = "Since current Universe is now finished, it's time to Inflate a new one and so to unlock 'Inflation' tab, Supervoid and basic End reset ‒ 'Big Crunch'.\n(Also 'Nucleosynthesis' effect has been improved, unlocked more Protogalaxy unlocks and exports will now fully claim their storage and need 4 times less time for max reward)";
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);
@@ -988,17 +967,16 @@ export const playEvent = (event: number, replay = true) => {
 
 const buildBigWindow = (subWindow: string): null | HTMLElement => {
     if (getId('closeBigWindow', true) === null) {
-        getId('bigWindow').innerHTML = '<div role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></div>';
-        specialHTML.styleSheet.textContent += `#bigWindow > div { display: flex; flex-direction: column; align-items: center; width: 38rem; max-width: 80vw; height: 42rem; max-height: 90vh; background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }
-            #bigWindow > div > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; }
-            #bigWindow > div > div { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior-y: none; } `;
+        getId('bigWindow').innerHTML = '<article role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></article>';
+        specialHTML.styleSheet.textContent += `#bigWindow > article { display: flex; flex-direction: column; align-items: center; width: 38rem; max-width: 80vw; height: 42rem; max-height: 90vh; background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }
+            #bigWindow > article > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; }
+            #bigWindow > article > div { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior-y: none; } `;
     }
 
     if (getId(subWindow, true) !== null) { return null; }
     const mainHTML = document.createElement('div');
-    getQuery('#bigWindow > div').prepend(mainHTML);
+    getQuery('#bigWindow > article').prepend(mainHTML);
     mainHTML.id = subWindow;
-    mainHTML.role = 'dialog';
     return mainHTML;
 };
 const addCloseEvents = (sectionHTML: HTMLElement, firstTargetHTML = null as HTMLElement | null) => {
@@ -1034,6 +1012,7 @@ export const openVersionInfo = () => {
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
+        <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
         <h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
@@ -1061,7 +1040,6 @@ export const openVersionInfo = () => {
         <h6>v0.0.2</h6><p>- Stats subtab</p>
         <h6>v0.0.1</h6><p>- Submerged Stage rework\n\n- Mobile device support</p>
         <h6>v0.0.0</h6><p>- First published version\n\n- Submerged Stage placeholder</p>`;
-        mainHTML.ariaLabel = 'Versions menu';
         specialHTML.styleSheet.textContent += `#versionHTML h6 { font-size: 1.18em; }
             #versionHTML p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; }
             #versionHTML p:last-of-type { margin-bottom: 0; } `;
@@ -1069,6 +1047,7 @@ export const openVersionInfo = () => {
 
     specialHTML.bigWindow = 'version';
     addCloseEvents(getId('versionHTML'));
+    getQuery('#bigWindow > article').ariaLabel = 'Versions menu';
 };
 
 export const openHotkeys = () => {
@@ -1126,7 +1105,6 @@ export const openHotkeys = () => {
         <p>Shift clicking the hotkey will remove it</p>
         <label id="hotkeysToggleLabel" title="Turn ON, if using non-QWERTY layout keyboard">Language dependant hotkeys </label>
         <button type="button" id="restoreHotkeys" class="selectBtn">Restore default hotkeys values</button>`; //Spacebar at the end of label is required
-        mainHTML.ariaLabel = 'Hotkeys menu';
         const toggle = getId('globalToggle0');
         getId('hotkeysToggleLabel').append(toggle);
         toggle.style.display = '';
@@ -1274,28 +1252,7 @@ export const openHotkeys = () => {
 
     specialHTML.bigWindow = 'hotkeys';
     addCloseEvents(getId('hotkeysHTML'), getQuery('#tabRightHotkey button'));
+    getQuery('#bigWindow > article').ariaLabel = 'Hotkeys menu';
     visualTrueStageUnlocks();
-    visualUpdate();
-};
-
-export const openLog = () => {
-    if (specialHTML.bigWindow !== null) { return; }
-    const mainHTML = buildBigWindow('logHTML');
-    if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h2 class="whiteText"><span class="biggerWord mainText">Log</span> | <button type="button" id="logOrder" class="selectBtn mainText">Entries on top are newer</button></h2>
-        <ul id="logMain"><li></li></ul>`; //Empty <li> is required
-        mainHTML.ariaLabel = 'Versions menu';
-        specialHTML.styleSheet.textContent += `#logHTML { display: flex; flex-direction: column; }
-            #logMain { display: flex; flex-direction: column; text-align: start; border-top: 2px solid; border-bottom: 2px solid; height: 100%; padding: 0.2em 0.4em; margin-top: 0.4em; overflow-y: scroll; overscroll-behavior-y: none; }
-            #logMain > li { list-style: inside "‒ "; white-space: pre-line; }
-            #logMain.bottom { flex-direction: column-reverse; } /* Cheap way to change the order */`;
-        getId('logOrder').addEventListener('click', () => {
-            const bottom = getId('logMain').classList.toggle('bottom');
-            getId('logOrder').textContent = `Entries on ${bottom ? 'bottom' : 'top'} are newer`;
-        });
-    }
-
-    specialHTML.bigWindow = 'log';
-    addCloseEvents(getId('logHTML'));
     visualUpdate();
 };

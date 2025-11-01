@@ -1,5 +1,20 @@
 import type Overlimit from './Limit';
 
+type building = {
+    /** Self-made */
+    true: number
+    current: Overlimit
+    /** This pre-Stage reset */
+    total: Overlimit
+    /** This Stage */
+    trueTotal: Overlimit
+};
+type verse = {
+    true: number
+    current: number
+    total: number
+};
+
 export interface playerType {
     version: string
     fileName: string
@@ -9,11 +24,10 @@ export interface playerType {
         active: number
         resets: number
         time: number
-        /** Interstellar only */
-        peak: number
-        /** Interstellar only */
-        peakedAt: number
-        input: number
+        /** Interstellar only, [Strange quarks peak, peaked at] */
+        peak: [number, number]
+        /** [type, quarks, time, peak] */
+        input: [number, number, number, number]
     }
     discharge: {
         energy: number
@@ -57,12 +71,12 @@ export interface playerType {
     inflation: {
         loadouts: Array<[string, number[]]>
         vacuum: boolean
-        voidVerses: number
         resets: number
-        /** End resets info [resets, min Universe, max Universe] */
+        age: number
         ends: [number, number, number]
         time: number
-        age: number
+        /** [Cosmons peak, peaked at] */
+        peak: [number, number]
     }
     time: {
         updated: number
@@ -80,28 +94,11 @@ export interface playerType {
         vacuum: number
         stage: number
     }
-    buildings: Array<[
-        {
-            current: Overlimit
-            /** This pre-Stage reset */
-            total: Overlimit
-            /** This Stage */
-            trueTotal: Overlimit
-        }, ...Array<{
-            /** Self-made */
-            true: number
-            current: Overlimit
-            /** This pre-Stage reset */
-            total: Overlimit
-            /** This Stage */
-            trueTotal: Overlimit
-        }>
-    ]>
-    verses: Array<{
-        true: number
-        current: number
-        total: number
-    }>
+    buildings: Array<[Omit<building, 'true'>, ...building[]]>
+    verses: [verse & {
+        /** After any End reset */
+        highest: number
+    }, ...verse[]]
     strange: Array<{
         current: number
         total: number
@@ -156,13 +153,11 @@ export interface playerType {
     history: {
         stage: {
             best: [number, number, number, number, number]
-            /** [time, quarks, strangelets, peak, peakedAt] */
             list: Array<playerType['history']['stage']['best']>
             input: [number, number]
         }
         end: {
-            best: [number, number] //, number
-            /** [time, inflatons] */ //, type
+            best: [number, number, number, number, number]
             list: Array<playerType['history']['end']['best']>
             input: [number, number]
         }
@@ -212,15 +207,10 @@ export interface globalType {
         active: boolean
         /** [Change into, update type] */
         stage: [number | null, boolean | null]
+        autosave: boolean
         cacheUpdate: boolean
     }
     paused: boolean
-    log: {
-        /** ['Text', count, time] */
-        add: Array<[string, number, number]>
-        /** Last added HTML into list, ['Text', count, time, changed] */
-        lastHTML: [string, number, number, boolean]
-    }
     hotkeys: {
         disabled: boolean
         repeat: boolean
@@ -281,6 +271,7 @@ export interface globalType {
         rankColor: string[]
         rankName: string[]
         rankImage: string[]
+        nextRank: Overlimit
         maxRank: number
         effective: number
         disableAuto: boolean
@@ -339,7 +330,7 @@ export interface globalType {
             Array<number | Overlimit>,
             Overlimit[],
             number[],
-            number[],
+            [Overlimit, Overlimit, ...number[]],
             Overlimit[],
             Overlimit[],
             number[]
@@ -437,6 +428,7 @@ export interface globalType {
         reward: number[]
         /** False Vacuum only */
         scaling: number[][]
+        recent: number[]
     }>
     challengesInfo: [{
         name: string
@@ -459,7 +451,9 @@ export interface globalType {
         color: string
     }]
     historyStorage: {
+        /** [time, quarks, strangelets, peak, peaked at] */
         stage: playerType['history']['stage']['list']
+        /** [time, cosmon, type, peak, peaked at] */
         end: playerType['history']['end']['list']
     }
     loadouts: {
@@ -472,7 +466,6 @@ export interface globalType {
 
 export interface globalSaveType {
     intervals: {
-        offline: number
         numbers: number
         visual: number
         autoSave: number
@@ -480,7 +473,8 @@ export interface globalSaveType {
     /** hotkeyFunction: [key, code] */
     hotkeys: Record<hotkeysList, string[]>
     numbers: Record<numbersList, string>
-    /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4], Hide main scrollbar[5], Milestone notifications[6] */
+    /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4],
+     * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7] */
     toggles: boolean[]
     /** Point[0], Separator[1] */
     format: [string, string]
@@ -515,8 +509,8 @@ export interface calculateEffectsType {
     S1Extra1: (level?: number) => number
     S1Extra3: (level?: number) => number
     S1Extra4: (S1Research5?: number) => number
-    /** laterPreons are calculateEffects.effectiveEnergy() ** calculateEffects.S1Extra3() */
-    preonsHardcap: (laterPreons: number) => number
+    /** laterPreons are effectiveEnergy ** S1Extra3 */
+    preonsHardcap: (laterPreons?: number) => Overlimit
     clouds: (post?: boolean) => number
     cloudsGain: () => number
     S2Upgrade1: () => number
@@ -578,4 +572,5 @@ export interface calculateEffectsType {
     T0Inflation3: () => number
     /** Default value for type is 0 or Quarks; Use 1 for Strangelets */
     strangeGain: (interstellar: boolean, quarks?: boolean) => number
+    cosmonGain: () => number
 }

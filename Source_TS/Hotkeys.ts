@@ -125,8 +125,7 @@ const basicFunctions: Record<hotkeysList, () => boolean> = {
         if (global.hotkeys.repeat) { return false; }
         const old = player.challenges.super;
         toggleSupervoid(true);
-        if (old === player.challenges.super) { return true; }
-        Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`);
+        if (old !== player.challenges.super) { Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`); }
         return true;
     },
     warp: () => {
@@ -334,10 +333,9 @@ export const toggleAll = () => {
 };
 
 export const offlineWarp = () => {
-    const required = player.challenges.active !== null ? 480_000 : 720_000;
-    if (global.offline.active || player.time.offline < required) { return; }
-    player.time.offline -= required;
-    void simulateOffline(300_000, true);
+    if (global.offline.active || player.time.offline < 120_000) { return; }
+    player.time.offline -= 120_000;
+    void simulateOffline(60_000, true);
 };
 
 const changeTab = (direction: 'left' | 'right') => {
