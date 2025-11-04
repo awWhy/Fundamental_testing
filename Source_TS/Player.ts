@@ -1919,6 +1919,7 @@ export const updatePlayer = (load: playerType): string => {
             load.inflation.peak = cloneArray(playerStart.inflation.peak);
             load.verses[0].current = 0;
             load.verses[0].total = 0;
+            load.verses[0].true = 0;
             if (load.stage.true >= 7) { load.stage.true = 6; }
             load.verses[0].highest = 0;
             load.cosmon[0].current = load.inflation.vacuum ? 1 : 0;

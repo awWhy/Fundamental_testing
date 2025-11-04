@@ -35,7 +35,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
     } else if (stageIndex === 2) {
         return true;
     } else if (stageIndex === 3) {
-        if (index === 1) { return player.accretion.rank !== 0; }
+        if (index === 1) { return (player.inflation.vacuum ? player.buildings[1][1].true : player.accretion.rank) !== 0; }
         if (index === 2) { return player.upgrades[3][2] === 1; }
         if (index === 3) { return player.upgrades[3][4] === 1; }
         if (index === 4) { return player.upgrades[3][8] === 1; }
