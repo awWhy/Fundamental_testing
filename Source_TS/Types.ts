@@ -98,6 +98,8 @@ export interface playerType {
     verses: [verse & {
         /** After any End reset */
         highest: number
+        /** After Big Rip or above */
+        lowest: number
     }, ...verse[]]
     strange: Array<{
         current: number
@@ -134,7 +136,7 @@ export interface playerType {
            Auto accept Offline[4] */
         normal: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6], Nucleation[7] */
-        confirm: Array<'Safe' | 'None'>
+        confirm: Array<'All' | 'Safe' | 'None'>
         /** Upgrades/Researches/Elements[0], Strangeness[1], Inflations[2] */
         hover: boolean[]
         /** Researches[0], Strangeness[1], Inflations[2] */
@@ -187,8 +189,14 @@ export interface globalType {
         }
     }
     debug: {
-        /** Notify about reaching time limit */
+        /** Notified about reaching time limit */
         timeLimit: boolean
+        /** To which Challenge game was adjusted\
+         * 0 ‒ Void;
+         * 1 ‒ Supervoid;
+         * 2 ‒ Stability;
+         */
+        challenge: number | null
         /** Which Rank is displayed */
         rankUpdated: number | null
         /** How many resets on last update */
@@ -284,8 +292,6 @@ export interface globalType {
         unlockU: number[]
         /** Solar mass required to unlock Research */
         unlockR: number[]
-        /** Test for Interstellar upgrades already being modified */
-        supervoid: boolean
         newMass: number
         starCheck: [number, number, number]
         trueStars: number
@@ -299,7 +305,7 @@ export interface globalType {
         unlockR: number[]
         /** Self-made Universes to unlock Special Research */
         unlockE: number[]
-        S5Extra2: number
+        S5Extra3: number
         checkReward: [number, number, number, number]
         galaxies: number
     }
@@ -463,6 +469,50 @@ export interface globalType {
         buttons: Array<[HTMLElement, () => void]>
     }
 }
+/** Important starting values for Vacuum states */
+export interface vacuumStartType {
+    true: {
+        upgradesS4: Overlimit[]
+        researchesS4: Overlimit[]
+        researchesS5: Overlimit[]
+        extrasS4: Overlimit[]
+        extrasS5: Overlimit[]
+    } & vacuumTemplate
+    false: vacuumTemplate
+}
+interface vacuumTemplate {
+    /** First 4 Stages */
+    build0Start: Overlimit[]
+    buildS1Cost: number[]
+    upgradesS1: number[]
+    /** For false Vacuum this is only cost for [5][3] (true Vacuum version is reused for Vacuum stability) */
+    upgradesS5: Overlimit[]
+    researchesS1Cost: number[]
+    researchesS1Scale: number[]
+    ASRS1: number[]
+    ASR3S3: number
+    /** For false Vacuum its cost only for some of Elements:\
+     * [0] ‒ [27];
+     * [1] ‒ [28];
+     */
+    elements: Overlimit[]
+    strangenessS1Cost: number[]
+    strangenessS1Scale: number[]
+    strangenessS2Cost: number[]
+    strangenessS2Scale: number[]
+    strangenessS3Cost: number[]
+    strangenessS3Scale: number[]
+    strangenessS4Cost: number[]
+    strangenessS4Scale: number[]
+    strangenessS5Cost: number[]
+    strangenessS5Scale: number[]
+    /** Cost for other Upgrades\
+     * [0] ‒ Upgrade cost [2][0];
+     * [1] ‒ Research scale [2][2];
+     * [2] ‒ Research scale [2][3];
+     */
+    rest: [Overlimit, ...number[]]
+}
 
 export interface globalSaveType {
     intervals: {
@@ -543,7 +593,6 @@ export interface calculateEffectsType {
     S4Research1: (level?: number, S4Extra1?: number) => number
     S4Research4: (post?: boolean, level?: number) => number
     S4Extra1: () => number
-    mergeRequirement: (stability?: boolean) => number
     mergeMaxResets: () => number
     reward: Array<(post?: boolean) => number>
     groupsCost: () => number
@@ -553,8 +602,8 @@ export interface calculateEffectsType {
     S5Upgrade2: (post?: boolean, level?: number) => number
     S5Research2: () => number
     S5Research3: () => number
-    /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][2] + player.merge.rewards[1] if for Stage reset */
-    S5Extra2: (level: number, post?: boolean) => number
+    /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][3] + player.merge.rewards[1] if for Stage reset */
+    S5Extra3: (level: number, post?: boolean) => number
     S5Extra4: (level?: number) => number
     element6: () => number
     element24_power: () => number

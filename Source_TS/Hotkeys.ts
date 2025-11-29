@@ -122,7 +122,7 @@ const basicFunctions: Record<hotkeysList, () => boolean> = {
         return true;
     },
     supervoid: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.repeat || (player.stage.true < 8 && !player.event)) { return false; }
         const old = player.challenges.super;
         toggleSupervoid(true);
         if (old !== player.challenges.super) { Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`); }

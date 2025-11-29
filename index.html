@@ -248,7 +248,7 @@
                                 <p id="mergeScore2" class="grayText"><span>Clusters:</span> <span id="mergeScore2Cur" class="greenText">0</span> <span>(<span class="greenText">4</span> per)</span></p>
                                 <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span class="hasTitle" data-title="Merge score if to use all available resets">(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
                             </article>
-                            <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span> (Real: <span class="orangeText">0 seconds</span>)</p>
+                            <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span><span id="universeTimeReal"> (Real: <span class="orangeText">0 seconds</span>)</span></p>
                         </div>
                     </section>
                     <article id="timeInfo" aria-label="Time information">
@@ -860,47 +860,47 @@
                                 <input type="image" src="Used_art/Offline.png" alt="Improved offline" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation6Tree1Level">0</span>/<span id="inflation6Tree1Max" class="greenText">1</span></span>
                             </label>
+                            <label id="inflation7Tree1" class="whiteText stageAllborderImage">
+                                <input type="image" src="Used_art/ResearchAuto3.png" alt="More rewards" draggable="false" class="stageBorderImage" aria-controls="inflationCost inflationEffect">
+                                <span><span id="inflation7Tree1Level">0</span>/<span id="inflation7Tree1Max" class="greenText">1</span></span>
+                            </label>
                         </section>
                         <section id="inflationsTree2" class="researchesDiv" aria-label="Cosmons">
                             <label id="inflation1Tree2" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Time.png" alt="More speed" draggable="false" aria-controls="inflationCost inflationEffect">
-                                <span><span id="inflation1Tree2Level">0</span>/<span id="inflation1Tree2Max" class="greenText">1</span></span>
+                                <span class="noMaxLevel"><span id="inflation1Tree2Level">0</span></span>
                             </label>
                             <label id="inflation2Tree2" class="whiteText greenBorderImage">
                                 <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="More Strange quarks" draggable="false" aria-controls="inflationCost inflationEffect">
-                                <span><span id="inflation2Tree2Level">0</span>/<span id="inflation2Tree2Max" class="greenText">1</span></span>
+                                <span class="noMaxLevel"><span id="inflation2Tree2Level">0</span></span>
                             </label>
-                            <label id="inflation3Tree2" class="whiteText stage5borderImage">
-                                <input type="image" src="Used_art/Stability.png" alt="Stability" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation3Tree2" class="whiteText greenBorderImage">
+                                <input type="image" src="Used_art/Strangelets%20many.png" alt="Stranger gain" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation3Tree2Level">0</span>/<span id="inflation3Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation4Tree2" class="whiteText greenBorderImage">
-                                <input type="image" src="Used_art/Strangelets%20many.png" alt="Stranger gain" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation4Tree2" class="whiteText stage4borderImage">
+                                <input type="image" src="Used_art/ResearchQ5.png" alt="Discharge improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation4Tree2Level">0</span>/<span id="inflation4Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation5Tree2" class="whiteText stage4borderImage">
-                                <input type="image" src="Used_art/ResearchQ5.png" alt="Discharge improvement" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation5Tree2" class="whiteText stage2borderImage">
+                                <input type="image" src="Used_art/Vaporization%20improvement.png" alt="Vaporization improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation5Tree2Level">0</span>/<span id="inflation5Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation6Tree2" class="whiteText stage2borderImage">
-                                <input type="image" src="Used_art/Vaporization%20improvement.png" alt="Vaporization improvement" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation6Tree2" class="whiteText stage3borderImage">
+                                <input type="image" src="Used_art/Rank%20improvement.png" alt="Rank improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation6Tree2Level">0</span>/<span id="inflation6Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation7Tree2" class="whiteText stage3borderImage">
-                                <input type="image" src="Used_art/Rank%20improvement.png" alt="Rank improvement" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation7Tree2" class="whiteText stage6borderImage">
+                                <input type="image" src="Used_art/Collapse%20Researches.png" alt="Collapse improvement" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation7Tree2Level">0</span>/<span id="inflation7Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation8Tree2" class="whiteText stage6borderImage">
-                                <input type="image" src="Used_art/Collapse%20Researches.png" alt="Collapse improvement" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation8Tree2" class="whiteText stage2borderImage">
+                                <input type="image" src="Used_art/Drops%20recycle.png" alt="Conservation of resources" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span><span id="inflation8Tree2Level">0</span>/<span id="inflation8Tree2Max" class="greenText">1</span></span>
                             </label>
-                            <label id="inflation9Tree2" class="whiteText stage2borderImage">
-                                <input type="image" src="Used_art/Drops%20recycle.png" alt="Conservation of resources" draggable="false" aria-controls="inflationCost inflationEffect">
-                                <span><span id="inflation9Tree2Level">0</span>/<span id="inflation9Tree2Max" class="greenText">1</span></span>
-                            </label>
-                            <label id="inflation10Tree2" class="whiteText redBorderImage">
+                            <label id="inflation9Tree2" class="whiteText redBorderImage">
                                 <input type="image" src="Used_art/Missing.png" alt="Primordial fluctuations" draggable="false" aria-controls="inflationCost inflationEffect">
-                                <span><span id="inflation10Tree2Level">0</span>/<span id="inflation10Tree2Max" class="greenText">1</span></span>
+                                <span><span id="inflation9Tree2Level">0</span>/<span id="inflation9Tree2Max" class="greenText">1</span></span>
                             </label>
                         </section>
                     </article>
@@ -935,9 +935,14 @@
                         <article id="inflationSupervoid">
                             <h4>Supervoid unlocks:</h4>
                             <p id="inflationSupervoid1">Indestructible matter ‒ Make self-made Preons and related Energy immune to pre-Stage resets</p>
+                            <p id="inflationSupervoid2">Passive Ranks ‒ Improve second level of 'Automatic Rank' by making Ranks not reset anything</p>
+                            <p id="inflationSupervoid3">Improved conservation ‒ Remove Stage requirements from Conservation of 'Mass' and 'Energy' Strangeness</p>
+                            <p id="inflationSupervoid4">Main Stars ‒ Improve 'Main giants' Strangeness and increased its max level by +2, true Vacuum only</p>
+                            <p id="inflationSupervoid5">Limitless Mass ‒ Remove hardcap for Preons from 'Deuterium' Microworld Upgrade</p>
                             <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
                         </article>
-                        <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to highest self-made Universe on any End<br>Also gain +1 extra Cosmon from End resets if current Vacuum state is true</span></section>
+                        <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to highest self-made Universe on any End<br>Exports fully claim Strange quarks and Strangelets storage</span></section>
+                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip: (WIP)</h4><span>Start End resets with ??? based on lowest self-made Universe from which Big Rip was caused<br>Exports award Cosmons, also unlock advanced automatization</span></section>
                         <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</span></section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universe:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universe:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>

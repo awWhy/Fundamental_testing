@@ -1,6 +1,6 @@
-import { player, global, updatePlayer, prepareVacuum, fillMissingValues } from './Player';
+import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, updateCollapsePoints } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify } from './Special';
 import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, toggleAll } from './Hotkeys';
 import { checkUpgrade } from './Check';
@@ -85,7 +85,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
 
     let decline = false;
     if (offline >= 20 && !autoConfirm) {
-        decline = !await Confirm(`Consume ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of offline time?\n(Includes time spent to click any of the buttons)`, 2) &&
+        decline = !await Confirm(`Consume ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of offline time?${player.challenges.supervoid[3] >= 2 ? `\nYou have ${player.tree[0][5]} levels of 'Offline improvement'` : ''}\n(Includes time spent to click any of the buttons)`, 2) &&
             (globalSave.developerMode || player.tree[0][5] >= 1 || !await Confirm("Press 'Cancel' again to confirm losing offline time, 'Confirm' to consume it"));
         const extra = handleOfflineTime();
         global.lastSave += extra;
@@ -292,7 +292,7 @@ const loadGame = (save: string) => {
 
         void simulateOffline(global.lastSave);
     } catch (error) {
-        prepareVacuum(Boolean(player.inflation.vacuum)); //Fix vacuum state
+        updatePlayer(player); //Fixes bugs
         pauseGame(false);
 
         void Alert(`Incorrect save file format\n${error}`);
@@ -408,11 +408,11 @@ export const toggleSwap = (number: number, type: 'buildings' | 'verses' | 'norma
 
 export const toggleConfirm = (number: number, change = false) => {
     const toggles = player.toggles.confirm;
-    if (change) { toggles[number] = toggles[number] === 'Safe' ? 'None' : 'Safe'; }
+    if (change) { toggles[number] = toggles[number] === 'All' ? 'Safe' : toggles[number] === 'Safe' ? 'None' : 'All'; }
 
     const toggleHTML = getId(`toggleConfirm${number}`);
     toggleHTML.textContent = toggles[number];
-    if (toggles[number] === 'Safe') {
+    if (toggles[number] !== 'None') {
         toggleHTML.style.color = 'var(--green-text)';
         toggleHTML.style.borderColor = 'forestgreen';
     } else {
@@ -492,7 +492,6 @@ const handleAutoResearchCreation = (index: number) => {
 export const loadoutsFinal = (load: number[]) => {
     if (!global.loadouts.open) { return; }
     const appeared = {} as Record<number, number>;
-    const { firstCost, scaling, max } = global.treeInfo[0];
 
     let cost = 0;
     let string = '';
@@ -500,11 +499,11 @@ export const loadoutsFinal = (load: number[]) => {
         const current = load[i];
         appeared[current] ??= 0;
         do {
-            if (appeared[current] >= max[current]) {
+            if (appeared[current] >= global.treeInfo[0].max[current]) {
                 load.splice(i + dupes, 1);
                 continue;
             }
-            cost += Math.floor(Math.round((firstCost[current] + scaling[current] * appeared[current]) * 100) / 100);
+            cost += calculateTreeCost(current, 0, appeared[current]);
             appeared[current] += 1;
             dupes++;
         } while (load[i + dupes] === current);
@@ -581,33 +580,38 @@ const loadoutsLoadAuto = () => {
         return array as startValue[];
     };
 
-    for (let s = 1; s < global.buildingsInfo.firstCost.length; s++) {
-        player.buildings[s] = [] as unknown as typeof player.buildings[0];
-        player.toggles.buildings[s] = createArray(global.buildingsInfo.firstCost[s].length, false);
-        global.buildingsInfo.producing[s] = [];
-        for (let i = 0; i < global.buildingsInfo.firstCost[s].length; i++) {
-            const start = i === 0 && s === 4 ? 1 : 0;
-            player.buildings[s][i] = {
+    const trueInfo = vacuumStart.true;
+    const { toggles, buildings } = player;
+    const { buildingsInfo, upgradesInfo, strangenessInfo, milestonesInfo } = global;
+    for (let s = 1; s < buildingsInfo.firstCost.length; s++) {
+        buildings[s] = [] as unknown as typeof buildings[0];
+        toggles.buildings[s] = createArray(buildingsInfo.firstCost[s].length, false);
+        buildingsInfo.producing[s] = [];
+        for (let i = 0; i < buildingsInfo.firstCost[s].length; i++) {
+            const start = i === 0 && s < 5 ? trueInfo.build0Start[s] : 0;
+            buildings[s][i] = {
                 current: new Overlimit(start),
                 total: new Overlimit(start),
                 trueTotal: new Overlimit(start)
             };
-            if (i !== 0) { player.buildings[s][i as 1].true = 0; }
-            global.buildingsInfo.producing[s as 0].push(i === 0 ? 0 : new Overlimit(0));
+            if (i !== 0) { buildings[s][i as 1].true = 0; }
+            buildingsInfo.producing[s as 0][i] = i === 0 ? 0 : new Overlimit(0);
         }
     }
-    player.toggles.verses = createArray(player.verses.length, false);
-    {
-        const pointer = global.upgradesInfo;
-        for (let s = 1; s < pointer.length; s++) {
-            const cost = pointer[s].cost;
-            player.upgrades[s] = createArray(cost.length, 0);
-            global.automatization.autoU = [];
-            global.automatization.autoR = [];
-            global.automatization.autoE = [];
-            global.lastUpgrade[s] = [null, 'upgrades'];
-            if (s === 1) { continue; }
-            for (let i = 0; i < cost.length; i++) { cost[i] = new Overlimit(cost[i]); }
+    trueInfo.buildS1Cost = cloneArray(buildingsInfo.firstCost[1]);
+    toggles.verses = createArray(player.verses.length, false);
+    for (let s = 1; s < upgradesInfo.length; s++) {
+        const cost = upgradesInfo[s].cost;
+        player.upgrades[s] = createArray(cost.length, 0);
+        global.automatization.autoU[s] = [];
+        global.lastUpgrade[s] = [null, 'upgrades'];
+        if (s === 1) {
+            trueInfo.upgradesS1 = cloneArray(cost as number[]);
+            continue;
+        }
+        for (let i = 0; i < cost.length; i++) {
+            cost[i] = new Overlimit(cost[i]);
+            if (s === 4 || s === 5) { trueInfo[`upgradesS${s}`][i] = new Overlimit(cost[i]); }
         }
     }
     for (const upgradeType of ['researches', 'researchesExtra'] as const) {
@@ -622,37 +626,50 @@ const loadoutsLoadAuto = () => {
             for (let i = 0; i < firstCost.length; i++) {
                 firstCost[i] = new Overlimit(firstCost[i]);
                 pointer[s].cost[i] = new Overlimit(firstCost[i]);
+                if (s === 4 || s === 5) { trueInfo[`${upgradeType === 'researches' ? 'researches' : 'extras'}S${s}`][i] = new Overlimit(firstCost[i]); }
             }
+            global.automatization[`auto${upgradeType === 'researches' ? 'R' : 'E'}`][s] = [];
+        }
+        if (upgradeType === 'researches') {
+            trueInfo.researchesS1Cost = cloneArray(pointer[1].firstCost as number[]);
+            trueInfo.researchesS1Scale = cloneArray(pointer[1].scaling);
         }
     }
     player.researchesAuto = createArray(global.researchesAutoInfo.costRange.length, 0);
     player.ASR = createArray(global.ASRInfo.costRange.length, 0);
+    trueInfo.ASRS1 = cloneArray(global.ASRInfo.costRange[1]);
     {
         const cost = global.elementsInfo.cost;
         player.elements = createArray(cost.length, 0);
-        for (let i = 1; i < cost.length; i++) { cost[i] = new Overlimit(cost[i]); }
+        for (let i = 1; i < cost.length; i++) {
+            cost[i] = new Overlimit(cost[i]);
+            trueInfo.elements[i] = new Overlimit(cost[i]);
+        }
     }
-    for (let s = 1; s < global.strangenessInfo.length; s++) {
-        player.strangeness[s] = createArray(global.strangenessInfo[s].firstCost.length, 0);
-        global.strangenessInfo[s].cost = cloneArray(global.strangenessInfo[s].firstCost);
+    for (let s = 1; s < strangenessInfo.length; s++) {
+        player.strangeness[s] = createArray(strangenessInfo[s].firstCost.length, 0);
+        strangenessInfo[s].cost = cloneArray(strangenessInfo[s].firstCost);
+        if (s > 5) { continue; }
+        trueInfo[`strangenessS${s as 1}Cost`] = cloneArray(strangenessInfo[s].firstCost);
+        trueInfo[`strangenessS${s as 1}Scale`] = cloneArray(strangenessInfo[s].scaling);
     }
-    for (let s = 1; s < global.milestonesInfo.length; s++) {
-        const pointer = global.milestonesInfo[s];
-        player.milestones[s] = createArray(pointer.needText.length, 0);
-        for (let i = 0; i < pointer.needText.length; i++) {
-            pointer.need.push(new Overlimit(Infinity));
+    for (let s = 1; s < milestonesInfo.length; s++) {
+        player.milestones[s] = createArray(milestonesInfo[s].needText.length, 0);
+        for (let i = 0; i < milestonesInfo[s].needText.length; i++) {
+            milestonesInfo[s].need[i] = new Overlimit('1e1e308');
         }
     }
     for (let s = 0; s < global.treeInfo.length; s++) {
         player.tree[s] = createArray(global.treeInfo[s].firstCost.length, 0);
         global.treeInfo[s].cost = cloneArray(global.treeInfo[s].firstCost);
     }
-    player.toggles.normal = createArray(document.getElementsByClassName('toggleNormal').length, false);
-    player.toggles.confirm = createArray(document.getElementsByClassName('toggleConfirm').length, 'Safe');
-    player.toggles.hover = createArray(document.getElementsByClassName('toggleHover').length, false);
-    player.toggles.max = createArray(document.getElementsByClassName('toggleMax').length, false);
-    player.toggles.auto = createArray(document.getElementsByClassName('toggleAuto').length, false);
-    player.toggles.normal[1] = true;
+    toggles.normal = createArray(document.getElementsByClassName('toggleNormal').length, false);
+    toggles.confirm = createArray(document.getElementsByClassName('toggleConfirm').length, 'Safe');
+    toggles.hover = createArray(document.getElementsByClassName('toggleHover').length, false);
+    toggles.max = createArray(document.getElementsByClassName('toggleMax').length, false);
+    toggles.auto = createArray(document.getElementsByClassName('toggleAuto').length, false);
+    toggles.normal[1] = true;
+    toggles.confirm[6] = 'All';
 }
 export const playerStart = deepClone(player);
 export const globalSaveStart = deepClone(globalSave);
@@ -902,8 +919,8 @@ try { //Start everything
             window.textContent = element.dataset.title as string;
             window.style.display = '';
             const position = (event: MouseEvent) => {
-                window.style.left = `${Math.min(event.clientX, document.documentElement.clientWidth - window.getBoundingClientRect().width - globalSave.fontSize / 2)}px`;
-                window.style.top = `${event.clientY}px`;
+                window.style.left = `${Math.min(event.clientX + 10, document.documentElement.clientWidth - window.getBoundingClientRect().width - 10)}px`;
+                window.style.top = `${event.clientY + 10}px`;
             };
             position(event);
             element.addEventListener('mousemove', position);
@@ -1542,8 +1559,10 @@ try { //Start everything
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
-            if (!checkUpgrade(number, 0, 'inflations') || isNaN(repeat)) { continue; }
-            if (repeat > 99) { repeat = 99; }
+            if (!checkUpgrade(number, 0, 'inflations')) { continue; }
+            if (isNaN(repeat) || repeat < 1) {
+                repeat = 1;
+            } else if (repeat > 99) { repeat = 99; }
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
         loadoutsFinal(final);
@@ -1708,10 +1727,10 @@ try { //Start everything
     });
     getId('export').addEventListener('click', () => {
         const exportReward = player.time.export;
-        const improved = player.stage.true >= 7;
-        if ((improved || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
+        if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
             const { strange } = player;
-            const conversion = Math.min(exportReward[0] / (improved ? 21600_000 : 86400_000), 1);
+            const improved = player.inflation.ends[0] >= 1;
+            const conversion = Math.min(exportReward[0] / (player.stage.true >= 6 ? 28800_000 : 86400_000), 1);
             const quarks = (exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion;
 
             strange[0].current += quarks;
