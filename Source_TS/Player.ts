@@ -1966,7 +1966,7 @@ export const updatePlayer = (load: playerType): string => {
             load.verses[0].lowest = 255;
             load.cosmon[1].total = load.cosmon[1].current;
             load.cosmon[0].current = load.verses[0].true >= 2 ? 4 : load.verses[0].true >= 1 ? 1 : 0;
-            if (load.inflation.vacuum) { load.cosmon[0].current++; }
+            if (load.inflation.vacuum && (load.verses[0].true >= 1 || load.inflation.ends[0] >= 1)) { load.cosmon[0].current++; }
             load.cosmon[0].total = load.cosmon[0].current;
             load.inflation.peak[0] = (load.verses[0].true + (load.inflation.vacuum ? 1 : 0)) / load.time.end;
             load.inflation.peak[1] = load.time.end;

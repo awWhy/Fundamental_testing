@@ -155,7 +155,6 @@ export const numbersUpdate = (ignoreOffline = false) => {
             specialHTML.cache.innerHTML.set(shiftButton, value);
             shiftButton.style.borderColor = value ? 'forestgreen' : '';
             shiftButton.style.color = value ? 'var(--green-text)' : '';
-            getId('makeAllFooter').textContent = value ? 'Upgrades' : 'Structures';
         }
     }
 
@@ -507,7 +506,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
         if (subtab === 'Settings') {
             const exportReward = player.time.export;
             const improved = player.inflation.ends[0] >= 1;
-            const conversion = Math.min(exportReward[0] / (player.stage.true >= 6 ? 28800_000 : 86400_000), 1);
+            const conversion = Math.min(exportReward[0] / (player.stage.true >= 6 ? 43200_000 : 86400_000), player.inflation.ends[1] >= 1 ? 2 : 1);
             getId('exportQuarks').textContent = format((exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion, { padding: true });
             getId('exportStrangelets').textContent = format(exportReward[2] / (improved ? 1 : 2.5) * conversion, { padding: true });
             getId('warpButton').textContent = `${Math.floor(player.time.offline / 120_000)} Warps`;
@@ -521,9 +520,10 @@ export const numbersUpdate = (ignoreOffline = false) => {
 
             const exportReward = player.time.export;
             const improved = player.inflation.ends[0] >= 1;
-            getId('exportQuarksMax').textContent = format(exportReward[1] / (improved ? 1 : 2.5) + 1, { padding: true });
-            getId('exportStrangeletsMax').textContent = format(exportReward[2] / (improved ? 1 : 2.5), { padding: true });
-            getId('exportTimeToMax').textContent = format((player.stage.true >= 6 ? 28800 : 86400) - exportReward[0] / 1000, { type: 'time' });
+            const over = player.inflation.ends[1] >= 1 ? 2 : 1;
+            getId('exportQuarksMax').textContent = format((exportReward[1] / (improved ? 1 : 2.5) + 1) * over, { padding: true });
+            getId('exportStrangeletsMax').textContent = format(exportReward[2] / (improved ? 1 : 2.5) * over, { padding: true });
+            getId('exportTimeToMax').textContent = format((player.stage.true >= 6 ? 43200 : 86400) * over - exportReward[0] / 1000, { type: 'time' });
             if (!improved) {
                 getQuery('#exportQuarksStorage > span').textContent = format(exportReward[1], { padding: true });
                 getQuery('#exportStrangeletsStorage > span').textContent = format(exportReward[2], { padding: true });
@@ -667,40 +667,39 @@ export const visualUpdate = (ignoreOffline = false) => {
     }
 
     {
+        let showReset1 = (tab === 'stage' && subtab === 'Advanced') || tab === 'upgrade' || tab === 'Elements';
         if (globalSave.toggles[1]) { getId('ElementsTabBtn').style.display = player.upgrades[4][1] === 1 ? '' : 'none'; }
         if (active === 1) {
-            if (highest < 2) {
-                getId('footerStat2').style.display = player.discharge.energyMax >= 12 ? '' : 'none';
-                getId('upgradeTabBtn').style.display = player.discharge.energyMax >= 12 ? '' : 'none';
-            }
+            if (player.upgrades[1][5] !== 1) { showReset1 = false; }
         } else if (active === 2) {
             getId('footerStat3').style.display = player.upgrades[2][2] === 1 ? '' : 'none';
+            if (player.upgrades[2][2] !== 1) { showReset1 = false; }
         } else if (active === 4) {
             getId('resetExtraFooter').style.display = player.researchesExtra[5][0] >= 1 ? '' : 'none';
+            if (player.upgrades[4][0] !== 1) { showReset1 = false; }
         } else if (active === 5) {
-            getId('resetExtraFooter').style.display = tab === 'stage' ? '' : 'none';
+            getId('resetExtraFooter').style.display = tab === 'stage' && subtab === 'Structures' ? '' : 'none';
+            if (player.upgrades[5][3] !== 1) { showReset1 = false; }
         } else if (active === 6) {
             getId('footerStat2').style.display = player.upgrades[6][0] === 1 ? '' : 'none';
             getId('footerStat3').style.display = player.upgrades[6][0] === 1 ? '' : 'none';
-            getId('resetExtraFooter').style.display = tab === 'stage' && player.upgrades[5][3] === 1 ? '' : 'none';
+            getId('resetExtraFooter').style.display = tab === 'stage' && subtab === 'Structures' && player.upgrades[5][3] === 1 ? '' : 'none';
+            if (player.upgrades[6][0] !== 1) { showReset1 = false; }
         }
-        let showReset1 = tab === 'stage' || tab === 'upgrade' || tab === 'Elements';
-        if (showReset1) {
-            if (active === 1) {
-                showReset1 = player.upgrades[1][5] === 1;
-            } else if (active === 2) {
-                showReset1 = player.upgrades[2][2] === 1;
-            } else if (active === 4) {
-                showReset1 = player.upgrades[4][0] === 1;
-            } else if (active === 5) {
-                showReset1 = player.upgrades[5][3] === 1;
-            } else if (active === 6) {
-                showReset1 = player.upgrades[6][0] === 1;
-            }
-        }
-        getId('reset2Footer').style.display = (highest >= 8 || (highest === 7 && player.event)) && (tab === 'stage' || tab === 'inflation') ? '' : 'none';
-        getId('reset1Footer').style.display = (highest >= 2 || player.upgrades[1][9] === 1) && (tab === 'stage' || tab === 'strangeness') ? '' : 'none';
+        getId('reset2Footer').style.display = (tab === 'stage' && subtab === 'Advanced') || tab === 'inflation' ? '' : 'none';
+        getId('reset1Footer').style.display = (tab === 'stage' && subtab === 'Advanced') || tab === 'strangeness' ? '' : 'none';
         getId('reset0Footer').style.display = showReset1 ? '' : 'none';
+        getId('createAllFooter').style.display = tab !== 'upgrade' || subtab !== 'Upgrades' ? '' : 'none';
+        getId('makeAllFooter').style.display = tab !== 'stage' || subtab !== 'Structures' ? '' : 'none';
+        if (highest < 8) {
+            if (highest < 2) {
+                getId('footerStat2').style.display = player.discharge.energyMax >= 12 ? '' : 'none';
+                getId('upgradeTabBtn').style.display = player.discharge.energyMax >= 12 ? '' : 'none';
+                if (player.discharge.energyMax < 12) { getId('createAllFooter').style.display = 'none'; }
+            }
+            if (highest < 7 && player.stage.resets < 1 && (vacuum ? player.elements[26] < 1 : player.upgrades[1][9] !== 1)) { getId('reset1Footer').style.display = 'none'; }
+            if (highest !== 7 || !player.event) { getId('reset2Footer').style.display = 'none'; }
+        }
     }
     if (specialHTML.bigWindow === 'hotkeys') {
         getId('warpHotkey').style.display = player.challenges.supervoid[3] >= 2 ? '' : 'none';
@@ -742,7 +741,7 @@ export const visualUpdate = (ignoreOffline = false) => {
             const buildingsToggle = player.toggles.buildings[active];
             const ASR = player.ASR[active];
 
-            getId('exportMaxed').style.display = player.time.export[0] >= (highest >= 6 ? 28800_000 : 86400_000) && (highest >= 7 || player.strange[0].total > 0) ? '' : 'none';
+            getId('exportMaxed').style.display = player.time.export[0] >= (player.inflation.ends[1] < 1 && highest >= 6 ? 43200_000 : 86400_000) && (highest >= 7 || player.strange[0].total > 0) ? '' : 'none';
             getId('gameDisabled').style.display = player.time.excess < 0 ? '' : 'none';
             if (highest < 7) { getId('reset1Main').style.display = player.stage.resets >= 1 || (vacuum ? player.elements[26] >= 1 : player.upgrades[1][9] === 1) ? '' : 'none'; }
             let anyON = false;
@@ -870,6 +869,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 } else {
                     getId('building1').style.display = 'none';
                 }
+                if (highest < 8) { getId('verse0True').style.display = player.inflation.ends[0] >= 1 ? '' : 'none'; }
             }
         } else if (subtab === 'Advanced') {
             if (global.lastChallenge[0] === 0) {
@@ -1164,7 +1164,7 @@ export const visualUpdate = (ignoreOffline = false) => {
             const { researchesAuto, strangeness } = player;
 
             const improved = player.inflation.ends[0] >= 1;
-            const timeToMax = highest >= 6 ? 28800 : 86400;
+            const timeToMax = player.inflation.ends[0] < 1 && highest >= 6 ? 43200 : 86400;
             getId('exportReward').dataset.title = `${format((player.time.export[1] / (improved ? 1 : 2.5) + 1) / timeToMax, { type: 'income' }).replace(' ', ' Strange quarks ')}${player.strangeness[5][8] >= 1 ? `\n${format(player.time.export[2] / (improved ? 1 : 2.5) / timeToMax, { type: 'income' }).replace(' ', ' Strangelets ')}` : ''}`;
             getQuery('#exportReward > span:last-of-type').style.display = player.challenges.active !== null && global.challengesInfo[player.challenges.active].resetType !== 'stage' ? '' : 'none';
             getId('collapsePointsMax').textContent = strangeness[5][4] >= 1 ? 'There is no maximum value' : 'Maximum value is 40';
@@ -1308,7 +1308,6 @@ export const visualTrueStageUnlocks = () => {
     getId('stageRewardOld').style.display = highest < 5 ? '' : 'none';
     getId('stageRewardNew').style.display = highest >= 5 ? '' : 'none';
     getId('stageTimeReal').style.display = highest >= 7 ? '' : 'none';
-    getId('verse0True').style.display = highest >= 7 ? '' : 'none';
     getId('universeTimeReal').style.display = highest >= 7 ? '' : 'none';
     getId('globalSpeed').style.display = highest >= 7 ? '' : 'none';
     getId('challenge2').style.cursor = highest >= 8 ? '' : 'help';
@@ -1326,6 +1325,8 @@ export const visualTrueStageUnlocks = () => {
     getId('cosmon1').style.display = supervoid ? '' : 'none';
     getId('cosmonGain').style.display = supervoid ? '' : 'none';
     getId('cosmonRate').style.display = supervoid ? '' : 'none';
+    getId('inflation4Tree1').style.display = supervoid ? '' : 'none';
+    getId('inflation5Tree1').style.display = supervoid ? '' : 'none';
     getId('inflationsTree2').style.display = supervoid ? '' : 'none';
     getId('inflationSupervoid').style.display = supervoid ? '' : 'none';
     getId('endMilestone1').style.display = supervoid ? '' : 'none';
@@ -1388,6 +1389,7 @@ export const visualTrueStageUnlocks = () => {
         getId('hideGlobalStats').style.display = '';
         if (!globalSave.toggles[4]) { getId('globalStats').style.display = ''; }
     }
+    if (highest >= 8) { getId('verse0True').style.display = ''; }
     if (highest >= 9) {
         getId('nucleationToggleReset').style.display = '';
     }

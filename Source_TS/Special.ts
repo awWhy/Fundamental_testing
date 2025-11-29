@@ -952,7 +952,7 @@ export const playEvent = (event: number, replay = true) => {
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
-        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab.\n(Also exports will now need 3 times less time for max reward)";
+        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab.\n(Also exports will now need 2 times less time for max reward)";
     } else if (event === 8) {
         if (!replay) {
             setTimeout(() => {
@@ -965,7 +965,7 @@ export const playEvent = (event: number, replay = true) => {
         text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n('Nucleosynthesis' now unlocks more Elements based on self-made Universes, also unlocked more Void rewards to achieve)";
     } else if (event === 10) {
         if (!replay) { visualTrueStageUnlocks(); }
-        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle Supervoid. End reset reward is higher if done from true Vacuum)";
+        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle Supervoid. End reset reward is higher if done from true Vacuum)";
     } else if (event === 11) {
         text = 'Placeholder. (Vacuum stability is unlocked)';
     }

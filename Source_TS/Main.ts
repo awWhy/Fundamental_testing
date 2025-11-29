@@ -1084,16 +1084,15 @@ try { //Start everything
     } {
         const button = getId('makeAllStructures');
         const footer = getId('makeAllFooter');
-        const clickFooterFunc = () => (global.hotkeys.shift ? createAll : buyAll)();
         button.addEventListener('click', buyAll);
-        footer.addEventListener('click', clickFooterFunc);
+        footer.addEventListener('click', buyAll);
         if (PC) {
             button.addEventListener('mousedown', () => repeatFunction(buyAll));
-            footer.addEventListener('mousedown', () => repeatFunction(clickFooterFunc));
+            footer.addEventListener('mousedown', () => repeatFunction(buyAll));
         }
         if (MD) {
             button.addEventListener('touchstart', () => repeatFunction(buyAll));
-            footer.addEventListener('touchstart', () => repeatFunction(clickFooterFunc));
+            footer.addEventListener('touchstart', () => repeatFunction(buyAll));
         }
     }
     getId('toggleAll').addEventListener('click', toggleAll);
@@ -1321,9 +1320,17 @@ try { //Start everything
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
     } {
         const button = getId('createAllUpgrades');
+        const footer = getId('createAllFooter');
         button.addEventListener('click', createAll);
-        if (PC) { button.addEventListener('mousedown', () => repeatFunction(createAll)); }
-        if (MD) { button.addEventListener('touchstart', () => repeatFunction(createAll)); }
+        footer.addEventListener('click', createAll);
+        if (PC) {
+            button.addEventListener('mousedown', () => repeatFunction(createAll));
+            footer.addEventListener('mousedown', () => repeatFunction(createAll));
+        }
+        if (MD) {
+            button.addEventListener('touchstart', () => repeatFunction(createAll));
+            footer.addEventListener('touchstart', () => repeatFunction(createAll));
+        }
     }
 
     {
@@ -1730,7 +1737,7 @@ try { //Start everything
         if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
             const { strange } = player;
             const improved = player.inflation.ends[0] >= 1;
-            const conversion = Math.min(exportReward[0] / (player.stage.true >= 6 ? 28800_000 : 86400_000), 1);
+            const conversion = Math.min(exportReward[0] / (player.stage.true >= 6 ? 43200_000 : 86400_000), player.inflation.ends[1] >= 1 ? 2 : 1);
             const quarks = (exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion;
 
             strange[0].current += quarks;
