@@ -1,3 +1,4 @@
+import { getVerseType } from './Check';
 import Overlimit from './Limit';
 import { cloneArray, deepClone, getId, getQuery, playerStart, toggleConfirm, toggleSwap } from './Main';
 import { globalSave, specialHTML } from './Special';
@@ -64,7 +65,7 @@ export const player: playerType = {
         updated: Date.now(),
         started: Date.now(),
         excess: 0,
-        export: [0, 0, 0],
+        export: [0, 0, 0, 0],
         offline: 0,
         online: 0,
         end: 0,
@@ -76,6 +77,7 @@ export const player: playerType = {
     verses: [
         {
             true: 0,
+            void: 0,
             current: 0,
             highest: 0,
             lowest: 255,
@@ -398,7 +400,7 @@ export const global: globalType = {
                 },
                 () => 'Spreads water too fast. 1 extra Sea per Ocean.\nIt will also improve Oceans effect scaling.'
             ],
-            cost: [10, 1e6, 1e10, 1e3, 1e4, 2e9, 5e20, 1e28, 2e48],
+            cost: [10, 1e6, 1e10, 1e3, 1e4, 2e9, 5e20, 1e28, 2e48] as unknown as Overlimit[],
             maxActive: 8
         }, { //Stage 3
             name: [
@@ -433,7 +435,7 @@ export const global: globalType = {
                 () => 'Satellites effect will scale better.',
                 () => `Allow for Star clusters to be boosted by ('Gravity' / ${format(2e5)}) ^${format(0.8)} + 1.\n(Boost is equal to ${format((calculateEffects.S3Research6() / 2e5) ** 0.5 + 1, { padding: true })})`
             ],
-            cost: [1e-16, 1e-13, 1e-13, 1, 1e14, 1e17, 1e10, 1e22, 1e22, 1e23, 1e9, 1e26, 1e29, 1e86],
+            cost: [1e-16, 1e-13, 1e-13, 1, 1e14, 1e17, 1e10, 1e22, 1e22, 1e23, 1e9, 1e26, 1e29, 1e86] as unknown as Overlimit[],
             maxActive: 13
         }, { //Stage 4
             name: [
@@ -450,15 +452,15 @@ export const global: globalType = {
                 () => 'Unlock 5 more Elements through the CNO cycle, which is also is a better source of Helium and Energy.',
                 () => 'Through Triple-alpha and then Alpha process unlock 2 more Elements.',
                 () => { //[4]
-                    const effect = 1 + player.verses[0].true;
-                    return `Create new Atomic nuclei with Neutron capture (s-process and r-process).\nUnlocks ${effect} more Element${effect !== 1 ? 's' : ''}${player.stage.true >= 7 ? ' (+1 for every self-made Universe)' : ''}.`;
+                    const effect = 1 + getVerseType();
+                    return `Create new Atomic nuclei with Neutron capture (s-process and r-process).\nUnlocks ${effect} more Element${effect !== 1 ? 's' : ''}${player.stage.true >= 7 ? ` (+1 for every ${player.challenges.active === 0 ? 'Void' : 'self-made'} Universe)'` : ''}.`;
                 },
                 () => { //[5]
                     const effect = 1;
                     return `Speed up the creation of new Elements by adding even more Protons (p-process and rp-process).\nUnlocks ${effect} more Element${effect !== 1 ? 's' : ''} (+1 for every Void Universe), but they do not increase max Merges from '[30] Zinc'.`;
                 }
             ],
-            cost: [100, 1000, 1e9, 1e48, 1e128, 1e256],
+            cost: [100, 1000, 1e9, 1e48, 1e128, 1e256] as unknown as Overlimit[],
             maxActive: 4
         }, { //Stage 5
             name: [
@@ -490,7 +492,7 @@ export const global: globalType = {
                 () => `Unlock a new Dark reset, it will start the formation of the new Dark resources by modifing existing physics.\n(Formula for Dark fluid gain is (log10(Dark matter / ${format(1e8)}) + Dark energy) ^${format(calculateEffects.S6Upgrade0())} - 1, gain is reduced with more Dark fluid. Dark fluid boost Dark matter production and effective Dark energy)`,
                 () => `Boost Dark matter production by current Galaxies / 125 + 1.\n(Boost is equal to ${format(global.mergeInfo.galaxies / 125 + 1, { padding: true })})`
             ],
-            cost: [8e12, 2e16],
+            cost: [8e12, 2e16] as unknown as Overlimit[],
             maxActive: 0
         }
     ],
@@ -546,7 +548,7 @@ export const global: globalType = {
                 () => 'Big enough to allow even more Lakes per Sea. (+1)'
             ],
             cost: [],
-            firstCost: [10, 400, 1e4, 1e5, 1e14, 1e22, 1e80],
+            firstCost: [10, 400, 1e4, 1e5, 1e14, 1e22, 1e80] as unknown as Overlimit[],
             scaling: [1.366, 5, 1e2, 1e3, 1e3, 1e4, 1],
             max: [8, 8, 4, 4, 2, 1, 1],
             maxActive: 6
@@ -577,7 +579,7 @@ export const global: globalType = {
                 () => `Improve 'Pebble accretion' Accretion speed even more.\n${player.inflation.vacuum ? 'Preons hardcap delay' : 'Mass production'} from Cosmic dust will increased by 2.`
             ],
             cost: [],
-            firstCost: [1e-16, 1e-15, 1e-5, 1e2, 1e10, 1e11, 1e15, 1e14, 1e12],
+            firstCost: [1e-16, 1e-15, 1e-5, 1e2, 1e10, 1e11, 1e15, 1e14, 1e12] as unknown as Overlimit[],
             scaling: [11, 111, 22, 10, 100, 100, 10, 1e4, 1e3],
             max: [9, 3, 8, 8, 2, 2, 6, 4, 4],
             maxActive: 9 //Required
@@ -602,7 +604,7 @@ export const global: globalType = {
                 () => 'Quasi-stars will Collapse into Intermediate-mass Black holes that are equivalent to +1 (Stellar) Black holes per level.'
             ],
             cost: [],
-            firstCost: [1e3, 5e4, 1e8, 1e11, 1e28, 1e154],
+            firstCost: [1e3, 5e4, 1e8, 1e11, 1e28, 1e154] as unknown as Overlimit[],
             scaling: [10, 200, 1e12, 1, 2e8, 1e306],
             max: [3, 2, 1, 1, 2, 1],
             maxActive: 5
@@ -653,7 +655,7 @@ export const global: globalType = {
                 () => 'Have more Dark energy by increasing its gain by 1 + level.'
             ],
             cost: [],
-            firstCost: [4e5, 2e8, 1e9, 4e9, 1e16],
+            firstCost: [4e5, 2e8, 1e9, 4e9, 1e16] as unknown as Overlimit[],
             scaling: [2, 2, 2, 3, 16],
             max: [8, 14, 9, 5, 4],
             maxActive: 0
@@ -726,7 +728,7 @@ export const global: globalType = {
                 }
             ],
             cost: [],
-            firstCost: [1e18, 1e12, 1e26, 1e14, 1e60],
+            firstCost: [1e18, 1e12, 1e26, 1e14, 1e60] as unknown as Overlimit[],
             scaling: [1e8, 1e3, 1, 1e8, 1e8],
             max: [1, 3, 1, 3, 3],
             maxActive: 3
@@ -751,7 +753,7 @@ export const global: globalType = {
                 () => `Protect your Mass from being removed by removing Cosmic dust hardcap instead.\nSecond level will redirect delay to the hardcap as a boost to Cosmic dust that ignores softcap.\n(Current hardcap delay is ${format(calculateEffects.dustDelay(), { padding: true })})`
             ],
             cost: [],
-            firstCost: [1e-18, 1e-7, 1e26, 1e9, 1e-10, 1.98847e40],
+            firstCost: [1e-18, 1e-7, 1e26, 1e9, 1e-10, 1.98847e40] as unknown as Overlimit[],
             scaling: [10, 100, 1, 1e5, 1e12, 5.024e59],
             max: [14, 6, 1, 5, 1, 2],
             maxActive: 4
@@ -771,7 +773,7 @@ export const global: globalType = {
                 () => 'Spawn White holes that will boost global speed with current Black holes effect.'
             ],
             cost: [],
-            firstCost: [4e4, 2e9, 1e50, 1e136, '1e680'] as unknown as Overlimit,
+            firstCost: [4e4, 2e9, 1e50, 1e136, '1e680'] as unknown as Overlimit[],
             scaling: [1e10, 1, 1, 1, 1],
             max: [3, 1, 1, 1, 1],
             maxActive: 3
@@ -797,7 +799,7 @@ export const global: globalType = {
                 () => `Unlock the second Merge result${global.researchesExtraInfo[5].max[5] > 1 ? ' and it make able to use excess Galaxies at level 2' : ''}${visualUniverseLevels(100)}.`
             ],
             cost: [],
-            firstCost: [1e80, 1e260, '1e350', '1e380', '1e560', '1e660'] as unknown as Overlimit,
+            firstCost: [1e80, 1e260, '1e350', '1e380', '1e560', '1e660'] as unknown as Overlimit[],
             scaling: [1, 1e150, 1e210, 1e30, 1e90, 1e270],
             max: [1, 1, 1, 2, 2, 1],
             maxActive: 1
@@ -1323,7 +1325,7 @@ export const global: globalType = {
             () => `Get ${player.inflation.ends[1] >= 1 ? 1 + player.verses[0].highest - player.verses[0].lowest : 0} extra Inflatons per level, this is equal to 1 + highest self-made Universe on any End minus lowest self-made Universe on Big Rip.${player.inflation.ends[1] >= 1 ? '' : "\n(Doesn't do anything until any Big Rips)"}`
         ],
         cost: [],
-        firstCost: [1, 1, 40, 1, 10, 1, 60, 5, 60],
+        firstCost: [1, 1, 400, 1, 100, 1, 600, 5, 600],
         scaling: [0.5, 0.5, 2, 1, 2.4, 1.8, 3.4, 2.4, 3],
         max: [999, 999, 8, 4, 4, 4, 4, 4, 3]
     }],
@@ -1521,7 +1523,7 @@ export const global: globalType = {
 /* Values for arrays are taken from global object */
 export const vacuumStart: vacuumStartType = {
     true: {
-        build0Start: [0, new Overlimit(5.476e-3), new Overlimit(0), new Overlimit(9.76185667392e-36), new Overlimit(1)] as unknown as Overlimit[],
+        build0Start: [new Overlimit(0), new Overlimit(5.476e-3), new Overlimit(0), new Overlimit(9.76185667392e-36), new Overlimit(1)],
         buildS1Cost: [],
         upgradesS1: [],
         upgradesS4: [],
@@ -1534,7 +1536,7 @@ export const vacuumStart: vacuumStartType = {
         extrasS5: [],
         ASRS1: [],
         ASR3S3: global.ASRInfo.costRange[2][5],
-        elements: [0] as unknown as Overlimit[],
+        elements: [],
         strangenessS1Cost: [],
         strangenessS1Scale: [],
         strangenessS2Cost: [],
@@ -1548,7 +1550,7 @@ export const vacuumStart: vacuumStartType = {
         rest: [new Overlimit(global.upgradesInfo[2].cost[0]), global.researchesInfo[2].scaling[2], global.researchesInfo[2].scaling[3]]
     },
     false: {
-        build0Start: [0, new Overlimit(3), new Overlimit(2.7753108348135e-3), new Overlimit(1e-19), new Overlimit(1)] as unknown as Overlimit[],
+        build0Start: [new Overlimit(0), new Overlimit(3), new Overlimit(2.7753108348135e-3), new Overlimit(1e-19), new Overlimit(1)],
         buildS1Cost: [0, 3, 24, 3],
         upgradesS1: [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800],
         upgradesS5: [new Overlimit(1e150)],
@@ -1573,10 +1575,10 @@ export const vacuumStart: vacuumStartType = {
 
 /** To make it easier to edit every case where it used at once, provided numbers need to be in ascending order */
 const visualUniverseLevels = (...unlocks: number[]): string => {
-    const universes = player.verses[0].true;
+    const universes = getVerseType();
     for (let i = 0; i < unlocks.length; i++) {
         if (universes >= unlocks[i]) { continue; }
-        return `\n(Max level will be increased at ${unlocks[i]} self-made Universes)`;
+        return `\n(Max level will be increased at ${unlocks[i]} ${player.challenges.active === 0 ? 'Void' : 'self-made'} Universes)`;
     }
     return '';
 };
@@ -1811,12 +1813,12 @@ export const prepareChallenge = () => { //which = null as number | null
 
     const trueInfo = vacuumStart.true;
     const startEl = global.elementsInfo.cost;
-    const startU4 = global.upgradesInfo[4].cost as Overlimit[];
-    const startU5 = global.upgradesInfo[5].cost as Overlimit[];
-    const startR4 = global.researchesInfo[4].firstCost as Overlimit[];
-    const startR5 = global.researchesInfo[5].firstCost as Overlimit[];
-    const startE4 = global.researchesExtraInfo[4].firstCost as Overlimit[];
-    const startE5 = global.researchesExtraInfo[5].firstCost as Overlimit[];
+    const startU4 = global.upgradesInfo[4].cost;
+    const startU5 = global.upgradesInfo[5].cost;
+    const startR4 = global.researchesInfo[4].firstCost;
+    const startR5 = global.researchesInfo[5].firstCost;
+    const startE4 = global.researchesExtraInfo[4].firstCost;
+    const startE5 = global.researchesExtraInfo[5].firstCost;
     if (next === 0 || next === 1) {
         global.buildingsInfo.producing[4][5].setValue(0);
         global.buildingsInfo.maxActive[4] = 5;
@@ -1890,9 +1892,6 @@ export const updatePlayer = (load: playerType): string => {
         if (load.version === 'v0.1.9' || load.version === 'v0.2.0') {
             load.version = 'v0.2.1';
             load.buildings = deepClone(playerStart.buildings);
-            load.upgrades[6] = cloneArray(playerStart.upgrades[6]);
-            load.researches[6] = cloneArray(playerStart.researches[6]);
-            load.researchesExtra[6] = cloneArray(playerStart.researchesExtra[6]);
             delete load['separator' as keyof unknown];
             delete load['intervals' as keyof unknown];
             delete load.stage['best' as keyof unknown];
@@ -1913,13 +1912,11 @@ export const updatePlayer = (load: playerType): string => {
         if (['v0.2.2', 'v0.2.3', 'v0.2.4', 'v0.2.5'].includes(load.version)) {
             load.version = 'v0.2.6';
             load.vaporization = deepClone(playerStart.vaporization);
-            load.darkness = deepClone(playerStart.darkness);
-            load.strangeness[6] = cloneArray(playerStart.strangeness[6]);
-            load.time = deepClone(playerStart.time);
             load.toggles = deepClone(playerStart.toggles);
             delete load['maxASR' as keyof unknown];
 
             /* Can be shortened */
+            load.time = deepClone(playerStart.time);
             load.verses = deepClone(playerStart.verses);
             load.verses[0].true = load.buildings[6][1].true;
             load.verses[0].current = load.buildings[6][1].true;
@@ -1933,8 +1930,13 @@ export const updatePlayer = (load: playerType): string => {
         }
         if (load.version === 'v0.2.7') { //Test properly (espetially exitting out of Supervoid)
             load.version = 'v0.2.8';
+            load.upgrades[6] = cloneArray(playerStart.upgrades[6]);
+            load.researches[6] = cloneArray(playerStart.researches[6]);
+            load.researchesExtra[6] = cloneArray(playerStart.researchesExtra[6]);
+            load.strangeness[6] = cloneArray(playerStart.strangeness[6]);
             load.stage.peak = cloneArray(playerStart.stage.peak);
             load.stage.input = cloneArray(playerStart.stage.input);
+            load.darkness = deepClone(playerStart.darkness);
             load.challenges = deepClone(playerStart.challenges);
             load.cosmon = deepClone(playerStart.cosmon);
             load.tree = deepClone(playerStart.tree);
@@ -1942,6 +1944,9 @@ export const updatePlayer = (load: playerType): string => {
             load.event = false;
 
             /* Can be shortened */
+            if (load.strange[0].current > 1e8) { load.strange[0].current = 1e8; }
+            if (load.strange[1].current > 1e6) { load.strange[1].current = 1e6; }
+            load.time.export[3] = 0;
             const state = load.clone?.inflation?.vacuum;
             if (state !== undefined && state !== load.inflation.vacuum) {
                 load.inflation.vacuum = state;
@@ -1956,6 +1961,7 @@ export const updatePlayer = (load: playerType): string => {
             }
             load.verses[0].current = load.verses[0].true;
             load.verses[0].total = load.verses[0].true;
+            load.verses[0].void = 0;
             if (load.stage.true >= 8) {
                 load.inflation.ends[0] = 1;
                 load.verses[0].current++;
@@ -1981,6 +1987,10 @@ export const updatePlayer = (load: playerType): string => {
     if (load.verses[0].lowest === undefined) { //Remove
         load.verses[0].lowest = 255;
         load.tree[1].splice(2, 1);
+    }
+    if (load.verses[0].void === undefined) { //Remove
+        load.verses[0].void = 0;
+        load.time.export[3] = 0;
     }
 
     for (let s = 1; s <= 6; s++) {

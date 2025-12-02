@@ -49,7 +49,7 @@ export const globalSave: globalSaveType = {
         toggleStructure: 'Numpad',
         enterChallenge: 'Shift Numbers'
     },
-    toggles: [false, false, false, false, false, false, true, true],
+    toggles: [false, false, false, false, false, false, true, true, false],
     format: ['.', ''],
     theme: null,
     fontSize: 16,
@@ -668,7 +668,7 @@ export const Confirm = async(text: string, priority = 0): Promise<boolean> => {
         cancel.style.display = '';
         body.classList.remove('noTextSelection');
         const oldFocus = document.activeElement as HTMLElement | null;
-        confirm.focus();
+        (globalSave.toggles[8] ? cancel : confirm).focus();
 
         let result = false;
         const yes = () => {
@@ -753,9 +753,10 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
                 if (shift || (code === 'Space' && active === input) || active === cancel) { return; }
                 yes();
             } else if (code === 'Tab') {
+                const last = globalSave.toggles[8] ? confirm : cancel;
                 if (shift && document.activeElement === input) {
-                    cancel.focus();
-                } else if (!shift && document.activeElement === cancel) {
+                    last.focus();
+                } else if (!shift && document.activeElement === last) {
                     input.focus();
                 } else { return; }
             } else { return; }
@@ -948,11 +949,11 @@ export const playEvent = (event: number, replay = true) => {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis.';
     } else if (event === 5) {
         if (!replay) { stageUpdate(false); }
-        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Stars in Intergalactic are just Stars from Interstellar)";
+        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Stars in Intergalactic are just Stars from Interstellar. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)";
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
-        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab.\n(Also exports will now need 2 times less time for max reward)";
+        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab.";
     } else if (event === 8) {
         if (!replay) {
             setTimeout(() => {
@@ -962,10 +963,10 @@ export const playEvent = (event: number, replay = true) => {
         }
         text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ the 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
     } else if (event === 9) {
-        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n('Nucleosynthesis' now unlocks more Elements based on self-made Universes, also unlocked more Void rewards to achieve)";
+        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n(Also 'Nucleosynthesis' now unlocks more Elements based on self-made Universes)";
     } else if (event === 10) {
         if (!replay) { visualTrueStageUnlocks(); }
-        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle Supervoid. End reset reward is higher if done from true Vacuum)";
+        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle into Supervoid. End reset reward is higher if done from true Vacuum)";
     } else if (event === 11) {
         text = 'Placeholder. (Vacuum stability is unlocked)';
     }

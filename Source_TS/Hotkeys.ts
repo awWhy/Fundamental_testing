@@ -318,7 +318,7 @@ export const toggleAll = () => {
         const toggles = player.toggles.buildings[active];
 
         let anyOn = false;
-        for (let i = 1; i <= Math.max(player.ASR[active], 1); i++) {
+        for (let i = 1; i <= Math.min(Math.max(player.ASR[active], 1), global.buildingsInfo.maxActive[active] - 1); i++) {
             if (toggles[i]) {
                 anyOn = true;
                 break;

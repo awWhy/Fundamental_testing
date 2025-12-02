@@ -172,7 +172,7 @@
                         <section id="verse0" class="buyBuilding darkvioletText stage6Only" aria-label="Universes">
                             <img src="Used_art/Universe.png" alt="" loading="lazy" draggable="false">
                             <div>
-                                <p>Universes: <span id="verse0Cur" class="whiteText">0</span> <span id="verse0True" class="yellowText">[<span class="hasTitle" data-title="Self-made">0</span>]</span></p>
+                                <p>Universes: <span id="verse0Cur" class="whiteText">0</span> <span id="verse0True" class="yellowText">[<span class="hasTitle" data-title="Self-made">0</span><span id="verse0Void"> + <span class="hasTitle" data-title="Void">0</span></span>]</span></p>
                                 <p class="hasTitle" data-title="Dark matter">producing: <span id="verse0Prod" class="whiteText">0</span></p>
                             </div>
                             <div>
@@ -941,13 +941,13 @@
                             <p id="inflationSupervoid5">Limitless Mass ‒ Remove hardcap for Preons from 'Deuterium' Microworld Upgrade</p>
                             <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
                         </article>
-                        <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to highest self-made Universe on any End<br>Exports fully claim Strange quarks and Strangelets storage</span></section>
+                        <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to highest self-made Universe on any End<br>Exports fully claim related storages and can reward Strangelets even if they are not unlocked</span></section>
                         <section id="endMilestone2"><h4>Unlocked at 1 Big Rip: (WIP)</h4><span>Start Vacuum resets with Strangelets equal to 2 ^Void Universes - 1<br>Exports can go 2 times above max time and also award Cosmons</span></section>
                         <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</span></section>
-                        <section id="inflationMilestone2"><h4>Unlocked at 2 Universe:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
-                        <section id="inflationMilestone3"><h4>Unlocked at 3 Universe:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
-                        <section id="inflationMilestone4"><h4>Unlocked at 5 Universe:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
-                        <section id="inflationMilestone5"><h4>Unlocked at 8 Universe:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Also unlock new mode for auto Stage that uses seconds since peak</span></section>
+                        <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
+                        <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
+                        <section id="inflationMilestone4"><h4>Unlocked at 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
+                        <section id="inflationMilestone5"><h4>Unlocked at 8 Universes:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Also unlock new mode for auto Stage that uses seconds since peak</span></section>
                     </article>
                 </section>
             </section>
@@ -1054,7 +1054,7 @@
                     </aside>
                     <article id="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
-                        <p id="exportReward" class="whiteText center hasTitle" data-title="0 per Second">Current reward is <span id="exportQuarks" class="greenText">0</span> Strange quarks<span id="exportStrangeletsUnlocked">, <span id="exportStrangelets" class="greenText">0</span> Strangelets</span><span class="redText"> (Disabled)</span></p>
+                        <p id="exportReward" class="whiteText center hasTitle" data-title="0 per Second">Current reward is <span id="exportQuarks" class="greenText">0</span> Strange quarks<span id="exportStrangelets">, <span class="greenText">0</span> Strangelets</span><span id="exportCosmon">, <span class="darkvioletText">0</span> Cosmons</span><span class="redText"> (Disabled)</span></p>
                         <div>
                             <div>
                                 <button type="button" id="save">Save</button>
@@ -1105,6 +1105,7 @@
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" maxlength="1" autocomplete="off"></label></li>
                             <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
                             <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
+                            <li><label>Swap alert confirmation buttons<button type="button" id="globalToggle8" class="specialToggle">OFF</button></label></li>
                             <li><label>Visually hide body scrollbar<button type="button" id="globalToggle5" class="specialToggle">OFF</button></label></li>
                             <li id="hideGlobalStats"><label>Hide global stats window<button type="button" id="globalToggle4" class="specialToggle">OFF</button></label></li>
                             <li><label>Allow text selection<button type="button" id="globalToggle2" class="specialToggle">OFF</button></label></li>
@@ -1141,7 +1142,7 @@
                 <section id="settingsSubtabStats" class="insideTab" style="display: none;" aria-label="Current tab">
                     <section class="stats" aria-role="none">
                         <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span> | Online time: <span id="onlineTotal" class="whiteText">0 seconds</span><span id="offlineStorage"> | Offline storage <span class="whiteText">0 seconds</span></span></p>
-                        <p id="exportStats" class="hasTitle" data-title="Storage can be increased by gaining more than the current value in a single Stage reset">Max export: <span id="exportQuarksMax" class="whiteText">1</span><span id="exportQuarksStorage"> (<span class="whiteText">1</span> in the storage)</span> <span class="whiteText">Strange quarks</span><span id="exportStatsStrangeletsUnlocked">, <span id="exportStrangeletsMax" class="whiteText">0</span><span id="exportStrangeletsStorage"> (<span class="whiteText">0</span>)</span> <span class="whiteText">Strangelets</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
+                        <p id="exportStats" class="hasTitle" data-title="Storage is equal to the highest reset value">Max export: <span id="exportQuarksMax" class="whiteText">1</span><span id="exportQuarksStorage"> (<span class="whiteText">1</span> in the storage)</span> <span class="whiteText">Strange quarks</span><span id="exportStrangeletsMax">, <span class="whiteText">0</span><span id="exportStrangeletsStorage"> (<span class="whiteText">0</span>)</span> <span class="whiteText">Strangelets</span></span><span id="exportCosmonMax">, <span class="whiteText">0</span> <span class="whiteText">Cosmons</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
                         <p id="endResets">End resets: <span class="whiteText">0</span></p>
                         <p id="stageResets">Stage resets: <span class="whiteText">0</span></p>
                         <article class="statsWindows" aria-label="Structures">

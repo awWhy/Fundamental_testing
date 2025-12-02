@@ -14,6 +14,30 @@ type verse = {
     current: number
     total: number
 };
+type upgrade = {
+    name: string[]
+    effectText: Array<() => string>
+    cost: Overlimit[]
+    maxActive: number
+};
+/** Upgrades that do not use numbers */
+type upgrageAlt = {
+    cost: number[]
+} & Omit<upgrade, 'cost'>;
+type research = {
+    name: string[]
+    effectText: Array<() => string>
+    cost: Overlimit[]
+    firstCost: Overlimit[]
+    scaling: number[]
+    max: number[]
+    maxActive: number
+};
+/** Researches that do not use numbers */
+type researchAlt = {
+    cost: number[]
+    firstCost: number[]
+} & Omit<research, 'cost' | 'firstCost'>;
 
 export interface playerType {
     version: string
@@ -83,8 +107,8 @@ export interface playerType {
         started: number
         /** Tick excess, in milliseconds */
         excess: number
-        /** [Milliseconds, Strange quarks, Strangelets] */
-        export: [number, number, number]
+        /** [Milliseconds, Strange quarks, Strangelets, Cosmons] */
+        export: [number, number, number, number]
         /** Offline storage, in milliseconds */
         offline: number
         /** In milliseconds */
@@ -96,6 +120,7 @@ export interface playerType {
     }
     buildings: Array<[Omit<building, 'true'>, ...building[]]>
     verses: [verse & {
+        void: number
         /** After any End reset */
         highest: number
         /** After Big Rip or above */
@@ -354,37 +379,9 @@ export interface globalType {
         strange0Gain: number
         strange1Gain: number
     }
-    upgradesInfo: Array<{
-        name: string[]
-        effectText: Array<() => string>
-        /** Number for Stage 1, Overlimit for rest */
-        cost: number[] | Overlimit[]
-        maxActive: number
-    }>
-    researchesInfo: Array<{
-        name: string[]
-        effectText: Array<() => string>
-        /** Number for Stage 1, Overlimit for rest */
-        cost: number[] | Overlimit[]
-        /** Number for Stage 1, Overlimit for rest */
-        firstCost: number[] | Overlimit[]
-        /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
-        scaling: number[]
-        max: number[]
-        maxActive: number
-    }>
-    researchesExtraInfo: Array<{
-        name: string[]
-        effectText: Array<() => string>
-        /** Number for Stage 1, Overlimit for rest */
-        cost: number[] | Overlimit[]
-        /** Number for Stage 1, Overlimit for rest */
-        firstCost: number[] | Overlimit[]
-        /** Never string for Stage 1, for others should be saved as string only if above 1e308 (or at least 1e16) */
-        scaling: number[]
-        max: number[]
-        maxActive: number
-    }>
+    upgradesInfo: [upgrade, upgrageAlt, ...upgrade[]]
+    researchesInfo: [research, researchAlt, ...research[]]
+    researchesExtraInfo: [research, researchAlt, research, research, research, research, researchAlt]
     researchesAutoInfo: {
         name: string[]
         effectText: Array<() => string>
@@ -524,7 +521,7 @@ export interface globalSaveType {
     hotkeys: Record<hotkeysList, string[]>
     numbers: Record<numbersList, string>
     /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4],
-     * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7] */
+     * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7], Swap alert buttons[8] */
     toggles: boolean[]
     /** Point[0], Separator[1] */
     format: [string, string]

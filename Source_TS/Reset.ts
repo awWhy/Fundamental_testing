@@ -225,6 +225,7 @@ export const resetVacuum = (level = 0) => {
     const vacuum = player.inflation.vacuum;
     if (level >= 2) {
         player.verses[0].true = 0;
+        player.verses[0].void = 0;
         player.verses[0].current = player.verses[0].highest;
         for (let i = 0; i < playerStart.tree[0].length; i++) {
             player.tree[0][i] = 0;
@@ -330,6 +331,7 @@ export const resetVacuum = (level = 0) => {
     }
     if (universes >= 5 && vacuum) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
+    if (player.inflation.ends[1] >= 1) { player.strange[1].current = 2 ** player.verses[0].void - 1; }
     for (let i = 0; i < playerStart.strange.length; i++) { player.strange[i].total = player.strange[0].current; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }

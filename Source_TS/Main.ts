@@ -363,7 +363,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         format(player.cosmon[1].total, { type: 'input', padding: 'exponent' }),
         `${player.inflation.vacuum}`,
         `${format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' })} [${player.buildings[5][3].true}]`,
-        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${player.verses[0].true}]`
+        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${player.verses[0].true}${player.stage.true >= 8 ? ` + ${player.verses[0].void}` : ''}]`
     ];
     for (let i = 0; i < special.length; i++) {
         name = name.replace(special[i], replaceWith[i]);
@@ -491,6 +491,7 @@ const handleAutoResearchCreation = (index: number) => {
 /** Sets selected loadout to provided */
 export const loadoutsFinal = (load: number[]) => {
     if (!global.loadouts.open) { return; }
+    const max = global.treeInfo[0].max;
     const appeared = {} as Record<number, number>;
 
     let cost = 0;
@@ -498,12 +499,11 @@ export const loadoutsFinal = (load: number[]) => {
     for (let i = 0, dupes = 0; i < load.length; i += dupes, dupes = 0) {
         const current = load[i];
         appeared[current] ??= 0;
+        const unlocked = checkUpgrade(current, 0, 'inflations');
         do {
-            if (appeared[current] >= global.treeInfo[0].max[current]) {
-                load.splice(i + dupes, 1);
-                continue;
+            if (unlocked && appeared[current] < max[current]) {
+                cost += calculateTreeCost(current, 0, appeared[current]);
             }
-            cost += calculateTreeCost(current, 0, appeared[current]);
             appeared[current] += 1;
             dupes++;
         } while (load[i + dupes] === current);
@@ -595,7 +595,7 @@ const loadoutsLoadAuto = () => {
                 trueTotal: new Overlimit(start)
             };
             if (i !== 0) { buildings[s][i as 1].true = 0; }
-            buildingsInfo.producing[s as 0][i] = i === 0 ? 0 : new Overlimit(0);
+            buildingsInfo.producing[s as 0][i] = new Overlimit(0);
         }
     }
     trueInfo.buildS1Cost = cloneArray(buildingsInfo.firstCost[1]);
@@ -631,7 +631,7 @@ const loadoutsLoadAuto = () => {
             global.automatization[`auto${upgradeType === 'researches' ? 'R' : 'E'}`][s] = [];
         }
         if (upgradeType === 'researches') {
-            trueInfo.researchesS1Cost = cloneArray(pointer[1].firstCost as number[]);
+            trueInfo.researchesS1Cost = cloneArray(pointer[1].firstCost);
             trueInfo.researchesS1Scale = cloneArray(pointer[1].scaling);
         }
     }
@@ -641,7 +641,7 @@ const loadoutsLoadAuto = () => {
     {
         const cost = global.elementsInfo.cost;
         player.elements = createArray(cost.length, 0);
-        for (let i = 1; i < cost.length; i++) {
+        for (let i = 0; i < cost.length; i++) {
             cost[i] = new Overlimit(cost[i]);
             trueInfo.elements[i] = new Overlimit(cost[i]);
         }
@@ -707,6 +707,7 @@ try { //Start everything
     (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
     for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'global'); }
     if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also sets breakpoints for screen size
+    if (globalSave.toggles[8]) { getId('alertCancel').after(getId('alertConfirm')); }
     if (globalSave.toggles[7]) {
         document.addEventListener('visibilitychange', () => {
             if (global.offline.active || global.paused || document.visibilityState !== 'hidden') { return; }
@@ -919,7 +920,7 @@ try { //Start everything
             window.textContent = element.dataset.title as string;
             window.style.display = '';
             const position = (event: MouseEvent) => {
-                window.style.left = `${Math.min(event.clientX + 10, document.documentElement.clientWidth - window.getBoundingClientRect().width - 10)}px`;
+                window.style.left = `${Math.min(event.clientX + 10, document.documentElement.clientWidth - window.getBoundingClientRect().width)}px`;
                 window.style.top = `${event.clientY + 10}px`;
             };
             position(event);
@@ -932,8 +933,9 @@ try { //Start everything
         for (const element of getClass('hasTitle')) { element.addEventListener('mouseenter', hoverEvent); }
     }
     for (let i = 0; i < globalSaveStart.toggles.length; i++) {
+        const refreshOnThese = [1, 3, 5, 7];
         getId(`globalToggle${i}`).addEventListener('click', () => {
-            toggleSpecial(i, 'global', true, i === 1 || i === 3 || i === 5 || i === 7);
+            toggleSpecial(i, 'global', true, refreshOnThese.includes(i));
             if (i === 0) {
                 assignHotkeys();
                 const index = globalSave.toggles[0] ? 0 : 1;
@@ -944,6 +946,8 @@ try { //Start everything
                 getId('globalStats').style.display = !globalSave.toggles[4] ? '' : 'none';
                 visualUpdate();
                 numbersUpdate();
+            } else if (i === 8) {
+                getId('alertCancel')[globalSave.toggles[8] ? 'after' : 'before'](getId('alertConfirm'));
             }
         });
     }
@@ -1566,7 +1570,7 @@ try { //Start everything
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
-            if (!checkUpgrade(number, 0, 'inflations')) { continue; }
+            if (number < 0 || !isFinite(number)) { continue; }
             if (isNaN(repeat) || repeat < 1) {
                 repeat = 1;
             } else if (repeat > 99) { repeat = 99; }
@@ -1735,32 +1739,41 @@ try { //Start everything
     getId('export').addEventListener('click', () => {
         const exportReward = player.time.export;
         if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
-            const { strange } = player;
             const improved = player.inflation.ends[0] >= 1;
-            const conversion = Math.min(exportReward[0] / (player.stage.true >= 6 ? 43200_000 : 86400_000), player.inflation.ends[1] >= 1 ? 2 : 1);
-            const quarks = (exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion;
+            const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
 
-            strange[0].current += quarks;
-            strange[0].total += quarks;
-            exportReward[1] = Math.max(exportReward[1] - quarks, 0);
-            if (player.strangeness[5][8] >= 1) {
-                const strangelets = exportReward[2] / (improved ? 1 : 2.5) * conversion;
-                strange[1].current += strangelets;
-                strange[1].total += strangelets;
-                exportReward[2] -= strangelets;
-                assignBuildingsProduction.strange1();
+            if (player.inflation.ends[1] >= 1) {
+                const value = exportReward[3] * conversion;
+                player.cosmon[1].current += value;
+                player.cosmon[1].total += value;
+                exportReward[3] -= Math.max(exportReward[3] - value, 0);
             }
-            assignBuildingsProduction.strange0();
+            if (improved || player.strangeness[5][8] >= 1) {
+                const value = (exportReward[2] / (improved ? 1 : 2.5) + (improved ? 1 : 0)) * conversion;
+                player.strange[1].current += value;
+                player.strange[1].total += value;
+                exportReward[2] -= Math.max(exportReward[2] - value, 0);
+                assignBuildingsProduction.strange1();
+            } {
+                const value = (exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion;
+                player.strange[0].current += value;
+                player.strange[0].total += value;
+                exportReward[1] = Math.max(exportReward[1] - value, 0);
+                assignBuildingsProduction.strange0();
+            }
             exportReward[0] = 0;
             numbersUpdate();
         }
 
         const save = saveGame(globalSave.developerMode);
         if (save === null) { return; }
-        const a = document.createElement('a');
-        a.href = `data:text/plain,${save}`;
-        a.download = replaceSaveFileSpecials();
-        a.click();
+        void (async() => {
+            if (globalSave.developerMode && await Confirm('Prevent export of the save file?')) { return; }
+            const a = document.createElement('a');
+            a.href = `data:text/plain,${save}`;
+            a.download = replaceSaveFileSpecials();
+            a.click();
+        })();
     });
     getId('saveConsole').addEventListener('click', async() => {
         let value = await Prompt("Available options:\n'Copy' ‒ copy save file to the clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it");
@@ -1989,10 +2002,21 @@ try { //Start everything
     }
     if (save !== null) {
         global.lastSave = handleOfflineTime();
-        Notify(`Welcome back, you were away for ${format(global.lastSave / 1000, { type: 'time', padding: false })}${oldVersion !== player.version ? `\nGame has been updated from ${oldVersion} to ${player.version}` : ''}${globalSave.developerMode ?
-            `\nGame loaded after ${format((Date.now() - playerStart.time.started) / 1000, { type: 'time', padding: false })}` : ''}
-        `);
+        const offline = global.lastSave;
+        const timeAtLoad = Date.now();
         void simulateOffline(global.lastSave);
+
+        void (async() => {
+            const result = await fetch('./last_build.txt');
+            if (result.ok) {
+                global.lastUpdate = Number((await result.text()).replace('\n', ''));
+                if (global.lastUpdate === 0 || isNaN(global.lastUpdate)) { global.lastUpdate = null; }
+            }
+            Notify(`Welcome back, you were away for ${format(offline / 1000, { type: 'time', padding: false })}${oldVersion !== player.version ? `\nGame has been updated from ${oldVersion} to ${player.version}` : ''}${global.lastUpdate !== null ?
+                `\nLast update was ${format((timeAtLoad - global.lastUpdate) / 1000, { type: 'time', padding: false })} ago` : ''}${globalSave.developerMode ?
+                `\nGame loaded after ${format((timeAtLoad - playerStart.time.started) / 1000, { type: 'time', padding: false })}` : ''}
+            `);
+        })();
     } else { pauseGame(false); }
     getId('body').style.display = '';
     getId('loading').style.display = 'none';
@@ -2000,18 +2024,6 @@ try { //Start everything
     specialHTML.cache.idMap.clear();
     specialHTML.cache.queryMap.clear();
     specialHTML.cache.classMap.clear();
-
-    void (async() => {
-        const result = await fetch('./last_build.txt');
-        if (!result.ok) { return; }
-        global.lastUpdate = Number((await result.text()).replace('\n', ''));
-        if (global.lastUpdate === 0 || isNaN(global.lastUpdate)) {
-            global.lastUpdate = null;
-            return;
-        }
-        if (global.lastUpdate > 86400_000) { return; }
-        Notify(`Last game update happened ${format((Date.now() - global.lastUpdate) / 1000, { type: 'time', padding: false })} ago`);
-    })();
 } catch (error) {
     const stack = (error as { stack?: string }).stack;
     void Alert(`Game failed to load\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 2);
