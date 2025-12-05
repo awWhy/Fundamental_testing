@@ -288,6 +288,7 @@ export const resetVacuum = (level = 0) => {
 
     for (let i = 0; i < playerStart.strange.length; i++) {
         player.strange[i].current = 0;
+        player.strange[i].total = 0;
     }
     player.discharge.energy = 0;
     player.discharge.energyMax = 0;
@@ -323,6 +324,7 @@ export const resetVacuum = (level = 0) => {
     player.challenges.void = cloneArray(playerStart.challenges.void);
     if (universes >= 1) {
         player.strange[0].current += Math.ceil(player.verses[0].true ** 1.5);
+        player.strange[0].total = player.strange[0].current;
         if (vacuum) { player.strangeness[1][8] = 2; }
     }
     if (universes >= 3) {
@@ -331,8 +333,6 @@ export const resetVacuum = (level = 0) => {
     }
     if (universes >= 5 && vacuum) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    if (player.inflation.ends[1] >= 1) { player.strange[1].current = 2 ** player.verses[0].void - 1; }
-    for (let i = 0; i < playerStart.strange.length; i++) { player.strange[i].total = player.strange[0].current; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 6; s++) {

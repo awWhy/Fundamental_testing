@@ -7,22 +7,17 @@ import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
 
 const hotkeys = {} as Record<string, hotkeysList | numbersList>;
-const basicFunctions: Record<hotkeysList, () => boolean> = {
-    makeAll: () => {
-        buyAll();
-        return false;
-    },
+const basicFunctions: Record<hotkeysList, () => void> = {
+    makeAll: () => buyAll(),
     toggleAll: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggleAll') { return; }
+        global.hotkeys.last = 'toggleAll';
         toggleAll();
-        return true;
     },
-    createAll: () => {
-        createAll();
-        return false;
-    },
+    createAll: () => createAll(),
     toggleUpgrades: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggleU') { return; }
+        global.hotkeys.last = 'toggleU';
         let anyOn = false;
         for (let i = 5; i <= 8; i++) {
             if (player.toggles.auto[i]) {
@@ -34,152 +29,139 @@ const basicFunctions: Record<hotkeysList, () => boolean> = {
             player.toggles.auto[i] = !anyOn;
             toggleSwap(i, 'auto');
         }
-        return true;
     },
-    discharge: () => {
-        void dischargeResetUser();
-        return false;
-    },
+    discharge: () => void dischargeResetUser(),
     toggleDischarge: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle1') { return; }
+        global.hotkeys.last = 'toggle1';
         toggleSwap(1, 'auto', true);
-        return true;
     },
     vaporization: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'reset2') { return; }
+        global.hotkeys.last = 'reset2';
         void vaporizationResetUser();
-        return true;
     },
     toggleVaporization: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle2') { return; }
+        global.hotkeys.last = 'toggle2';
         toggleSwap(2, 'auto', true);
-        return true;
     },
-    rank: () => {
-        void rankResetUser();
-        return false;
-    },
+    rank: () => void rankResetUser(),
     toggleRank: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle3') { return; }
+        global.hotkeys.last = 'toggle3';
         toggleSwap(3, 'auto', true);
-        return true;
     },
     collapse: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'reset4') { return; }
+        global.hotkeys.last = 'reset4';
         void collapseResetUser();
-        return true;
     },
     toggleCollapse: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle4') { return; }
+        global.hotkeys.last = 'toggle4';
         toggleSwap(4, 'auto', true);
-        return true;
     },
-    galaxy: () => {
-        buyBuilding(3, 5);
-        return false;
-    },
+    galaxy: () => buyBuilding(3, 5),
     merge: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'reset5') { return; }
+        global.hotkeys.last = 'reset5';
         void mergeResetUser();
-        return true;
     },
     toggleMerge: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle9') { return; }
+        global.hotkeys.last = 'toggle9';
         toggleSwap(9, 'auto', true);
-        return true;
     },
     nucleation: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'reset6') { return; }
+        global.hotkeys.last = 'reset6';
         void nucleationResetUser();
-        return true;
     },
     toggleNucleation: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle10') { return; }
+        global.hotkeys.last = 'toggle10';
         toggleSwap(10, 'auto', true);
-        return true;
     },
     stage: () => {
-        if (global.hotkeys.repeat && (player.inflation.vacuum || player.stage.active >= 4)) { return false; }
+        if (player.inflation.vacuum || player.stage.active >= 4) {
+            if (global.hotkeys.last === 'reset0') { return; }
+            global.hotkeys.last = 'reset0';
+        }
         void stageResetUser();
-        return true;
     },
     toggleStage: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'toggle0') { return; }
+        global.hotkeys.last = 'toggle0';
         toggleSwap(0, 'auto', true);
-        return true;
     },
-    universe: () => {
-        buyVerse(0);
-        return false;
-    },
-    end: () => {
-        void endResetUser();
-        return false;
-    },
+    universe: () => buyVerse(0),
+    end: () => void endResetUser(),
     exitChallenge: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'exit') { return; }
+        global.hotkeys.last = 'exit';
         enterExitChallengeUser(null);
-        return true;
     },
     supervoid: () => {
-        if (global.hotkeys.repeat || (player.stage.true < 8 && !player.event)) { return false; }
+        if (global.hotkeys.last === 'super' || (player.stage.true < 8 && !player.event)) { return; }
+        global.hotkeys.last = 'super';
         const old = player.challenges.super;
         toggleSupervoid(true);
         if (old !== player.challenges.super) { Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`); }
-        return true;
     },
     warp: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'warp') { return; }
+        global.hotkeys.last = 'warp';
         offlineWarp();
-        return true;
     },
     pause: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'pause') { return; }
+        global.hotkeys.last = 'pause';
         pauseGameUser();
-        return true;
     },
     tabRight: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'tabRight') { return; }
+        global.hotkeys.last = 'tabRight';
         changeTab('right');
-        return true;
     },
     tabLeft: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'tabLeft') { return; }
+        global.hotkeys.last = 'tabLeft';
         changeTab('left');
-        return true;
     },
     subtabUp: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'subtabUp') { return; }
+        global.hotkeys.last = 'subtabUp';
         changeSubtab('up');
-        return true;
     },
     subtabDown: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'subtabDown') { return; }
+        global.hotkeys.last = 'subtabDown';
         changeSubtab('down');
-        return true;
     },
     stageRight: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'stageRight') { return; }
+        global.hotkeys.last = 'stageRight';
         changeStage('right');
-        return true;
     },
     stageLeft: () => {
-        if (global.hotkeys.repeat) { return false; }
+        if (global.hotkeys.last === 'stageLeft') { return; }
+        global.hotkeys.last = 'stageLeft';
         changeStage('left');
-        return true;
     }
 };
-const numberFunctions: Record<numbersList, (number: number) => boolean> = {
+const numberFunctions: Record<numbersList, (number: number) => void> = {
     makeStructure: (number) => {
         if (number !== 0) {
             if (player.stage.active === 6 && player.strangeness[6][3] < 1) {
                 buyVerse(number - 1);
             } else { buyBuilding(number, player.stage.active); }
         } else { buyAll(); }
-        return false;
     },
     toggleStructure: (number) => {
-        if (global.hotkeys.repeat) { return false; }
+        const repeat = `build${number}`;
+        if (global.hotkeys.last === repeat) { return; }
+        global.hotkeys.last = repeat;
         if (number === 0) {
             toggleAll();
         } else if (player.stage.active === 6 && player.strangeness[6][3] < 1) {
@@ -188,14 +170,14 @@ const numberFunctions: Record<numbersList, (number: number) => boolean> = {
         } else {
             if (number < playerStart.buildings[player.stage.active].length) { toggleSwap(number, 'buildings', true); }
         }
-        return true;
     },
     enterChallenge: (number) => {
-        if (global.hotkeys.repeat) { return false; }
+        const repeat = `chal${number}`;
+        if (global.hotkeys.last === repeat) { return; }
+        global.hotkeys.last = repeat;
         if (number !== 0) {
             enterExitChallengeUser(number - 1);
         } else { enterExitChallengeUser(null); }
-        return true;
     }
 };
 
@@ -261,9 +243,14 @@ export const detectHotkey = (check: KeyboardEvent) => {
     if (info.disabled) { return; }
 
     if (code === 'Escape') {
-        if (detectShift(check) !== false || specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
-        const notification = specialHTML.notifications[0];
-        if (notification !== undefined) { notification[1](true); }
+        if (detectShift(check) === null || specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
+        const notifications = specialHTML.notifications;
+        if (check.shiftKey) {
+            if (globalSave.developerMode || notifications[0] === undefined) { return; }
+            notifications[0][1](true);
+        } else {
+            for (let i = notifications.length - 1; i >= 0; i--) { notifications[i][1](true); }
+        }
         check.preventDefault();
         return;
     } else if (check.metaKey) { return; }
@@ -278,12 +265,12 @@ export const detectHotkey = (check: KeyboardEvent) => {
             (key.length === 1 ? code.replace('Key', '') : code.replaceAll(/([A-Z]+)/g, ' $1').trimStart()))
     ] as hotkeysList];
     if (functionTest !== undefined) {
-        if (functionTest()) { info.repeat = true; }
-        return check.preventDefault();
+        functionTest();
+        check.preventDefault();
     } else if (number) {
         const functionTest = numberFunctions[hotkeys[prefix + (code.includes('Numpad') ? 'Numpad' : 'Numbers')] as numbersList];
         if (functionTest !== undefined) {
-            if (functionTest(Number(code.replace('Digit', '').replace('Numpad', '')))) { info.repeat = true; }
+            functionTest(Number(code.replace('Digit', '').replace('Numpad', '')));
             check.preventDefault();
         }
     }

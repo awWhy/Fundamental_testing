@@ -276,12 +276,11 @@ export const numbersUpdate = (ignoreOffline = false) => {
                 }
             } else if (active === 4 || active === 5) {
                 const { collapseInfo } = global;
-                const starEffect = [calculateEffects.star[0](), effectsCache.star1, calculateEffects.star[2]()];
                 const starProd = buildingsInfo.producing[4];
                 let total = player.strangeness[4][4] >= 3 ? 1 : (calculateEffects.mass(true) / calculateEffects.mass()) * (calculateEffects.S4Research4(true) / calculateEffects.S4Research4()) * ((1 + (calculateEffects.S5Upgrade2(true) - calculateEffects.S5Upgrade2()) / effectsCache.galaxyBase) ** (player.buildings[5][3].true * 2));
                 if (player.strangeness[4][4] < 2) {
                     const restProd = new Overlimit(starProd[1]).allPlus(starProd[3], starProd[4], starProd[5]);
-                    total *= new Overlimit(starProd[2]).multiply(calculateEffects.star[0](true) / starEffect[0]).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN(1).toNumber() * (calculateEffects.star[1](true) / starEffect[1]) * (calculateEffects.star[2](true) / starEffect[2]);
+                    total *= new Overlimit(starProd[2]).multiply(calculateEffects.star[0](true) / effectsCache.star[0]).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN(1).toNumber() * (calculateEffects.star[1](true) / effectsCache.star[1]) * (calculateEffects.star[2](true) / effectsCache.star[2]);
                 }
 
                 if (active === 4) {
@@ -290,7 +289,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     for (let i = 0; i < 3; i++) {
                         getId(`special${i + 1}Cur`).textContent = format(player.collapse.stars[i], { padding: 'exponent' });
                         getId(`special${i + 1}Get`).textContent = format(collapseInfo.starCheck[i], { padding: 'exponent' });
-                        getQuery(`#star${i + 1}Effect > span`).textContent = format(starEffect[i], { padding: true });
+                        getQuery(`#star${i + 1}Effect > span`).textContent = format(effectsCache.star[i], { padding: true });
 
                         /* Fixes text movement */
                         const mainQuery = getQuery(`#special${i + 1} > p`);
@@ -328,7 +327,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                         const clustersTotal = player.researchesExtra[5][5] >= 2;
                         getQuery('#merge2Effect > span:nth-of-type(2)').textContent = `${(clustersTotal ? mergeInfo.galaxies : buildings[3].true) - (mergeInfo.checkReward[1] + merge[clustersTotal ? 'rewards' : 'claimed'][1]) * 100}`;
                     }
-                    if (player.strangeness[4][4] < 2) { getQuery('#mainCapPostS5 > span').textContent = format(collapseInfo[vacuum ? 'solarCap' : 'newMass'] * (calculateEffects.star[2](true) / starEffect[2]), { padding: true }); }
+                    if (player.strangeness[4][4] < 2) { getQuery('#mainCapPostS5 > span').textContent = format(collapseInfo[vacuum ? 'solarCap' : 'newMass'] * (calculateEffects.star[2](true) / effectsCache.star[2]), { padding: true }); }
                     getQuery('#elementsProductionS5 > span').textContent = format(new Overlimit(starProd[1]).allPlus(starProd[2], starProd[3], starProd[4], starProd[5]).multiply(speed), { padding: true });
                     if (player.strangeness[4][4] < 3) { getQuery('#collapseBoostTotalS5 > span').textContent = format(total, { padding: true }); }
                     getQuery('#mainCapS5 > span').textContent = format(collapseInfo.newMass, { padding: true });
@@ -354,9 +353,9 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     if (i === 0) {
                         if (player.challenges.active === 0) {
                             if (player.stage.true < 8) {
-                                lockText = 'Not unlocked';
+                                lockText = 'Not yet unlocked';
                             } else if (global.challengesInfo[0].time < player.time.stage) {
-                                lockText = 'Out of time';
+                                lockText = 'Out of Challenge time';
                             }
                         } else if (!vacuum) {
                             lockText = 'Requires true Vacuum state';
@@ -512,10 +511,10 @@ export const numbersUpdate = (ignoreOffline = false) => {
     } else if (tab === 'settings') {
         if (subtab === 'Settings') {
             const exportReward = player.time.export;
-            const improved = player.inflation.ends[0] >= 1;
+            const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
             const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
-            getId('exportQuarks').textContent = format((exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion, { padding: true });
-            getQuery('#exportStrangelets > span').textContent = format((exportReward[2] / (improved ? 1 : 2.5) + (improved ? 1 : 0)) * conversion, { padding: true });
+            getId('exportQuarks').textContent = format((exportReward[1] / claimPer + 1) * conversion, { padding: true });
+            getQuery('#exportStrangelets > span').textContent = format(exportReward[2] / claimPer * conversion, { padding: true });
             getQuery('#exportCosmon > span').textContent = format(exportReward[3] * conversion, { padding: true });
             getId('warpButton').textContent = `${Math.floor(player.time.offline / 120_000)} Warps`;
             if (global.lastSave >= 1000) { getId('isSaved').textContent = `${format(global.lastSave / 1000, { type: 'time' })} ago`; }
@@ -527,13 +526,13 @@ export const numbersUpdate = (ignoreOffline = false) => {
             getQuery('#endResets > span').textContent = `${player.inflation.ends[0]}`;
 
             const exportReward = player.time.export;
-            const improved = player.inflation.ends[0] >= 1;
+            const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
             const over = player.inflation.ends[1] >= 1 ? 2 : 1;
-            getId('exportQuarksMax').textContent = format((exportReward[1] / (improved ? 1 : 2.5) + 1) * over, { padding: true });
-            getQuery('#exportStrangeletsMax > span').textContent = format((exportReward[2] / (improved ? 1 : 2.5) + (improved ? 1 : 0)) * over, { padding: true });
+            getId('exportQuarksMax').textContent = format((exportReward[1] / claimPer + 1) * over, { padding: true });
+            getQuery('#exportStrangeletsMax > span').textContent = format(exportReward[2] / claimPer * over, { padding: true });
             getQuery('#exportCosmonMax > span').textContent = format(exportReward[3] * over, { padding: true });
             getId('exportTimeToMax').textContent = format(43200 * over - exportReward[0] / 1000, { type: 'time' });
-            if (!improved) {
+            if (claimPer !== 1) {
                 getQuery('#exportQuarksStorage > span').textContent = format(exportReward[1], { padding: true });
                 getQuery('#exportStrangeletsStorage > span').textContent = format(exportReward[2], { padding: true });
             }
@@ -582,12 +581,12 @@ export const numbersUpdate = (ignoreOffline = false) => {
                         const mass = calculateEffects.mass(true) / calculateEffects.mass();
                         getQuery('#solarMassStat > span').textContent = format(mass, { padding: true });
                         let star0 = 1;
-                        const star1 = auto2 ? 1 : calculateEffects.star[1](true) / effectsCache.star1;
-                        const star2 = auto2 ? 1 : calculateEffects.star[2](true) / calculateEffects.star[2]();
+                        const star1 = auto2 ? 1 : calculateEffects.star[1](true) / effectsCache.star[1];
+                        const star2 = auto2 ? 1 : calculateEffects.star[2](true) / effectsCache.star[2];
                         if (!auto2) {
                             const starProd = global.buildingsInfo.producing[4];
                             const restProd = new Overlimit(starProd[1]).allPlus(starProd[3], starProd[4], starProd[5]);
-                            star0 = new Overlimit(starProd[2]).multiply(calculateEffects.star[0](true) / calculateEffects.star[0]()).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN(1).toNumber();
+                            star0 = new Overlimit(starProd[2]).multiply(calculateEffects.star[0](true) / effectsCache.star[0]).plus(restProd).divide(restProd.plus(starProd[2])).replaceNaN(1).toNumber();
                             getQuery('#star1Stat > span').textContent = format(star0, { padding: true });
                             getQuery('#star2Stat > span').textContent = format(star1, { padding: true });
                             getQuery('#star3Stat > span').textContent = format(star2, { padding: true });
@@ -1071,7 +1070,7 @@ export const visualUpdate = (ignoreOffline = false) => {
             const show1 = universes < 2 || global.sessionToggles[1];
             const show2 = universes < 3 || global.sessionToggles[1];
             const show3 = universes < 5 || global.sessionToggles[1];
-            getId('strange1').style.display = player.inflation.ends[0] >= 1 || player.strangeness[5][8] >= 1 ? '' : 'none';
+            getId('strange1').style.display = player.strangeness[5][8] >= 1 ? '' : 'none';
             getId('strange1Unlocked').style.display = player.strangeness[5][8] >= 1 ? '' : 'none';
             getId('strange1Effect1Stat0Extra').style.display = 'none';
             getId('strange1Effect1Stat1Extra').style.display = 'none';
@@ -1177,13 +1176,13 @@ export const visualUpdate = (ignoreOffline = false) => {
             const { researchesAuto, strangeness } = player;
 
             const exportReward = player.time.export;
-            const improved = player.inflation.ends[0] >= 1;
-            getId('exportReward').dataset.title = `${format((exportReward[1] / (improved ? 1 : 2.5) + 1) / 43200, { type: 'income' }).replace(' ', ' Strange quarks ')}${
-                improved || player.strangeness[5][8] >= 1 ? `\n${format((exportReward[2] / (improved ? 1 : 2.5) + (improved ? 1 : 0)) / 43200, { type: 'income' }).replace(' ', ' Strangelets ')}` : ''}${
+            const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
+            getId('exportReward').dataset.title = `${format((exportReward[1] / claimPer + 1) / 43200, { type: 'income' }).replace(' ', ' Strange quarks ')}${
+                strangeness[5][8] >= 1 ? `\n${format(exportReward[2] / claimPer / 43200, { type: 'income' }).replace(' ', ' Strangelets ')}` : ''}${
                 player.inflation.ends[1] >= 1 ? `\n${format(exportReward[3] / 43200, { type: 'income' }).replace(' ', ' Cosmons ')}` : ''}`;
             getQuery('#exportReward > span:last-of-type').style.display = player.challenges.active !== null && global.challengesInfo[player.challenges.active].resetType !== 'stage' ? '' : 'none';
             getId('collapsePointsMax').textContent = strangeness[5][4] >= 1 ? 'There is no maximum value' : 'Maximum value is 40';
-            getId('exportStrangelets').style.display = improved || strangeness[5][8] >= 1 ? '' : 'none';
+            getId('exportStrangelets').style.display = strangeness[5][8] >= 1 ? '' : 'none';
             getId('exportCosmon').style.display = player.inflation.ends[1] >= 1 ? '' : 'none';
             getId('warpButton').style.display = player.challenges.supervoid[3] >= 2 ? '' : 'none';
             getId('autoTogglesUpgrades').style.display = researchesAuto[0] >= 1 || researchesAuto[1] >= 2 ? '' : 'none';
@@ -1246,10 +1245,9 @@ export const visualUpdate = (ignoreOffline = false) => {
 
             getId('firstPlay').textContent = new Date(player.time.started).toLocaleString();
             getId('offlineStorage').style.display = player.challenges.supervoid[3] >= 2 ? '' : 'none';
-            const improved = player.inflation.ends[0] >= 1;
-            getId('exportQuarksStorage').style.display = !improved ? '' : 'none';
-            getId('exportStrangeletsStorage').style.display = !improved ? '' : 'none';
-            getId('exportStrangeletsMax').style.display = improved || strangeness[5][8] >= 1 ? '' : 'none';
+            getId('exportQuarksStorage').style.display = player.inflation.ends[0] < 1 ? '' : 'none';
+            getId('exportStrangeletsStorage').style.display = player.inflation.ends[0] < 1 ? '' : 'none';
+            getId('exportStrangeletsMax').style.display = strangeness[5][8] >= 1 ? '' : 'none';
             getId('exportCosmonMax').style.display = player.inflation.ends[1] >= 1 ? '' : 'none';
             for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
                 getId(`building${i}Stats`).style.display = buildings[i].trueTotal.moreThan(0) ? '' : 'none';
@@ -1889,6 +1887,7 @@ const setRemnants = () => {
             getId('special1').dataset.title = img1.alt;
             getId('special1Cur').style.color = `var(--${whiteDwarf ? 'cyan' : 'red'}-text)`;
         }
+        getId('star2Effect').dataset.title = `Boost to ${player.elements[27] >= 1 ? 'Brown dwarfs, ' : ''}Main-sequence${player.elements[33] >= 1 ? ', Red supergiants' : ''}`;
 
         const quarkStar = player.researchesExtra[4][3] >= 1;
         const src2 = quarkStar ? 'Quark%20star' : 'Neutron%20star';

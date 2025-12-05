@@ -192,10 +192,10 @@ export const global: globalType = {
     lastUpdate: null,
     hotkeys: {
         disabled: true,
-        repeat: false,
         shift: false,
         ctrl: false,
-        tab: false
+        tab: false,
+        last: ''
     },
     lastUpgrade: [[null, 'upgrades']],
     lastElement: null,
@@ -258,10 +258,10 @@ export const global: globalType = {
         solarCap: 0.01235
     },
     mergeInfo: {
-        unlockU: [0, 0, 0, 0, 1, 1, 3],
+        unlockU: [0, 0, 0, 0, 1, 1, 4],
         unlockR: [0, 0, 3, 3, 60],
-        unlockE: [0, 2, 4, 50, 60, 60],
-        S5Extra3: 0,
+        unlockE: [0, 2, 4, 4, 60, 60],
+        S5Extra2: 0,
         checkReward: [0, 0, 0, 0],
         galaxies: 0
     },
@@ -477,11 +477,11 @@ export const global: globalType = {
                 () => `A very massive Star cluster that will boost Star clusters by ${format(calculateEffects.S5Upgrade1())}.`,
                 () => `Boost per Galaxy will be increased by +${format(calculateEffects.S5Upgrade2(false, 1), { padding: true })}.\n(Effect will be stronger with more Solar mass past ${format(1e5)})`,
                 () => `Unlock a new reset type that will bring Galaxies closer for potential Merging.${player.inflation.vacuum ? ' That reset behaves like a Galaxy reset, while also converting self-made Galaxies into bonus ones. Can only be done a limited amount of times per Stage reset.' : ''}`,
-                () => `Region of space that is undergoing a larger amount of Star formations, it will boost Nebulas by ${format(100 * 10 ** player.researches[5][4])}.`,
-                () => `A spheroidal conglomeration of Stars that is even more dense than Super Star cluster, it will boost Star clusters by ${format(100 * 10 ** player.researches[5][4])}.`,
+                () => `Region of space that is undergoing a larger amount of Star formations, it will boost Nebulas by ${format(1000 * 10 ** player.researches[5][4])}.`,
+                () => `A spheroidal conglomeration of Stars that is even more dense than Super Star cluster, it will boost Star clusters by ${format(1000 * 10 ** player.researches[5][4])}.`,
                 () => `An entire Galaxy that is undergoing higher rate of Star formations, it will boost Galaxies by ${format(100 * 10 ** player.researches[5][4])}.`
             ],
-            cost: [1e56, 1e60, 1e120, 1e160, 1e200, 1e210, 1e290] as unknown as Overlimit[],
+            cost: [1e56, 1e60, 1e120, 1e160, 1e200, 1e210, '1e360'] as unknown as Overlimit[],
             maxActive: 4
         }, { //Stage 6
             name: [
@@ -630,14 +630,14 @@ export const global: globalType = {
                     for (let i = 1; i < player.researches[5][1] + 1; i++) { unlocks += `, ${names[max - i]}`; }
                     return `More of the same Star type will be found within Star cluster. Star clusters and their minimum strength will be improved by 2. It will also boost Stars of lower tier, but 2 times less than the previous one.\nNext tier will be ${names[Math.max(max - player.researches[5][1] - 1, 1)]}. Currently can boost: ${unlocks}.`;
                 },
-                () => `Weaken internal gas pressure within Nebulas to cause even more gravitational Collapses.\nThis will make every self-made Nebula boost each other by ${format(calculateEffects.S5Research2(), { padding: true })}. (+${format(0.00625)} per level)${visualUniverseLevels(4, 50)}`,
-                () => `Increase the Energy required for Star clusters to cease being in a gravitationally bound state.\nThis will make every self-made Star cluster boost each other by ${format(calculateEffects.S5Research3(), { padding: true })}. (+${format(0.00625)} per level)${visualUniverseLevels(4, 50)}`,
+                () => `Weaken internal gas pressure within Nebulas to cause even more gravitational Collapses.\nThis will make every self-made Nebula boost each other by ${format(calculateEffects.S5Research2(), { padding: true })}. (+${format(0.00625)} per level)${visualUniverseLevels(4, 50, 60)}`,
+                () => `Increase the Energy required for Star clusters to cease being in a gravitationally bound state.\nThis will make every self-made Star cluster boost each other by ${format(calculateEffects.S5Research3(), { padding: true })}. (+${format(0.00625)} per level)${visualUniverseLevels(4, 50, 60)}`,
                 () => `Produce even more stars and increase strength of 'Starburst region', 'Globular cluster' and 'Starburst Galaxy' effects by 10 per level.${visualUniverseLevels(70)}`
             ],
             cost: [],
-            firstCost: [1e54, 1e58, 1e270, 1e280, '1e550'] as unknown as Overlimit[],
+            firstCost: [1e54, 1e58, 1e280, 1e290, '1e550'] as unknown as Overlimit[],
             scaling: [1e8, 1e8, 1e30, 1e30, 1e30],
-            max: [4, 4, 2, 2, 4],
+            max: [4, 4, 1, 1, 1],
             maxActive: 2
         }, { //Stage 6
             name: [
@@ -781,27 +781,27 @@ export const global: globalType = {
             name: [
                 'Hypercompact stellar system',
                 'Interacting Galaxies',
-                'More Merges',
                 'Central dominant Galaxy',
+                'More Merges',
                 'Compact Group',
                 'Interacting Groups'
             ],
             effectText: [
                 () => `Super dense core which will allow creation of a new Structure. That Structure will increase Stage reset reward${player.inflation.vacuum ? ', starting Energy after any Reset' : ''}, boost Nebulas and Star clusters. But creating it will fully reset ${player.inflation.vacuum ? 'all' : 'Interstellar and Intergalactic'} Stages.\nThis Research also removes Solar mass and other Remnant requirements from everything in the Interstellar Stage.`,
-                () => `Unlock a new Result for the Merge resets, if to reset with enough self-made Galaxies.${global.researchesExtraInfo[5].max[1] > 1 ? '\nSecond level will allow the use of the excess Galaxies from previous Merge resets when forming new Galaxy groups.' : ''}${visualUniverseLevels(40)}`,
-                () => `Increase max allowed Merge resets by +1 per level.${visualUniverseLevels(50, 90, 110)}`,
-                () => { //[3]
-                    const maxLevel = player.researchesExtra[5][3] + player.merge.rewards[1];
-                    const trueLevel = global.mergeInfo.S5Extra3;
-                    return `An even bigger Galaxy to improve Stage reset reward and Galaxy groups effect with every Galaxy group.\nEffective level is ${format(trueLevel, { padding: trueLevel !== maxLevel })}, will be ${trueLevel !== maxLevel ? "restored with more Stardust, this doesn't" : "set to 0 after any reset, this won't"} affect Stage reset reward.\n(Total boost: ${format(calculateEffects.S5Extra3(trueLevel), { padding: true })} ⟶ ${format(calculateEffects.S5Extra3(maxLevel + (maxLevel === trueLevel ? 1 : 0)), { padding: true })})${visualUniverseLevels(50)}`;
+                () => `Unlock a new Result for the Merge resets, if to reset with enough self-made Galaxies.${global.researchesExtraInfo[5].max[1] > 1 ? '\nSecond level will allow the use of the excess Galaxies from previous Merge resets when forming new Galaxy groups.' : ''}${visualUniverseLevels(4)}`,
+                () => { //[2]
+                    const maxLevel = player.researchesExtra[5][2] + player.merge.rewards[1];
+                    const trueLevel = global.mergeInfo.S5Extra2;
+                    return `An even bigger Galaxy to improve Stage reset reward and Galaxy groups effect with every Galaxy group.\nEffective level is ${format(trueLevel, { padding: trueLevel !== maxLevel })}, will be ${trueLevel !== maxLevel ? "restored with more Stardust, this doesn't" : "set to 0 after any reset, this won't"} affect Stage reset reward.\n(Total boost: ${format(calculateEffects.S5Extra2(trueLevel), { padding: true })} ⟶ ${format(calculateEffects.S5Extra2(maxLevel + (maxLevel === trueLevel ? 1 : 0)), { padding: true })})${visualUniverseLevels(50, 60)}`;
                 },
+                () => `Increase max allowed Merge resets by +1 per level.${visualUniverseLevels(50, 90, 110)}`,
                 () => `Decrease amount of Galaxies required for the creation of a Galaxy Group.\n(Effect: ${calculateEffects.S5Extra4()} ⟶ ${calculateEffects.S5Extra4(player.researchesExtra[5][4] + 1)}, effect increase per level decreases with more level)${visualUniverseLevels(80, 100)}`,
                 () => `Unlock the second Merge result${global.researchesExtraInfo[5].max[5] > 1 ? ' and it make able to use excess Galaxies at level 2' : ''}${visualUniverseLevels(100)}.`
             ],
             cost: [],
-            firstCost: [1e80, 1e260, '1e350', '1e380', '1e560', '1e660'] as unknown as Overlimit[],
-            scaling: [1, 1e150, 1e210, 1e30, 1e90, 1e270],
-            max: [1, 1, 1, 2, 2, 1],
+            firstCost: [1e80, 1e270, '1e360', '1e390', '1e560', '1e660'] as unknown as Overlimit[],
+            scaling: [1, 1e120, 1e30, 1e210, 1e90, 1e270],
+            max: [1, 1, 1, 1, 1, 1],
             maxActive: 1
         }, { //Stage 6
             name: [
@@ -991,13 +991,13 @@ export const global: globalType = {
             () => `No corrosion, only boost to all Stars that is based on unspent Stardust ^${format(calculateEffects.element24_power())}.\n(Boost to Stars: ${format(calculateEffects.element24(), { padding: true })})`,
             () => "Brittle Element, but not the bonus ‒ 1 more level in 'Star system'.",
             () => `Any further fusion will be an endothermic process. ${player.inflation.vacuum ? `Unlock a new Star type${player.strangeness[5][3] >= 1 ? ' and Intergalactic Stage' : ''}` : 'Enter Intergalactic space'}.\n${player.stage.true >= 6 || player.strange[0].total >= 1 ? `Current base increase for Stage reset reward is +${format(effectsCache.element26, { padding: true })}, which is equal to log10(Stardust produced this Stage) - 48.${player.elements[29] >= 1 ? "\n(Formula doesn't show improvement from '[29] Copper', but base increase does)" : ''}` : '(Can change active Stage from footer, new effect will be added after another Stage reset)'}`,
-            () => `Combined and ready to make all self-made Red supergiants count as Red giants and improve Brown dwarfs by ${format(1e6)}, and '[24] Chromium' Element by +^${format(0.01)}.`,
-            () => "Slow to react, but will increase max level of 'Star system' by +1.",
+            () => `Combined and ready to make Red giants effect improve Brown dwarfs.\nAlso improves '[24] Chromium' Element by +^${format(0.01)}.`,
+            () => `Slow to react, but will increase effective amount of Red giants ${format(1.5)}.\nOh, and also will increase max level of 'Star system' by +1.`,
             () => `Does not need to be prepared to increase Stage reset reward base by Arithmetic progression with step of ${format(0.01)}.`,
             () => `First of new Elements to come, increases max allowed Merge resets by +1 for every new Element past '[29] Copper'${player.upgrades[4][5] === 1 ? ` until '${global.elementsInfo.name[29 + player.verses[0].true]}'` : ''}.\n(Currently highest created Element in the current Stage reset is '${global.elementsInfo.name[player.collapse.maxElement]}', equals to +${Math.max(Math.min(player.collapse.maxElement, 29 + player.verses[0].true) - 29, 0)} allowed Merges)`,
-            () => "Will melt in the palm of your hand to increase max level of 'Protoplanetary disk' by +1.",
+            () => "Will melt in the palm of your hand to increase max level of 'Star system' by +1.",
             () => `Too late to appear, but it will make all Galaxies cost scale slower by ${format(-0.01)} anyway.`,
-            () => "Toxic enough to increase the max level of 'Star system' by only +1.",
+            () => 'Toxic enough to make Red giants effect improve Red supergiants.',
             () => "Capable of sensing an +1 increase to the max level of 'Star system'.",
             () => "The only liquid nonmetal to increase the max level of 'Inner Black hole' by +1.",
             () => `Nothing special, just an ${format(1.21)}x decrease to Galaxies cost.`
@@ -1006,7 +1006,7 @@ export const global: globalType = {
             0, 1000, 4000, 2e4, 1e5, 1e8, 1e10, 4e11, 8e12, 6e13,
             1e15, 1e20, 1e22, 1e24, 1.4e26, 1e28, 1e30, 1e32, 2e36, 1e38,
             1e39, 1e41, 2e42, 3e43, 4e44, 5e45, 1e48, 1e54, 1e58, 1e140,
-            1e220, 1e240, 1e260, '1e410', '1e5200', '1e6000', '1e8200'
+            1e220, 1e240, 1e260, '1e330', '1e5200', '1e6000', '1e8200'
         ] as unknown as Overlimit[],
         maxActive: 29
     },
@@ -1326,7 +1326,7 @@ export const global: globalType = {
         ],
         cost: [],
         firstCost: [1, 1, 400, 1, 100, 1, 600, 5, 600],
-        scaling: [0.5, 0.5, 2, 1, 2.4, 1.8, 3.4, 2.4, 3],
+        scaling: [0.5, 0.5, 2, 1, 2.4, 2.6, 3.4, 2.4, 3],
         max: [999, 999, 8, 4, 4, 4, 4, 4, 3]
     }],
     milestonesInfo: [
@@ -1593,7 +1593,7 @@ export const effectsCache = { //Cannot be in Stage.ts due to esbuild file orderi
     S2Upgrade3: 0,
     S2Upgrade4: 0,
     interstellar: 0,
-    star1: 0,
+    star: [0, 0, 0],
     galaxyBase: 0,
     strangeMiltipliers: 0,
     element26: 0,

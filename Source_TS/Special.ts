@@ -285,8 +285,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ], [
             ['ResearchGalaxy1.png', 'stage3borderImage'],
             ['ResearchGalaxy2.png', 'brownBorderImage'],
-            ['ResearchGalaxy3.png', 'brownBorderImage'],
-            ['ResearchGalaxy4.png', 'stage3borderImage'],
+            ['ResearchGalaxy3.png', 'stage3borderImage'],
+            ['ResearchGalaxy4.png', 'brownBorderImage'],
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
         ], [
@@ -588,13 +588,9 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
 
     const bodyStyle = document.documentElement.style;
     bodyStyle.setProperty('--transition-all', '500ms');
-    bodyStyle.setProperty('--transition-buttons', '500ms');
-    for (const property in properties) { bodyStyle.setProperty(property, properties[property as '--main-text']); }
+    for (const property in properties) { bodyStyle.setProperty(property, properties[property as keyof typeof properties]); }
 
-    setTimeout(() => {
-        bodyStyle.setProperty('--transition-all', '0ms');
-        bodyStyle.setProperty('--transition-buttons', '100ms');
-    }, 500);
+    setTimeout(() => { bodyStyle.setProperty('--transition-all', '0ms'); }, 500);
 };
 
 export const Alert = async(text: string, priority = 0): Promise<void> => {
@@ -816,17 +812,21 @@ export const Notify = (text: string) => {
         const remove = () => {
             const index = notifications.indexOf(pointer);
             if (index !== -1) { notifications.splice(index, 1); }
-            html.removeEventListener('click', remove);
+            html.removeEventListener('click', clickEvent);
             html.style.animation = 'hideX 800ms ease-in-out forwards';
             html.style.pointerEvents = 'none';
             setTimeout(() => html.remove(), 800);
             clearTimeout(timeout);
         };
+        const clickEvent = () => {
+            if (global.hotkeys.shift) { return remove(); }
+            for (let i = notifications.length - 1; i >= 0; i--) { notifications[i][1](true); }
+        };
         setTimeout(() => {
             html.style.animation = '';
             html.style.pointerEvents = '';
             timeout = setTimeout(remove, 7200);
-            html.addEventListener('click', remove);
+            html.addEventListener('click', clickEvent);
         }, 800);
     } else { notifications[index][1](); }
 };

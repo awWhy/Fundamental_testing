@@ -123,20 +123,13 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
     const finish = () => { tick = 0; };
     const key = (event: KeyboardEvent) => {
         const shift = detectShift(event);
-        if (shift === null) { return; }
-        const code = event.code;
-        if (code === 'Escape') {
-            if (shift) { return; }
-            finish();
-            event.preventDefault();
-        } else if (code === 'Tab') {
-            if (shift && document.activeElement === accelBtn) {
-                cancelBtn.focus();
-            } else if (!shift && document.activeElement === cancelBtn) {
-                accelBtn.focus();
-            } else { return; }
-            event.preventDefault();
-        }
+        if (shift === null || event.code !== 'Tab') { return; }
+        if (shift && document.activeElement === accelBtn) {
+            cancelBtn.focus();
+        } else if (!shift && document.activeElement === cancelBtn) {
+            accelBtn.focus();
+        } else { return; }
+        event.preventDefault();
     };
     const end = () => {
         pauseGame(false);
@@ -877,8 +870,8 @@ try { //Start everything
             hotkeys.ctrl = false;
             numbersUpdate();
         }
-        hotkeys.repeat = false;
         hotkeys.tab = false;
+        hotkeys.last = '';
     };
     body.addEventListener('contextmenu', (event) => {
         const activeType = (document.activeElement as HTMLInputElement)?.type;
@@ -1739,7 +1732,7 @@ try { //Start everything
     getId('export').addEventListener('click', () => {
         const exportReward = player.time.export;
         if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
-            const improved = player.inflation.ends[0] >= 1;
+            const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
             const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
 
             if (player.inflation.ends[1] >= 1) {
@@ -1748,14 +1741,14 @@ try { //Start everything
                 player.cosmon[1].total += value;
                 exportReward[3] -= Math.max(exportReward[3] - value, 0);
             }
-            if (improved || player.strangeness[5][8] >= 1) {
-                const value = (exportReward[2] / (improved ? 1 : 2.5) + (improved ? 1 : 0)) * conversion;
+            if (player.strangeness[5][8] >= 1) {
+                const value = exportReward[2] / claimPer * conversion;
                 player.strange[1].current += value;
                 player.strange[1].total += value;
                 exportReward[2] -= Math.max(exportReward[2] - value, 0);
                 assignBuildingsProduction.strange1();
             } {
-                const value = (exportReward[1] / (improved ? 1 : 2.5) + 1) * conversion;
+                const value = (exportReward[1] / claimPer + 1) * conversion;
                 player.strange[0].current += value;
                 player.strange[0].total += value;
                 exportReward[1] = Math.max(exportReward[1] - value, 0);

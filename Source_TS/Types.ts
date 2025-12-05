@@ -246,10 +246,11 @@ export interface globalType {
     paused: boolean
     hotkeys: {
         disabled: boolean
-        repeat: boolean
         shift: boolean
         ctrl: boolean
         tab: boolean
+        /** Only for non-repeatable hotkeys */
+        last: string
     }
     lastUpgrade: Array<[number | null, 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR']>
     lastElement: number | null
@@ -330,7 +331,7 @@ export interface globalType {
         unlockR: number[]
         /** Self-made Universes to unlock Special Research */
         unlockE: number[]
-        S5Extra3: number
+        S5Extra2: number
         checkReward: [number, number, number, number]
         galaxies: number
     }
@@ -599,8 +600,8 @@ export interface calculateEffectsType {
     S5Upgrade2: (post?: boolean, level?: number) => number
     S5Research2: () => number
     S5Research3: () => number
-    /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][3] + player.merge.rewards[1] if for Stage reset */
-    S5Extra3: (level: number, post?: boolean) => number
+    /** Level is global.mergeInfo.S5Extra2 if used for production and player.researchesExtra[5][2] + player.merge.rewards[1] if for Stage reset */
+    S5Extra2: (level: number, post?: boolean) => number
     S5Extra4: (level?: number) => number
     element6: () => number
     element24_power: () => number
