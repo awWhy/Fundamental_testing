@@ -54,7 +54,6 @@ html {
     --yellow-text: #fafa00;
 
     --transition-all: 0s;
-    --transition-buttons: 100ms;
     --stage-text: var(--cyan-text);
     --stage-button-border: darkcyan;
     --stage-image-borderColor: #008b8b;
@@ -360,10 +359,6 @@ button, input { appearance: none; }
 }
 
 .hollowButton { background-color: var(--background-color); }
-
-img, input[type = "image"], button, #load, #logoLinks > a {
-    transition-duration: var(--transition-buttons);
-}
 
 button:hover, #load:hover { background-color: var(--button-hover); }
 .toggleNormal:hover, .toggleConfirm:hover, .toggleHover:hover, .toggleMax:hover, .toggleAuto:hover,
@@ -845,7 +840,7 @@ input:-webkit-autofill { /* Chrome related pain */
     left: calc(-38px - 0.65em);
     opacity: 0;
     cursor: help;
-    transition: opacity 1s 3s, background-color var(--transition-buttons);
+    transition: opacity 1s 3s, background-color var(--transition-all);
 }
 
 #element0:hover { opacity: 1; }
