@@ -172,7 +172,7 @@
                         <section id="verse0" class="buyBuilding darkvioletText stage6Only" aria-label="Universes">
                             <img src="Used_art/Universe.png" alt="" loading="lazy" draggable="false">
                             <div>
-                                <p>Universes: <span id="verse0Cur" class="whiteText">0</span> <span id="verse0True" class="yellowText">[<span class="hasTitle" data-title="Self-made">0</span><span id="verse0Void"> + <span class="hasTitle" data-title="Void">0</span></span>]</span></p>
+                                <p>Universes: <span id="verse0Cur" class="whiteText">0</span> <span id="verse0True" class="yellowText hasTitle" data-title="Basic">[0]</span></p>
                                 <p class="hasTitle" data-title="Dark matter">producing: <span id="verse0Prod" class="whiteText">0</span></p>
                             </div>
                             <div>
@@ -942,7 +942,7 @@
                             <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
                         </article>
                         <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest self-made Universe on any End<br>Exports fully claim related storages</span></section>
-                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip: (WIP)</h4><span>Start End resets with bonus Universes equal to highest sum of all non-standart self-made Universes on any End<br>Exports can go 2 times above max time and also award Cosmons</span></section>
+                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip: (WIP)</h4><span>Start End resets with bonus Universes equal to highest sum of all non-basic self-made Universes on any End<br>Exports can go 2 times above max time and also award Cosmons</span></section>
                         <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</span></section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
@@ -1039,18 +1039,9 @@
                         </div>
                     </article>
                     <aside id="logoLinks" aria-label="Links">
-                        <a href="https://discord.gg/DfpuhDTseN" target="_blank" rel="noopener noreferrer">
-                            <img src="Used_art/SVG/Discord.svg" alt="" loading="lazy" draggable="false">
-                            Discord
-                        </a>
-                        <button type="button" id="hotkeysButton" aria-haspopup="dialog">
-                            <img src="Used_art/SVG/Keyboard.svg" alt="" loading="lazy">
-                            Hotkeys
-                        </button>
-                        <button type="button" id="versionButton" aria-haspopup="dialog">
-                            <img src="Used_art/SVG/Files.svg" alt="" loading="lazy" draggable="false">
-                            Version
-                        </button>
+                        <a href="https://discord.gg/DfpuhDTseN" target="_blank" rel="noopener noreferrer"><img src="Used_art/SVG/Discord.svg" alt="" loading="lazy" draggable="false">Discord</a>
+                        <button type="button" id="hotkeysButton" aria-haspopup="dialog"><img src="Used_art/SVG/Keyboard.svg" alt="" loading="lazy" draggable="false">Hotkeys</button>
+                        <button type="button" id="versionButton" aria-haspopup="dialog"><img src="Used_art/SVG/Files.svg" alt="" loading="lazy" draggable="false">Version</button>
                     </aside>
                     <article id="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
@@ -1104,7 +1095,7 @@
                             <li id="autoStageSwitch"><label class="hasTitle" data-title="Automatically clicks new Stages in the footer">Automatically change active Stage<button type="button" id="toggleNormal0" class="toggleNormal">OFF</button></label></li>
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" maxlength="1" autocomplete="off"></label></li>
                             <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
-                            <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
+                            <li id="SRLi" aria-description="Due to rare usage some parts are not supported, known cases are: hover text"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
                             <li><label>Swap alert confirmation buttons<button type="button" id="globalToggle8" class="specialToggle">OFF</button></label></li>
                             <li><label>Visually hide body scrollbar<button type="button" id="globalToggle5" class="specialToggle">OFF</button></label></li>
                             <li id="hideGlobalStats"><label>Hide global stats window<button type="button" id="globalToggle4" class="specialToggle">OFF</button></label></li>

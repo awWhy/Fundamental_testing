@@ -1144,7 +1144,7 @@ export const addEnergy = (increase: number, index: number, stage: number) => {
 };
 
 export const calculateBuildingsCost = (index: number, stageIndex: number): Overlimit => {
-    let increase = global.buildingsInfo.increase[stageIndex][index];
+    let increase = global.buildingsInfo.increaseStart[stageIndex][index];
     let firstCost = global.buildingsInfo.firstCost[stageIndex][index];
     if (stageIndex === 1) {
         increase -= effectsCache.S1Upgrade6;
@@ -1188,6 +1188,7 @@ export const calculateBuildingsCost = (index: number, stageIndex: number): Overl
         }
     }
 
+    global.buildingsInfo.increase[stageIndex][index] = increase;
     return new Overlimit(increase).power(player.buildings[stageIndex][index as 1].true).multiply(firstCost);
 };
 
@@ -1242,7 +1243,7 @@ export const buyVerse = (index: number, auto = false) => {
     }
 };
 
-export const calculateVerseCost = (index: number): number => global.versesInfo.firstCost[index] * global.versesInfo.increase[index] ** player.verses[index].true/*[index === 0 && player.challenges.active === 0 ? 'true' : 'void']*/;
+export const calculateVerseCost = (index: number): number => global.versesInfo.firstCost[index] * global.versesInfo.increase[index] ** player.verses[index as 0][index === 0 && player.challenges.active === 0 ? 'void' : 'true'];
 
 const gainBuildings = (get: number, stageIndex: number, time: number) => {
     let stageGet = stageIndex;

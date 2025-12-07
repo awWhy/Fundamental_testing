@@ -334,6 +334,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     getQuery('#timeSinceGalaxy > span').textContent = format(merge.since, { type: 'time' });
                 }
             } else if (active === 6) {
+                const challenge = player.challenges.active;
                 const soft = calculateEffects.darkSoftcap();
                 getId('darkSoft').textContent = format(soft);
                 getId('darkHardcap').textContent = format(calculateEffects.darkHardcap(), { padding: true });
@@ -346,15 +347,16 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     producings[0] = ((current / hardcap) ** (1 / soft) + producings[0] * speed / hardcap) ** soft * hardcap - current;
                 } else { producings[0] *= speed; }
                 for (let i = 0; i < global.versesInfo.firstCost.length; i++) {
-                    getId(`verse${i}Cur`).textContent = format(player.verses[i].current, { padding: 'exponent' });
+                    getId(`verse${i}True`).textContent = `[${player.verses[i].true}]`;
+                    getId(`verse${i}Cur`).textContent = `${player.verses[i].current}`;
                     getId(`verse${i}Prod`).textContent = format(producings[i], { padding: true });
 
                     let lockText;
                     if (i === 0) {
-                        if (player.challenges.active === 0) {
+                        if (challenge !== null) {
                             if (player.stage.true < 8) {
                                 lockText = 'Not yet unlocked';
-                            } else if (global.challengesInfo[0].time < player.time.stage) {
+                            } else if (global.challengesInfo[challenge].time < player.time[global.challengesInfo[challenge].resetType]) {
                                 lockText = 'Out of Challenge time';
                             }
                         } else if (!vacuum) {
@@ -373,8 +375,14 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     getId(`verse${i}Btn`).textContent = `Need: ${format(cost, { padding: true })} Merge score`;
                     getId(`verse${i}BuyX`).textContent = '1';
                 }
-                getQuery('#verse0True > span').textContent = format(player.verses[0].true, { padding: 'exponent' });
-                getQuery('#verse0Void > span').textContent = format(player.verses[0].void, { padding: 'exponent' });
+                const verse0HTML = getId('verse0True');
+                if (challenge === 0) {
+                    verse0HTML.textContent = `[${player.challenges.super ? 0 : player.verses[0].void}]`;
+                    verse0HTML.dataset.title = player.challenges.super ? 'Supervoid' : 'Void';
+                } else if (challenge === 1) {
+                    verse0HTML.textContent = '[0]';
+                    verse0HTML.dataset.title = 'False';
+                } else { verse0HTML.dataset.title = 'Basic'; }
                 if (vacuum) {
                     const { merge } = player;
 
@@ -541,11 +549,10 @@ export const numbersUpdate = (ignoreOffline = false) => {
                 getId('dischargeStatTrue').textContent = ` [${player.discharge.current}]`;
                 getQuery('#dischargeScaleStat > span').textContent = format(calculateEffects.dischargeScaling());
                 for (let s = 1; s < (vacuum ? 6 : 2); s++) {
-                    const buildings = player.buildings[s];
                     const energyType = global.dischargeInfo.energyType[s];
                     getId(`energyGainStage${s}Total`).textContent = format(global.dischargeInfo.energyStage[s], { padding: 'exponent' });
                     for (let i = 1; i < global.buildingsInfo.maxActive[s]; i++) {
-                        getId(`energyGainStage${s}Build${i + (vacuum ? 0 : 2)}Cur`).textContent = format(energyType[i] * buildings[i as 1].true, { padding: 'exponent' });
+                        getId(`energyGainStage${s}Build${i + (vacuum ? 0 : 2)}Cur`).textContent = format(energyType[i] * player.buildings[s][i as 1].true, { padding: 'exponent' });
                         getId(`energyGainStage${s}Build${i + (vacuum ? 0 : 2)}Per`).textContent = format(energyType[i]);
                     }
                 }
@@ -569,7 +576,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                 }
             } else if (active === 3) {
                 getId('currentRank').textContent = format(global.accretionInfo.effective);
-                getId('currentRankTrue').textContent = ` [${player.accretion.rank}]`;
+                getId('currentRankTrue').textContent = ` [${format(player.accretion.rank, { padding: 'exponent' })}]`;
                 if (vacuum) {
                     buildings[0].trueTotal.setValue(player.buildings[1][0].trueTotal).multiply(1.78266192e-33);
                 }
@@ -601,7 +608,6 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     getQuery('#galaxyBase > span').textContent = format(effectsCache.galaxyBase, { padding: true });
                     getId('trueStarsStat').textContent = format(global.collapseInfo.trueStars, { padding: 'exponent' });
                     const stars = player.buildings[4];
-                    buildings[0].current.setValue(stars[1].current).allPlus(stars[2].current, stars[3].current, stars[4].current, stars[5].current);
                     buildings[0].total.setValue(stars[1].total).allPlus(stars[2].total, stars[3].total, stars[4].total, stars[5].total);
                     buildings[0].trueTotal.setValue(stars[1].trueTotal).allPlus(stars[2].trueTotal, stars[3].trueTotal, stars[4].trueTotal, stars[5].trueTotal);
                     if (vacuum) {
@@ -675,7 +681,7 @@ export const visualUpdate = (ignoreOffline = false) => {
     }
 
     {
-        let showReset1 = (tab === 'stage' && subtab === 'Advanced') || tab === 'upgrade' || tab === 'Elements';
+        let showReset1 = tab === 'upgrade' || tab === 'Elements';
         if (globalSave.toggles[1]) { getId('ElementsTabBtn').style.display = player.upgrades[4][1] === 1 ? '' : 'none'; }
         if (active === 1) {
             if (player.upgrades[1][5] !== 1) { showReset1 = false; }
@@ -694,8 +700,8 @@ export const visualUpdate = (ignoreOffline = false) => {
             getId('resetExtraFooter').style.display = tab === 'stage' && subtab === 'Structures' && player.upgrades[5][3] === 1 ? '' : 'none';
             if (player.upgrades[6][0] !== 1) { showReset1 = false; }
         }
-        getId('reset2Footer').style.display = (tab === 'stage' && subtab === 'Advanced') || tab === 'inflation' ? '' : 'none';
-        getId('reset1Footer').style.display = (tab === 'stage' && subtab === 'Advanced') || tab === 'strangeness' ? '' : 'none';
+        getId('reset2Footer').style.display = tab === 'inflation' ? '' : 'none';
+        getId('reset1Footer').style.display = tab === 'strangeness' ? '' : 'none';
         getId('reset0Footer').style.display = showReset1 ? '' : 'none';
         getId('createAllFooter').style.display = tab !== 'upgrade' || subtab !== 'Upgrades' ? '' : 'none';
         getId('makeAllFooter').style.display = tab !== 'stage' || subtab !== 'Structures' ? '' : 'none';
@@ -1324,7 +1330,6 @@ export const visualTrueStageUnlocks = () => {
     getId('stageRewardOld').style.display = highest < 5 ? '' : 'none';
     getId('stageRewardNew').style.display = highest >= 5 ? '' : 'none';
     getId('stageTimeReal').style.display = highest >= 7 ? '' : 'none';
-    getId('verse0Void').style.display = highest >= 8 ? '' : 'none';
     getId('universeTimeReal').style.display = highest >= 7 ? '' : 'none';
     getId('globalSpeed').style.display = highest >= 7 ? '' : 'none';
     getId('challenge2').style.cursor = highest >= 8 ? '' : 'help';
@@ -1887,7 +1892,7 @@ const setRemnants = () => {
             getId('special1').dataset.title = img1.alt;
             getId('special1Cur').style.color = `var(--${whiteDwarf ? 'cyan' : 'red'}-text)`;
         }
-        getId('star2Effect').dataset.title = `Boost to ${player.elements[27] >= 1 ? 'Brown dwarfs, ' : ''}Main-sequence${player.elements[33] >= 1 ? ', Red supergiants' : ''}`;
+        getId('star1Effect').dataset.title = `Boost to ${player.elements[27] >= 1 ? 'Brown dwarfs, ' : ''}Main-sequence${player.elements[33] >= 1 ? ', Red supergiants' : ''}`;
 
         const quarkStar = player.researchesExtra[4][3] >= 1;
         const src2 = quarkStar ? 'Quark%20star' : 'Neutron%20star';

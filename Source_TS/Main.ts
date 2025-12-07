@@ -590,6 +590,7 @@ const loadoutsLoadAuto = () => {
             if (i !== 0) { buildings[s][i as 1].true = 0; }
             buildingsInfo.producing[s as 0][i] = new Overlimit(0);
         }
+        buildingsInfo.increaseStart[s] = cloneArray(buildingsInfo.increase[s]);
     }
     trueInfo.buildS1Cost = cloneArray(buildingsInfo.firstCost[1]);
     toggles.verses = createArray(player.verses.length, false);
@@ -1597,7 +1598,7 @@ try { //Start everything
     getId('loadoutsDelete').addEventListener('click', async() => {
         const loadouts = player.inflation.loadouts;
         if (global.hotkeys.shift) {
-            if (loadouts.length !== 0 || !await Confirm('Delete all loadouts?')) { return; }
+            if (loadouts.length === 0 || !await Confirm('Delete all loadouts?')) { return; }
             loadouts.length = 0;
         } else {
             const name = (getId('loadoutsName') as HTMLInputElement).value;

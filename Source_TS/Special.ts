@@ -188,7 +188,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG4.png',
             'UpgradeG5.png',
             'UpgradeG6.png',
-            'Missing.png'
+            'UpgradeG7.png'
         ], [
             'Missing.png',
             'Missing.png'

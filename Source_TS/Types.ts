@@ -357,6 +357,7 @@ export interface globalType {
         type: Array<Array<'producing' | 'improving' | 'delaying'>>
         firstCost: number[][]
         increase: number[][]
+        increaseStart: number[][]
         /** Visual only, [0] type is never[] */
         producing: [
             Array<number | Overlimit>,
