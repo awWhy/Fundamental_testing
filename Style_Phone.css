@@ -1,12 +1,5 @@
 html { --elements-columns-phone: min(var(--elements-columns), 9); }
 
-#MDMessage1 {
-    display: block;
-    text-align: center;
-    color: var(--green-text);
-    max-width: 90vw;
-}
-
 #notifications { max-height: 33vh; }
 #notifications > p { width: 95vw; }
 
