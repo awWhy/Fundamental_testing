@@ -180,8 +180,6 @@ input[type = "image"] { cursor: pointer; }
     background-position: center;
 }
 
-#MDMessage1 { display: none; }
-
 .reader { /* For screen readers */
     position: absolute;
     clip-path: circle(0);
@@ -1556,7 +1554,7 @@ li .hollowButton {
 
 #shortcuts button,
 #subtabs button {
-    min-width: 5.5em;
+    min-width: 4.5em;
     background-color: var(--background-color);
     border-radius: 2px;
     padding: 0 0.6em;

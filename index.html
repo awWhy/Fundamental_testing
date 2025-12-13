@@ -260,7 +260,6 @@
                         <p id="globalSpeed" class="blueText">Global speed multiplier: <span class="cyanText">1</span></p>
                     </article>
                     <p id="SRMessage1" class="reader">If you are using Screen reader, then enabling support in Settings will add extra information and other helpful stuff. Current hotkeys to change tabs are <span>Arrows Left and Right</span>, and for subtabs are <span>Arrows Down and Up</span></p>
-                    <p id="MDMessage1" aria-hidden="true">If you are playing on Mobile device, then enabling support in Settings will add helpful stuff and can fix some bugs</p>
                 </section>
                 <section id="stageSubtabAdvanced" class="insideTab" style="display: none;" aria-label="Current tab">
                     <div id="challengesMain">
@@ -1095,7 +1094,7 @@
                             <li id="autoStageSwitch"><label class="hasTitle" data-title="Automatically clicks new Stages in the footer">Automatically change active Stage<button type="button" id="toggleNormal0" class="toggleNormal">OFF</button></label></li>
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" maxlength="1" autocomplete="off"></label></li>
                             <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
-                            <li id="SRLi" aria-description="Due to rare usage some parts are not supported, known cases are: hover text"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
+                            <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
                             <li><label>Swap alert confirmation buttons<button type="button" id="globalToggle8" class="specialToggle">OFF</button></label></li>
                             <li><label>Visually hide body scrollbar<button type="button" id="globalToggle5" class="specialToggle">OFF</button></label></li>
                             <li id="hideGlobalStats"><label>Hide global stats window<button type="button" id="globalToggle4" class="specialToggle">OFF</button></label></li>
@@ -1432,6 +1431,7 @@
                         <button type="button" id="settingsSubtabBtnHistory" style="display: none;">History</button>
                     </nav>
                     <article id="shortcuts" aria-hidden="true">
+                        <button type="button" id="exitFooter" tabindex="-1">Exit</button>
                         <button type="button" id="resetExtraFooter" tabindex="-1">Missing</button>
                         <button type="button" id="reset0Footer" tabindex="-1">Missing</button>
                         <button type="button" id="reset1Footer" tabindex="-1">Stage</button>

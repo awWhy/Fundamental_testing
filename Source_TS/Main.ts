@@ -494,6 +494,10 @@ export const loadoutsFinal = (load: number[]) => {
         appeared[current] ??= 0;
         const unlocked = checkUpgrade(current, 0, 'inflations');
         do {
+            if (appeared[current] >= 20) {
+                load.splice(i + dupes, 1);
+                continue;
+            }
             if (unlocked && appeared[current] < max[current]) {
                 cost += calculateTreeCost(current, 0, appeared[current]);
             }
@@ -755,7 +759,6 @@ try { //Start everything
     toggleSpecial(0, 'reader');
 
     if (globalSave.MDSettings[0]) {
-        (document.getElementById('MDMessage1') as HTMLElement).remove();
         specialHTML.styleSheet.textContent += `html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
             #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
@@ -907,6 +910,8 @@ try { //Start everything
             releaseHotkey(null);
             cancelRepeat();
         });
+    } else {
+        body.addEventListener('touchstart', () => Notify('Touch events require mobile device support enabled in settings'), { once: true });
     } {
         const hoverEvent = (event: MouseEvent) => {
             const element = event.currentTarget as HTMLElement;
@@ -1124,6 +1129,7 @@ try { //Start everything
         }, { once: true });
     });
 
+    getId('exitFooter').addEventListener('click', () => enterExitChallengeUser(null));
     for (let i = 0; i < global.challengesInfo.length; i++) {
         const image = getId(`challenge${i + 1}`);
         if (!MD) { image.addEventListener('mouseenter', () => hoverChallenge(i)); }
@@ -1567,7 +1573,7 @@ try { //Start everything
             if (number < 0 || !isFinite(number)) { continue; }
             if (isNaN(repeat) || repeat < 1) {
                 repeat = 1;
-            } else if (repeat > 99) { repeat = 99; }
+            } else if (repeat > 20) { repeat = 20; }
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
         loadoutsFinal(final);
@@ -1733,41 +1739,40 @@ try { //Start everything
     getId('export').addEventListener('click', () => {
         const exportReward = player.time.export;
         if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
-            const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
-            const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
+            if (!globalSave.developerMode) {
+                const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
+                const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
 
-            if (player.inflation.ends[1] >= 1) {
-                const value = exportReward[3] * conversion;
-                player.cosmon[1].current += value;
-                player.cosmon[1].total += value;
-                exportReward[3] -= Math.max(exportReward[3] - value, 0);
-            }
-            if (player.strangeness[5][8] >= 1) {
-                const value = exportReward[2] / claimPer * conversion;
-                player.strange[1].current += value;
-                player.strange[1].total += value;
-                exportReward[2] -= Math.max(exportReward[2] - value, 0);
-                assignBuildingsProduction.strange1();
-            } {
-                const value = (exportReward[1] / claimPer + 1) * conversion;
-                player.strange[0].current += value;
-                player.strange[0].total += value;
-                exportReward[1] = Math.max(exportReward[1] - value, 0);
-                assignBuildingsProduction.strange0();
-            }
-            exportReward[0] = 0;
-            numbersUpdate();
+                if (player.inflation.ends[1] >= 1) {
+                    const value = exportReward[3] * conversion;
+                    player.cosmon[1].current += value;
+                    player.cosmon[1].total += value;
+                    exportReward[3] -= Math.max(exportReward[3] - value, 0);
+                }
+                if (player.strangeness[5][8] >= 1) {
+                    const value = exportReward[2] / claimPer * conversion;
+                    player.strange[1].current += value;
+                    player.strange[1].total += value;
+                    exportReward[2] -= Math.max(exportReward[2] - value, 0);
+                    assignBuildingsProduction.strange1();
+                } {
+                    const value = (exportReward[1] / claimPer + 1) * conversion;
+                    player.strange[0].current += value;
+                    player.strange[0].total += value;
+                    exportReward[1] = Math.max(exportReward[1] - value, 0);
+                    assignBuildingsProduction.strange0();
+                }
+                exportReward[0] = 0;
+                numbersUpdate();
+            } else { Notify("Export reward is disabled when using 'devMode', disable it by writting this into save options (case sensitive)"); }
         }
 
         const save = saveGame(globalSave.developerMode);
         if (save === null) { return; }
-        void (async() => {
-            if (globalSave.developerMode && await Confirm('Prevent export of the save file?')) { return; }
-            const a = document.createElement('a');
-            a.href = `data:text/plain,${save}`;
-            a.download = replaceSaveFileSpecials();
-            a.click();
-        })();
+        const a = document.createElement('a');
+        a.href = `data:text/plain,${save}`;
+        a.download = replaceSaveFileSpecials();
+        a.click();
     });
     getId('saveConsole').addEventListener('click', async() => {
         let value = await Prompt("Available options:\n'Copy' ‒ copy save file to the clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it");
@@ -1807,6 +1812,8 @@ try { //Start everything
         } else if (value === 'devMode') {
             Notify(`Developer mode is ${((globalSave.developerMode = !globalSave.developerMode)) ? 'now' : 'no longer'} active`);
             saveGlobalSettings();
+        } else if (lower === 'console' && globalSave.developerMode) {
+            console.log(deepClone(player), deepClone(globalSave), deepClone(global));
         } else if (lower === 'achievement') {
             Notify('Unlocked a new Achievement! (If there were any)');
         } else if (lower === 'slow' || lower === 'free' || lower === 'boost') {
@@ -2036,7 +2043,7 @@ try { //Start everything
         a.click();
     });
     getId('deleteError').addEventListener('click', async() => {
-        if (!exported && !await Confirm("It's recommended to export save file first\nPress 'Confirm' to confirm and delete your save file")) { return; }
+        if (!globalSave.developerMode && !exported && !await Confirm("It's recommended to export save file first\nPress 'Confirm' to confirm and delete your save file")) { return; }
         localStorage.removeItem(specialHTML.localStorage.main);
         window.location.reload();
         void Alert('Awaiting game reload');

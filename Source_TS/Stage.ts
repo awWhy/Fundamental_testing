@@ -194,7 +194,8 @@ export const calculateEffects: calculateEffectsType = {
     dischargeBase: (research = player.researches[1][4]) => {
         let base = (4 + research) / 2;
         if (player.challenges.active === 0) { base **= 0.5; }
-        return base + player.tree[1][3] / 10;
+        if (player.inflation.vacuum) { base += player.tree[1][3] / 10; }
+        return base;
     },
     S1Upgrade6: () => 0.1 + 0.03 * player.researches[1][0],
     S1Upgrade7: (preons = false) => {
@@ -460,8 +461,8 @@ export const calculateEffects: calculateEffectsType = {
             if (player.inflation.vacuum && player.tree[1][5] >= 4) { base *= 1.02 ** global.accretionInfo.effective; }
             if (player.challenges.active === 1) {
                 const completions = player.challenges.stability;
-                base /= 2 ** Math.max(player.stage.resets + completions - 7, 0);
-                if (!interstellar) { base /= 2 ** completions * 2; }
+                base /= 2 ** Math.max(player.stage.resets + completions - 8, 0) * 2 ** completions;
+                if (!interstellar) { base /= 2 ** completions * 4; }
             } else if (player.challenges.active === 0 && player.challenges.super) { return 1; }
         } else { base *= (1.4 ** player.strangeness[6][1]) * (1.4 ** player.tree[1][2]); }
         return base * global.strangeInfo.strangeletsInfo[1] * effectsCache.T0Inflation3;
@@ -484,7 +485,7 @@ export const assignBuildingsProduction = {
         if (challenge !== null) {
             speed *= 1.2 ** Math.min(tree[0][2], player.challenges.stability) * 5 / (5 - tree[0][5]);
             if (challenge === 1) {
-                speed /= 4 ** player.challenges.stability * 2;
+                speed /= 4 ** player.challenges.stability * 4;
             }
         }
         return (global.inflationInfo.globalSpeed = speed);
@@ -800,7 +801,7 @@ export const assignBuildingsProduction = {
         if (global.mergeInfo.galaxies > 0) {
             let multiplier3 = (global.mergeInfo.galaxies + 1) / (player.buildings[5][3].true + 1);
             if (vacuum) { multiplier3 *= calculateEffects.reward[0](); }
-            if (player.upgrades[5][6] === 1) { multiplier3 *= 1000 * moreStars; }
+            if (player.upgrades[5][6] === 1) { multiplier3 *= 100 * moreStars; }
             production.multiply(multiplier3);
         }
 
@@ -816,7 +817,7 @@ export const assignBuildingsProduction = {
 
         let multiplier1 = 6 * (2 ** player.researches[5][0]) * globalMult;
         if (player.upgrades[5][0] === 1) { multiplier1 *= calculateEffects.S5Upgrade0(); }
-        if (player.upgrades[5][4] === 1) { multiplier1 *= 100 * moreStars; }
+        if (player.upgrades[5][4] === 1) { multiplier1 *= 1000 * moreStars; }
         if (vacuum) {
             if (player.researchesExtra[2][4] >= 1) { multiplier1 *= effectsCache.S2Upgrade3; }
             if (player.researchesExtra[2][4] >= 3) {
@@ -953,7 +954,7 @@ export const assignResetInformation = {
         starCheck[1] = building[3].true;
         if (mainStars && building[3].trueTotal.moreThan(0)) { starCheck[1] += building[2].true * conversion; }
         starCheck[2] = building[4].true + (building[5].true * player.researches[4][5]);
-        if (player.tree[1][6] >= 1) {
+        if (player.inflation.vacuum && player.tree[1][6] >= 1) {
             starCheck[0] += Math.min(starCheck[0], stars[0]) / 4;
             starCheck[1] += Math.min(starCheck[1], stars[1]) / 4;
             starCheck[2] += Math.min(starCheck[2], stars[2]) / 4;
@@ -1721,6 +1722,12 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 for (let s = 1; s < playerStart.milestones.length; s++) {
                     for (let i = 0; i < playerStart.milestones[s].length; i++) {
                         assignMilestoneInformation(i, s);
+                    }
+                }
+            } else if (upgrade === 4) {
+                if (player.challenges.active === 1) {
+                    for (let i = 0; i < global.challengesInfo.length; i++) {
+                        assignChallengeInformation(i);
                     }
                 }
             } else if (upgrade === 5) {
@@ -2933,7 +2940,7 @@ export const assignMilestoneInformation = (index: number, stageIndex: number) =>
                 time = index === 0 ? (3600 / (percentage * 2 + 1)) : 1200;
             }
             if (player.tree[1][2] < 1 && player.tree[0][0] === 1) { time /= 4; }
-        }
+        } else if (player.tree[0][4] >= 1) { time = 600; }
         pointer.reward[index] = time;
         pointer.need[index].setValue(pointer.scaling[index][level]);
     }

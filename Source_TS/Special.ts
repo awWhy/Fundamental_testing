@@ -1021,8 +1021,9 @@ export const openVersionInfo = () => {
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
+        <h6>v0.2.8</h6><p>- Abyss rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewars is now 12 hours\n- Removed log\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
-        <h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos</p>
         <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>
         <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
         <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>

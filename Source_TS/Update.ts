@@ -95,9 +95,9 @@ export const numbersUpdate = (ignoreOffline = false) => {
     if (!global.debug.timeLimit) {
         const challenge = player.challenges.active;
         let noTime = null as boolean | null;
-        if (vacuum) {
-            if (challenge !== null) { noTime = player.time[global.challengesInfo[challenge].resetType] > global.challengesInfo[challenge].time; }
-        } else if (player.tree[0][4] < 1 && (player.stage.true >= 7 || player.stage.resets >= 4)) {
+        if (challenge !== null) {
+            noTime = player.time[global.challengesInfo[challenge].resetType] > global.challengesInfo[challenge].time;
+        } else if (!vacuum && player.tree[0][4] < 1 && (player.stage.true >= 7 || player.stage.resets >= 4)) {
             const s = Math.min(player.stage.current, 4);
             const info = global.milestonesInfo;
             let maxTime = 0;
@@ -703,6 +703,7 @@ export const visualUpdate = (ignoreOffline = false) => {
         getId('reset2Footer').style.display = tab === 'inflation' ? '' : 'none';
         getId('reset1Footer').style.display = tab === 'strangeness' ? '' : 'none';
         getId('reset0Footer').style.display = showReset1 ? '' : 'none';
+        getId('exitFooter').style.display = player.challenges.active !== null && (tab !== 'stage' || subtab !== 'Advanced') ? '' : 'none';
         getId('createAllFooter').style.display = tab !== 'upgrade' || subtab !== 'Upgrades' ? '' : 'none';
         getId('makeAllFooter').style.display = tab !== 'stage' || subtab !== 'Structures' ? '' : 'none';
         if (highest < 8) {
@@ -755,7 +756,7 @@ export const visualUpdate = (ignoreOffline = false) => {
             const buildingsToggle = player.toggles.buildings[active];
             const ASR = player.ASR[active];
 
-            getId('exportMaxed').style.display = player.time.export[0] >= (player.inflation.ends[1] < 1 ? 43200_000 : 86400_000) && (highest >= 7 || player.strange[0].total > 0) ? '' : 'none';
+            getId('exportMaxed').style.display = !globalSave.developerMode && player.time.export[0] >= (player.inflation.ends[1] < 1 ? 43200_000 : 86400_000) && (highest >= 7 || player.strange[0].total > 0) ? '' : 'none';
             getId('gameDisabled').style.display = player.time.excess < 0 ? '' : 'none';
             if (highest < 7) { getId('reset1Main').style.display = player.stage.resets >= 1 || (vacuum ? player.elements[26] >= 1 : player.upgrades[1][9] === 1) ? '' : 'none'; }
             let anyON = false;
@@ -1321,6 +1322,9 @@ export const visualUpdate = (ignoreOffline = false) => {
     }
 
     if (!globalSave.toggles[3]) { getId('fakeFooter').style.height = `${getId('footer').offsetHeight + globalSave.fontSize * 2}px`; }
+    if (globalSave.SRSettings[0]) {
+        for (const element of getClass('hasTitle')) { element.ariaDescription = element.dataset.title as string; }
+    }
 };
 export const visualTrueStageUnlocks = () => {
     const highest = player.stage.true;
@@ -1578,7 +1582,7 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
         const pointer = global.treeInfo[stageIndex];
         const level = player.tree[stageIndex][index];
 
-        getId('inflationText').textContent = `${pointer.name[index]}. (Level ${level} out of ${pointer.max[index]})`;
+        getId('inflationText').textContent = `${pointer.name[index]}. (Level ${level}${pointer.max[index] < 999 ? ` out of ${pointer.max[index]}` : ''})`;
         getId('inflationEffect').textContent = pointer.effectText[index]();
         if (level >= pointer.max[index]) {
             getId('inflationCost').textContent = 'Fully activated.';
@@ -1652,8 +1656,9 @@ export const getStrangenessDescription = (index: number | null, stageIndex: numb
                 <p class="darkvioletText">Effect: <span class="greenText">${pointer.rewardText[index]()}</span>${player.tree[0][4] < 1 ? ' <span class="redText">(Disabled)</span>' : ''}</p>`;
             } else if (level < pointer.scaling[index].length) {
                 const isActive = global.stageInfo.activeAll.includes(Math.min(stageIndex, 4));
+                const timeLimit = isActive && (player.tree[0][4] < 1 || player.challenges.active === 1);
                 text = `<p class="orchidText">Requirement: <span class="greenText">${pointer.needText[index]()}</span></p>
-                <p class="blueText">Time limit: <span class="greenText">${format(pointer.reward[index] - (isActive && player.tree[0][4] < 1 ? player.time.stage : 0), { type: 'time' })} ${isActive && player.tree[0][4] < 1 ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
+                <p class="blueText">Time limit: <span class="greenText">${format(pointer.reward[index] - (timeLimit ? player.time.stage : 0), { type: 'time' })} ${timeLimit ? 'remains ' : ''}to complete this tier within ${isActive ? 'current' : global.stageInfo.word[index === 0 && stageIndex === 5 ? 4 : stageIndex]} Stage.</span></p>
                 <p class="darkvioletText">Unlock: <span class="greenText">Main reward unlocked after ${pointer.scaling[index].length - level} more completions.</span></p>`;
             } else { text = `<p class="darkvioletText">Reward: <span class="greenText">${pointer.rewardText[index]()}</span></p>`; }
         }

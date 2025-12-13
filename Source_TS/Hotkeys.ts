@@ -279,10 +279,11 @@ export const detectHotkey = (check: KeyboardEvent) => {
 export const buyAll = () => {
     const active = player.stage.active;
     const max = global.buildingsInfo.maxActive[active];
+    const howMany = global.hotkeys.shift ? (global.hotkeys.ctrl ? 100 : 1) : global.hotkeys.ctrl ? 10 : 0;
     if (active === 3) {
-        for (let i = 1; i < max; i++) { buyBuilding(i, active, 0); }
+        for (let i = 1; i < max; i++) { buyBuilding(i, active, howMany); }
     } else {
-        for (let i = max - 1; i >= 1; i--) { buyBuilding(i, active, 0); }
+        for (let i = max - 1; i >= 1; i--) { buyBuilding(i, active, howMany); }
     }
     if (active === 6 && player.strangeness[6][3] < 1) {
         for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
@@ -387,6 +388,7 @@ const changeStage = (direction: 'left' | 'right') => {
 
 /* preventDefault should not be used here */
 export const handleTouchHotkeys = (event: TouchEvent) => {
+    if (global.hotkeys.disabled) { return; }
     const horizontal = event.changedTouches[0].clientX - specialHTML.mobileDevice.start[0];
     const vertical = event.changedTouches[0].clientY - specialHTML.mobileDevice.start[1];
 
