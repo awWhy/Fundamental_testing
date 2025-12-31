@@ -172,6 +172,11 @@ p > img {
     margin: 0.5em 0.5em 0 0.2em;
 }
 
+sup {
+    vertical-align: text-top;
+    font-size: 0.72em;
+}
+
 input[type = "image"] { cursor: pointer; }
 
 .stageBorderImage {
@@ -468,7 +473,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #resets button {
-    width: 16em;
+    width: 16.6em;
     height: 2.2em;
     font-size: 0.86em;
     margin-top: auto;
