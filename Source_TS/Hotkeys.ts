@@ -109,11 +109,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         toggleSupervoid(true);
         if (old !== player.challenges.super) { Notify(`Toggled into the ${player.challenges.super ? 'Supervoid' : 'Void'}`); }
     },
-    warp: () => {
-        if (global.hotkeys.last === 'warp') { return; }
-        global.hotkeys.last = 'warp';
-        offlineWarp();
-    },
+    warp: () => offlineWarp(),
     pause: () => {
         if (global.hotkeys.last === 'pause') { return; }
         global.hotkeys.last = 'pause';

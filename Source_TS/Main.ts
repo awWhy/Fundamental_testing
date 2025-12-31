@@ -1,6 +1,6 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, updateCollapsePoints } from './Update';
-import { assignBuildingsProduction, autoElementsSet, autoResearchesSet, autoUpgradesSet, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify } from './Special';
 import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, toggleAll } from './Hotkeys';
 import { checkUpgrade } from './Check';
@@ -85,7 +85,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
 
     let decline = false;
     if (offline >= 20 && !autoConfirm) {
-        decline = !await Confirm(`Consume ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of offline time?${player.challenges.supervoid[3] >= 2 ? `\nYou have ${player.tree[0][5]} levels of 'Offline improvement'` : ''}\n(Includes time spent to click any of the buttons)`, 2) &&
+        decline = !await Confirm(`Consume ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of offline time?${player.challenges.supervoid[3] >= 4 ? `\nYou have ${player.tree[0][5]} levels of 'Offline improvement'` : ''}\n(Includes time spent to click any of the buttons)`, 2) &&
             (globalSave.developerMode || player.tree[0][5] >= 1 || !await Confirm("Press 'Cancel' again to confirm losing offline time, 'Confirm' to consume it"));
         const extra = handleOfflineTime();
         global.lastSave += extra;
@@ -353,10 +353,10 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         global.stageInfo.word[player.stage.current],
         format(player.strange[0].total, { type: 'input', padding: true }),
         format(player.cosmon[0].total, { type: 'input', padding: 'exponent' }),
-        format(player.cosmon[1].total, { type: 'input', padding: 'exponent' }),
+        format(player.cosmon[1].total, { type: 'input', padding: true }),
         `${player.inflation.vacuum}`,
-        `${format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' })} [${player.buildings[5][3].true}]`,
-        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${player.verses[0].true}${player.stage.true >= 8 ? ` + ${player.verses[0].void}` : ''}]`
+        `${format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' })} [${format(player.buildings[5][3].true, { type: 'input', padding: 'exponent' })}]`,
+        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${format(global.inflationInfo.trueUniverses, { type: 'input', padding: 'exponent' })}]`
     ];
     for (let i = 0; i < special.length; i++) {
         name = name.replace(special[i], replaceWith[i]);
@@ -441,7 +441,10 @@ const showAndFix = (element: HTMLElement) => {
 const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements') => {
     if (type === 'elements') {
         global.lastElement = index;
-    } else { global.lastUpgrade[player.stage.active] = [index, type]; }
+    } else {
+        if ((type === 'upgrades' || type === 'researches' || type === 'researchesExtra') && global[`${type}Info`][player.stage.active].maxActive <= index) { return; }
+        global.lastUpgrade[player.stage.active] = [index, type];
+    }
     getUpgradeDescription(index, type);
 };
 const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflations') => {
@@ -953,9 +956,6 @@ try { //Start everything
     for (let i = 1; i < specialHTML.longestBuilding; i++) {
         getId(`toggleBuilding${i}`).addEventListener('click', () => toggleSwap(i, 'buildings', true));
     }
-    for (let i = 0; i < playerStart.toggles.verses.length; i++) {
-        getId(`toggleVerse${i}`).addEventListener('click', () => toggleSwap(i, 'verses', true));
-    }
     for (let i = 0; i < playerStart.toggles.normal.length; i++) {
         getId(`toggleNormal${i}`).addEventListener('click', () => toggleSwap(i, 'normal', true));
     }
@@ -969,18 +969,7 @@ try { //Start everything
         getId(`toggleMax${i}`).addEventListener('click', () => toggleSwap(i, 'max', true));
     }
     for (let i = 0; i < playerStart.toggles.auto.length; i++) {
-        getId(`toggleAuto${i}`).addEventListener('click', () => {
-            toggleSwap(i, 'auto', true);
-            if (i === 5) {
-                for (let s = 1; s <= 6; s++) { autoUpgradesSet(s); }
-            } else if (i === 6) {
-                for (let s = 1; s <= 6; s++) { autoResearchesSet('researches', s); }
-            } else if (i === 7) {
-                for (let s = 1; s <= 6; s++) { autoResearchesSet('researchesExtra', s); }
-            } else if (i === 8) {
-                autoElementsSet();
-            }
-        });
+        getId(`toggleAuto${i}`).addEventListener('click', () => toggleSwap(i, 'auto', true));
     }
 
     /* Stage tab */
@@ -1140,7 +1129,7 @@ try { //Start everything
         changeRewardType();
         getChallenge0Reward(global.lastChallenge[1]);
     });
-    for (let s = 1; s <= 5; s++) {
+    for (let s = 1; s <= 6; s++) {
         const image = getId(`voidReward${s}`);
         const clickFunc = () => {
             global.lastChallenge[1] = s;
@@ -1419,6 +1408,7 @@ try { //Start everything
             }
             html.style.display = '';
             numbersUpdate();
+            visualUpdate();
         };
         button.addEventListener('mouseenter', () => open());
         if (SR) { button.addEventListener('focus', () => open(true)); }
@@ -1429,7 +1419,7 @@ try { //Start everything
             const label = getId(`strange${i + 1}Stage${s}`);
             const image = getQuery(`#strange${i + 1}Stage${s} > input`);
             const hoverFunc = () => hoverStrangeness(i, s, 'strangeness');
-            const clickFunc = () => buyStrangeness(i, s, 'strangeness');
+            const clickFunc = () => buyStrangenessMax(i, s, 'strangeness');
             if (PC) {
                 label.addEventListener('mouseenter', hoverFunc);
                 image.addEventListener('mouseenter', () => {
@@ -1461,7 +1451,7 @@ try { //Start everything
         const button = getId('strangenessCreate');
         const clickFunc = () => {
             const last = global.lastStrangeness;
-            if (last[0] !== null) { buyStrangeness(last[0], last[1], 'strangeness'); }
+            if (last[0] !== null) { buyStrangenessMax(last[0], last[1], 'strangeness'); }
         };
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
@@ -1471,10 +1461,10 @@ try { //Start everything
         const clickFunc = () => {
             if (globalSave.MDSettings[0]) {
                 const s = global.debug.MDStrangePage;
-                for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangeness(i, s, 'strangeness'); }
+                for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
             } else {
                 for (let s = 1; s < global.strangenessInfo.length; s++) {
-                    for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangeness(i, s, 'strangeness'); }
+                    for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
                 }
             }
         };
@@ -1509,7 +1499,7 @@ try { //Start everything
             const label = getId(`inflation${i + 1}Tree${s + 1}`);
             const image = getQuery(`#inflation${i + 1}Tree${s + 1} > input`);
             const hoverFunc = () => hoverStrangeness(i, s, 'inflations');
-            const clickFunc = () => buyStrangeness(i, s, 'inflations');
+            const clickFunc = () => buyStrangenessMax(i, s, 'inflations');
             if (PC) {
                 label.addEventListener('mouseenter', hoverFunc);
                 image.addEventListener('mouseenter', () => {
@@ -1623,7 +1613,7 @@ try { //Start everything
     if (MD) {
         const button = getId('inflationActivate');
         const clickFunc = () => {
-            if (global.lastInflation[0] !== null) { buyStrangeness(global.lastInflation[0], global.lastInflation[1], 'inflations'); }
+            if (global.lastInflation[0] !== null) { buyStrangenessMax(global.lastInflation[0], global.lastInflation[1], 'inflations'); }
         };
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
@@ -1905,7 +1895,12 @@ try { //Start everything
             void document.documentElement.requestFullscreen({ navigationUI: 'hide' });
         } else { void document.exitFullscreen(); }
     });
-    getId('warpButton').addEventListener('click', offlineWarp);
+    {
+        const button = getId('warpButton');
+        button.addEventListener('click', offlineWarp);
+        button.addEventListener('touchstart', () => repeatFunction(offlineWarp));
+        if (PC) { button.addEventListener('mousedown', () => repeatFunction(offlineWarp)); }
+    }
     getId('customFontSize').addEventListener('change', () => changeFontSize());
 
     getId('stageHistorySave').addEventListener('change', () => {

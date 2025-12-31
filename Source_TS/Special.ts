@@ -905,7 +905,7 @@ export const MDStrangenessPage = (stageIndex: number) => {
 };
 
 export const replayEvent = async() => {
-    const last = player.stage.true >= 8 ? 11 :
+    const last = player.stage.true >= 8 ? (player.event ? 12 : 11) :
         player.stage.true === 7 ? (player.event ? 10 : 9) :
         player.stage.true === 6 ? (player.event ? 8 : player.stage.resets >= 1 ? 7 : 6) :
         player.stage.true - (player.event ? 0 : 1);
@@ -922,6 +922,7 @@ export const replayEvent = async() => {
     if (last >= 9) { text += '\nEvent 9: Inflation'; }
     if (last >= 10) { text += '\nEvent 10: Universal End'; }
     if (last >= 11) { text += '\nEvent 11: Stability unlocked'; }
+    if (last >= 12) { text += '\nEvent 12: Placeholder'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -949,7 +950,7 @@ export const playEvent = (event: number, replay = true) => {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis.';
     } else if (event === 5) {
         if (!replay) { stageUpdate(false); }
-        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Stars in Intergalactic are just Stars from Interstellar. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)";
+        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Intergalactic Stars are combined Interstellar Stars. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)";
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
@@ -968,7 +969,9 @@ export const playEvent = (event: number, replay = true) => {
         if (!replay) { visualTrueStageUnlocks(); }
         text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle into Supervoid. End reset reward is higher if done from true Vacuum)";
     } else if (event === 11) {
-        text = 'Placeholder. (Vacuum stability is unlocked)';
+        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.\n(Also unlocked ability to create Universes inside Challenges)";
+    } else if (event === 12) {
+        text = 'Placeholder.';
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);

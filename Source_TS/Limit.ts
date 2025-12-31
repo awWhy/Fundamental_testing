@@ -591,7 +591,7 @@ const technical = {
         }
         return left;
     },
-    /* Left is readonly */
+    /* Left is readonly. String.replace can be replaced with .slice for 4x speed up if required, but I am just going to hope that it will be optimized by browsers eventually */
     format: (left: [number, number] | Overlimit, settings: { type?: 'number' | 'input', padding?: boolean | 'exponent' }): string => {
         const [base, power] = left;
         if (!isFinite(base)) { return `${base}`; }
@@ -651,14 +651,17 @@ const technical = {
         } else if (padding && powerCheck !== power) { digits = powerCheck < 1 ? 5 : (5 - powerCheck); }
 
         let formated = padding ? mantissa.toFixed(digits) : `${mantissa}`;
-        if (type === 'input') { return formated; }
-        let ending = ''; //Being lazy
-        const index = formated.indexOf('.');
-        if (index !== -1) { //For some reason this replaces dot 2 times faster (?), also fixes spaces after dot (not required)
-            ending = `${globalSave.format[0]}${formated.slice(index + 1)}`;
-            formated = formated.slice(0, index);
+        if (type !== 'input') {
+            let index = formated.indexOf('.');
+            if (index !== -1) {
+                formated = `${formated.slice(0, index)}${globalSave.format[0]}${formated.slice(index + 1)}`;
+            } else { index = formated.length; }
+            if (index > 3) {
+                index -= 3;
+                formated = `${formated.slice(0, index)}${globalSave.format[1]}${formated.slice(index)}`;
+            }
         }
-        return `${mantissa >= 1e3 ? formated.replace(/\B(?=(\d{3})+(?!\d))/, globalSave.format[1]) : formated}${ending}`;
+        return formated;
     }
 };
 
