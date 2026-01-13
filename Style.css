@@ -55,6 +55,7 @@ html {
 
     --transition-all: 0s;
     --stage-text: var(--cyan-text);
+    --stage-subtext: var(--stage-text);
     --stage-button-border: darkcyan;
     --stage-image-borderColor: #008b8b;
     --image-border: url("Used_art/Stage1 border.png");
@@ -76,6 +77,7 @@ body {
 }
 
 .stageText { color: var(--stage-text) !important; }
+.stageTextSub { color: var(--stage-subtext) !important; }
 .mainText { color: var(--main-text) !important; }
 .whiteText { color: var(--white-text) !important; }
 .cyanText { color: var(--cyan-text) !important; }
@@ -473,7 +475,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #resets button {
-    width: 16.6em;
+    width: 16.8em;
     height: 2.2em;
     font-size: 0.86em;
     margin-top: auto;
