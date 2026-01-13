@@ -31,7 +31,7 @@
         </div>
         <article id="offlineMain" style="display: none;" role="alertdialog" aria-modal="true" aria-label="Offline calculation" aria-describedby="offlinePercentage">
             <div>
-                <p>Calculating offline time by using <span id="offlineTick">1</span> milliseconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage"><span>0</span>% done</span>)</p>
+                <p>Calculating Offline time by using <span id="offlineTick">1</span> milliseconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage"><span>0</span>% done</span>)</p>
                 <p>Accelerating too much will break time based autos</p>
                 <div>
                     <button type="button" id="offlineAccelerate">Accelerate</button>
@@ -79,7 +79,7 @@
                                 <p class="whiteText"><span id="special3Cur" class="grayText">0</span><span>(+<span id="special3Get">0</span>)</span></p>
                             </div>
                         </article>
-                        <section id="building1" class="buyBuilding stageText" aria-labelledby="building1Name">
+                        <section id="building1" class="buyBuilding stageTextSub" aria-labelledby="building1Name">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
                             <div>
                                 <p><span id="building1Name">Placeholder</span>: <span id="building1Cur" class="whiteText">0</span> <span id="building1True" class="yellowText">[0]</span></p>
@@ -94,7 +94,7 @@
                                 <button type="button" id="toggleBuilding1" class="specialToggle">Auto ON</button>
                             </div>
                         </section>
-                        <section id="building2" class="buyBuilding stageText" aria-labelledby="building2Name">
+                        <section id="building2" class="buyBuilding stageTextSub" aria-labelledby="building2Name">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
                             <div>
                                 <p><span id="building2Name">Placeholder</span>: <span id="building2Cur" class="whiteText">0</span> <span id="building2True" class="yellowText">[0]</span></p>
@@ -109,7 +109,7 @@
                                 <button type="button" id="toggleBuilding2" class="specialToggle">Auto ON</button>
                             </div>
                         </section>
-                        <section id="building3" class="buyBuilding stageText" aria-labelledby="building3Name">
+                        <section id="building3" class="buyBuilding stageTextSub" aria-labelledby="building3Name">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
                             <div>
                                 <p><span id="building3Name">Placeholder</span>: <span id="building3Cur" class="whiteText">0</span> <span id="building3True" class="yellowText">[0]</span></p>
@@ -124,7 +124,7 @@
                                 <button type="button" id="toggleBuilding3" class="specialToggle">Auto ON</button>
                             </div>
                         </section>
-                        <section id="building4" class="buyBuilding stageText" aria-labelledby="building4Name">
+                        <section id="building4" class="buyBuilding stageTextSub" aria-labelledby="building4Name">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
                             <div>
                                 <p><span id="building4Name">Placeholder</span>: <span id="building4Cur" class="whiteText">0</span> <span id="building4True" class="yellowText">[0]</span></p>
@@ -139,7 +139,7 @@
                                 <button type="button" id="toggleBuilding4" class="specialToggle">Auto ON</button>
                             </div>
                         </section>
-                        <section id="building5" class="buyBuilding stageText" aria-labelledby="building5Name">
+                        <section id="building5" class="buyBuilding stageTextSub" aria-labelledby="building5Name">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
                             <div>
                                 <p><span id="building5Name">Placeholder</span>: <span id="building5Cur" class="whiteText">0</span> <span id="building5True" class="yellowText">[0]</span></p>
@@ -154,7 +154,7 @@
                                 <button type="button" id="toggleBuilding5" class="specialToggle">Auto ON</button>
                             </div>
                         </section>
-                        <section id="building6" class="buyBuilding stageText" aria-labelledby="building6Name">
+                        <section id="building6" class="buyBuilding stageTextSub" aria-labelledby="building6Name">
                             <img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false">
                             <div>
                                 <p><span id="building6Name">Placeholder</span>: <span id="building6Cur" class="whiteText">0</span> <span id="building6True" class="yellowText">[0]</span></p>
@@ -251,7 +251,7 @@
                             </article>
                         </div>
                         <div class="stage6Only">
-                            <p class="grayText">Dark matter softcap (^<span id="darkSoft" class="cyanText">0</span>) starts at <span id="darkHardcap" class="cyanText">0</span></p>
+                            <p class="grayText">Dark matter softcap starts at <span id="darkSoftcap" class="cyanText">0</span></p>
                             <p id="nucleationBoostTotal" class="grayText">Total boost after Nucleation: <span class="blueText">0</span></p>
                             <p id="darkEnergySpent" class="grayText">Missing Dark energy: <span class="orangeText">0</span></p>
                             <p id="mergeResetsS6" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max</p>
@@ -259,7 +259,7 @@
                                 <p id="mergeScore0" class="grayText"><span>Galaxies:</span> <span id="mergeScore0Cur" class="greenText">0</span> <span>(<span class="greenText">1</span> per)</span></p>
                                 <p id="mergeScore1" class="grayText"><span>Groups:</span> <span id="mergeScore1Cur" class="greenText">0</span> <span>(<span class="greenText">2</span> per)</span></p>
                                 <p id="mergeScore2" class="grayText"><span>Clusters:</span> <span id="mergeScore2Cur" class="greenText">0</span> <span>(<span class="greenText">4</span> per)</span></p>
-                                <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span class="hasTitle" data-title="Merge score if to use all available resets">(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
+                                <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span class="hasTitle" data-title="Merge score if to use up remaining resets while restting with same amount of Galaxies every time">(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
                             </article>
                             <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span><span id="universeTimeReal"> (Real: <span class="orangeText">0 seconds</span>)</span></p>
                         </div>
@@ -293,7 +293,6 @@
                                     <button type="button" id="voidReward3" class="hollowButton stage3borderButton grayText" aria-controls="voidRewardsMultiline">Accretion</button>
                                     <button type="button" id="voidReward4" class="hollowButton stage4borderButton orangeText" aria-controls="voidRewardsMultiline">Interstellar</button>
                                     <button type="button" id="voidReward5" class="hollowButton stage5borderButton darkorchidText" aria-controls="voidRewardsMultiline">Intergalactic</button>
-                                    <button type="button" id="voidReward6" class="hollowButton stage6borderButton darkvioletText" aria-controls="voidRewardsMultiline">Abyss</button>
                                 </div>
                                 <div id="voidRewardsMultiline" class="whiteText challengeRewards"></div>
                             </article>
@@ -866,7 +865,7 @@
                                 <span>Missing</span>
                             </label>
                             <label id="inflation6Tree1" class="whiteText stage2borderImage">
-                                <input type="image" src="Used_art/Offline.png" alt="Improved offline" draggable="false" aria-controls="inflationCost inflationEffect">
+                                <input type="image" src="Used_art/Offline.png" alt="Improved Offline" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
                             <label id="inflation7Tree1" class="whiteText stageAllborderImage">
@@ -883,8 +882,8 @@
                                 <input type="image" src="Used_art/Strange%20Quarks%20many.png" alt="More Strange quarks" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
-                            <label id="inflation3Tree2" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="More Cosmons" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation3Tree2" class="whiteText stage6borderImage">
+                                <input type="image" src="Used_art/More%20Cosmon.png" alt="More Cosmons" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
                             <label id="inflation4Tree2" class="whiteText greenBorderImage">
@@ -951,7 +950,7 @@
                             <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
                         </article>
                         <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports fully claim related storages</span></section>
-                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip: (WIP)</h4><span>Start End resets with bonus Inflatons equal to 1 + highest self-made Universes on Big Crunch - lowest on Big Rip<br>Exports can go 2 times above max time and also award Cosmons</span></section>
+                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip:</h4><span>Start End resets with bonus Inflatons equal to 1 + highest self-made Universes on Big Crunch - lowest on Big Rip<br>Exports can go 2 times above max time and also award Cosmons (temporarily disabled)</span></section>
                         <section id="endMilestone3"><h4>Unlocked at 1 Big Freeze: (WIP)</h4><span>Unlock 'Stability' Inflaton Inflation and no idea for now</span></section>
                         <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</span></section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
@@ -1037,7 +1036,7 @@
                                 <button type="button" id="toggleAuto9" class="toggleAuto">Auto OFF</button>
                             </section>
                             <section id="nucleationToggleReset" aria-label="Nucleation">
-                                <img src="Used_art/Missing.png" alt="Nucleation" class="hasTitle" data-title="Nucleation" loading="lazy" draggable="false">
+                                <img src="Used_art/Nucleation%20toggle.png" alt="Nucleation" class="hasTitle" data-title="Nucleation" loading="lazy" draggable="false">
                                 <div>
                                     <button type="button" id="toggleConfirm7" class="toggleConfirm">Safe</button>
                                     <button type="button" id="toggleAuto10Info" class="hollowButton stage4borderButton" aria-label="Settings" aria-haspopup="menu" aria-controls="toggleAuto10Menu">!</button>
@@ -1102,7 +1101,7 @@
                             <li><label>Visual update interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
                             <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="5" max="9999" step="1"> s</label></li>
                             <li><label class="hasTitle" data-title="Game must be not paused for this to work">Autosave on tab out or page refresh<button type="button" id="globalToggle7" class="specialToggle">OFF</button></label></li>
-                            <li><label>Auto accept offline time<button type="button" id="toggleNormal4" class="toggleNormal">OFF</button></label><button type="button" id="warpButton" class="hollowButton">0 Warps</button></li>
+                            <li><label>Auto accept Offline time<button type="button" id="toggleNormal4" class="toggleNormal">OFF</button></label><button type="button" id="warpButton" class="hollowButton">0 Warps</button></li>
                             <li id="autoStageSwitch"><label class="hasTitle" data-title="Automatically clicks new Stages in the footer">Automatically change active Stage<button type="button" id="toggleNormal0" class="toggleNormal">OFF</button></label></li>
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" maxlength="1" autocomplete="off"></label></li>
                             <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
@@ -1151,7 +1150,7 @@
                         <p id="stageResets">Stage resets: <span class="whiteText">0</span></p>
                         <article class="statsWindows" aria-label="Structures">
                             <section id="building0Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building0StatTotal" class="whiteText">0</span>
@@ -1162,7 +1161,7 @@
                                 </div>
                             </section>
                             <section id="building1Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building1StatTotal" class="whiteText">0</span>
@@ -1173,7 +1172,7 @@
                                 </div>
                             </section>
                             <section id="building2Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building2StatTotal" class="whiteText">0</span>
@@ -1184,7 +1183,7 @@
                                 </div>
                             </section>
                             <section id="building3Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building3StatTotal" class="whiteText">0</span>
@@ -1195,7 +1194,7 @@
                                 </div>
                             </section>
                             <section id="building4Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building4StatTotal" class="whiteText">0</span>
@@ -1206,7 +1205,7 @@
                                 </div>
                             </section>
                             <section id="building5Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building5StatTotal" class="whiteText">0</span>
@@ -1217,7 +1216,7 @@
                                 </div>
                             </section>
                             <section id="building6Stats">
-                                <h4 class="stageText bigWord">Missing</h4>
+                                <h4 class="stageTextSub bigWord">Missing</h4>
                                 <div>
                                     <p>This reset:</p>
                                     <span id="building6StatTotal" class="whiteText">0</span>
@@ -1325,7 +1324,6 @@
                                 <p id="stormStat" class="orangeText">Storm Clouds: <span class="greenText">1</span></p>
                                 <h4 class="darkorchidText">Total: <span id="cloudEffectTotal" class="greenText">1</span></h4>
                             </article>
-                            <p id="maxCloudStat" class="grayText">Most Clouds at once: <span class="blueText">0</span></p>
                         </div>
                         <div class="stats stage3Only">
                             <p class="grayText">Current Rank: <span id="currentRank" class="darkorchidText">0</span><span id="currentRankTrue" class="orchidText">[0]</span></p>
@@ -1360,7 +1358,7 @@
                             </article>
                             <p id="mergeResets" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max</p>
                             <p id="galaxyBase" class="grayText">Galaxy base: <span class="orangeText">0</span></p>
-                            <p class="redText">Self-made Stars: <span id="trueStarsStat" class="orangeText">0</span></p>
+                            <p id="maxSolarMassStat" class="cyanText">Highest Solar mass: <span class="orchidText">0.01235</span></p>
                         </div>
                         <div class="stats stage6Only">
                             <article id="nucleationBoost">
@@ -1369,12 +1367,13 @@
                                 <p id="quintessenceStat" class="grayText">Quintessence: <span class="greenText">1</span></p>
                                 <h4 class="orangeText">Total: <span id="nucleationTotal" class="greenText">1</span></h4>
                             </article>
-                            <p id="effectiveDarkEnergyStat" class="grayText">Effective Dark Energy: <span class="orangeText">0</span></p>
+                            <p id="effectiveDarkEnergyStat" class="grayText">Effective Dark energy: <span class="orangeText">0</span></p>
                             <article id="energyGainStage6" class="darkvioletText stage6borderImage" aria-label="Dark energy gain">
                                 <p><span>Planets:</span> <span id="energyGainStage6Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage6Build1Per" class="greenText">0</span> per)</span></p>
                             </article>
+                            <p id="maxDarkEnergyStat" class="grayText">Most Dark energy at once: <span class="orangeText">0</span></p>
                         </div>
-                        <p id="maxSolarMassStat" class="cyanText">Highest Solar mass: <span class="orchidText">0.01235</span></p>
+                        <p id="trueStarsStat" class="redText">Self-made Stars: <span class="orangeText">0</span></p>
                     </section>
                 </section>
                 <section id="settingsSubtabHistory" class="insideTab" style="display: none;" aria-label="Current tab">

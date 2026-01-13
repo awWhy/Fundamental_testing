@@ -52,7 +52,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
         if (index === 3) { return player.researchesExtra[5][0] >= 1; }
     } else if (stageIndex === 6) {
-        if (index === 1) { return player.upgrades[6][0] === 1 || player.researches[6][0] >= 8; }
+        if (index === 1) { return player.upgrades[6][0] === 1 || player.researches[6][0] >= 6; }
     }
 
     return false;
@@ -110,7 +110,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 3) { return player.inflation.vacuum ? player.accretion.rank >= 7 : player.milestones[5][1] >= 8; }
                 return player.accretion.rank >= 7;
             } else if (stageIndex === 6) {
-                return player.strangeness[6][3] >= 1;
+                if (upgrade === 0) { return player.buildings[6][1].true >= 80; }
+                return false;
             }
             break;
         case 'researches':
@@ -213,7 +214,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 10) { return player.challenges.void[2] >= 3; }
                     if ([0, 1, 5, 7].includes(upgrade)) { return player.strangeness[5][3] >= 1; }
                 } else if (stageIndex === 6) {
-                    return player.challenges.void[6] >= 1;
+                    return player.challenges.void[5] >= 2;
                 }
             } else {
                 if (global.strangenessInfo[stageIndex].maxActive < upgrade + 1) { return false; }
@@ -271,7 +272,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             break;
         case 'researches':
             if (stageIndex === 1) { return check !== 3; }
-            if (stageIndex === 6) { return check !== 4; }
+            if (stageIndex === 6) { return check !== 3; }
             break;
         case 'researchesExtra':
             if (stageIndex === 1) { return check !== 2; }

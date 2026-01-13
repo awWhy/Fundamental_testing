@@ -60,7 +60,6 @@ export interface playerType {
     }
     vaporization: {
         clouds: number
-        cloudsMax: number
         /** [Boost, max] */
         input: [number, number]
     }
@@ -89,6 +88,7 @@ export interface playerType {
     }
     darkness: {
         energy: number
+        energyMax: number
         fluid: number
         input: number
     }
@@ -345,7 +345,6 @@ export interface globalType {
         /** In the current Universe */
         totalSuper: number
         newFluid: number
-        disableAuto: boolean
     }
     intervalsId: {
         main: number | undefined
@@ -540,7 +539,7 @@ export interface globalSaveType {
 export type hotkeysList = 'makeAll' | 'toggleAll' | 'createAll' | 'toggleUpgrades' |
     'discharge' | 'vaporization' | 'rank' | 'collapse' | 'nucleation' | 'merge' | 'stage' | 'end' |
     'toggleDischarge' | 'toggleVaporization' | 'toggleRank' | 'toggleCollapse' | 'toggleMerge' | 'toggleNucleation' | 'toggleStage' |
-    'galaxy' | 'universe' | 'exitChallenge' | 'supervoid' | 'warp' | 'pause' |
+    'galaxy' | 'verses' | 'exitChallenge' | 'supervoid' | 'warp' | 'pause' |
     'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
 
 export type numbersList = 'makeStructure' | 'toggleStructure' | 'enterChallenge';
@@ -612,14 +611,14 @@ export interface calculateEffectsType {
     element24_power: () => number
     element24: () => Overlimit
     element26: () => number
-    darkSoftcap: () => number
-    darkHardcap: (delayOnly?: boolean) => number
+    darkSoftcap: (delayOnly?: boolean) => number
     effectiveDarkEnergy: (fluid?: number) => number
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
     S2Strange9: () => number
     trueUniverses: () => number
     T0Inflation0: () => number
+    TOInflation1_softcap: () => number
     T0Inflation1: () => number
     T0Inflation3: () => number
     /** Default value for type is 0 or Quarks; Use 1 for Strangelets */

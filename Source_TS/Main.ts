@@ -85,15 +85,15 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
 
     let decline = false;
     if (offline >= 20 && !autoConfirm) {
-        decline = !await Confirm(`Consume ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of offline time?${player.challenges.supervoid[3] >= 4 ? `\nYou have ${player.tree[0][5]} levels of 'Offline improvement'` : ''}\n(Includes time spent to click any of the buttons)`, 2) &&
-            (globalSave.developerMode || player.tree[0][5] >= 1 || !await Confirm("Press 'Cancel' again to confirm losing offline time, 'Confirm' to consume it"));
+        decline = !await Confirm(`Accept and use ${format(Math.min(offline / 1000, 43200), { type: 'time', padding: false })} worth of Offline time?${player.challenges.supervoid[3] >= 4 ? ' Or reject it to store it instead.' : ''}\n(Includes time spent to click any of the buttons)`, 2) &&
+            (globalSave.developerMode || player.challenges.supervoid[3] >= 4 || !await Confirm("Press 'Cancel' again to confirm losing Offline time, 'Confirm' to use it instead"));
         const extra = handleOfflineTime();
         global.lastSave += extra;
         offline += extra;
     }
     if (offline > 43200_000) { offline = 43200_000; }
     if (decline || offline < 20) {
-        if (decline) { player.time.offline = Math.min(player.time.offline + offline * (player.tree[0][5] / 4), 43200_000); }
+        if (decline && player.challenges.supervoid[3] >= 4) { player.time.offline = Math.min(player.time.offline + offline, 43200_000); }
         if (offline < 0) { player.time.excess = offline - 20; }
         pauseGame(false);
         timeUpdate(20, 20); //Just in case
@@ -694,8 +694,6 @@ try { //Start everything
             for (const key in globalSaveStart.hotkeys) {
                 globalSave.hotkeys[key as hotkeysList] ??= ['None', 'None'];
             }
-
-            delete globalSave.intervals['offline' as keyof unknown];
         } catch (error) {
             Notify('Global settings failed to parse, default ones will be used instead');
             console.log(`(Full parse error) ${error}`);
@@ -919,7 +917,8 @@ try { //Start everything
         const hoverEvent = (event: MouseEvent) => {
             const element = event.currentTarget as HTMLElement;
             const window = getId('hoverWindow');
-            window.textContent = element.dataset.title as string;
+            specialHTML.hoverText = () => { window.textContent = element.dataset.title as string; };
+            specialHTML.hoverText();
             window.style.display = '';
             const position = (event: MouseEvent) => {
                 window.style.left = `${Math.min(event.clientX + 10, document.documentElement.clientWidth - window.getBoundingClientRect().width)}px`;
@@ -928,6 +927,7 @@ try { //Start everything
             position(event);
             element.addEventListener('mousemove', position);
             element.addEventListener('mouseleave', () => {
+                specialHTML.hoverText = null;
                 window.style.display = 'none';
                 element.removeEventListener('mousemove', position);
             }, { once: true });
@@ -1129,7 +1129,7 @@ try { //Start everything
         changeRewardType();
         getChallenge0Reward(global.lastChallenge[1]);
     });
-    for (let s = 1; s <= 6; s++) {
+    for (let s = 1; s <= 5; s++) {
         const image = getId(`voidReward${s}`);
         const clickFunc = () => {
             global.lastChallenge[1] = s;
@@ -1556,14 +1556,12 @@ try { //Start everything
             const index = first[i].indexOf('x');
             let repeat = 1;
             if (index !== -1) {
-                repeat = Number(first[i].slice(index + 1));
+                repeat = Math.min(Math.max(Number(first[i].slice(index + 1)), 0), 20);
+                if (isNaN(repeat)) { repeat = 1; }
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
             if (number < 0 || !isFinite(number)) { continue; }
-            if (isNaN(repeat) || repeat < 1) {
-                repeat = 1;
-            } else if (repeat > 20) { repeat = 20; }
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
         loadoutsFinal(final);
@@ -1731,14 +1729,8 @@ try { //Start everything
         if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
             if (!globalSave.developerMode) {
                 const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
-                const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
+                const conversion = Math.min(exportReward[0] / 43200_000, 1);
 
-                if (player.inflation.ends[1] >= 1) {
-                    const value = exportReward[3] * conversion;
-                    player.cosmon[1].current += value;
-                    player.cosmon[1].total += value;
-                    exportReward[3] -= Math.max(exportReward[3] - value, 0);
-                }
                 if (player.strangeness[5][8] >= 1) {
                     const value = exportReward[2] / claimPer * conversion;
                     player.strange[1].current += value;

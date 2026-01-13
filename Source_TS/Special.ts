@@ -31,7 +31,7 @@ export const globalSave: globalSaveType = {
         toggleNucleation: ['None', 'None'],
         stage: ['S', 'S'],
         toggleStage: ['None', 'None'],
-        universe: ['Shift U', 'Shift U'],
+        verses: ['Shift V', 'Shift V'],
         end: ['Shift B', 'Shift B'],
         exitChallenge: ['Shift E', 'Shift E'],
         supervoid: ['Shift S', 'Shift S'],
@@ -190,7 +190,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG6.png',
             'UpgradeG7.png'
         ], [
-            'Missing.png',
+            'UpgradeD1.png',
             'Missing.png'
         ]
     ],
@@ -237,10 +237,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Missing.png', 'redBorderImage']
         ], [
             ['ResearchD1.png', 'stage3borderImage'],
-            ['ResearchD2.png', 'stage3borderImage'],
-            ['ResearchD3.png', 'stage2borderImage'],
-            ['ResearchD4.png', 'stage3borderImage'],
-            ['ResearchD5.png', 'stage3borderImage']
+            ['ResearchD2.png', 'stage2borderImage'],
+            ['ResearchD3.png', 'stage3borderImage'],
+            ['ResearchD4.png', 'stage3borderImage']
         ]
     ],
     longestResearchExtra: 6,
@@ -252,7 +251,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Rank%20Researches.png', 'stage6borderImage', 'Rank'],
         ['Collapse%20Researches.png', 'stage6borderImage', 'Collapse'],
         ['Galaxy%20Researches.png', 'stage3borderImage', 'Galaxy'],
-        ['Missing.png', 'stage3borderImage', 'Dark']
+        ['Missing.png', 'stage3borderImage', 'Dark energy']
     ],
     /** [src, className] */
     researchExtraHTML: [
@@ -290,10 +289,11 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Missing.png', 'redBorderImage'],
             ['Missing.png', 'redBorderImage']
         ], [
-            ['ResearchDark1.png', 'stage6borderImage'],
-            ['ResearchDark2.png', 'stage3borderImage'],
-            ['Missing.png', 'redBorderImage'],
-            ['Missing.png', 'redBorderImage']
+            ['ResearchDark1.png', 'stage3borderImage'],
+            ['ResearchDark2.png', 'stage6borderImage'],
+            ['ResearchDark3.png', 'stage3borderImage'],
+            ['ResearchDark4.png', 'stage3borderImage'],
+            ['ResearchDark5.png', 'stage6borderImage']
         ]
     ],
     longestFooterStats: 3,
@@ -344,6 +344,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     notifications: [] as Array<[string, (instantClose?: boolean) => void]>,
     /** [priority, closeFunc] */
     alert: [null, null] as [number | null, (() => void) | null],
+    /** Function to update current hover text */
+    hoverText: null as null | (() => void),
     bigWindow: null as 'version' | 'hotkeys' | null,
     styleSheet: document.createElement('style') //Secondary
 };
@@ -580,7 +582,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             properties['--button-text'] = '#bfbdff';
             properties['--main-text'] = 'var(--darkviolet-text)';
             properties['--white-text'] = '#aba8ff';
-            properties['--gray-text'] = '#9b9b9b';
+            properties['--gray-text'] = '#95979d';
             properties['--darkviolet-text'] = '#8157ff';
             properties['--red-text'] = 'red';
             properties['--yellow-text'] = 'var(--green-text)';
@@ -778,7 +780,7 @@ export const Prompt = async(text: string, placeholder = '', priority = 0): Promi
 };
 
 export const Notify = (text: string) => {
-    const { notifications } = specialHTML;
+    const notifications = specialHTML.notifications;
 
     let index;
     for (let i = 0; i < notifications.length; i++) {
@@ -833,7 +835,7 @@ export const Notify = (text: string) => {
 
 /** Notify about error in the code with a cooldown of 20 seconds */
 export const errorNotify = (text: string) => {
-    const { errorCooldowns } = specialHTML;
+    const errorCooldowns = specialHTML.errorCooldowns;
     if (errorCooldowns.includes(text)) { return; }
 
     Notify(text);
@@ -905,7 +907,8 @@ export const MDStrangenessPage = (stageIndex: number) => {
 };
 
 export const replayEvent = async() => {
-    const last = player.stage.true >= 8 ? (player.event ? 12 : 11) :
+    const last = player.stage.true >= 9 ? (player.event ? 13 : 12) :
+        player.stage.true === 8 ? (player.event ? 12 : 11) :
         player.stage.true === 7 ? (player.event ? 10 : 9) :
         player.stage.true === 6 ? (player.event ? 8 : player.stage.resets >= 1 ? 7 : 6) :
         player.stage.true - (player.event ? 0 : 1);
@@ -922,7 +925,8 @@ export const replayEvent = async() => {
     if (last >= 9) { text += '\nEvent 9: Inflation'; }
     if (last >= 10) { text += '\nEvent 10: Universal End'; }
     if (last >= 11) { text += '\nEvent 11: Stability unlocked'; }
-    if (last >= 12) { text += '\nEvent 12: Placeholder'; }
+    if (last >= 12) { text += '\nEvent 12: Better End'; }
+    if (last >= 13) { text += '\nEvent 13: More Universes'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -964,14 +968,16 @@ export const playEvent = (event: number, replay = true) => {
         }
         text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ the 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
     } else if (event === 9) {
-        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n(Also 'Nucleosynthesis' now unlocks more Elements based on self-made Universes)";
+        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' now unlocks more Elements based on self-made Universes)";
     } else if (event === 10) {
         if (!replay) { visualTrueStageUnlocks(); }
         text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle into Supervoid. End reset reward is higher if done from true Vacuum)";
     } else if (event === 11) {
-        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.\n(Also unlocked ability to create Universes inside Challenges)";
+        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.";
     } else if (event === 12) {
-        text = 'Placeholder.';
+        text = 'Big Rip unlocked placeholder text.';
+    } else if (event === 13) {
+        text = 'Void Universe placeholder text.';
     }
     if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
     return void Alert(text);
@@ -1024,7 +1030,7 @@ export const openVersionInfo = () => {
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
-        <h6>v0.2.8</h6><p>- Abyss rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewars is now 12 hours\n- Removed log\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.8</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewars is now 12 hours\n- Removed log\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
         <h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos</p>
         <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>
@@ -1091,7 +1097,7 @@ export const openHotkeys = () => {
             <label id="mergeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Merge</span></label>
             <label id="nucleationHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Nucleation</span></label>
             <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage</span></label>
-            <label id="universeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Universe</span></label>
+            <label id="versesHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Verses</span></label>
             <label id="endHotkey" class="redText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">End</span></label>
             <label id="supervoidHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Supervoid</span></label>
             <label id="warpHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Warp</span></label>

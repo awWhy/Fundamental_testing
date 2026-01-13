@@ -95,7 +95,9 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         global.hotkeys.last = 'toggle0';
         toggleSwap(0, 'auto', true);
     },
-    universe: () => buyVerse(0),
+    verses: () => {
+        for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
+    },
     end: () => void endResetUser(),
     exitChallenge: () => {
         if (global.hotkeys.last === 'exit') { return; }
@@ -149,9 +151,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
 const numberFunctions: Record<numbersList, (number: number) => void> = {
     makeStructure: (number) => {
         if (number !== 0) {
-            if (player.stage.active === 6 && player.strangeness[6][3] < 1) {
-                buyVerse(number - 1);
-            } else { buyBuilding(number, player.stage.active); }
+            buyBuilding(number, player.stage.active);
         } else { buyAll(); }
     },
     toggleStructure: (number) => {
@@ -160,9 +160,6 @@ const numberFunctions: Record<numbersList, (number: number) => void> = {
         global.hotkeys.last = repeat;
         if (number === 0) {
             toggleAll();
-        } else if (player.stage.active === 6 && player.strangeness[6][3] < 1) {
-            number--;
-            if (number < playerStart.verses.length) { toggleSwap(number, 'verses', true); }
         } else {
             if (number < playerStart.buildings[player.stage.active].length) { toggleSwap(number, 'buildings', true); }
         }
@@ -281,9 +278,6 @@ export const buyAll = () => {
     } else {
         for (let i = max - 1; i >= 1; i--) { buyBuilding(i, active, howMany); }
     }
-    if (active === 6 && player.strangeness[6][3] < 1) {
-        for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
-    }
 };
 export const createAll = () => {
     const active = player.stage.active;
@@ -296,29 +290,27 @@ export const createAll = () => {
 };
 export const toggleAll = () => {
     const active = player.stage.active;
-    if (active === 6 && player.strangeness[6][3] < 1) {
-        toggleSwap(0, 'verses', true);
-    } else {
-        const toggles = player.toggles.buildings[active];
+    const toggles = player.toggles.buildings[active];
 
-        let anyOn = false;
-        for (let i = 1; i <= Math.min(Math.max(player.ASR[active], 1), global.buildingsInfo.maxActive[active] - 1); i++) {
-            if (toggles[i]) {
-                anyOn = true;
-                break;
-            }
+    let anyOn = false;
+    for (let i = 1; i <= Math.min(Math.max(player.ASR[active], 1), global.buildingsInfo.maxActive[active] - 1); i++) {
+        if (toggles[i]) {
+            anyOn = true;
+            break;
         }
-        for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
-            toggles[i] = !anyOn;
-            toggleSwap(i, 'buildings');
-        }
+    }
+    for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
+        toggles[i] = !anyOn;
+        toggleSwap(i, 'buildings');
     }
     visualUpdate();
 };
 
 export const offlineWarp = () => {
-    if (global.offline.active || player.time.offline < 120_000) { return; }
-    player.time.offline -= 120_000;
+    const required = 60_000 * (6 - player.tree[0][5]);
+    if (global.offline.active || player.time.offline < required) { return; }
+    if (player.tree[0][5] < 1) { return Notify("'Improved Offline' has to be at least level 1"); }
+    player.time.offline -= required;
     void simulateOffline(60_000, true);
 };
 

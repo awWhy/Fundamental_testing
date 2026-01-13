@@ -1,8 +1,13 @@
 import { globalSave } from './Special';
 
 type allowedTypes = string | number | bigint | [number, number] | Overlimit;
-/** To test number for being Overlimit can use: typeof number === 'object'; Array.isArray(number); number instanceof Overlimit
- * @param number allowed types are string, number, bigint, Overlimit and [number, number]; If Array is used, then must not contain any mistakes (example and proper way: [11, 0] > [1.1, 1]; [1, NaN] > [NaN, NaN]; [1, 1.4] > [1, 1])
+/** To test number for being Overlimit can use: typeof number === 'object'; Array.isArray(number); number instanceof Overlimit;\
+ * Allowed types are string, number, bigint, Overlimit and [number, number];\
+ * Provided value exponent must be floored, can call .floorExponent() to floor it: `-2e${Math.log10(0.2)}` === -0.3;\
+ * Providing an array will force extra restrictions:\
+ * Number must be provided in scientific format ([123, 0] > [1.23, 2]);\
+ * If mantissa is 0, then exponent must be 0, same if exponent is -Infinity;\
+ * if any part is NaN or Infinity, then both must be NaN or Infinity
  */
 export default class Overlimit extends Array<number> { //This is version is sligthly modified
     constructor(number: allowedTypes) {
@@ -23,6 +28,8 @@ export default class Overlimit extends Array<number> { //This is version is slig
         this[1] = after[1];
         return this;
     }
+    /** Fixes exponent not being floored, old mantissa will be added into new one */
+    floorExponent(): this { return technical.fixExpo(this) as this; }
 
     plus(number: allowedTypes): this { return technical.add(this, technical.convert(number)) as this; }
     minus(number: allowedTypes): this {
@@ -36,7 +43,9 @@ export default class Overlimit extends Array<number> { //This is version is slig
     /** Root must be a number, default value is 2 */
     root(root = 2): this { return technical.pow(this, 1 / root) as this; }
     /** Default value is Math.E */
-    log(base?: allowedTypes): this { return technical.log(this, base === undefined ? [2.718281828459045, 0] : technical.convert(base)) as this; }
+    log(base?: allowedTypes): this { return technical.log(this, base === undefined ? [Math.E, 0] : technical.convert(base)) as this; }
+    /** Experemental version of .log that allows negative numbers as long as complex numbers are not required */
+    logExp(base?: allowedTypes): this { return technical.log2(this, base === undefined ? [Math.E, 0] : technical.convert(base)) as this; }
 
     abs(): this {
         this[0] = Math.abs(this[0]);
@@ -226,6 +235,21 @@ const technical = {
 
         return result;
     },
+    fixExpo: (number: Overlimit): Overlimit => {
+        const target = Math.floor(number[1]);
+        if (target !== number[1]) {
+            const negative = number[0] < 0;
+            number[0] = Math.round((10 ** (number[1] - target) - 1 + Math.abs(number[0])) * 1e14) / 1e14;
+            number[1] = target;
+
+            if (number[0] >= 10) {
+                number[0] /= 10;
+                number[1]++;
+            }
+            if (negative) { number[0] *= -1; }
+        }
+        return number;
+    },
     /* Number is readonly */
     turnString: (number: Overlimit): string => number[1] === 0 || !isFinite(number[0]) ? `${number[0]}` : `${number[0]}e${number[1]}`,
     /* Right is readonly */
@@ -400,10 +424,9 @@ const technical = {
         }
 
         const target = Math.floor(base10);
-        left[0] = 10 ** (base10 - target);
+        left[0] = Math.round(10 ** (base10 - target) * 1e14) / 1e14;
         left[1] = target;
 
-        left[0] = Math.round(left[0] * 1e14) / 1e14;
         if (left[0] === 10) {
             left[0] = 1;
             left[1]++;
@@ -414,6 +437,69 @@ const technical = {
     },
     /* Base is readonly */
     log: (left: Overlimit, base: [number, number] | Overlimit): Overlimit => {
+        if (base[0] <= 0 || (base[1] === 0 && base[0] === 1)) {
+            left[0] = NaN;
+            left[1] = NaN;
+            return left;
+        } else if (left[1] === 0 && left[0] === 1) {
+            if (left[0] === 1) {
+                left[0] = 0;
+            } else {
+                left[0] = NaN;
+                left[1] = NaN;
+            }
+            return left;
+        } else if (left[0] <= 0) {
+            if (isNaN(base[0]) || left[0] < 0) {
+                left[0] = NaN;
+                left[1] = NaN;
+            } else {
+                left[0] = base[1] < 0 ? Infinity : -Infinity;
+                left[1] = Infinity;
+            }
+            return left;
+        } else if (!isFinite(base[0])) { //Order matters (Infinity ** 0 === 1 || Infinity ** -Infinity === 0)
+            left[0] = NaN;
+            left[1] = NaN;
+            return left;
+        } else if (!isFinite(left[0])) {
+            if (isNaN(left[0]) || left[0] === -Infinity) {
+                left[0] = NaN;
+                left[1] = NaN;
+            } else {
+                left[0] = base[0] < 1 ? -Infinity : Infinity;
+                left[1] = Infinity;
+            }
+            return left;
+        }
+
+        const tooSmall = left[1] < 0; //Minor issue with negative power
+        const base10 = Math.log10(Math.abs(Math.log10(left[0]) + left[1]));
+        const target = Math.floor(base10);
+        left[0] = 10 ** (base10 - target);
+        left[1] = target;
+
+        if (tooSmall) { left[0] *= -1; } //Already can be negative
+        if (base[1] !== 1 || base[0] !== 1) {
+            left[0] /= Math.log10(base[0]) + base[1];
+
+            const after = Math.abs(left[0]);
+            if (after < 1 || after >= 10) {
+                const digits = Math.floor(Math.log10(after));
+                left[0] /= 10 ** digits;
+                left[1] += digits;
+            }
+        }
+
+        left[0] = Math.round(left[0] * 1e14) / 1e14;
+        if (Math.abs(left[0]) === 10) {
+            left[0] /= 10;
+            left[1]++;
+        }
+        return left;
+    },
+    /* Base is readonly */
+    log2: (left: Overlimit, base: [number, number] | Overlimit): Overlimit => {
         if (base[0] === 0 || (base[1] === 0 && Math.abs(base[0]) === 1)) {
             left[0] = NaN;
             left[1] = NaN;
@@ -451,7 +537,7 @@ const technical = {
         }
 
         const negative = left[0] < 0;
-        if (negative) { //Complex numbers are not supported
+        if (negative) {
             if (base[0] > 0) {
                 left[0] = NaN;
                 left[1] = NaN;
@@ -478,6 +564,12 @@ const technical = {
             }
         }
 
+        left[0] = Math.round(left[0] * 1e14) / 1e14;
+        if (Math.abs(left[0]) === 10) {
+            left[0] /= 10;
+            left[1]++;
+        }
+
         if (base[0] < 0 || negative) { //Special test for negative numbers
             if (left[1] < 0) {
                 left[0] = NaN;
@@ -489,14 +581,7 @@ const technical = {
             if (base[0] < 0 && (negative ? test !== 1 : test !== 0)) { //Result must be uneven : even
                 left[0] = NaN;
                 left[1] = NaN;
-                return left;
             }
-        }
-
-        left[0] = Math.round(left[0] * 1e14) / 1e14;
-        if (Math.abs(left[0]) === 10) {
-            left[0] /= 10;
-            left[1]++;
         }
         return left;
     },
