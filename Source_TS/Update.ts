@@ -520,7 +520,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
             getId('endResetsType3').textContent = format(player.inflation.ends[2], { padding: 'exponent' });
             getQuery('#trueUniversesStats > span').textContent = format(global.inflationInfo.trueUniverses, { padding: 'exponent' });
             getId('trueUniversesHigh').textContent = format(player.verses[0].highest, { padding: 'exponent' });
-            getId('trueUniversesLow').textContent = player.inflation.ends[2] >= 1 ? `${player.verses[0].lowest}` : 'Infinity';
+            getId('trueUniversesLow').textContent = player.inflation.ends[1] >= 1 ? `${player.verses[0].lowest}` : 'Infinity';
 
             const exportReward = player.time.export;
             const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;

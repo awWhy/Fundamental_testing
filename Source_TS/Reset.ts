@@ -234,7 +234,7 @@ export const resetVacuum = (level = 0) => {
             assignResearchCost(i, 0, 'inflations');
         }
         const supervoid = player.challenges.supervoid;
-        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + supervoid[6];
+        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5];
         if (player.inflation.ends[1] >= 1) { total += 1 + Math.max(player.verses[0].highest - player.verses[0].lowest, 0); }
         if (player.inflation.vacuum) { total++; }
         player.cosmon[0].current = total;
