@@ -507,7 +507,6 @@ export const numbersUpdate = (ignoreOffline = false) => {
             const conversion = Math.min(exportReward[0] / 43200_000, 1);
             getId('exportQuarks').textContent = format((exportReward[1] / claimPer + 1) * conversion, { padding: true });
             getQuery('#exportStrangelets > span').textContent = format(exportReward[2] / claimPer * conversion, { padding: true });
-            getQuery('#exportCosmon > span').textContent = format(exportReward[3] * conversion, { padding: true });
             getId('warpButton').textContent = `${Math.floor(player.time.offline / (60_000 * (6 - player.tree[0][5])))} Warps`;
             if (global.lastSave >= 1000) { getId('isSaved').textContent = `${format(global.lastSave / 1000, { type: 'time' })} ago`; }
         } else if (subtab === 'Stats') {
@@ -520,14 +519,13 @@ export const numbersUpdate = (ignoreOffline = false) => {
             getId('endResetsType3').textContent = format(player.inflation.ends[2], { padding: 'exponent' });
             getQuery('#trueUniversesStats > span').textContent = format(global.inflationInfo.trueUniverses, { padding: 'exponent' });
             getId('trueUniversesHigh').textContent = format(player.verses[0].highest, { padding: 'exponent' });
-            getId('trueUniversesLow').textContent = player.inflation.ends[2] >= 1 ? `${player.verses[0].lowest}` : 'Infinity';
+            getId('trueUniversesLow').textContent = player.inflation.ends[1] >= 1 ? `${player.verses[0].lowest}` : 'Infinity';
 
             const exportReward = player.time.export;
             const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
             const over = 1;
             getId('exportQuarksMax').textContent = format((exportReward[1] / claimPer + 1) * over, { padding: true });
             getQuery('#exportStrangeletsMax > span').textContent = format(exportReward[2] / claimPer * over, { padding: true });
-            getQuery('#exportCosmonMax > span').textContent = format(exportReward[3] * over, { padding: true });
             getId('exportTimeToMax').textContent = format(43200 * over - exportReward[0] / 1000, { type: 'time' });
             if (claimPer !== 1) {
                 getQuery('#exportQuarksStorage > span').textContent = format(exportReward[1], { padding: true });
@@ -1189,10 +1187,10 @@ export const visualUpdate = (ignoreOffline = false) => {
             getId('exportStrangelets').style.display = strangeness[5][8] >= 1 ? '' : 'none';
             getId('warpButton').style.display = player.challenges.supervoid[3] >= 4 ? '' : 'none';
             getId('autoTogglesUpgrades').style.display = researchesAuto[0] >= 1 || researchesAuto[1] >= 2 ? '' : 'none';
-            getId('autoElMain').style.display = researchesAuto[0] >= 1 ? '' : 'none';
-            getId('autoUMain').style.display = researchesAuto[0] >= 2 ? '' : 'none';
-            getId('autoRMain').style.display = researchesAuto[0] >= 3 ? '' : 'none';
-            getId('autoEMain').style.display = researchesAuto[1] >= 2 ? '' : 'none';
+            getId('autoElMain').style.display = researchesAuto[1] >= 2 ? '' : 'none';
+            getId('autoUMain').style.display = researchesAuto[0] >= 1 ? '' : 'none';
+            getId('autoRMain').style.display = researchesAuto[0] >= 2 ? '' : 'none';
+            getId('autoEMain').style.display = researchesAuto[0] >= 3 ? '' : 'none';
             getId('autoSMain').style.display = player.verses[0].current >= 12 ? '' : 'none';
             getId('toggleAuto0').style.display = strangeness[5][6] >= 1 ? '' : 'none';
             getId('toggleAuto0Info').style.display = strangeness[5][6] >= 1 ? '' : 'none';

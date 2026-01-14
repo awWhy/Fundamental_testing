@@ -1207,8 +1207,8 @@ export const openHotkeys = () => {
                 const newHotkey = await changeHotkey(false) as string[];
                 if (newHotkey !== null) {
                     const index = globalSave.toggles[0] ? 0 : 1;
-                    const removed = removeHotkey(newHotkey[index]);
-                    if (removed !== null) { getQuery(`#${removed}Hotkey button`).textContent = 'None'; }
+                    const removed = removeHotkey(newHotkey[index]) as hotkeysList;
+                    if (globalSaveStart.hotkeys[removed] !== undefined) { getQuery(`#${removed}Hotkey button`).textContent = 'None'; }
                     button.textContent = newHotkey[index];
                     globalSave.hotkeys[key as hotkeysList] = newHotkey;
                     assignHotkeys();
@@ -1239,8 +1239,8 @@ export const openHotkeys = () => {
                 button.style.borderBottomStyle = 'dashed';
                 const newHotkey = await changeHotkey(true) as string;
                 if (newHotkey !== null) {
-                    const removed = removeHotkey(newHotkey, true);
-                    if (removed !== null) {
+                    const removed = removeHotkey(newHotkey, true) as numbersList;
+                    if (extraHotkeyName[removed] !== undefined) {
                         getQuery(`#${removed}Hotkey button`).textContent = 'None';
                         getQuery(`#${extraHotkeyName[removed]}Hotkey span`).textContent = 'None';
                     }
