@@ -31,7 +31,7 @@
         </div>
         <article id="offlineMain" style="display: none;" role="alertdialog" aria-modal="true" aria-label="Offline calculation" aria-describedby="offlinePercentage">
             <div>
-                <p>Calculating Offline time by using <span id="offlineTick">1</span> milliseconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage"><span>0</span>% done</span>)</p>
+                <p>Calculating Offline time by using <span id="offlineTick">1</span> milliseconds per tick. Remains <span id="offlineRemains">0 seconds</span> to calculate (<span id="offlinePercentage">0% done</span>)</p>
                 <p>Accelerating too much will break time based autos</p>
                 <div>
                     <button type="button" id="offlineAccelerate">Accelerate</button>
@@ -259,7 +259,7 @@
                                 <p id="mergeScore0" class="grayText"><span>Galaxies:</span> <span id="mergeScore0Cur" class="greenText">0</span> <span>(<span class="greenText">1</span> per)</span></p>
                                 <p id="mergeScore1" class="grayText"><span>Groups:</span> <span id="mergeScore1Cur" class="greenText">0</span> <span>(<span class="greenText">2</span> per)</span></p>
                                 <p id="mergeScore2" class="grayText"><span>Clusters:</span> <span id="mergeScore2Cur" class="greenText">0</span> <span>(<span class="greenText">4</span> per)</span></p>
-                                <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span class="hasTitle" data-title="Merge score if to use up remaining resets while restting with same amount of Galaxies every time">(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
+                                <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span class="hasTitle" data-title="Merge score if to use up remaining resets while resetting with same amount of Galaxies every time">(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
                             </article>
                             <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span><span id="universeTimeReal"> (Real: <span class="orangeText">0 seconds</span>)</span></p>
                         </div>
@@ -279,26 +279,29 @@
                         <article aria-label="Challenges">
                             <input type="image" src="Used_art/Void.png" alt="Void" draggable="false" id="challenge1" aria-controls="challengeMultiline">
                             <input type="image" src="Used_art/False%20vacuum.png" alt="Vacuum information" draggable="false" id="challenge2" aria-controls="challengeMultiline">
+                            <input type="image" src="Used_art/Darkness.png" alt="Darkness" draggable="false" id="challenge3" aria-controls="challengeMultiline">
                         </article>
                         <div>
                             <section>
                                 <h3 class="bigWord"><button type="button" id="challengeName" class="selectBtn"></button><span id="challengeActive" class="greenText">, active</span></h3>
                                 <div id="challengeMultiline"></div>
                             </section>
-                            <article id="voidRewards" aria-labelledby="voidRewardsType">
-                                <button type="button" id="voidRewardsType" class="selectBtn darkvioletText bigWord">Void rewards:</button>
-                                <div>
-                                    <button type="button" id="voidReward1" class="hollowButton stage1borderButton cyanText" aria-controls="voidRewardsMultiline">Microworld</button>
-                                    <button type="button" id="voidReward2" class="hollowButton stage2borderButton blueText" aria-controls="voidRewardsMultiline">Submerged</button>
-                                    <button type="button" id="voidReward3" class="hollowButton stage3borderButton grayText" aria-controls="voidRewardsMultiline">Accretion</button>
-                                    <button type="button" id="voidReward4" class="hollowButton stage4borderButton orangeText" aria-controls="voidRewardsMultiline">Interstellar</button>
-                                    <button type="button" id="voidReward5" class="hollowButton stage5borderButton darkorchidText" aria-controls="voidRewardsMultiline">Intergalactic</button>
+                            <article id="challengeRewards" aria-labelledby="voidRewardsHead stabilityRewardsHead darknessTier">
+                                <button type="button" id="voidRewardsHead" class="selectBtn darkvioletText bigWord" style="display: none;">Void rewards:</button>
+                                <div id="voidRewards" style="display: none;">
+                                    <button type="button" id="voidReward1" class="hollowButton stage1borderButton cyanText" aria-controls="challengeRewardsMultiline">Microworld</button>
+                                    <button type="button" id="voidReward2" class="hollowButton stage2borderButton blueText" aria-controls="challengeRewardsMultiline">Submerged</button>
+                                    <button type="button" id="voidReward3" class="hollowButton stage3borderButton grayText" aria-controls="challengeRewardsMultiline">Accretion</button>
+                                    <button type="button" id="voidReward4" class="hollowButton stage4borderButton orangeText" aria-controls="challengeRewardsMultiline">Interstellar</button>
+                                    <button type="button" id="voidReward5" class="hollowButton stage5borderButton darkorchidText" aria-controls="challengeRewardsMultiline">Intergalactic</button>
                                 </div>
-                                <div id="voidRewardsMultiline" class="whiteText challengeRewards"></div>
-                            </article>
-                            <article id="stabilityRewards">
-                                <h3 class="darkorchidText bigWord">Completions rewards:</h3>
-                                <div id="stabilityRewardsMultiline" class="whiteText challengeRewards"></div>
+                                <h3 id="stabilityRewardsHead" class="darkorchidText bigWord" style="display: none;">Completions rewards:</h3>
+                                <div id="darknessTierMain" class="bigWord" style="display: none;">
+                                    <button type="button" id="darknessTierMinus" class="hollowButton">-</button>
+                                    <h3 id="darknessTier" class="grayText">Tier: <span class="whiteText">1</span>/<span class="whiteText">1</span></h3>
+                                    <button type="button" id="darknessTierPlus" class="hollowButton">+</button>
+                                </div>
+                                <div id="challengeRewardsMultiline" class="whiteText"></div>
                             </article>
                         </div>
                     </div>
@@ -500,11 +503,11 @@
                             <div id="strange0EffectsMain" class="popUpMenu mainText" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Current effects:</h4>
                                 <ul class="whiteText">
-                                    <li>Improving Microworld Structures<span id="strange0Effect1Level2"> and reducing Goals requirement</span> by <span id="strange0Effect1Stat">1</span></li>
-                                    <li>Improving Puddles<span id="strange0Effect2Level2"> and reducing Drops requirement for Clouds</span> by <span id="strange0Effect2Stat">1</span></li>
-                                    <li>Reducing cost for Accretion Structures<span id="strange0Effect3Level2"> and improving 'Gravity'</span> by <span id="strange0Effect3Stat">1</span></li>
-                                    <li>Improving Interstellar Structures<span id="strange0Effect4Level2"> and reducing Brown dwarfs cost</span> by <span id="strange0Effect4Stat">1</span></li>
-                                    <li>Increasing Solar mass gain<span id="strange0Effect5Level2"> and improving Intergalactic Structures</span> by <span id="strange0Effect5Stat">1</span></li>
+                                    <li><span class="cyanText">Microworld</span> − improving its Structures<span id="strange0Effect1Level2">, Tritium and reducing Goals requirement</span> by <span id="strange0Effect1Stat">1</span></li>
+                                    <li><span class="blueText">Submerged</span> − improving Puddles<span id="strange0Effect2Level2"> and reducing Drops requirement for Clouds</span> by <span id="strange0Effect2Stat">1</span></li>
+                                    <li><span class="grayText">Accretion</span> − reducing cost of its Structures<span id="strange0Effect3Level2">, Ranks and improving Satellites</span> by <span id="strange0Effect3Stat">1</span></li>
+                                    <li><span class="orangeText">Interstellar</span> − improving its Structures<span id="strange0Effect4Level2"> and reducing cost of Brown dwarfs</span> by <span id="strange0Effect4Stat">1</span></li>
+                                    <li><span class="darkorchidText">Intergalactic</span> − increasing Solar mass gain<span id="strange0Effect5Level2"> and impoving first two Structures </span> by <span id="strange0Effect5Stat">1</span></li>
                                 </ul>
                             </div>
                         </section>
@@ -517,7 +520,7 @@
                             <div id="strange1EffectsMain" class="popUpMenu mainText" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Current effects:</h4>
                                 <ul class="whiteText">
-                                    <li>Producing <span id="strange1Effect1Stat0">0</span>% of current Strange quarks rate<br>(<span id="strange1Effect1Allowed">Which is equal to <span id="strange1Effect1Stat1">0 per eon</span></span><span id="strange1Effect1Disabled" style="display: none;">For Interstellar Stage only</span><span id="strange1GlobalSpeedInfo">, not affected by global speed</span>)</li>
+                                    <li>Producing <span id="strange1Effect1Stat0">0</span>% of current Strange quarks rate<br>(<span id="strange1Effect1Stat1">Missing</span>)</li>
                                     <li>Increasing Stage reset reward by <span id="strange1Effect2Stat">1</span></li>
                                 </ul>
                             </div>
@@ -949,9 +952,9 @@
                             <p id="inflationSupervoid5">Limitless Mass ‒ Remove hardcap for Preons from 'Deuterium' Microworld Upgrade</p>
                             <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
                         </article>
-                        <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports fully claim related storages</span></section>
-                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip:</h4><span>Start End resets with bonus Inflatons equal to 1 + highest self-made Universes on Big Crunch - lowest on Big Rip<br>Exports can go 2 times above max time and also award Cosmons (temporarily disabled)</span></section>
-                        <section id="endMilestone3"><h4>Unlocked at 1 Big Freeze: (WIP)</h4><span>Unlock 'Stability' Inflaton Inflation and no idea for now</span></section>
+                        <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports can fully claim Strange quarks and Strangelets storages</span></section>
+                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip:</h4><span>Start End resets with bonus Inflatons equal to 1 + highest self-made Universes on Big Crunch - lowest on Big Rip<br>Exports can go 2 times above max time and also award Cosmons</span></section>
+                        <section id="endMilestone3"><h4>Unlocked at 1 Big Freeze: (WIP)</h4><span>Unlock 'Stability' Inflaton Inflation and no idea for now<br>Exports can fully claim Cosmons export Storage and its value is now always +1</span></section>
                         <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</span></section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
@@ -1055,7 +1058,7 @@
                     </aside>
                     <article id="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
-                        <p id="exportReward" class="whiteText center hasTitle" data-title="0 per Second">Current reward is <span id="exportQuarks" class="greenText">0</span> Strange quarks<span id="exportStrangelets">, <span class="greenText">0</span> Strangelets</span><span class="redText"> (Disabled)</span></p>
+                        <p id="exportReward" class="whiteText center hasTitle" data-title="0 per Second">Current reward is <span id="exportQuarks" class="greenText">0</span> Strange quarks<span id="exportStrangelets">, <span class="greenText">0</span> Strangelets</span><span id="exportCosmon">, <span class="darkvioletText">0</span> Cosmons</span><span class="redText"> (Disabled)</span></p>
                         <div>
                             <div>
                                 <button type="button" id="save">Save</button>
@@ -1074,7 +1077,7 @@
                                     <p id="saveFileNamePreview" class="mainText bigWord">Fundamental.txt</p>
                                     <h3 class="whiteText center">Any of these can be added for extra information of the save file</h3>
                                     <p class="mainText">[version] - <span class="whiteText">for game version</span></p>
-                                    <p class="stageText">[stage] - <span class="whiteText">for current Stage</span></p>
+                                    <p id="saveFileNameStage" class="stageText">[stage] - <span class="whiteText">for current Stage</span></p>
                                     <p id="saveFileNameStrange" class="greenText">[strange] - <span class="whiteText">for total Strange quarks</span></p>
                                     <p id="saveFileNameInflaton" class="darkvioletText">[inflaton] - <span class="whiteText">for total Inflatons</span></p>
                                     <p id="saveFileNameCosmon" class="darkvioletText">[cosmon] - <span class="whiteText">for total Cosmons</span></p>
@@ -1098,7 +1101,7 @@
                                 </div>
                             </li>
                             <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label><button type="button" id="pauseButton" class="hollowButton hasTitle" data-title="Pauses game ticks and resets autosave interval">Pause</button></li>
-                            <li><label>Visual update interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
+                            <li><label>Visual update and events interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
                             <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="5" max="9999" step="1"> s</label></li>
                             <li><label class="hasTitle" data-title="Game must be not paused for this to work">Autosave on tab out or page refresh<button type="button" id="globalToggle7" class="specialToggle">OFF</button></label></li>
                             <li><label>Auto accept Offline time<button type="button" id="toggleNormal4" class="toggleNormal">OFF</button></label><button type="button" id="warpButton" class="hollowButton">0 Warps</button></li>
@@ -1144,9 +1147,9 @@
                 <section id="settingsSubtabStats" class="insideTab" style="display: none;" aria-label="Current tab">
                     <section class="stats" aria-role="none">
                         <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span> | Online time: <span id="onlineTotal" class="whiteText">0 seconds</span><span id="offlineStorage"> | Offline storage <span class="whiteText">0 seconds</span></span></p>
-                        <p id="exportStats" class="hasTitle" data-title="Storage is equal to the highest reset value">Max export: <span id="exportQuarksMax" class="whiteText">1</span><span id="exportQuarksStorage"> (<span class="whiteText">1</span> in the storage)</span> <span class="whiteText">Strange quarks</span><span id="exportStrangeletsMax">, <span class="whiteText">0</span><span id="exportStrangeletsStorage"> (<span class="whiteText">0</span>)</span> <span class="whiteText">Strangelets</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
-                        <p id="trueUniversesStats">Self-made Universes: <span class="whiteText">0</span> | Highest on Big Crunch: <span id="trueUniversesHigh" class="whiteText">0</span> | Lowest on Big Rip: <span id="trueUniversesLow" class="whiteText">0</span></p>
-                        <p id="endResets">Big Crunches: <span class="whiteText">0</span> | Big Rips: <span id="endResetsType2" class="whiteText">0</span> | Big Freezes: <span id="endResetsType3" class="whiteText">0</span></p>
+                        <p id="exportStats" class="hasTitle" data-title="Value inside parentheses is storage and is equal to the highest reset value">Max export: <span id="exportQuarksMax">1</span> <span class="whiteText">Strange quarks</span><span id="exportStrangeletsMax">, <span>0</span> <span class="whiteText">Strangelets</span></span><span id="exportCosmonMax">, <span>0</span> <span class="whiteText">Cosmons</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
+                        <p id="trueUniversesStats">Self-made Universes: <span class="whiteText">0</span> | Highest on Big Crunch: <span id="trueUniversesHigh" class="whiteText">0</span><span id="trueUniversesLow"> | Lowest on Big Rip: <span class="whiteText">0</span></span></p>
+                        <p id="endResets">Big Crunches: <span class="whiteText">0</span><span id="endResetsType2"> | Big Rips: <span class="whiteText">0</span></span><span id="endResetsType3"> | Big Freezes: <span class="whiteText">0</span></span></p>
                         <p id="stageResets">Stage resets: <span class="whiteText">0</span></p>
                         <article class="statsWindows" aria-label="Structures">
                             <section id="building0Stats">
@@ -1228,7 +1231,7 @@
                             </section>
                         </article>
                         <article id="strangeAllStats" class="statsWindows" aria-label="Strange Structures">
-                            <section id="strange0Stats">
+                            <section>
                                 <h4 class="greenText bigWord">Quarks</h4>
                                 <div>
                                     <p>Total:</p>
@@ -1244,7 +1247,7 @@
                             </section>
                         </article>
                         <article id="inflatonStat" class="statsWindows" aria-label="Space Structures">
-                            <section id="verse0Stat">
+                            <section>
                                 <h4 class="darkvioletText bigWord">Universes</h4>
                                 <div>
                                     <p>Total:</p>
@@ -1314,7 +1317,6 @@
                                 </div>
                             </article>
                             <p id="effectiveEnergyStat" class="orangeText">Effective Energy: <span class="whiteText">0</span></p>
-                            <p id="maxEnergyStat" class="orangeText">Most Energy at once: <span class="whiteText">0</span></p>
                         </div>
                         <div class="stats stage2Only">
                             <article id="vaporizationBoost">
@@ -1358,7 +1360,6 @@
                             </article>
                             <p id="mergeResets" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max</p>
                             <p id="galaxyBase" class="grayText">Galaxy base: <span class="orangeText">0</span></p>
-                            <p id="maxSolarMassStat" class="cyanText">Highest Solar mass: <span class="orchidText">0.01235</span></p>
                         </div>
                         <div class="stats stage6Only">
                             <article id="nucleationBoost">
@@ -1371,7 +1372,6 @@
                             <article id="energyGainStage6" class="darkvioletText stage6borderImage" aria-label="Dark energy gain">
                                 <p><span>Planets:</span> <span id="energyGainStage6Build1Cur" class="greenText">0</span> <span>(<span id="energyGainStage6Build1Per" class="greenText">0</span> per)</span></p>
                             </article>
-                            <p id="maxDarkEnergyStat" class="grayText">Most Dark energy at once: <span class="orangeText">0</span></p>
                         </div>
                         <p id="trueStarsStat" class="redText">Self-made Stars: <span class="orangeText">0</span></p>
                     </section>
@@ -1469,7 +1469,7 @@
                         <button type="button" id="stageTabBtn" class="tabActive">Stage</button>
                         <button type="button" id="upgradeTabBtn">Upgrade</button>
                         <button type="button" id="strangenessTabBtn">Strangeness</button>
-                        <button type="button" id="inflationTabBtn" class="stage6Include">Inflation</button>
+                        <button type="button" id="inflationTabBtn">Inflation</button>
                         <button type="button" id="settingsTabBtn">Settings</button>
                     </nav>
                 </div>
