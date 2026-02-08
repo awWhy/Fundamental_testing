@@ -377,7 +377,7 @@ button.selectBtn {
     border-bottom: 1px solid;
     border-color: inherit;
     color: inherit;
-    font-size: unset;
+    font-size: inherit;
     height: unset;
     transition-duration: var(--transition-all);
 }
@@ -665,28 +665,14 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 1em;
 }
 
-#voidRewards,
-#stabilityRewards {
+#challengeRewards {
     display: flex;
     flex-direction: column;
     align-items: center;
     row-gap: 0.4em;
 }
 
-#voidRewards > div:first-of-type {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.3em;
-}
-
-#voidRewards > div button {
-    height: 1.9em;
-    padding: 0 0.4em;
-    border-radius: 4px;
-}
-
-.challengeRewards {
+#challengeRewardsMultiline {
     display: flex;
     flex-direction: column;
     background-color: var(--window-color);
@@ -697,8 +683,42 @@ input:-webkit-autofill { /* Chrome related pain */
     row-gap: 0.2em;
 }
 
-.challengeRewards p { white-space: pre-line; }
-#voidRewards > .challengeRewards { margin-top: 0.2em; }
+#challengeRewardsMultiline p { white-space: pre-line; }
+
+#voidRewards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3em;
+    margin-bottom: 0.2em;
+}
+
+#voidRewards button {
+    height: 1.9em;
+    padding: 0 0.4em;
+    border-radius: 4px;
+}
+
+#darknessTierMain {
+    display: flex;
+    align-items: center;
+    column-gap: 0.4em;
+}
+
+#darknessTierMain button {
+    width: 1.4em;
+    height: 1.6em;
+}
+
+#darknessTierMinus {
+    color: var(--red-text);
+    border-color: crimson;
+}
+
+#darknessTierPlus {
+    color: var(--green-text);
+    border-color: forestgreen;
+}
 
 .togglesDiv {
     display: flex;

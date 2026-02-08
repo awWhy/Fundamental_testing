@@ -43,7 +43,6 @@ export interface playerType {
     version: string
     fileName: string
     stage: {
-        true: number
         current: number
         active: number
         resets: number
@@ -55,7 +54,6 @@ export interface playerType {
     }
     discharge: {
         energy: number
-        energyMax: number
         current: number
     }
     vaporization: {
@@ -68,7 +66,6 @@ export interface playerType {
     }
     collapse: {
         mass: number
-        massMax: number
         stars: [number, number, number]
         show: number
         maxElement: number
@@ -87,8 +84,12 @@ export interface playerType {
         since: number
     }
     darkness: {
+        active: boolean
+        /** [tier, ...lowest Universes on Big Rip[]] \
+         * Tier 1: 0 - 6
+         */
+        tier: number[]
         energy: number
-        energyMax: number
         fluid: number
         input: number
     }
@@ -189,7 +190,11 @@ export interface playerType {
             input: [number, number]
         }
     }
-    event: boolean
+    proggress: {
+        main: number
+        /** Used for showing Merge results related Void rewards */
+        results: number
+    }
     clone: {
         depth?: 'stage' | 'vacuum'
         [key: string]: any
@@ -268,8 +273,8 @@ export interface globalType {
         autoR: number[][]
         /** Researches Extra */
         autoE: number[][]
-        /** Elements */
-        autoEl: number[]
+        /** Points to last created Element */
+        element: number
         /** Strangeness, [index, stageindex] */
         autoS: Array<[number, number]>
     }
@@ -309,7 +314,6 @@ export interface globalType {
         rankColor: string[]
         rankName: string[]
         rankImage: string[]
-        nextRank: Overlimit
         maxRank: number
         effective: number
         disableAuto: boolean
@@ -454,6 +458,15 @@ export interface globalType {
         resetType: 'vacuum'
         time: number
         color: string
+    }, {
+        name: string
+        description: () => string
+        effectText: () => string
+        /** Unlocks are in reverse */
+        rewardText: string[]
+        resetType: 'universe'
+        time: number
+        color: string
     }]
     historyStorage: {
         /** [time, quarks, strangelets, peak, peaked at] */
@@ -574,14 +587,14 @@ export interface calculateEffectsType {
     /** Rain is calculateEffects.S2Extra1() */
     S2Extra2: (rain: number, level?: number) => number
     submersion: () => number
+    rankCost: () => Overlimit | number
     effectiveRank: () => number
     S3Upgrade0: () => number
     S3Upgrade1_power: (S3Research3?: number) => number
     S3Upgrade1: (power?: number) => number
     S3Upgrade3: () => number
     S3Upgrade13: () => number
-    S3Research6_base: (level?: number) => number
-    S3Research6: (base?: number) => number
+    S3Research6: (level?: number) => number
     S3Extra1: (level?: number) => number
     S3Extra4: (level?: number) => number
     dustDelay: () => number

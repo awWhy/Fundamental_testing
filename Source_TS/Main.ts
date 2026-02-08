@@ -1,5 +1,5 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
-import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, getChallenge0Reward, getChallenge1Reward, stageUpdate, getStrangenessDescription, updateCollapsePoints } from './Update';
+import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
 import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify } from './Special';
 import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, toggleAll } from './Hotkeys';
@@ -67,6 +67,14 @@ export const getClass = (idCollection: string): HTMLCollectionOf<HTMLElement> =>
     const store = document.getElementsByClassName(idCollection) as HTMLCollectionOf<HTMLElement>;
     specialHTML.cache.classMap.set(idCollection, store);
     return store;
+};
+
+/** Assigns and then caches value, returns true if change is detected. Calls getQuery if ID is a string */
+export const assignInnerHTML = (id: HTMLElement | string, text: string): boolean => {
+    if (specialHTML.cache.innerHTML.get(id) === text) { return false; }
+    specialHTML.cache.innerHTML.set(id, text);
+    (typeof id === 'string' ? getQuery(id) : id).innerHTML = text;
+    return true;
 };
 
 /** Returns offline time in milliseconds */
@@ -166,7 +174,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
 
     const tickHTML = getId('offlineTick');
     const remainsHTML = getId('offlineRemains');
-    const percentageHTML = getQuery('#offlinePercentage > span');
+    const percentageHTML = getId('offlinePercentage');
     const calculate = () => {
         const time = tick <= 0 ? offline : Math.min(600 * tick, offline);
         offline -= time;
@@ -182,7 +190,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
             setTimeout(calculate);
             tickHTML.textContent = format(tick);
             remainsHTML.textContent = format(offline / 1000, { type: 'time' });
-            percentageHTML.textContent = format(100 - offline / startValue * 100, { padding: true });
+            percentageHTML.textContent = `${format(100 - offline / startValue * 100, { padding: true })}% done`;
         } else {
             player.time.excess += offline;
             end();
@@ -445,7 +453,7 @@ const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researc
         if ((type === 'upgrades' || type === 'researches' || type === 'researchesExtra') && global[`${type}Info`][player.stage.active].maxActive <= index) { return; }
         global.lastUpgrade[player.stage.active] = [index, type];
     }
-    getUpgradeDescription(index, type);
+    getUpgradeDescription(type);
 };
 const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflations') => {
     if (type === 'inflations') {
@@ -453,21 +461,13 @@ const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness'
     } else if (type === 'strangeness') {
         global.lastStrangeness = [index, stageIndex];
     } else { global.lastMilestone = [index, stageIndex]; }
-    getStrangenessDescription(index, stageIndex, type);
+    getUpgradeDescription(type);
 };
 const hoverChallenge = (index: number) => {
     global.lastChallenge[0] = index;
-    getChallengeDescription(index);
-    if (index === 0) {
-        getChallenge0Reward(global.lastChallenge[1]);
-    } else if (index === 1) {
-        getChallenge1Reward();
-    }
+    getChallengeDescription();
+    getChallengeRewards();
     visualUpdate();
-};
-export const changeRewardType = (state = !global.sessionToggles[0]) => {
-    global.sessionToggles[0] = state;
-    getId('voidRewardsType').textContent = `${state ? 'Supervoid' : 'Void'} rewards:`;
 };
 /** Creates X automatization Research or switches Stage to from which that Research auto can be created if done from wrong Stage */
 const handleAutoResearchCreation = (index: number) => {
@@ -1125,15 +1125,15 @@ try { //Start everything
         image.addEventListener('click', () => { global.lastChallenge[0] === i ? enterExitChallengeUser(i) : hoverChallenge(i); });
     }
     getId('challengeName').addEventListener('click', () => { toggleSupervoid(true); });
-    getId('voidRewardsType').addEventListener('click', () => {
-        changeRewardType();
-        getChallenge0Reward(global.lastChallenge[1]);
+    getId('voidRewardsHead').addEventListener('click', () => {
+        global.sessionToggles[0] = !global.sessionToggles[0];
+        getChallengeRewards();
     });
     for (let s = 1; s <= 5; s++) {
         const image = getId(`voidReward${s}`);
         const clickFunc = () => {
             global.lastChallenge[1] = s;
-            getChallenge0Reward(s);
+            getChallengeRewards();
         };
         image.addEventListener('mouseenter', clickFunc);
         if (PC || SR) {
@@ -1330,7 +1330,7 @@ try { //Start everything
         const button = getId('element0');
         const dblclickFunc = () => {
             global.lastElement = 0;
-            getUpgradeDescription(0, 'elements');
+            getUpgradeDescription('elements');
         };
         if (SR) {
             getId('element1').addEventListener('keydown', (event) => {
@@ -1390,7 +1390,7 @@ try { //Start everything
     for (let i = 0; i < playerStart.strange.length; i++) {
         const button = getId(`strange${i}`);
         const open = (focus = false) => {
-            if (i === 0 && player.stage.true < 6 && player.milestones[4][0] < 8) { return; }
+            if (player.proggress.main < 15 && player.milestones[4][0] < 8) { return; }
             const html = getId(`strange${i}EffectsMain`);
             if (html.dataset.focus === 'true') { return; }
             const button = getId(`strange${i}`);
@@ -1726,11 +1726,17 @@ try { //Start everything
     });
     getId('export').addEventListener('click', () => {
         const exportReward = player.time.export;
-        if ((player.stage.true >= 7 || player.strange[0].total > 0) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
+        if ((player.proggress.main >= 17 || (!player.inflation.vacuum && player.proggress.main >= 11)) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
             if (!globalSave.developerMode) {
                 const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
-                const conversion = Math.min(exportReward[0] / 43200_000, 1);
+                const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
 
+                if (player.inflation.ends[1] >= 1) {
+                    const value = exportReward[3] / 5 * conversion;
+                    player.cosmon[1].current += value;
+                    player.cosmon[1].total += value;
+                    exportReward[3] -= Math.max(exportReward[3] - value, 0);
+                }
                 if (player.strangeness[5][8] >= 1) {
                     const value = exportReward[2] / claimPer * conversion;
                     player.strange[1].current += value;

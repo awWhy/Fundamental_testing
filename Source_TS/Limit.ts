@@ -1,5 +1,20 @@
 import { globalSave } from './Special';
 
+/* Overlimit - awWhy's version of break infinity (or Decimal):
+    Uses 2 numbers ([mantissa, exponent]) to allow for numbers that are bigger than 1.8e308 (up to like ~9e1.8e308)
+    Exponent above maxSafeInteger (~9e15) will start losing some precision (functions like multiply by 10 won't work and etc)
+
+    Altered JS math rules:
+    '1 ** Infinity', '1 ** NaN' now returns 1 instead of NaN
+    '0 ** 0', 'NaN ** 0' now retuns NaN instead of 1
+    '0 * Infinity', '0 * NaN' now returns 0 instead of NaN
+    'Infinity / 0', '-x ** Infinity' now returns NaN instead of Infinity
+
+    Logic behind is to help against bugs (0 ** 0 is a good example)
+    In these calculation I assume that Infinity is number Much bigger than its possible to represent
+    And NaN being any number and simutanionsly non-number as long as no complex Math is required
+*/
+
 type allowedTypes = string | number | bigint | [number, number] | Overlimit;
 /** To test number for being Overlimit can use: typeof number === 'object'; Array.isArray(number); number instanceof Overlimit;\
  * Allowed types are string, number, bigint, Overlimit and [number, number];\
@@ -341,7 +356,7 @@ const technical = {
             left[0] = NaN;
             left[1] = NaN;
             return left;
-        } else if (left[0] === 0) { return left; }
+        }
 
         left[1] -= right[1];
         left[0] /= right[0];

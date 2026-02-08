@@ -105,7 +105,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         enterExitChallengeUser(null);
     },
     supervoid: () => {
-        if (global.hotkeys.last === 'super' || (player.stage.true < 8 && !player.event)) { return; }
+        if (global.hotkeys.last === 'super') { return; }
         global.hotkeys.last = 'super';
         const old = player.challenges.super;
         toggleSupervoid(true);

@@ -3,7 +3,7 @@ import { deepClone, getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { global, player } from './Player';
 import { assignResetInformation, setActiveStage } from './Stage';
 import type { globalSaveType, hotkeysList, numbersList } from './Types';
-import { format, stageUpdate, visualTrueStageUnlocks, visualUpdate } from './Update';
+import { format, stageUpdate, switchTab, visualProggressUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -394,10 +394,6 @@ export const preventImageUnload = () => {
 /** Not providing value for 'theme' will make it use one from globalSave and remove all checks */
 export const setTheme = (theme = 'current' as 'current' | number | null) => {
     if (theme !== 'current') {
-        if (theme !== null) {
-            if (player.stage.true < theme) { theme = null; }
-            if (theme === 6 && player.stage.true < 7) { theme = null; }
-        }
         getId(`switchTheme${globalSave.theme ?? 0}`).style.textDecoration = '';
 
         globalSave.theme = theme;
@@ -906,12 +902,113 @@ export const MDStrangenessPage = (stageIndex: number) => {
     global.debug.MDStrangePage = stageIndex;
 };
 
+export const checkProggress = () => {
+    proggressMain();
+
+    for (let i = 2; i > 0; i--) {
+        if (player.proggress.results >= i) { return; }
+        if (player.merge.rewards[i - 1] >= 1) {
+            player.proggress.results = i;
+            return;
+        }
+    }
+};
+const proggressMain = () => {
+    const proggress = player.proggress.main;
+    if (proggress >= 24 || global.offline.active) { return; }
+    if (player.verses[0].other[0] >= 1) { proggressUp(24, 13); }
+    if (proggress >= 23) { return; }
+    if (player.darkness.energy >= 1000) { proggressUp(23, 12); }
+    if (proggress >= 22) { return; }
+    if (player.verses[0].total >= 5) { return proggressUp(22, 11); }
+    if (proggress >= 21) { return; }
+    if (player.inflation.ends[0] >= 1) { return proggressUp(21); }
+    if (proggress >= 20) { return; }
+    if (player.verses[0].total >= 1) {
+        if (player.inflation.vacuum) { return proggressUp(20, 10); }
+        if (proggress >= 19) { return; }
+        return proggressUp(19, 9);
+    } else if (proggress >= 18) { return; }
+    if (player.inflation.vacuum) {
+        if (player.merge.resets >= 1) { return proggressUp(18, 8); }
+        if (proggress >= 17) { return; }
+        if (player.stage.resets >= 1) { return proggressUp(17, 7); }
+        if (proggress >= 16) { return; }
+        if (player.stage.current >= 5) { return proggressUp(16); }
+        if (proggress >= 15) { return; }
+        player.collapse.show = 0;
+        proggressUp(15, 6);
+    } else if (proggress < 14) {
+        if (player.stage.resets >= 7) { return proggressUp(14); }
+        if (proggress >= 13) { return; }
+        if (player.stage.resets >= 6) { return proggressUp(13); }
+        if (proggress >= 12) { return; }
+        if (player.stage.resets >= 5) { return proggressUp(12); }
+        if (proggress >= 11) { return; }
+        if (player.stage.resets >= 4) { return proggressUp(11); }
+        if (proggress >= 10) { return; }
+        if (player.stage.active >= 5) { return proggressUp(10, 5); }
+        if (proggress >= 9) { return; }
+        if (player.stage.current >= 5) { return proggressUp(9); }
+        if (proggress >= 8) { return; }
+        if (player.collapse.stars[1] >= 1) { return proggressUp(8, 4); }
+        if (proggress >= 7) { return; }
+        if (player.stage.current >= 4) { return proggressUp(7); }
+        if (proggress >= 6) { return; }
+        if (player.buildings[3][0].current.moreOrEqual(5e29)) { return proggressUp(6, 3); }
+        if (proggress >= 5) { return; }
+        if (player.stage.current >= 3) { return proggressUp(5); }
+        if (proggress >= 4) { return; }
+        if (assignResetInformation.newClouds() + player.vaporization.clouds > 1e4) { return proggressUp(4, 2); }
+        if (proggress >= 3) { return; }
+        if (player.stage.current >= 2) { return proggressUp(3); }
+        if (proggress >= 2) { return; }
+        if (player.upgrades[1][9] === 1) { return proggressUp(2, 1); }
+        if (proggress >= 1) { return; }
+        if (player.buildings[1][1].true >= 12) { proggressUp(1); }
+    }
+};
+const proggressUp = (newValue: number, event = null as null | number) => {
+    const old = player.proggress.main;
+    player.proggress.main = newValue;
+    if (event !== null) { playEvent(event, false); }
+    if (old < 6 && newValue >= 6) {
+        assignResetInformation.maxRank();
+        global.debug.rankUpdated = null;
+    }
+    visualProggressUnlocks();
+    if (global.tabs.current === 'stage') {
+        if (old < 15 && newValue >= 15) { switchTab(); }
+    } else if (global.tabs.current === 'strangeness') {
+        if (old < 20 && newValue >= 20) { switchTab(); }
+    } else if (global.tabs.current === 'settings') {
+        if (old < 17 && (newValue >= 17 || (old < 11 && newValue >= 11))) { switchTab(); }
+    }
+    if (old < 17 && (newValue >= 18 || (old < 10 && (newValue >= 10 || old < 1)))) {
+        stageUpdate(old < 1);
+    } else if (old === 17) {
+        setTimeout(() => {
+            setActiveStage(6, player.stage.active);
+            stageUpdate();
+        });
+    }
+};
+
 export const replayEvent = async() => {
-    const last = player.stage.true >= 9 ? (player.event ? 13 : 12) :
-        player.stage.true === 8 ? (player.event ? 12 : 11) :
-        player.stage.true === 7 ? (player.event ? 10 : 9) :
-        player.stage.true === 6 ? (player.event ? 8 : player.stage.resets >= 1 ? 7 : 6) :
-        player.stage.true - (player.event ? 0 : 1);
+    const proggress = player.proggress.main;
+    const last = proggress >= 24 ? 13 :
+        proggress >= 23 ? 12 :
+        proggress >= 22 ? 11 :
+        proggress >= 20 ? 10 :
+        proggress >= 19 ? 9 :
+        proggress >= 18 ? 8 :
+        proggress >= 17 ? 7 :
+        proggress >= 15 ? 6 :
+        proggress >= 10 ? 5 :
+        proggress >= 8 ? 4 :
+        proggress >= 6 ? 3 :
+        proggress >= 4 ? 2 :
+        proggress >= 2 ? 1 : 0;
     if (last < 1) { return void Alert('There are no unlocked events'); }
 
     let text = 'Which event do you want to see again?\nEvent 1: Stage reset';
@@ -935,51 +1032,39 @@ export const replayEvent = async() => {
 };
 
 /** Sets player.event to true if replay is false */
-export const playEvent = (event: number, replay = true) => {
-    if (global.offline.active || specialHTML.alert[0] !== null) { return; }
-    if (!replay) { player.event = true; }
-
+const playEvent = (event: number, replay = true) => {
     let text = 'No such event.';
     if (event === 1) {
         text = 'A new reset tier has been unlocked. It will allow the creation of higher tier Structures, but for the price of everything else.';
     } else if (event === 2) {
         text = `Cloud density is too high... Any new Clouds past ${format(1e4)} will be weaker due to the softcap.`;
     } else if (event === 3) {
-        if (!replay) {
-            assignResetInformation.rankInformation();
-            global.debug.rankUpdated = null;
-        }
         text = 'Cannot gain any more Mass with the current Rank. A new one has been unlocked, but reaching it will softcap the Mass production.';
     } else if (event === 4) {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis.';
     } else if (event === 5) {
-        if (!replay) { stageUpdate(false); }
         text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Intergalactic Stars are combined Interstellar Stars. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)";
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
-        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the 'Void'. Check it out in the 'Advanced' subtab.";
+        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the very first Challenge ‒ 'Void'. Check it out in the 'Advanced' subtab.\n(There is no reason to stay inside Challenges past time limit)";
     } else if (event === 8) {
-        if (!replay) {
-            setTimeout(() => {
-                setActiveStage(6, player.stage.active);
-                stageUpdate(true);
-            });
-        }
-        text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ the 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
+        text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
     } else if (event === 9) {
-        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' now unlocks more Elements based on self-made Universes)";
+        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' unlocks more Elements based on self-made Universes)";
     } else if (event === 10) {
-        if (!replay) { visualTrueStageUnlocks(); }
-        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle into Supervoid. End reset reward is higher if done from true Vacuum)";
+        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle into Supervoid. End reset reward base will be increased by +1 if inside true Vacuum)";
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.";
     } else if (event === 12) {
-        text = 'Big Rip unlocked placeholder text.';
+        text = 'Big Rip and related Milestone unlocked placeholder text.\n(Big Rip uses all Universes instead of only self-made for Cosmon calculations)';
     } else if (event === 13) {
         text = 'Void Universe placeholder text.';
     }
-    if (!replay) { text += "\n\n(Can be viewed again with 'Events' button in Settings tab)"; }
+    if (!replay) {
+        text += "\n\n(Can be viewed again with 'Events' button in Settings tab)";
+        if (specialHTML.alert[0] !== null) { return Notify(`Wasn't able to show event ${event}, event text:\n${text}`); }
+    }
     return void Alert(text);
 };
 
@@ -1218,6 +1303,7 @@ export const openHotkeys = () => {
                 getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
             });
         }
+        /** Actual type is Record<numbersList, string> */
         const extraHotkeyName: Record<string, string> = {
             makeStructure: 'makeAll',
             toggleStructure: 'toggleAll',
@@ -1272,6 +1358,6 @@ export const openHotkeys = () => {
     specialHTML.bigWindow = 'hotkeys';
     addCloseEvents(getId('hotkeysHTML'), getQuery('#tabRightHotkey button'));
     getQuery('#bigWindow > article').ariaLabel = 'Hotkeys menu';
-    visualTrueStageUnlocks();
+    visualProggressUnlocks();
     visualUpdate();
 };
