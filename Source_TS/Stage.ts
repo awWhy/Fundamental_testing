@@ -1808,7 +1808,7 @@ export const calculateTreeCost = (index: number, stageIndex: number, level = pla
     let scaling = global.treeInfo[stageIndex].scaling[index];
     if (stageIndex === 1) {
         if (index === 0 || index === 1) {
-            scaling += Math.floor(level / 4) / 4;
+            scaling += Math.floor(level / 4) / (globalSave.developerMode ? 2 : 4);
         } else if (index === 2) {
             return Math.floor(Math.round((global.treeInfo[stageIndex].firstCost[index] * scaling ** level) * 100) / 100);
         }
