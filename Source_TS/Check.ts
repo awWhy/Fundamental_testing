@@ -295,7 +295,7 @@ export const getStageResetType = (): number => {
 export const allowedToEnter = (challenge: number): boolean => {
     if (challenge === 0) { return (player.inflation.vacuum || player.challenges.super) && player.proggress.main >= 17; }
     if (challenge === 1) { return player.proggress.main >= 22; }
-    if (challenge === 2) { return !player.darkness.active; }
+    if (challenge === 2) { return !player.darkness.active && player.strangeness[6][3] >= 1; }
     return false;
 };
 

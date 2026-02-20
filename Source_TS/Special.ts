@@ -251,7 +251,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Rank%20Researches.png', 'stage6borderImage', 'Rank'],
         ['Collapse%20Researches.png', 'stage6borderImage', 'Collapse'],
         ['Galaxy%20Researches.png', 'stage3borderImage', 'Galaxy'],
-        ['Missing.png', 'stage3borderImage', 'Dark energy']
+        ['Dark%20energy%20Researches.png', 'stage3borderImage', 'Dark energy']
     ],
     /** [src, className] */
     researchExtraHTML: [
@@ -915,55 +915,56 @@ export const checkProggress = () => {
 };
 const proggressMain = () => {
     const proggress = player.proggress.main;
-    if (proggress >= 24 || global.offline.active) { return; }
-    if (player.verses[0].other[0] >= 1) { proggressUp(24, 13); }
+    if (proggress >= 25 || global.offline.active) { return; }
+    if (player.verses[0].other[0] >= 1) { proggressUp(25, 13); }
+    if (proggress >= 24) { return; }
+    if (player.inflation.ends[1] >= 1) { proggressUp(24); }
     if (proggress >= 23) { return; }
     if (player.darkness.energy >= 1000) { proggressUp(23, 12); }
     if (proggress >= 22) { return; }
-    if (player.verses[0].total >= 5) { return proggressUp(22, 11); }
+    if (player.verses[0].true >= 5) { proggressUp(22, 11); }
     if (proggress >= 21) { return; }
-    if (player.inflation.ends[0] >= 1) { return proggressUp(21); }
+    if (player.inflation.ends[0] >= 1) { proggressUp(21); }
     if (proggress >= 20) { return; }
-    if (player.verses[0].total >= 1) {
-        if (player.inflation.vacuum) { return proggressUp(20, 10); }
-        if (proggress >= 19) { return; }
-        return proggressUp(19, 9);
-    } else if (proggress >= 18) { return; }
     if (player.inflation.vacuum) {
-        if (player.merge.resets >= 1) { return proggressUp(18, 8); }
+        if (player.verses[0].total >= 1) { proggressUp(20, 10); }
+        if (proggress >= 18) { return; }
+        if (player.merge.resets >= 1) { proggressUp(18, 8); }
         if (proggress >= 17) { return; }
-        if (player.stage.resets >= 1) { return proggressUp(17, 7); }
+        if (player.stage.resets >= 1) { proggressUp(17, 7); }
         if (proggress >= 16) { return; }
-        if (player.stage.current >= 5) { return proggressUp(16); }
+        if (player.stage.current >= 5) { proggressUp(16); }
         if (proggress >= 15) { return; }
         player.collapse.show = 0;
         proggressUp(15, 6);
-    } else if (proggress < 14) {
-        if (player.stage.resets >= 7) { return proggressUp(14); }
+    } else if (proggress < 19) {
+        if (player.verses[0].total >= 1) { proggressUp(19, 9); }
+        if (proggress >= 14) { return; }
+        if (player.stage.resets >= 7) { proggressUp(14); }
         if (proggress >= 13) { return; }
-        if (player.stage.resets >= 6) { return proggressUp(13); }
+        if (player.stage.resets >= 6) { proggressUp(13); }
         if (proggress >= 12) { return; }
-        if (player.stage.resets >= 5) { return proggressUp(12); }
+        if (player.stage.resets >= 5) { proggressUp(12); }
         if (proggress >= 11) { return; }
-        if (player.stage.resets >= 4) { return proggressUp(11); }
+        if (player.stage.resets >= 4) { proggressUp(11); }
         if (proggress >= 10) { return; }
-        if (player.stage.active >= 5) { return proggressUp(10, 5); }
+        if (player.stage.active >= 5) { proggressUp(10, 5); }
         if (proggress >= 9) { return; }
-        if (player.stage.current >= 5) { return proggressUp(9); }
+        if (player.stage.current >= 5) { proggressUp(9); }
         if (proggress >= 8) { return; }
-        if (player.collapse.stars[1] >= 1) { return proggressUp(8, 4); }
+        if (player.collapse.stars[1] >= 1) { proggressUp(8, 4); }
         if (proggress >= 7) { return; }
-        if (player.stage.current >= 4) { return proggressUp(7); }
+        if (player.stage.current >= 4) { proggressUp(7); }
         if (proggress >= 6) { return; }
-        if (player.buildings[3][0].current.moreOrEqual(5e29)) { return proggressUp(6, 3); }
+        if (player.buildings[3][0].current.moreOrEqual(5e29)) { proggressUp(6, 3); }
         if (proggress >= 5) { return; }
-        if (player.stage.current >= 3) { return proggressUp(5); }
+        if (player.stage.current >= 3) { proggressUp(5); }
         if (proggress >= 4) { return; }
-        if (assignResetInformation.newClouds() + player.vaporization.clouds > 1e4) { return proggressUp(4, 2); }
+        if (assignResetInformation.newClouds() + player.vaporization.clouds > 1e4) { proggressUp(4, 2); }
         if (proggress >= 3) { return; }
-        if (player.stage.current >= 2) { return proggressUp(3); }
+        if (player.stage.current >= 2) { proggressUp(3); }
         if (proggress >= 2) { return; }
-        if (player.upgrades[1][9] === 1) { return proggressUp(2, 1); }
+        if (player.upgrades[1][9] === 1) { proggressUp(2, 1); }
         if (proggress >= 1) { return; }
         if (player.buildings[1][1].true >= 12) { proggressUp(1); }
     }
@@ -996,7 +997,7 @@ const proggressUp = (newValue: number, event = null as null | number) => {
 
 export const replayEvent = async() => {
     const proggress = player.proggress.main;
-    const last = proggress >= 24 ? 13 :
+    const last = proggress >= 25 ? 13 :
         proggress >= 23 ? 12 :
         proggress >= 22 ? 11 :
         proggress >= 20 ? 10 :
@@ -1057,7 +1058,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.";
     } else if (event === 12) {
-        text = 'Big Rip and related Milestone unlocked placeholder text.\n(Big Rip uses all Universes instead of only self-made for Cosmon calculations)';
+        text = "Unlocked a new type of End resets ‒ 'Big Rip', this one can use non-self-made Universes when calculating Cosmons gain.";
     } else if (event === 13) {
         text = 'Void Universe placeholder text.';
     }
@@ -1115,7 +1116,7 @@ export const openVersionInfo = () => {
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
-        <h6>v0.2.8</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewars is now 12 hours\n- Removed log\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.8</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewards is now 12 hours\n- Removed log\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
         <h6>v0.2.6</h6><p>- New content (Big Rip)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos</p>
         <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>

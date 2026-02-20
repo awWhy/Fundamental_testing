@@ -88,7 +88,7 @@ export interface playerType {
         /** [tier, ...lowest Universes on Big Rip[]] \
          * Tier 1: 0 - 6
          */
-        tier: number[]
+        tier: number
         energy: number
         fluid: number
         input: number
@@ -125,8 +125,8 @@ export interface playerType {
         other: [number, number, number]
         /** After Big Crunch */
         highest: number
-        /** After Big Rip */
-        lowest: number
+        /** After Big Rip [Darkness tier] */
+        lowest: number[]
     }, ...verse[]]
     strange: Array<{
         current: number
@@ -628,7 +628,7 @@ export interface calculateEffectsType {
     effectiveDarkEnergy: (fluid?: number) => number
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
-    S2Strange9: () => number
+    S2Strange9: (unlocked?: boolean) => number
     trueUniverses: () => number
     T0Inflation0: () => number
     TOInflation1_softcap: () => number

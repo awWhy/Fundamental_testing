@@ -101,7 +101,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
     }
     if (offline > 43200_000) { offline = 43200_000; }
     if (decline || offline < 20) {
-        if (decline && player.challenges.supervoid[3] >= 4) { player.time.offline = Math.min(player.time.offline + offline, 43200_000); }
+        if (decline) { player.time.offline = Math.min(player.time.offline + offline, 43200_000); }
         if (offline < 0) { player.time.excess = offline - 20; }
         pauseGame(false);
         timeUpdate(20, 20); //Just in case

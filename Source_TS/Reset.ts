@@ -25,7 +25,26 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
     let energyRefund = 0;
     for (const s of stageIndex) {
-        if (s !== 6) { energyRefund += energyStage[s]; }
+        if (s === 1) {
+            if (player.inflation.vacuum) {
+                if (player.tree[1][5] === 4) {
+                    player.buildings[2][0].current.setValue(0);
+                    player.buildings[2][0].total.setValue(0);
+                }
+            } else {
+                player.discharge.energy = 0;
+                dischargeInfo.energyTrue = 0;
+            }
+        } else if (s === 2) {
+            if (player.tree[1][5] === 4) { continue; }
+            assignBuildingsProduction.S2Levels(false);
+        } else if (s === 4) {
+            global.collapseInfo.trueStars = 0;
+            assignBuildingsProduction.S4Levels(false);
+        }
+        if (s === 6) {
+            player.darkness.energy = 0;
+        } else { energyRefund += energyStage[s]; }
         energyStage[s] = 0;
 
         const building = player.buildings[s];
@@ -47,19 +66,6 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             building[i as 1].true = 0;
             building[i].current.setValue(0);
             building[i].total.setValue(0);
-        }
-        if (s === 1) {
-            if (!player.inflation.vacuum) {
-                player.discharge.energy = 0;
-                dischargeInfo.energyTrue = 0;
-            }
-        } else if (s === 2) {
-            assignBuildingsProduction.S2Levels(false);
-        } else if (s === 4) {
-            global.collapseInfo.trueStars = 0;
-            assignBuildingsProduction.S4Levels(false);
-        } else if (s === 6) {
-            player.darkness.energy = 0;
         }
 
         if (type === 'discharge') { continue; }
@@ -94,7 +100,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
     if (player.inflation.vacuum && energyRefund !== 0) { //energyRefund should always be > 0
         let deficit = dischargeInfo.energyTrue - player.discharge.energy - energyRefund;
-        for (let s = 2; s < 6; s++) {
+        for (let s = player.tree[1][5] === 4 ? 3 : 2; s < 6; s++) {
             if (stageIndex.includes(s)) { continue; }
             const building = player.buildings[s];
             for (let i = global.buildingsInfo.maxActive[s] - 1; i >= 1; i--) {
@@ -209,7 +215,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
         if (s === 6) {
-            player.ASR[s] = player.darkness.tier[1] <= 4 ? 1 : 0;
+            player.ASR[s] = player.verses[0].lowest[0] <= 5 ? 1 : 0;
         } else if (strangeness[s][5] < 1) { player.ASR[s] = 0; }
     }
     if (update !== null) {
@@ -232,7 +238,6 @@ export const resetVacuum = (level = 0) => {
         }
         const supervoid = player.challenges.supervoid;
         let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5];
-        if (player.inflation.ends[1] >= 1) { total += 1 + Math.max(player.verses[0].highest - player.verses[0].lowest, 0); }
         if (player.inflation.vacuum) { total++; }
         player.cosmon[0].current = total;
         player.cosmon[0].total = total;
@@ -334,11 +339,14 @@ export const resetVacuum = (level = 0) => {
         player.strangeness[3][6] = 3;
         player.strangeness[4][6] = 2;
     }
-    if (vacuum && universes >= 5) { player.strangeness[5][9] = 1; }
+    if (vacuum) {
+        if (universes >= 5) { player.strangeness[5][9] = 1; }
+        if (universes >= 12) { player.strangeness[5][8] = 1; }
+    }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
     if (player.darkness.active) {
         player.strangeness[6][3] = 1;
-        player.ASR[6] = player.darkness.tier[1] <= 4 ? 1 : 0;
+        player.ASR[6] = player.verses[0].lowest[0] <= 5 ? 1 : 0;
     } else { player.ASR[6] = 0; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }

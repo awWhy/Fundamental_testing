@@ -40,7 +40,7 @@
                 </div>
             </div>
         </article>
-        <article id="notifications" aria-live="polite"></article>
+        <article id="notifications" aria-live="polite" role="none"></article>
         <aside id="hoverWindow" class="whiteText" style="display: none;" aria-label="Hover text"></aside>
         <main id="body" style="display: none;">
             <section id="stageTab" role="none">
@@ -507,7 +507,7 @@
                                     <li><span class="blueText">Submerged</span> − improving Puddles<span id="strange0Effect2Level2"> and reducing Drops requirement for Clouds</span> by <span id="strange0Effect2Stat">1</span></li>
                                     <li><span class="grayText">Accretion</span> − reducing cost of its Structures<span id="strange0Effect3Level2">, Ranks and improving Satellites</span> by <span id="strange0Effect3Stat">1</span></li>
                                     <li><span class="orangeText">Interstellar</span> − improving its Structures<span id="strange0Effect4Level2"> and reducing cost of Brown dwarfs</span> by <span id="strange0Effect4Stat">1</span></li>
-                                    <li><span class="darkorchidText">Intergalactic</span> − increasing Solar mass gain<span id="strange0Effect5Level2"> and impoving first two Structures </span> by <span id="strange0Effect5Stat">1</span></li>
+                                    <li><span class="darkorchidText">Intergalactic</span> − increasing Solar mass gain<span id="strange0Effect5Level2"> and improving first two Structures </span> by <span id="strange0Effect5Stat">1</span></li>
                                 </ul>
                             </div>
                         </section>
@@ -520,7 +520,7 @@
                             <div id="strange1EffectsMain" class="popUpMenu mainText" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Current effects:</h4>
                                 <ul class="whiteText">
-                                    <li>Producing <span id="strange1Effect1Stat0">0</span>% of current Strange quarks rate<br>(<span id="strange1Effect1Stat1">Missing</span>)</li>
+                                    <li>Producing <span id="strange1Effect1Stat0">0% of current</span> Strange quarks rate<br>(<span id="strange1Effect1Stat1">Which is equal to 0 per eon</span>)</li>
                                     <li>Increasing Stage reset reward by <span id="strange1Effect2Stat">1</span></li>
                                 </ul>
                             </div>
@@ -953,14 +953,14 @@
                             <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
                         </article>
                         <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports can fully claim Strange quarks and Strangelets storages</span></section>
-                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip:</h4><span>Start End resets with bonus Inflatons equal to 1 + highest self-made Universes on Big Crunch - lowest on Big Rip<br>Exports can go 2 times above max time and also award Cosmons</span></section>
+                        <section id="endMilestone2"><h4>Unlocked at 1 Big Rip:</h4><span>Gain more Cosmons from higher self-made Universes equal to +<span>0.2</span> * self-made Universes<br>Exports can go 2 times above max time and also award Cosmons</span></section>
                         <section id="endMilestone3"><h4>Unlocked at 1 Big Freeze: (WIP)</h4><span>Unlock 'Stability' Inflaton Inflation and no idea for now<br>Exports can fully claim Cosmons export Storage and its value is now always +1</span></section>
-                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness maxed</span></section>
+                        <section id="inflationMilestone1"><h4>Unlocked at 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness level 2</span></section>
                         <section id="inflationMilestone2"><h4>Unlocked at 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
                         <section id="inflationMilestone3"><h4>Unlocked at 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
                         <section id="inflationMilestone4"><h4>Unlocked at 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
                         <section id="inflationMilestone5"><h4>Unlocked at 8 Universes:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Unlock new mode for auto Stage that uses seconds since peak</span></section>
-                        <section id="inflationMilestone6"><h4>Unlocked at 12 Universes:</h4><span>Unlock auto Strangeness (needs to be enabled in Settings)<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
+                        <section id="inflationMilestone6"><h4>Unlocked at 12 Universes:</h4><span>Unlock auto Strangeness (needs to be enabled in Settings), true Vacuum will also start with 'Strange growth' level 1<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
                     </article>
                 </section>
             </section>
@@ -1145,11 +1145,11 @@
                     </div>
                 </section>
                 <section id="settingsSubtabStats" class="insideTab" style="display: none;" aria-label="Current tab">
-                    <section class="stats" aria-role="none">
+                    <section class="stats" role="none">
                         <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span> | Online time: <span id="onlineTotal" class="whiteText">0 seconds</span><span id="offlineStorage"> | Offline storage <span class="whiteText">0 seconds</span></span></p>
                         <p id="exportStats" class="hasTitle" data-title="Value inside parentheses is storage and is equal to the highest reset value">Max export: <span id="exportQuarksMax">1</span> <span class="whiteText">Strange quarks</span><span id="exportStrangeletsMax">, <span>0</span> <span class="whiteText">Strangelets</span></span><span id="exportCosmonMax">, <span>0</span> <span class="whiteText">Cosmons</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
-                        <p id="trueUniversesStats">Self-made Universes: <span class="whiteText">0</span> | Highest on Big Crunch: <span id="trueUniversesHigh" class="whiteText">0</span><span id="trueUniversesLow"> | Lowest on Big Rip: <span class="whiteText">0</span></span></p>
-                        <p id="endResets">Big Crunches: <span class="whiteText">0</span><span id="endResetsType2"> | Big Rips: <span class="whiteText">0</span></span><span id="endResetsType3"> | Big Freezes: <span class="whiteText">0</span></span></p>
+                        <p id="trueUniversesStats">Self-made Universes: <span class="whiteText">0</span> | Highest on Big Crunch: <span id="trueUniversesHigh" class="whiteText">0</span><span id="trueUniversesLow"> | Lowest on Tier 1 Big Rip <span class="whiteText">0</span></span></p>
+                        <p id="endResets">Big Crunches: <span class="whiteText">0</span> | Big Rips: <span id="endResetsType2" class="whiteText">0</span> | Big Freezes: <span id="endResetsType3" class="whiteText">0</span></p>
                         <p id="stageResets">Stage resets: <span class="whiteText">0</span></p>
                         <article class="statsWindows" aria-label="Structures">
                             <section id="building0Stats">
@@ -1377,7 +1377,7 @@
                     </section>
                 </section>
                 <section id="settingsSubtabHistory" class="insideTab" style="display: none;" aria-label="Current tab">
-                    <article id="historyMainDiv" aria-role="none">
+                    <article id="historyMainDiv" role="none">
                         <section id="endHistory" class="redText">
                             <h3 class="bigWord">End resets:</h3>
                             <p><label>Save <input type="number" id="endHistorySave" min="0" max="20" step="1"></label>, <label>show <input type="number" id="endHistoryShow" min="10" max="100" step="1"></label></p>
