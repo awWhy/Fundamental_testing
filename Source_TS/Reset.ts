@@ -27,7 +27,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
     for (const s of stageIndex) {
         if (s === 1) {
             if (player.inflation.vacuum) {
-                if (player.tree[1][5] === 4) {
+                if (player.tree[1][5] >= 4 && !stageIndex.includes(2)) {
                     player.buildings[2][0].current.setValue(0);
                     player.buildings[2][0].total.setValue(0);
                 }
@@ -36,7 +36,6 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
                 dischargeInfo.energyTrue = 0;
             }
         } else if (s === 2) {
-            if (player.tree[1][5] === 4) { continue; }
             assignBuildingsProduction.S2Levels(false);
         } else if (s === 4) {
             global.collapseInfo.trueStars = 0;
@@ -100,7 +99,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
     if (player.inflation.vacuum && energyRefund !== 0) { //energyRefund should always be > 0
         let deficit = dischargeInfo.energyTrue - player.discharge.energy - energyRefund;
-        for (let s = player.tree[1][5] === 4 ? 3 : 2; s < 6; s++) {
+        for (let s = player.tree[1][5] >= 4 ? 3 : 2; s < 6; s++) {
             if (stageIndex.includes(s)) { continue; }
             const building = player.buildings[s];
             for (let i = global.buildingsInfo.maxActive[s] - 1; i >= 1; i--) {
@@ -231,7 +230,7 @@ export const resetVacuum = (level = 0) => {
         player.verses[0].true = 0;
         player.verses[0].other = [0, 0, 0];
         global.inflationInfo.trueUniverses = 0;
-        if (player.inflation.ends[0] >= 1) { player.verses[0].current = player.verses[0].highest; }
+        player.verses[0].current = player.inflation.ends[0] >= 1 ? player.verses[0].highest : 0;
         for (let i = 0; i < playerStart.tree[0].length; i++) {
             player.tree[0][i] = 0;
             assignResearchCost(i, 0, 'inflations');
@@ -244,9 +243,11 @@ export const resetVacuum = (level = 0) => {
         player.inflation.resets = 0;
         player.inflation.peak = [0, 0];
         player.time.end = 0;
-        player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoidMax);
-        global.inflationInfo.totalSuper = 0;
         player.darkness.active = false;
+        if (player.challenges.stability < 2) {
+            player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoidMax);
+            global.inflationInfo.totalSuper = 0;
+        }
 
         for (let i = 0; i < global.challengesInfo.length; i++) { assignChallengeInformation(i); }
     }
@@ -344,7 +345,7 @@ export const resetVacuum = (level = 0) => {
         if (universes >= 12) { player.strangeness[5][8] = 1; }
     }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    if (player.darkness.active) {
+    if (vacuum && player.darkness.active) {
         player.strangeness[6][3] = 1;
         player.ASR[6] = player.verses[0].lowest[0] <= 5 ? 1 : 0;
     } else { player.ASR[6] = 0; }
@@ -354,12 +355,13 @@ export const resetVacuum = (level = 0) => {
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
         calculateMaxLevel(0, s, 'ASR');
-        if (s === 6) { continue; }
-        if (universes >= 2) {
-            player.ASR[s] = global.ASRInfo.max[s];
-            player.strangeness[s][5] = 1;
-            if (universes >= 5) { player.strangeness[s][4] = 1; }
-        } else { player.ASR[s] = 0; }
+        if (s !== 6) {
+            if (universes >= 2) {
+                player.ASR[s] = global.ASRInfo.max[s];
+                player.strangeness[s][5] = 1;
+                if (universes >= 5) { player.strangeness[s][4] = 1; }
+            } else { player.ASR[s] = 0; }
+        }
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'strangeness'); }
     }
 

@@ -374,7 +374,10 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
 
 export const toggleSwap = (number: number, type: 'buildings' | 'verses' | 'normal' | 'hover' | 'max' | 'auto', change = false) => {
     const toggles = type === 'buildings' ? player.toggles.buildings[player.stage.active] : player.toggles[type];
-    if (change) { toggles[number] = !toggles[number]; }
+    if (change) {
+        if (type === 'buildings' && toggles.length <= number) { return; }
+        toggles[number] = !toggles[number];
+    }
 
     let extraText;
     let toggleHTML;
@@ -688,9 +691,9 @@ try { //Start everything
                     array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
                 }
             }
-            fillMissingValues(globalSave.toggles, globalSaveStart.toggles);
-            fillMissingValues(globalSave.MDSettings, globalSaveStart.MDSettings);
-            fillMissingValues(globalSave.SRSettings, globalSaveStart.SRSettings);
+            fillMissingValues(globalSave.toggles, globalSaveStart.toggles, false);
+            fillMissingValues(globalSave.MDSettings, globalSaveStart.MDSettings, false);
+            fillMissingValues(globalSave.SRSettings, globalSaveStart.SRSettings, false);
             for (const key in globalSaveStart.hotkeys) {
                 globalSave.hotkeys[key as hotkeysList] ??= ['None', 'None'];
             }
@@ -1729,7 +1732,7 @@ try { //Start everything
         if ((player.proggress.main >= 17 || (!player.inflation.vacuum && player.proggress.main >= 11)) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
             if (!globalSave.developerMode) {
                 const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
-                const conversion = Math.min(exportReward[0] / 43200_000, player.inflation.ends[1] >= 1 ? 2 : 1);
+                const conversion = Math.min(exportReward[0] / 43200_000, 1);
 
                 if (player.inflation.ends[1] >= 1) {
                     const value = exportReward[3] / 5 * conversion;

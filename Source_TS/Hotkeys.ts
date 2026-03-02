@@ -161,7 +161,7 @@ const numberFunctions: Record<numbersList, (number: number) => void> = {
         if (number === 0) {
             toggleAll();
         } else {
-            if (number < playerStart.buildings[player.stage.active].length) { toggleSwap(number, 'buildings', true); }
+            toggleSwap(number, 'buildings', true);
         }
     },
     enterChallenge: (number) => {
@@ -291,15 +291,13 @@ export const createAll = () => {
 export const toggleAll = () => {
     const active = player.stage.active;
     const toggles = player.toggles.buildings[active];
+    const maxActive = Math.max(global.buildingsInfo.maxActive[active], 2);
 
-    let anyOn = false;
-    for (let i = 1; i <= Math.min(Math.max(player.ASR[active], 1), global.buildingsInfo.maxActive[active] - 1); i++) {
-        if (toggles[i]) {
-            anyOn = true;
-            break;
-        }
+    let anyOn = toggles[1];
+    for (let i = 2; !anyOn && i < Math.min(player.ASR[active] + 1, maxActive); i++) {
+        if (toggles[i]) { anyOn = true; }
     }
-    for (let i = 1; i < global.buildingsInfo.maxActive[active]; i++) {
+    for (let i = 1; i < maxActive; i++) {
         toggles[i] = !anyOn;
         toggleSwap(i, 'buildings');
     }

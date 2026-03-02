@@ -976,7 +976,7 @@ export const global: globalType = {
             () => "Highly toxic and reactive, +12 to max level of 'Planetary system'.",
             () => `A noble 2x boost to the Solar mass gain${player.inflation.vacuum ? ' and delay to the Preons hardcap' : ''}.`,
             () => "Through leaching will increase max level of 'Protoplanetary disk' by +1.",
-            () => 'Stars are inside you, as well Neutron stars will improve themselfs by log4 of their own amount.',
+            () => 'Stars are inside you, as well Neutron stars will improve themselves by log4 of their own amount.',
             () => 'Has a great affinity towards Oxygen and to decrease cost of Interstellar Stars by 100.',
             () => `Just another tetravalent metalloid, and so is another ${format(1.4)}x boost to Interstellar Stars${player.inflation.vacuum ? ' and Cosmic dust' : ''}.`,
             () => `One of the fundamentals for Life and to make all self-made Stars to boost Solar mass gain${player.inflation.vacuum ? ' and delay Cosmic dust hardcap' : ''}.`,
@@ -1098,7 +1098,7 @@ export const global: globalType = {
                     if (!global.stageInfo.activeAll.includes(3)) { assignBuildingsProduction.stage3Cache(); }
                     return `Satellites will be able to improve remaining ${player.inflation.vacuum ? 'Accretion ' : ''} Structures, but at reduced strength (^${format(player.inflation.vacuum ? 0.1 : 0.2)}).\n(Affected Structures are Cosmic dust and Planetesimals, boost is equal to ${format(effectsCache.S3Strange3, { padding: true })})`;
                 },
-                () => `Automatically increase Rank when possible. (Needs to be enabled in Settings)${global.strangenessInfo[3].max[4] > 1 ? `\nSecond level will make Rank ${player.challenges.supervoid[3] >= 2 ? 'to be based on Mass produced this reset and without needing to reset' : 'increase use Mass produced this reset instead of current'}.` : ''}`,
+                () => `Automatically increase Rank when possible. (Needs to be enabled in Settings)${global.strangenessInfo[3].max[4] > 1 ? `\nSecond level will make ${player.challenges.supervoid[3] >= 2 ? 'Ranks to be based on Mass produced this reset and without needing to reset' : 'Rank increase use Mass produced this reset instead of current'}.` : ''}`,
                 () => 'Make auto for all Accretion Structures permanent.',
                 () => { //[6]
                     let unlocked = 'none';
@@ -1239,7 +1239,7 @@ export const global: globalType = {
                 return `Boost global speed by unspent Dark matter ^${format((effect > 1 ? logAny(effect, player.buildings[6][0].current.toNumber() + 1) : 0.04) * player.tree[0][1], { padding: true })}.\n(Boost per level: ${format(effect, { padding: true })}, softcaps after ${format(calculateEffects.TOInflation1_softcap())} Dark matter. Global speed doesn't speed up game ticks)`;
             },
             () => `Gain ${format(1.4)} times more Strange quarks from any Stage reset per level.${player.challenges.stability >= 1 ? `\nFirst ${player.challenges.stability} levels (1 per Vacuum stability completion) will also boost global speed by ${format(1.1)}, but only while inside any Challenge.` : ''}`,
-            () => `Boost global speed and Stage reset reward by ${format(calculateEffects.T0Inflation3())}, strength is based on Supervoid progress in the current End reset.`,
+            () => `Boost global speed and Stage reset reward by ${format(calculateEffects.T0Inflation3())}, strength is based on Supervoid progress${player.challenges.stability < 2 ? ' in the current End reset' : ''}.`,
             () => 'For false Vacuum it will remove time limit from Milestones.\nFor true Vacuum it will unlock false Vacuum Milestones for Void. Their effects are active everywhere, but only if this Inflation is active.',
             () => {
                 const level = player.tree[0][5];
@@ -1270,7 +1270,7 @@ export const global: globalType = {
             () => `Gain ${format(1.4)} times more Cosmons from End resets.\n(Max level will be increased after spending ${format((4 ** (global.treeInfo[1].max[2] + 2) - 4) / 3 - player.cosmon[1].total + player.cosmon[1].current, { padding: true })} more Cosmons)`,
             () => `Boost Strangelets gain from the Stage resets by ${format(1.4)} and increase max level of 'Strange gain' Inflation by +1.`,
             () => `True Vacuum only, gain +1 free Goal, improve Discharge base by +${format(0.1)} (immune to the softcap) and decrease requirement scaling by -${format(0.5)} with every level.`,
-            () => `True Vacuum only, make 'Ocean world' Strangeness old effect always active and add new effect to improve related formula.\nSecond level will make 'Natural Vaporization' Cloud Research old effect of 'Clouds use total Drops this reset' always active and add new effect to unlock 1% > 10% passive Clouds gain over 5 levels, 10 times stronger with 'Automatic Vaporization' Strangeness level 2.\nThird level will improve a lot of Strangeness, also max level will be affected by Void for the first two in the list: +${format(0.5)} to 'Better improvement', +${format(0.2)} to 'More Moles' and 'Bigger Puddles', +${format(0.04)} to 'Improved flow' and finally new Upgrade from 'Galactic tide' level 2.\nFinal level will make most of Submerged immune to non-Vaporization resets and Vaporization won't reset Stages higher than Submerged.`,
+            () => `True Vacuum only, make 'Ocean world' Strangeness old effect always active and add new effect to improve related formula.\nSecond level will make 'Natural Vaporization' Cloud Research old effect of 'Clouds use total Drops this reset' always active and add new effect to unlock 1% > 10% passive Clouds gain over 5 levels, 10 times stronger with 'Automatic Vaporization' Strangeness level 2.\nThird level will improve a lot of Strangeness, also max level will be affected by Void for the first two in the list: +${format(0.5)} to 'Better improvement', +${format(0.2)} to 'More Moles' and 'Bigger Puddles', +${format(0.04)} to 'Improved flow' and finally new Upgrade from 'Galactic tide' level 2.\nFinal level will make most of Submerged immune to pre-Merge resets, Vaporization will still reset Submerged, but never higher Stages.`,
             () => `True Vacuum only, make effective Rank boost even more: (all effects are per Rank)\n+${format(0.5)} Discharge goals at level 1, +1 to max level of 'Planetary system' Interstellar Research at level 2, ${format(1.01)}x to the Solar mass gain at level 3 and finally ${format(1.02)}x to Stage reset reward at level 4.`,
             () => "True Vacuum only, reclaim up to 25% of Remnants once (doesn't affect Milestones).\nSecond level will increase max level of 'Galactic tide' Strangeness, but without passive effects until level 3.\nFinal level will increase max level of 'Automatic Collapse' Strangeness.",
             () => { //[8]
@@ -1439,11 +1439,11 @@ export const global: globalType = {
             ["'Mechanical spread' (Submerged)", "'Ocean world' (Submerged)", "'Galactic tide' (Intergalactic)"],
             ['Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', 'Multiple max level increases', "'Strange growth' (Intergalactic)", "'Automatic Merge' (Intergalactic)"],
             ['Max level increased for auto resets', "'Conservation of Energy' (Microworld)", "'Neutronium' (Interstellar)", "'Mass delay' (Accretion)", "'Newer Upgrade' (Interstellar)"],
-            ["'Rank raise' (Accretion)", 'New Abyss themed Strangeness', 'Max level increased for auto resets', 'Work in progress']
+            ["'Rank raise' (Accretion)", 'New Abyss themed Strangeness', 'Max level increased for auto resets (WIP)', 'Work in progress']
         ], [
             [],
             ["'Discharge improvement' (Cosmons)", "'Indestructible matter' (Milestone)", "'Conservation of resources' (Cosmons)"],
-            ["'Vaporization improvement' (Cosmons)", "'Better rewards' (Inflatons)", "'Isolation' (No idea, WIP)"],
+            ["'Vaporization improvement' (Cosmons)", "'Better rewards' (Inflatons, WIP)", "'Work in progress"],
             ["'Rank improvement' (Cosmons)", "'Passive Ranks' (Milestone)", "'More Cosmons' (Cosmons)", "'Improved Offline' (Inflatons)", "'Improved conservation' (Milestone)", 'Work in progress'],
             ["'Collapse improvement' (Cosmons)", "'Stranger gain' (Cosmons)", "'Main Stars' (Milestone)", "'Limitless Mass' (Milestone)", "'Inflationary boost' (Inflatons, WIP)"],
             ['Work in progress', 'Work in progress', 'Work in progress', 'Work in progress']
@@ -1460,12 +1460,17 @@ export const global: globalType = {
             <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Intergalactic Upgrade 'Galactic Merger' cost ${format(1e10)} times more</p>`;
         },
-        needText: ['1 Completion', '2 Completions (WIP)', '3 Completions (WIP)', '4 Completions (WIP)'],
+        needText: ['1 Completion', '2 Completions', '3 Completions (WIP)', '4 Completions (WIP)', '5 Completions (WIP)', '6 Completions (WIP)', '7 Completions (WIP)', '8 Completions (WIP)', '9 Completions (WIP)'],
         rewardText: [
             "Improve 'Overboost' and 'Strange gain' Inflaton Inflations", //1
-            "Make 'Instability' Inflation immune to all resets (WIP)", //2
-            'Start Vacuum resets with Void equal to the Supervoid (WIP)', //3
-            'Start Vacuum resets with Microworld Milestones equal to best in Supervoid (WIP)' //4
+            "Make 'Instability' Inflation immune to End resets", //2
+            'Start Vacuum resets with Void equal to Supervoid (WIP)', //3
+            'Microworld Milestones not longer reset (WIP)', //4
+            'Submerged Milestones not longer reset (WIP)', //5
+            'Accretion Milestones not longer reset (WIP)', //6
+            'Interstellar Milestones not longer reset (WIP)', //7
+            'Intergalactic Milestones not longer reset (WIP)', //8
+            'Start Universe resets with true Vacuum state (WIP)' //9
         ],
         resetType: 'vacuum',
         time: 7200,
@@ -1704,7 +1709,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         buildingsInfo.maxActive[2] = 6;
         buildingsInfo.maxActive[3] = 5;
         buildingsInfo.maxActive[4] = 5;
-        buildingsInfo.maxActive[6] = 0;
+        buildingsInfo.maxActive[6] = 1;
         upgradesInfo[1].maxActive = 10;
         upgradesInfo[2].maxActive = 8;
         upgradesInfo[3].maxActive = 13;
@@ -1758,6 +1763,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('submersionBoost').style.display = 'none';
         getId('mainCap').style.display = 'none';
         getId('mainCapHardS5').style.display = 'none';
+        getId('mergeScore').style.display = 'none';
         getId('mergeBoost').style.display = 'none';
         getId('mergeEffects').style.display = 'none';
         getId('mergeBoostTotal').style.display = 'none';
@@ -1847,7 +1853,12 @@ export const prepareChallenge = () => {
     }
 };
 
-export const fillMissingValues = <ArrayType extends any[]>(test: ArrayType, start: ArrayType) => {
+/** Removes excess data by default */
+export const fillMissingValues = <ArrayType extends any[]>(test: ArrayType, start: ArrayType, removeExcess = true) => {
+    if (test.length > start.length) {
+        if (removeExcess) { test.length = start.length; }
+        return;
+    }
     for (let i = test.length; i < start.length; i++) { test[i] = deepClone(start[i]); }
 };
 
@@ -1950,13 +1961,11 @@ export const updatePlayer = (load: playerType): string => {
     }
     if (load.darkness.tier === undefined) { //Remove
         load.proggress = deepClone(playerStart.proggress);
+        load.darkness.active = false;
     }
     if (typeof load.darkness.tier !== 'number') { //Remove
         load.darkness.tier = 0;
-        load.darkness.active = false;
         load.verses[0].lowest = cloneArray(playerStart.verses[0].lowest);
-        load.tree[1] = cloneArray(playerStart.tree[1]);
-        load.cosmon[1].current = load.cosmon[1].total;
     }
 
     for (let s = 1; s <= 6; s++) {
