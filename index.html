@@ -59,7 +59,7 @@
                             <p class="whiteText stage2Only"><span class="blueText">Vaporization</span> resets Structures and Upgrades for <span class="grayText">Clouds</span>. Their gain is based on current amount of <span class="blueText">Drops</span>.</p>
                             <p class="whiteText stage3Only"><img src="Used_art/Missing.png" alt="" loading="lazy" draggable="false" id="rankImage">Current <span class="darkorchidText">Rank</span> is <span id="rankName">Missing</span><sup id="rankExtra" class="orangeText" style="display: none;"></sup>.<br>Resets Structures, Upgrades and Stage Researches.</p>
                             <p class="whiteText stage4Only"><span class="orchidText">Collapse</span> resets Structures, Upgrades and all Researches for <span class="cyanText">Solar mass</span> and <span class="darkorchidText">Star remnants</span>.</p>
-                            <p class="whiteText stage5Only" id="mergeResetText">Missing.</p>
+                            <p class="whiteText stage5Only"><span id="mergeTrue"><span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting all self-made <span class="grayText">Galaxies</span> into bonus ones</span><span id="mergeFalse">Missing</span>.</p>
                             <p class="whiteText stage6Only"><span class="orangeText">Nucleation</span> resets <span class="grayText">Dark energy</span>, Dark Structures, <span class="darkvioletText">Abyss</span> Upgrades and Researches for <span class="darkvioletText">Dark fluid</span>.</p>
                             <button type="button" id="reset0Button">Missing</button>
                         </section>
@@ -490,8 +490,8 @@
                 <section id="strangenessSubtabMatter" class="insideTab" aria-label="Current tab">
                     <div class="center greenText">
                         <h2 class="biggerWord">Strange matter</h2>
-                        <p>Stage reset reward: <span class="whiteText"><span id="strange0Gain">1</span> Strange quarks</span><span id="strange1Unlocked">, <span class="whiteText"><span id="strange1Gain">1</span> Strangelets</span></span> | Time: <span id="stageTimeStrangeness" class="whiteText">0 seconds</span></p>
-                        <p>Strange quarks rate: <span id="strangeRate" class="whiteText">0 per eon</span><span id="strangePeak"> (Peak: <span class="whiteText">0 per eon</span> | At: <span id="strangePeakAt" class="whiteText">0 seconds</span>)</span></p>
+                        <p>Stage reset reward: <span class="whiteText"><span id="strange0Gain">1</span> <span id="strange0Type">Strange quarks</span></span><span id="strange1Unlocked">, <span class="whiteText"><span id="strange1Gain">1</span> Strangelets</span></span> | Time: <span id="stageTimeStrangeness" class="whiteText">0 seconds</span></p>
+                        <p><span id="strangeRateType">Strange quarks</span> rate: <span id="strangeRate" class="whiteText">0 per eon</span><span id="strangePeak"> (Peak: <span class="whiteText">0 per eon</span> | At: <span id="strangePeakAt" class="whiteText">0 seconds</span>)</span></p>
                     </div>
                     <article id="strangeStructures" class="greenText" aria-label="Strange Structures">
                         <section id="strange0" aria-haspopup="dialog" aria-controls="strange0EffectsMain">
@@ -867,11 +867,15 @@
                                 <input type="image" src="Used_art/Milestones.png" alt="Void Milestones" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
-                            <label id="inflation6Tree1" class="whiteText stage2borderImage">
+                            <label id="inflation6Tree1" class="whiteText stage5borderImage">
+                                <input type="image" src="Used_art/Stability.png" alt="Stability" draggable="false" aria-controls="inflationCost inflationEffect">
+                                <span>Missing</span>
+                            </label>
+                            <label id="inflation7Tree1" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Offline.png" alt="Improved Offline" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
-                            <label id="inflation7Tree1" class="whiteText stageAllborderImage">
+                            <label id="inflation8Tree1" class="whiteText stageAllborderImage">
                                 <input type="image" src="Used_art/ResearchAuto3.png" alt="Better rewards" draggable="false" class="stageBorderImage" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
@@ -950,7 +954,7 @@
                             <p id="inflationSupervoid3">Improved conservation ‒ Remove Stage requirements from Conservation of 'Mass' and 'Energy' Strangeness</p>
                             <p id="inflationSupervoid4">Main Stars ‒ Improve 'Main giants' Strangeness and increased its max level by +2, true Vacuum only</p>
                             <p id="inflationSupervoid5">Limitless Mass ‒ Remove hardcap for Preons from 'Deuterium' Microworld Upgrade</p>
-                            <p>(To toggle into the Supervoid will need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in Advanced subtab)</p>
+                            <p>(To toggle into the Supervoid you need to change the Void type by clicking the '<span style="text-decoration: underline;">Void</span>' button in the 'Advanced' subtab)</p>
                         </article>
                         <section id="endMilestone1"><h4>Unlocked at 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports can fully claim Strange quarks and Strangelets storages</span></section>
                         <section id="endMilestone2"><h4>Unlocked at 1 Big Rip:</h4><span>Gain more Cosmons from higher self-made Universes equal to +<span>0.2</span> * (self-made Universes - 1)<br>Exports can award Cosmons</span></section>
@@ -961,7 +965,7 @@
                         <section id="inflationMilestone4"><h4>Unlocked at 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
                         <section id="inflationMilestone5"><h4>Unlocked at 8 Universes:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Unlock new mode for auto Stage that uses seconds since peak</span></section>
                         <section id="inflationMilestone6"><h4>Unlocked at 12 Universes:</h4><span>Unlock auto Strangeness (needs to be enabled in Settings), true Vacuum will also start with 'Strange growth' level 1<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
-                        <section id="multiMilestone1"><h4>Unlocked at 1 Multiverse: (WIP)</h4><span>Start any Vacuum reset with 'Automatic Stage' Strangeness at level 1 and unlock auto Universes</span></section>
+                        <section id="multiMilestone1"><h4>Unlocked at 1 Multiverse: (WIP)</h4><span>Start any Vacuum reset with 'Automatic Merge' Strangeness at level 1 and unlock auto Universes</span></section>
                     </article>
                 </section>
             </section>
@@ -984,7 +988,8 @@
                                     <div id="toggleAuto0Menu" class="popUpMenu" role="menu" aria-label="Settings menu" style="display: none;">
                                         <label id="stageAutoInterstellar1">Perform <span>Interstellar </span>Stage reset when related mode value is at least <input type="number" id="stageInput" step="any" data-type="1">, doesn't reset if set to 0 or less</label>
                                         <label id="stageAutoInterstellar2">Current mode value is <input type="number" id="stageInputType" class="miniInput" step="1"> ‒ <span id="stageAutoType">placeholder</span></label>
-                                        <label id="stageAutoElse"><span>Reset pre-Interstellar Stages only if all Milestones are maxed</span> <button type="button" id="toggleNormal2" class="toggleNormal">ON</button><span>, ignored if time limit is reached</span></label>
+                                        <label id="stageAutoFalse">Reset pre-Interstellar Stages only if all Milestones are maxed <button type="button" id="toggleNormal2" class="toggleNormal">ON</button>, ignored if time limit is reached</label>
+                                        <label id="stageAutoMerge">Auto disable if still capable to do more automatic Merges <button type="button" id="toggleNormal5" class="toggleNormal">ON</button>, ignored if value for minimum Galaxies is above 0</label>
                                     </div>
                                 </div>
                                 <button type="button" id="toggleAuto0" class="toggleAuto">Auto OFF</button>
@@ -1059,7 +1064,7 @@
                     </aside>
                     <article id="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
-                        <p id="exportReward" class="whiteText center hasTitle" data-title="0 per Second">Current reward is <span id="exportQuarks" class="greenText">0</span> Strange quarks<span id="exportStrangelets">, <span class="greenText">0</span> Strangelets</span><span id="exportCosmon">, <span class="darkvioletText">0</span> Cosmons</span><span class="redText"> (Disabled)</span></p>
+                        <p id="exportReward" class="whiteText center hasTitle" data-title="0 per Second">Missing</p>
                         <div>
                             <div>
                                 <button type="button" id="save">Save</button>
