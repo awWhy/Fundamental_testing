@@ -1727,36 +1727,39 @@ try { //Start everything
             loadGame(await (id.files as FileList)[0].text());
         } finally { id.value = ''; }
     });
-    getId('export').addEventListener('click', () => {
-        const exportReward = player.time.export;
-        if ((player.proggress.main >= 17 || (!player.inflation.vacuum && player.proggress.main >= 11)) && (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') && exportReward[0] > 0) {
-            if (!globalSave.developerMode) {
-                const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
-                const conversion = Math.min(exportReward[0] / 43200_000, 1);
+    const exportReward = () => {
+        if (player.proggress.main < 17 && (player.inflation.vacuum || player.proggress.main < 11)) { return; }
+        if (globalSave.developerMode) { return Notify("Export reward is disabled when using 'devMode', disable it by writting this into save options (case sensitive)"); }
 
-                if (player.inflation.ends[1] >= 1) {
-                    const value = exportReward[3] / 5 * conversion;
-                    player.cosmon[1].current += value;
-                    player.cosmon[1].total += value;
-                    exportReward[3] -= Math.max(exportReward[3] - value, 0);
-                }
-                if (player.strangeness[5][8] >= 1) {
-                    const value = exportReward[2] / claimPer * conversion;
-                    player.strange[1].current += value;
-                    player.strange[1].total += value;
-                    exportReward[2] -= Math.max(exportReward[2] - value, 0);
-                    assignBuildingsProduction.strange1();
-                } {
-                    const value = (exportReward[1] / claimPer + 1) * conversion;
-                    player.strange[0].current += value;
-                    player.strange[0].total += value;
-                    exportReward[1] = Math.max(exportReward[1] - value, 0);
-                    assignBuildingsProduction.strange0();
-                }
-                exportReward[0] = 0;
-                numbersUpdate();
-            } else { Notify("Export reward is disabled when using 'devMode', disable it by writting this into save options (case sensitive)"); }
+        const exportReward = player.time.export;
+        if (exportReward[0] <= 0) { return; }
+        const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
+        const conversion = Math.min(exportReward[0] / 43200_000, 1);
+
+        if (player.inflation.ends[1] >= 1 && exportReward[3] > 0) {
+            const value = exportReward[3] / 5 * conversion;
+            player.cosmon[1].current += value;
+            player.cosmon[1].total += value;
+            exportReward[3] -= Math.max(exportReward[3] - value, 0);
+        } else if (player.challenges.active !== null && global.challengesInfo[player.challenges.active].resetType !== 'stage') { return; }
+        if (exportReward[2] > 0) {
+            const value = exportReward[2] / claimPer * conversion;
+            player.strange[1].current += value;
+            player.strange[1].total += value;
+            exportReward[2] -= Math.max(exportReward[2] - value, 0);
+            assignBuildingsProduction.strange1();
+        } {
+            const value = (exportReward[1] / claimPer + 1) * conversion;
+            player.strange[0].current += value;
+            player.strange[0].total += value;
+            exportReward[1] = Math.max(exportReward[1] - value, 0);
+            assignBuildingsProduction.strange0();
         }
+        exportReward[0] = 0;
+        numbersUpdate();
+    };
+    getId('export').addEventListener('click', () => {
+        exportReward();
 
         const save = saveGame(globalSave.developerMode);
         if (save === null) { return; }

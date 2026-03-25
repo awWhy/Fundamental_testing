@@ -67,8 +67,8 @@ export interface playerType {
     collapse: {
         mass: number
         stars: [number, number, number]
-        show: number
-        maxElement: number
+        /** Highest Element in current Stage */
+        highest: number
         /** [Boost, wait] */
         input: [number, number]
         points: number[]
@@ -149,7 +149,6 @@ export interface playerType {
     tree: number[][]
     challenges: {
         active: number | null
-        super: boolean
         void: number[]
         voidCheck: number[]
         supervoid: number[]
@@ -157,8 +156,8 @@ export interface playerType {
         stability: number
     }
     toggles: {
-        /** Auto Stage switch[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
-           Auto accept Offline[4] */
+        /** Stay till time out[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
+           Auto accept Offline[4], Stay till no Merges[5] */
         normal: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6], Nucleation[7] */
         confirm: Array<'All' | 'Safe' | 'None'>
@@ -173,6 +172,7 @@ export interface playerType {
         /** [0] is not used */
         buildings: boolean[][]
         verses: boolean[]
+        supervoid: boolean
         shop: {
             input: number
             wait: number[]
@@ -192,8 +192,12 @@ export interface playerType {
     }
     proggress: {
         main: number
+        /** Highest reached Element for visuals [false, true Vacuum] */
+        element: [number, number]
         /** Used for showing Merge results related Void rewards */
         results: number
+        /** Highest reached basic self-made Universes for visuals */
+        universe: number
     }
     clone: {
         depth?: 'stage' | 'vacuum'
@@ -608,7 +612,9 @@ export interface calculateEffectsType {
     S4Research1: (level?: number, S4Extra1?: number) => number
     S4Research4: (post?: boolean, level?: number) => number
     S4Extra1: () => number
-    mergeMaxResets: () => number
+    mergeRequirement: () => number
+    /** Returns 0 if Merge isn't unlocked */
+    mergeMaxResets: (safe?: boolean) => number
     reward: Array<(post?: boolean) => number>
     groupsCost: () => number
     mergeScore: () => number
@@ -629,12 +635,13 @@ export interface calculateEffectsType {
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
     S2Strange9: (unlocked?: boolean) => number
+    trueUniversesAll: () => number
+    /** Self-made Universes, but only for the current Challenge */
     trueUniverses: () => number
     T0Inflation0: () => number
     TOInflation1_softcap: () => number
     T0Inflation1: () => number
     T0Inflation3: () => number
-    /** Default value for type is 0 or Quarks; Use 1 for Strangelets */
     strangeGain: (interstellar: boolean, quarks?: boolean) => number
     cosmonGain: () => number
 }

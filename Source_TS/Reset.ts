@@ -181,7 +181,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
             global.collapseInfo.trueStars = 0;
             player.collapse.mass = 0.01235;
             player.collapse.stars = [0, 0, 0];
-            player.collapse.maxElement = 0;
+            player.collapse.highest = 0;
             assignBuildingsProduction.S4Levels(false);
             player.elements = cloneArray(playerStart.elements);
             player.elements[0] = strangeness[4][8] >= 1 ? 1 : 0;
@@ -202,7 +202,6 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         player.time.stage = 0;
         player.stage.time = 0;
         player.stage.peak = [0, 0];
-        global.debug.timeLimit = false;
         player.researchesAuto[0] = strangeness[3][6];
         player.researchesAuto[1] = strangeness[4][6];
         player.researchesAuto[2] = player.inflation.vacuum ? (strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4) :
@@ -315,7 +314,7 @@ export const resetVacuum = (level = 0) => {
     global.collapseInfo.trueStars = 0;
     player.collapse.mass = 0.01235;
     player.collapse.stars = [0, 0, 0];
-    player.collapse.maxElement = 0;
+    player.collapse.highest = 0;
     assignBuildingsProduction.S4Levels(false);
     player.elements = cloneArray(playerStart.elements);
     global.automatization.element = 1;
@@ -340,14 +339,12 @@ export const resetVacuum = (level = 0) => {
         player.strangeness[3][6] = 3;
         player.strangeness[4][6] = 2;
     }
-    if (vacuum) {
-        if (universes >= 5) { player.strangeness[5][9] = 1; }
-        if (universes >= 12) { player.strangeness[5][8] = 1; }
-    }
+    if (universes >= 5 && vacuum) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    if (vacuum && player.darkness.active) {
+    if (universes >= 12 && vacuum) { player.strangeness[5][8] = 1; }
+    if (player.darkness.active) {
         player.strangeness[6][3] = 1;
-        player.ASR[6] = player.verses[0].lowest[0] <= 5 ? 1 : 0;
+        player.ASR[6] = (vacuum || player.tree[0][5] >= 1) && player.verses[0].lowest[0] <= 5 ? 1 : 0;
     } else { player.ASR[6] = 0; }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
@@ -434,7 +431,7 @@ export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {
     clone.collapse = {
         mass: player.collapse.mass,
         stars: cloneArray(player.collapse.stars),
-        maxElement: player.collapse.maxElement
+        maxElement: player.collapse.highest
     };
     clone.elements = cloneArray(player.elements);
     clone.merge = {
@@ -523,7 +520,7 @@ export const loadFromClone = () => {
     global.collapseInfo.pointsLoop = 0;
     player.collapse.mass = clone.collapse.mass;
     player.collapse.stars = clone.collapse.stars;
-    player.collapse.maxElement = clone.collapse.maxElement;
+    player.collapse.highest = clone.collapse.maxElement;
     assignBuildingsProduction.S4Levels(true);
     player.elements = clone.elements;
     global.automatization.element = 1;

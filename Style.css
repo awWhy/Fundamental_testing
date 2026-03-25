@@ -425,7 +425,7 @@ input:-webkit-autofill { /* Chrome related pain */
     border: 2px solid var(--window-border);
     border-radius: 7px;
     width: max-content;
-    max-width: min(55em, 90vw);
+    max-width: min(55em, 95vw);
     padding: 0.5em 0.6em 0.6em;
     margin-top: 0.3em;
     overflow-wrap: break-word;

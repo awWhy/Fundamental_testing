@@ -1,5 +1,5 @@
 import { assignHotkeys, detectShift, removeHotkey } from './Hotkeys';
-import { deepClone, getId, getQuery, globalSaveStart, pauseGame } from './Main';
+import { cloneArray, deepClone, getId, getQuery, globalSaveStart, pauseGame } from './Main';
 import { global, player } from './Player';
 import { assignResetInformation, setActiveStage } from './Stage';
 import type { globalSaveType, hotkeysList, numbersList } from './Types';
@@ -906,19 +906,21 @@ export const MDStrangenessPage = (stageIndex: number) => {
 export const checkProggress = () => {
     proggressMain();
 
-    for (let i = 2; i > 0; i--) {
-        if (player.proggress.results >= i) { return; }
-        if (player.merge.rewards[i - 1] >= 1) {
-            player.proggress.results = i;
-            return;
-        }
+    const universes = player.inflation.vacuum ? player.verses[0].true : player.verses[0].other[2];
+    if (universes > player.proggress.universe) { player.proggress.universe = universes; }
+    const index = player.inflation.vacuum ? 1 : 0;
+    for (let i = player.proggress.element[index] + 1; i < global.elementsInfo.maxActive; i++) {
+        if (player.elements[i] === 0) { break; }
+        player.proggress.element[index] = i;
+    }
+    for (let i = player.proggress.results; i < 1; i++) {
+        if (player.merge.rewards[i] < 1) { break; }
+        player.proggress.results = i + 1;
     }
 };
 const proggressMain = () => {
     const proggress = player.proggress.main;
-    if (proggress >= 25 || global.offline.active) { return; }
-    if (player.verses[1].total >= 1) { return proggressUp(25, 13); }
-    if (proggress >= 24) { return; }
+    if (proggress >= 24 || global.offline.active) { return; }
     if (player.inflation.ends[1] >= 1) { return proggressUp(24); }
     if (proggress >= 23) { return; }
     if (player.darkness.energy >= 1000) { return proggressUp(23, 12); }
@@ -936,7 +938,6 @@ const proggressMain = () => {
         if (proggress >= 16) { return; }
         if (player.stage.current >= 5) { return proggressUp(16); }
         if (proggress >= 15) { return; }
-        player.collapse.show = 0;
         proggressUp(15, 6);
     } else if (proggress < 19) {
         if (player.verses[0].total >= 1) { return proggressUp(19, 9); }
@@ -994,6 +995,7 @@ const proggressUp = (newValue: number, event = null as null | number) => {
             stageUpdate();
         });
     }
+    if (globalSave.developerMode) { Notify(`Game proggress had increased to ${newValue}`); }
 };
 
 export const replayEvent = async() => {
@@ -1024,7 +1026,6 @@ export const replayEvent = async() => {
     if (last >= 10) { text += '\nEvent 10: Universal End'; }
     if (last >= 11) { text += '\nEvent 11: Stability unlocked'; }
     if (last >= 12) { text += '\nEvent 12: Better End'; }
-    if (last >= 13) { text += '\nEvent 13: More Universes'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -1058,9 +1059,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.";
     } else if (event === 12) {
-        text = "Unlocked a new type of End resets ‒ 'Big Rip', this one can use non-self-made Universes when calculating Cosmons gain.\n(Also unlocked Multiverses and related Inflation Milestones)";
-    } else if (event === 13) {
-        text = 'Created Multiverse placeholder text.';
+        text = "Unlocked a new type of End resets ‒ 'Big Rip', this one adds non-self-made Universes into Cosmons gain base.\n(Also unlocked ability to create new type of self-made Universes)";
     }
     if (!replay) {
         text += "\n\n(Can be viewed again with 'Events' button in Settings tab)";
@@ -1185,7 +1184,6 @@ export const openHotkeys = () => {
             <label id="stageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage</span></label>
             <label id="versesHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Verses</span></label>
             <label id="endHotkey" class="redText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">End</span></label>
-            <label id="supervoidHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Supervoid</span></label>
             <label id="warpHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Warp</span></label>
             <label id="pauseHotkey" class="grayText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">pause</span></label>
         </div>
@@ -1204,10 +1202,11 @@ export const openHotkeys = () => {
             <label id="toggleMergeHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Merge</span></label>
             <label id="toggleNucleationHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Nucleation</span></label>
             <label id="toggleStageHotkey" class="stageText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Stage</span></label>
+            <label id="supervoidHotkey" class="darkvioletText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Void type</span></label>
         </div>
         <p>Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
+        <p>Shift clicking the hotkey will set it to the default value or remove it</p>
         <p>Numlock being ON can break Numpad hotkeys</p>
-        <p>Shift clicking the hotkey will remove it</p>
         <label id="hotkeysToggleLabel" title="Turn ON, if using non-QWERTY layout keyboard">Language dependant hotkeys </label>
         <button type="button" id="restoreHotkeys" class="selectBtn">Restore default hotkeys values</button>`; //Spacebar at the end of label is required
         const toggle = getId('globalToggle0');
@@ -1281,27 +1280,26 @@ export const openHotkeys = () => {
             const button = getQuery(`#${key}Hotkey button`);
             button.textContent = globalSave.hotkeys[key as hotkeysList][index];
             button.addEventListener('click', async(event) => {
+                const index = globalSave.toggles[0] ? 0 : 1;
+                let newHotkey: string[] | null;
                 if (event.shiftKey) {
-                    if (removeHotkey(globalSave.hotkeys[key as hotkeysList][globalSave.toggles[0] ? 0 : 1]) !== null) {
-                        button.textContent = 'None';
-                        assignHotkeys();
-                        saveGlobalSettings();
-                    }
-                    return;
+                    newHotkey = removeHotkey(globalSave.hotkeys[key as hotkeysList][index]) === null ?
+                        cloneArray(globalSaveStart.hotkeys[key as hotkeysList]) :
+                        newHotkey = globalSave.hotkeys[key as hotkeysList];
+                } else {
+                    button.style.borderBottomStyle = 'dashed';
+                    newHotkey = await changeHotkey(false) as string[];
+                    button.style.borderBottomStyle = '';
+                    getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
+                    if (newHotkey === null) { return; }
                 }
-                button.style.borderBottomStyle = 'dashed';
-                const newHotkey = await changeHotkey(false) as string[];
-                if (newHotkey !== null) {
-                    const index = globalSave.toggles[0] ? 0 : 1;
-                    const removed = removeHotkey(newHotkey[index]) as hotkeysList;
-                    if (globalSaveStart.hotkeys[removed] !== undefined) { getQuery(`#${removed}Hotkey button`).textContent = 'None'; }
-                    button.textContent = newHotkey[index];
-                    globalSave.hotkeys[key as hotkeysList] = newHotkey;
-                    assignHotkeys();
-                    saveGlobalSettings();
-                }
-                button.style.borderBottomStyle = '';
-                getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
+                const removed = removeHotkey(newHotkey[index]) as hotkeysList;
+                if (globalSaveStart.hotkeys[removed] !== undefined) { getQuery(`#${removed}Hotkey button`).textContent = 'None'; }
+                button.textContent = newHotkey[index];
+                globalSave.hotkeys[key as hotkeysList] = newHotkey;
+                button.textContent = newHotkey[index];
+                assignHotkeys();
+                saveGlobalSettings();
             });
         }
         /** Actual type is Record<numbersList, string> */
@@ -1315,30 +1313,28 @@ export const openHotkeys = () => {
             button.textContent = globalSave.numbers[key as numbersList];
             getQuery(`#${extraHotkeyName[key]}Hotkey span`).textContent = globalSave.numbers[key as numbersList].replace('Numbers', '0').replace('Numpad', 'Num 0');
             button.addEventListener('click', async(event) => {
+                let newHotkey: string | null;
                 if (event.shiftKey) {
-                    if (removeHotkey(globalSave.numbers[key as numbersList], true) !== null) {
-                        button.textContent = 'None';
-                        assignHotkeys();
-                        saveGlobalSettings();
-                    }
-                    return;
+                    newHotkey = removeHotkey(globalSave.numbers[key as numbersList], true) === null ?
+                        globalSaveStart.numbers[key as numbersList] :
+                        globalSave.numbers[key as numbersList];
+                } else {
+                    button.style.borderBottomStyle = 'dashed';
+                    newHotkey = await changeHotkey(true) as string;
+                    button.style.borderBottomStyle = '';
+                    getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
+                    if (newHotkey === null) { return; }
                 }
-                button.style.borderBottomStyle = 'dashed';
-                const newHotkey = await changeHotkey(true) as string;
-                if (newHotkey !== null) {
-                    const removed = removeHotkey(newHotkey, true) as numbersList;
-                    if (extraHotkeyName[removed] !== undefined) {
-                        getQuery(`#${removed}Hotkey button`).textContent = 'None';
-                        getQuery(`#${extraHotkeyName[removed]}Hotkey span`).textContent = 'None';
-                    }
-                    button.textContent = newHotkey;
-                    getQuery(`#${extraHotkeyName[key]}Hotkey span`).textContent = newHotkey.replace('Numbers', '0').replace('Numpad', 'Num 0');
-                    globalSave.numbers[key as numbersList] = newHotkey;
-                    assignHotkeys();
-                    saveGlobalSettings();
+                const removed = removeHotkey(newHotkey, true) as numbersList;
+                if (extraHotkeyName[removed] !== undefined) {
+                    getQuery(`#${removed}Hotkey button`).textContent = 'None';
+                    getQuery(`#${extraHotkeyName[removed]}Hotkey span`).textContent = 'None';
                 }
-                button.style.borderBottomStyle = '';
-                getId('hotkeysMessage').textContent = 'Highlighted hotkeys can be modified';
+                button.textContent = newHotkey;
+                getQuery(`#${extraHotkeyName[key]}Hotkey span`).textContent = newHotkey.replace('Numbers', '0').replace('Numpad', 'Num 0');
+                globalSave.numbers[key as numbersList] = newHotkey;
+                assignHotkeys();
+                saveGlobalSettings();
             });
         }
         getId('restoreHotkeys').addEventListener('click', () => {
