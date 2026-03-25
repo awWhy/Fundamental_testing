@@ -1,7 +1,7 @@
 import { allowedToBeReset } from './Check';
 import { cloneArray, playerStart } from './Main';
 import { global, player } from './Player';
-import { calculateMaxLevel, assignResearchCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation } from './Stage';
+import { calculateMaxLevel, assignResearchCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, prepareDarkness } from './Stage';
 import { stageUpdate, switchTab } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
@@ -196,6 +196,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
         } else if (s === 6) {
             player.darkness.energy = 0;
             player.darkness.fluid = 0;
+            prepareDarkness();
         }
     }
     if (full) {
@@ -212,9 +213,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     for (const s of stageIndex) { //Less errors if do it separatly
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researches'); }
         for (let i = 0; i < global.researchesExtraInfo[s].maxActive; i++) { calculateMaxLevel(i, s, 'researchesExtra'); }
-        if (s === 6) {
-            player.ASR[s] = player.verses[0].lowest[0] <= 5 ? 1 : 0;
-        } else if (strangeness[s][5] < 1) { player.ASR[s] = 0; }
+        if (s !== 6 && strangeness[s][5] < 1) { player.ASR[s] = 0; }
     }
     if (update !== null) {
         switchTab();
@@ -342,10 +341,8 @@ export const resetVacuum = (level = 0) => {
     if (universes >= 5 && vacuum) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
     if (universes >= 12 && vacuum) { player.strangeness[5][8] = 1; }
-    if (player.darkness.active) {
-        player.strangeness[6][3] = 1;
-        player.ASR[6] = (vacuum || player.tree[0][5] >= 1) && player.verses[0].lowest[0] <= 5 ? 1 : 0;
-    } else { player.ASR[6] = 0; }
+    if (player.darkness.active) { player.strangeness[6][3] = 1; }
+    prepareDarkness();
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { calculateMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 6; s++) {

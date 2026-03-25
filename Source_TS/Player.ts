@@ -1,7 +1,7 @@
 import Overlimit from './Limit';
 import { assignInnerHTML, cloneArray, deepClone, getId, getQuery, playerStart, toggleConfirm, toggleSwap } from './Main';
 import { globalSave, specialHTML } from './Special';
-import { calculateMaxLevel, assignMilestoneInformation, calculateEffects, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, logAny, toggleSupervoid, enableDarknessAutos } from './Stage';
+import { calculateMaxLevel, assignMilestoneInformation, calculateEffects, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, logAny, toggleSupervoid, prepareDarkness } from './Stage';
 import type { globalType, playerType, vacuumStartType } from './Types';
 import { format, switchTab, updateCollapsePoints, visualProggressUnlocks } from './Update';
 
@@ -1241,7 +1241,7 @@ export const global: globalType = {
             },
             () => `Gain ${format(1.4)} times more Strange quarks from any Stage reset per level.${player.challenges.stability >= 1 ? `\nFirst ${player.challenges.stability} levels (1 per Vacuum stability completion) will also boost global speed by ${format(1.1)}, but only while inside any Challenge.` : ''}`,
             () => `Boost global speed and Stage reset reward by ${format(calculateEffects.T0Inflation3())}, strength is based on Supervoid progress${player.challenges.stability < 2 ? ' in the current End reset' : ''}.`,
-            () => `For false Vacuum it will remove time limit from Milestones${player.tree[0][5] >= 1 ? " and allow for Abyss to be reset for Strangelets, Abyss won't reset with other Stages" : ''}.\nFor true Vacuum it will unlock false Vacuum Milestones for Void. Their effects are active anywhere, but only if this Inflation is active.`,
+            () => `For false Vacuum it will remove time limit from Milestones${player.tree[0][5] >= 1 ? " and allow for Darkness to be reset for Strangelets, Darkness won't reset with other Stages" : ''}.\nFor true Vacuum it will unlock false Vacuum Milestones for Void. Their effects are active anywhere, but only if this Inflation is active.`,
             () => "Allow to go above max allowed Merges up to the current relevant self-made Universes without making next Universe requiring less.\nAlso stabilize false Vacuum, allow creation of false Universes and add new effect for false Vacuum 'Void Milestones'. Or make Strangelets produce themselves, if in true Vacuum.",
             () => { //[6]
                 const level = player.tree[0][6];
@@ -1458,7 +1458,7 @@ export const global: globalType = {
         description: () => 'A more stable, but still the false Vacuum state\n(Entering will force a Vacuum reset, will be reverted after exiting)',
         effectText: () => {
             const completions = player.challenges.stability;
-            return `<p class="orchidText">‒ Global speed is decreased by ${format(4 * 8 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle${player.tree[0][5] >= 1 ? '\n‒ Abyss resets other Stages and reset by other Stages\n‒ On Stage reset will receive reward only for the selected Stage' : ''}</p>
+            return `<p class="orchidText">‒ Global speed is decreased by ${format(4 * 8 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle${player.tree[0][5] >= 1 ? '\n‒ Darkness resets other Stages and reset by other Stages\n‒ On Stage reset will receive reward only for the selected Stage' : ''}</p>
             <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Intergalactic Upgrade 'Galactic Merger' cost ${format(1e10)} times more\n‒ Merge requirement is set to ${22 + completions}${player.tree[0][5] >= 1 ? '\n‒ Creation of Universes is disabled' : ''}</p>`;
         },
@@ -1923,6 +1923,12 @@ export const updatePlayer = (load: playerType): string => {
             }
 
             /* Can be shortened */
+            for (let i = 0; i < load.inflation.loadouts.length; i++) {
+                const loadout = load.inflation.loadouts[i][1];
+                for (let l = 0; l < loadout.length; l++) {
+                    if (loadout[l] >= 5) { loadout[l]++; }
+                }
+            }
             load.collapse.highest = load.collapse['maxElement' as keyof unknown] ?? 0;
             load.buildings[6] = deepClone(playerStart.buildings[6]);
             load.time.export[3] = 0;
@@ -1968,6 +1974,12 @@ export const updatePlayer = (load: playerType): string => {
         load.toggles.supervoid = false;
         delete load.challenges['super' as keyof unknown];
         load.tree[0][5] = 0;
+        for (let i = 0; i < load.inflation.loadouts.length; i++) {
+            const loadout = load.inflation.loadouts[i][1];
+            for (let l = 0; l < loadout.length; l++) {
+                if (loadout[l] >= 5) { loadout[l]++; }
+            }
+        }
     }
 
     for (let s = 1; s <= 6; s++) {
@@ -2039,6 +2051,7 @@ export const updatePlayer = (load: playerType): string => {
 
     /* Final preparations */
     prepareChallenge();
+    prepareDarkness(false);
     global.trueActive = player.stage.active;
     global.debug.historyStage = null;
     global.debug.historyEnd = null;
@@ -2113,7 +2126,6 @@ export const updatePlayer = (load: playerType): string => {
     assignBuildingsProduction.S4Levels(true);
     assignResetInformation.maxRank();
     assignResetInformation.trueEnergy();
-    enableDarknessAutos(!player.darkness.active || (!player.inflation.vacuum && player.tree[0][5] < 1));
 
     visualProggressUnlocks();
     switchTab(); //Order matters
