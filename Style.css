@@ -41,7 +41,7 @@ html {
     --button-text: #e3e3e3;
     --main-text: var(--cyan-text);
     --white-text: white;
-    --cyan-text: #03d3d3;
+    --cyan-text: #00d6d6;
     --blue-text: dodgerblue;
     --orange-text: darkorange;
     --gray-text: #8f8f8f;
@@ -379,7 +379,6 @@ button.selectBtn {
     color: inherit;
     font-size: inherit;
     height: unset;
-    transition-duration: var(--transition-all);
 }
 
 button.selectBtn:disabled {
@@ -1012,7 +1011,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
 #milestonesProgressArea span { width: 5em; }
 #milestonesProgressArea span:first-of-type { width: 10.8em; }
 
-#inflations {
+#inflation {
     display: flex;
     flex-direction: column;
     background-color: #01003c;
@@ -1024,14 +1023,14 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     margin-bottom: -0.6em;
 }
 
-#inflations > section {
+#inflation > section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5em;
 }
 
-#inflations > section:not(:first-of-type) {
+#inflation > section:not(:first-of-type) {
     border-top: 2px solid #5300c1;
     padding-top: 0.5em;
 }
@@ -1102,18 +1101,18 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
 }
 
 #inflationMilestones > * {
-    background-color: #004200;
-    color: var(--green-text);
-    border: 2px solid darkgreen;
+    background-color: #4d0000;
+    color: var(--red-text);
+    border: 2px solid darkred;
     border-radius: 6px;
     padding: 0.3em 0.6em;
     text-align: center;
 }
 
-#inflationMilestones > section.uncompleted {
-    background-color: #4d0000;
-    color: var(--red-text);
-    border-color: darkred;
+#inflationMilestones > .completed {
+    background-color: #004200;
+    color: var(--green-text);
+    border-color: darkgreen;
 }
 
 #inflationMilestones > #inflationSupervoid {

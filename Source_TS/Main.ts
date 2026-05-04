@@ -1,8 +1,8 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
-import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleSupervoid, vaporizationResetUser } from './Stage';
-import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify } from './Special';
-import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, toggleAll } from './Hotkeys';
+import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleChallengeType, vaporizationResetUser } from './Stage';
+import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness } from './Special';
+import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, strangenessAll, toggleAll } from './Hotkeys';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
 import Overlimit from './Limit';
@@ -85,7 +85,7 @@ const handleOfflineTime = (): number => {
     player.time.export[0] += offlineTime;
     return offlineTime;
 };
-export const simulateOffline = async(offline: number, autoConfirm = player.toggles.normal[4]) => {
+export const simulateOffline = async(offline: number, autoConfirm = globalSave.toggles[9]) => {
     const info = global.offline;
     if (!info.active) { pauseGame(); }
     offline += player.time.excess;
@@ -109,7 +109,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
         numbersUpdate();
         if (info.autosave) {
             info.autosave = false;
-            saveGame();
+            saveGame(false, true);
         }
         return;
     }
@@ -161,7 +161,7 @@ export const simulateOffline = async(offline: number, autoConfirm = player.toggl
 
         if (info.autosave) {
             info.autosave = false;
-            saveGame();
+            saveGame(false, true);
         }
     };
     accelBtn.addEventListener('click', accelerate);
@@ -220,7 +220,7 @@ export const pauseGame = (pause = true) => {
         global.paused = false;
         if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Game unpaused'; }
 
-        global.intervalsId.autoSave = setTimeout(saveGame, globalSave.intervals.autoSave);
+        global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
     }
     global.hotkeys.disabled = pause;
     global.offline.active = pause;
@@ -240,7 +240,7 @@ export const pauseGameUser = () => {
         getId('gamePaused').style.display = '';
         global.paused = true;
         changeIntervals();
-        clearTimeout(global.intervalsId.autoSave);
+        clearInterval(global.intervalsId.autoSave);
         if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Game paused'; }
         return;
     }
@@ -249,9 +249,14 @@ export const pauseGameUser = () => {
     void simulateOffline(offline);
 };
 
-const saveGame = (noSaving = false): string | null => {
+const saveGame = (noSaving = false, manual = false): string | null => {
     if (global.offline.active) {
         global.offline.autosave = true;
+        clearInterval(global.intervalsId.autoSave);
+        return null;
+    } else if (global.april.ultravoid === true) {
+        getId('isSaved').textContent = 'Saved';
+        global.lastSave = 0;
         return null;
     }
     try {
@@ -269,9 +274,9 @@ const saveGame = (noSaving = false): string | null => {
             localStorage.setItem(specialHTML.localStorage.main, save);
             getId('isSaved').textContent = 'Saved';
             global.lastSave = 0;
-            if (!global.paused) {
-                clearTimeout(global.intervalsId.autoSave);
-                global.intervalsId.autoSave = setTimeout(saveGame, globalSave.intervals.autoSave);
+            if (manual && !global.paused) {
+                clearInterval(global.intervalsId.autoSave);
+                global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
             }
         }
         return save;
@@ -282,7 +287,7 @@ const saveGame = (noSaving = false): string | null => {
     }
 };
 const loadGame = (save: string) => {
-    if (global.offline.active) { return; }
+    if (global.offline.active || global.april.ultravoid === true) { return; }
     pauseGame();
     try {
         const versionCheck = updatePlayer(JSON.parse(atob(save)));
@@ -293,7 +298,7 @@ const loadGame = (save: string) => {
 
         void simulateOffline(global.lastSave);
     } catch (error) {
-        updatePlayer(player); //Fixes bugs
+        updatePlayer(player, false); //Fixes bugs
         pauseGame(false);
 
         void Alert(`Incorrect save file format\n${error}`);
@@ -458,8 +463,8 @@ const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researc
     }
     getUpgradeDescription(type);
 };
-const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflations') => {
-    if (type === 'inflations') {
+const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflation') => {
+    if (type === 'inflation') {
         global.lastInflation = [index, stageIndex];
     } else if (type === 'strangeness') {
         global.lastStrangeness = [index, stageIndex];
@@ -498,7 +503,7 @@ export const loadoutsFinal = (load: number[]) => {
     for (let i = 0, dupes = 0; i < load.length; i += dupes, dupes = 0) {
         const current = load[i];
         appeared[current] ??= 0;
-        const unlocked = checkUpgrade(current, 0, 'inflations');
+        const unlocked = checkUpgrade(current, 0, 'inflation');
         do {
             if (appeared[current] >= 20) {
                 load.splice(i + dupes, 1);
@@ -560,8 +565,8 @@ const loadoutsLoad = async(loadout = null as null | number[]) => {
 
     if (loadout === null) { loadout = global.loadouts.input; }
     for (let i = 0; i < loadout.length; i++) {
-        if (!checkUpgrade(loadout[i], 0, 'inflations')) { continue; }
-        buyStrangeness(loadout[i], 0, 'inflations', true);
+        if (!checkUpgrade(loadout[i], 0, 'inflation')) { continue; }
+        buyStrangeness(loadout[i], 0, 'inflation', true);
     }
     numbersUpdate();
     if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Loaded loadout'; }
@@ -605,17 +610,19 @@ const loadoutsLoadAuto = () => {
     trueInfo.buildS1Cost = cloneArray(buildingsInfo.firstCost[1]);
     toggles.verses = createArray(player.verses.length, false);
     for (let s = 1; s < upgradesInfo.length; s++) {
-        const cost = upgradesInfo[s].cost;
-        player.upgrades[s] = createArray(cost.length, 0);
+        const firstCost = upgradesInfo[s].firstCost;
+        player.upgrades[s] = createArray(firstCost.length, 0);
         global.automatization.autoU[s] = [];
         global.lastUpgrade[s] = [null, 'upgrades'];
         if (s === 1) {
-            trueInfo.upgradesS1 = cloneArray(cost as number[]);
+            upgradesInfo[1].cost = cloneArray(firstCost as number[]);
+            trueInfo.upgradesS1 = cloneArray(firstCost as number[]);
             continue;
         }
-        for (let i = 0; i < cost.length; i++) {
-            cost[i] = new Overlimit(cost[i]);
-            if (s === 4 || s === 5) { trueInfo[`upgradesS${s}`][i] = new Overlimit(cost[i]); }
+        for (let i = 0; i < firstCost.length; i++) {
+            firstCost[i] = new Overlimit(firstCost[i]);
+            upgradesInfo[s].cost[i] = new Overlimit(firstCost[i]);
+            if (s >= 4 && s <= 6) { trueInfo[`upgradesS${s as 4}`][i] = new Overlimit(firstCost[i]); }
         }
     }
     for (const upgradeType of ['researches', 'researchesExtra'] as const) {
@@ -630,7 +637,7 @@ const loadoutsLoadAuto = () => {
             for (let i = 0; i < firstCost.length; i++) {
                 firstCost[i] = new Overlimit(firstCost[i]);
                 pointer[s].cost[i] = new Overlimit(firstCost[i]);
-                if (s === 4 || s === 5) { trueInfo[`${upgradeType === 'researches' ? 'researches' : 'extras'}S${s}`][i] = new Overlimit(firstCost[i]); }
+                if (s === 4 || s === 5 || (s === 6 && upgradeType === 'researches')) { trueInfo[`${upgradeType === 'researches' ? 'researches' : 'extras'}S${s as 4}`][i] = new Overlimit(firstCost[i]); }
             }
             global.automatization[`auto${upgradeType === 'researches' ? 'R' : 'E'}`][s] = [];
         }
@@ -643,18 +650,20 @@ const loadoutsLoadAuto = () => {
     player.ASR = createArray(global.ASRInfo.costRange.length, 0);
     trueInfo.ASRS1 = cloneArray(global.ASRInfo.costRange[1]);
     {
-        const cost = global.elementsInfo.cost;
-        player.elements = createArray(cost.length, 0);
-        for (let i = 0; i < cost.length; i++) {
-            cost[i] = new Overlimit(cost[i]);
-            trueInfo.elements[i] = new Overlimit(cost[i]);
+        const { firstCost, cost } = global.elementsInfo;
+        player.elements = createArray(firstCost.length, 0);
+        for (let i = 0; i < firstCost.length; i++) {
+            cost[i] = new Overlimit(firstCost[i]);
+            firstCost[i] = new Overlimit(firstCost[i]);
+            trueInfo.elements[i] = new Overlimit(firstCost[i]);
         }
     }
     for (let s = 1; s < strangenessInfo.length; s++) {
-        player.strangeness[s] = createArray(strangenessInfo[s].firstCost.length, 0);
-        strangenessInfo[s].cost = cloneArray(strangenessInfo[s].firstCost);
+        const firstCost = strangenessInfo[s].firstCost;
+        player.strangeness[s] = createArray(firstCost.length, 0);
+        strangenessInfo[s].cost = cloneArray(firstCost);
         if (s > 5) { continue; }
-        trueInfo[`strangenessS${s as 1}Cost`] = cloneArray(strangenessInfo[s].firstCost);
+        trueInfo[`strangenessS${s as 1}Cost`] = cloneArray(firstCost);
         trueInfo[`strangenessS${s as 1}Scale`] = cloneArray(strangenessInfo[s].scaling);
     }
     for (let s = 1; s < milestonesInfo.length; s++) {
@@ -679,6 +688,9 @@ export const playerStart = deepClone(player);
 export const globalSaveStart = deepClone(globalSave);
 
 try { //Start everything
+    const date = new Date();
+    if (date.getMonth() === 3 && date.getDate() < 8) { enableApril(); }
+
     const body = document.documentElement;
     const globalSettings = localStorage.getItem(specialHTML.localStorage.settings);
     if (globalSettings !== null) {
@@ -697,6 +709,9 @@ try { //Start everything
             for (const key in globalSaveStart.hotkeys) {
                 globalSave.hotkeys[key as hotkeysList] ??= ['None', 'None'];
             }
+
+            delete globalSave.intervals['offline' as keyof unknown];
+            delete globalSave.hotkeys['universe' as keyof unknown];
         } catch (error) {
             Notify('Global settings failed to parse, default ones will be used instead');
             console.log(`(Full parse error) ${error}`);
@@ -713,10 +728,10 @@ try { //Start everything
     if (globalSave.toggles[7]) {
         document.addEventListener('visibilitychange', () => {
             if (global.offline.active || global.paused || document.visibilityState !== 'hidden') { return; }
-            saveGame();
+            saveGame(false, true);
         });
     }
-    if (globalSave.toggles[5]) { specialHTML.styleSheet.textContent += 'body::-webkit-scrollbar { display: none; } '; }
+    if (globalSave.toggles[5]) { specialHTML.styleSheet.textContent += ' body::-webkit-scrollbar { display: none; }'; }
     if (globalSave.toggles[4]) { getId('globalStats').style.display = 'none'; }
     if (globalSave.toggles[3]) {
         getQuery('#footer > div:first-child').style.display = 'none';
@@ -727,7 +742,7 @@ try { //Start everything
         const div = document.createElement('div');
         div.append(getId('footerStats'), getQuery('#footerMain > nav'), getId('stageSelect'));
         getId('footerMain').append(div, getId('subtabs'));
-        specialHTML.styleSheet.textContent += `.insideTab { margin-top: 0.6rem; }
+        specialHTML.styleSheet.textContent += ` .insideTab { margin-top: 0.6rem; }
             #footer { top: 0; bottom: unset; }
             #footerMain { flex-direction: row; padding: 0.6em 0; gap: 0.6em; }
             #footerMain > div { display: flex; flex-direction: column; row-gap: 0.6em; margin: 0 0 0 auto; }
@@ -739,7 +754,7 @@ try { //Start everything
             #subtabs button { width: 100%; min-width: 7em; }
             #globalStats { bottom: 3.04em; right: calc(50vw - 6.325em); }
             #shortcuts { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100vw; max-width: unset; bottom: 0.6em; margin: 0; }
-            #fakeFooter { height: 3.04em; } `;
+            #fakeFooter { height: 3.04em; }`;
     }
     if (globalSave.toggles[2]) { body.classList.remove('noTextSelection'); }
     if (globalSave.toggles[1]) {
@@ -763,7 +778,7 @@ try { //Start everything
     toggleSpecial(0, 'reader');
 
     if (globalSave.MDSettings[0]) {
-        specialHTML.styleSheet.textContent += `html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
+        specialHTML.styleSheet.textContent += ` html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
             #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
         (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
@@ -777,12 +792,12 @@ try { //Start everything
             arrow.addEventListener('click', () => getId(`reset${i}Main`).classList.toggle('open'));
             arrow.addEventListener('blur', () => getId(`reset${i}Main`).classList.remove('open'));
         }
-        specialHTML.styleSheet.textContent += `#resets { row-gap: 1em; }
+        specialHTML.styleSheet.textContent += ` #resets { row-gap: 1em; }
             #resets > section { position: relative; flex-direction: row; justify-content: center; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; }
             #resets > section:not(.open) > p { display: none !important; }
             #resets > section > button:last-of-type { display: flex; justify-content: center; align-items: center; width: 2.2em; margin-left: -2px; }
             #resets .downArrow { width: 1.24em; height: 1.24em; }
-            #resets p { position: absolute; width: 17.4em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(100% - 2px); z-index: 2; box-sizing: content-box; } `;
+            #resets p { position: absolute; width: 17.4em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(100% - 2px); z-index: 2; box-sizing: content-box; }`;
 
         const createUpgButton = document.createElement('button');
         createUpgButton.className = 'hollowButton';
@@ -801,7 +816,7 @@ try { //Start everything
         const pages = document.createElement('div');
         pages.id = 'strangenessPages';
         pages.innerHTML = '<button type="button" id="strangenessPage1" class="stage1borderImage hollowButton">1</button><button type="button" id="strangenessPage2" class="stage2borderImage hollowButton">2</button><button type="button" id="strangenessPage3" class="stage3borderImage hollowButton">3</button><button type="button" id="strangenessPage4" class="stage4borderImage hollowButton">4</button><button type="button" id="strangenessPage5" class="stage5borderImage hollowButton">5</button><button type="button" id="strangenessPage6" class="stage6borderImage hollowButton">6</button>';
-        specialHTML.styleSheet.textContent += `#strangenessPages { display: flex; justify-content: center; column-gap: 0.36em; }
+        specialHTML.styleSheet.textContent += ` #strangenessPages { display: flex; justify-content: center; column-gap: 0.36em; }
             #strangenessPages button { width: 2.08em; height: calc(2.08em - 2px); border-top: none; border-radius: 0 0 4px 4px; }`;
         getId('strangenessResearch').append(pages);
         const createStrButton = document.createElement('button');
@@ -859,8 +874,14 @@ try { //Start everything
     if (save !== null) {
         oldVersion = updatePlayer(JSON.parse(atob(save)));
     } else {
-        prepareVacuum(false); //Set buildings values
-        updatePlayer(deepClone(playerStart));
+        const oldSave = localStorage.getItem('save');
+        if (oldSave !== null) {
+            oldVersion = updatePlayer(JSON.parse(atob(oldSave)));
+            Notify('Save file has been updated to newest version\nOld save can be retrieved in the advanced save settings');
+        } else {
+            prepareVacuum(false); //Set buildings values
+            updatePlayer(deepClone(playerStart), false);
+        }
     }
 
     /* Global */
@@ -956,7 +977,7 @@ try { //Start everything
             }
         });
     }
-    for (let i = 1; i < specialHTML.longestBuilding; i++) {
+    for (let i = 1; i < specialHTML.lastBuilding; i++) {
         getId(`toggleBuilding${i}`).addEventListener('click', () => toggleSwap(i, 'buildings', true));
     }
     for (let i = 0; i < playerStart.toggles.normal.length; i++) {
@@ -1063,16 +1084,16 @@ try { //Start everything
         if (MD) { button.addEventListener('touchstart', repeatFunc); }
     }
     const getMakeCount = () => global.hotkeys.shift ? (global.hotkeys.ctrl ? 100 : 1) : global.hotkeys.ctrl ? 10 : undefined;
-    for (let i = 1; i < specialHTML.longestBuilding; i++) {
+    for (let i = 1; i < specialHTML.lastBuilding; i++) {
         const button = getId(`building${i}Btn`);
         const clickFunc = () => buyBuilding(i, player.stage.active, getMakeCount());
         button.addEventListener('click', clickFunc);
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
         if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
     }
-    for (let i = 0; i < playerStart.verses.length; i++) {
+    for (let i = 0; i < 1; i++) {
         const button = getId(`verse${i}Btn`);
-        const clickFunc = () => buyVerse(i);
+        const clickFunc = () => buyVerse();
         button.addEventListener('click', clickFunc);
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
         if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
@@ -1127,9 +1148,37 @@ try { //Start everything
         if (!MD) { image.addEventListener('mouseenter', () => hoverChallenge(i)); }
         image.addEventListener('click', () => { global.lastChallenge[0] === i ? enterExitChallengeUser(i) : hoverChallenge(i); });
     }
-    getId('challengeName').addEventListener('click', () => { toggleSupervoid(true); });
+    getId('challengeName').addEventListener('click', () => {
+        if (global.lastChallenge[0] === 0) {
+            toggleChallengeType(true);
+        } else if (global.lastChallenge[0] === 1) {
+            if (player.challenges.active === 1) { return Notify(`Can't be toggled while inside ${global.challengesInfo[1].name}`); }
+            global.april.quantum = !global.april.quantum;
+            global.challengesInfo[1].name = global.april.quantum ? 'Quantum Vacuum' : 'Vacuum stability';
+            numbersUpdate();
+            visualUpdate();
+        } else if (global.lastChallenge[0] === 2) {
+            enableLightness();
+        }
+    });
+    getId('voidSwitchFall').addEventListener('click', () => {
+        if (global.hotkeys.shift && global.april.ultravoid === null) {
+            if (player.challenges.active === 0) { return Notify(`Can't be toggled while inside ${global.challengesInfo[0].name}`); }
+            global.april.ultravoid = false;
+            global.challengesInfo[0].name = 'Ultravoid';
+            global.challengesInfo[0].time = 30;
+            numbersUpdate();
+            visualUpdate();
+            return;
+        }
+        toggleChallengeType(true);
+    });
     getId('voidRewardsHead').addEventListener('click', () => {
         global.sessionToggles[0] = !global.sessionToggles[0];
+        getChallengeRewards();
+    });
+    getId('stabilityRewardsHead').addEventListener('click', () => {
+        global.sessionToggles[2] = !global.sessionToggles[2];
         getChallengeRewards();
     });
     for (let s = 1; s <= 5; s++) {
@@ -1148,7 +1197,7 @@ try { //Start everything
     }
 
     /* Upgrade tab */
-    for (let i = 0; i < specialHTML.longestUpgrade; i++) {
+    for (let i = 0; i < specialHTML.lastUpgrade; i++) {
         const image = getId(`upgrade${i + 1}`);
         const hoverFunc = () => hoverUpgrades(i, 'upgrades');
         const clickFunc = () => buyUpgrades(i, player.stage.active, 'upgrades');
@@ -1178,7 +1227,7 @@ try { //Start everything
             });
         }
     }
-    for (let i = 0; i < specialHTML.longestResearch; i++) {
+    for (let i = 0; i < specialHTML.lastResearch; i++) {
         const label = getId(`research${i + 1}`);
         const image = getQuery(`#research${i + 1} > input`);
         const hoverFunc = () => hoverUpgrades(i, 'researches');
@@ -1209,7 +1258,7 @@ try { //Start everything
             });
         }
     }
-    for (let i = 0; i < specialHTML.longestResearchExtra; i++) {
+    for (let i = 0; i < specialHTML.lastResearchExtra; i++) {
         const label = getId(`researchExtra${i + 1}`);
         const image = getQuery(`#researchExtra${i + 1} > input`);
         const hoverFunc = () => hoverUpgrades(i, 'researchesExtra');
@@ -1393,7 +1442,7 @@ try { //Start everything
     for (let i = 0; i < playerStart.strange.length; i++) {
         const button = getId(`strange${i}`);
         const open = (focus = false) => {
-            if (player.proggress.main < 15 && player.milestones[4][0] < 8) { return; }
+            if (player.progress.main < 15 && player.milestones[4][0] < 8) { return; }
             const html = getId(`strange${i}EffectsMain`);
             if (html.dataset.focus === 'true') { return; }
             const button = getId(`strange${i}`);
@@ -1461,19 +1510,9 @@ try { //Start everything
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
     } {
         const button = getId('createAllStrangeness');
-        const clickFunc = () => {
-            if (globalSave.MDSettings[0]) {
-                const s = global.debug.MDStrangePage;
-                for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
-            } else {
-                for (let s = 1; s < global.strangenessInfo.length; s++) {
-                    for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
-                }
-            }
-        };
-        button.addEventListener('click', clickFunc);
-        if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
-        if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
+        button.addEventListener('click', strangenessAll);
+        if (PC) { button.addEventListener('mousedown', () => repeatFunction(strangenessAll)); }
+        if (MD) { button.addEventListener('touchstart', () => repeatFunction(strangenessAll)); }
     }
     getId('strangenessVisibility').addEventListener('click', () => {
         global.sessionToggles[1] = !global.sessionToggles[1];
@@ -1501,8 +1540,8 @@ try { //Start everything
         for (let i = 0; i < playerStart.tree[s].length; i++) {
             const label = getId(`inflation${i + 1}Tree${s + 1}`);
             const image = getQuery(`#inflation${i + 1}Tree${s + 1} > input`);
-            const hoverFunc = () => hoverStrangeness(i, s, 'inflations');
-            const clickFunc = () => buyStrangenessMax(i, s, 'inflations');
+            const hoverFunc = () => hoverStrangeness(i, s, 'inflation');
+            const clickFunc = () => buyStrangenessMax(i, s, 'inflation');
             if (PC) {
                 label.addEventListener('mouseenter', hoverFunc);
                 image.addEventListener('mouseenter', () => {
@@ -1614,7 +1653,7 @@ try { //Start everything
     if (MD) {
         const button = getId('inflationActivate');
         const clickFunc = () => {
-            if (global.lastInflation[0] !== null) { buyStrangenessMax(global.lastInflation[0], global.lastInflation[1], 'inflations'); }
+            if (global.lastInflation[0] !== null) { buyStrangenessMax(global.lastInflation[0], global.lastInflation[1], 'inflation'); }
         };
         button.addEventListener('click', clickFunc);
         button.addEventListener('touchstart', () => repeatFunction(clickFunc));
@@ -1654,19 +1693,17 @@ try { //Start everything
     }
     getId('stageInput').addEventListener('change', () => {
         const input = getId('stageInput') as HTMLInputElement;
-        const type = Number(input.dataset.type);
-        if (playerStart.stage.input[type] !== undefined) {
-            input.value = format((player.stage.input[type] = Number(input.value)), { type: 'input' });
-        } else { player.stage.input[0] = 1; }
+        input.value = format((player.stage.input[player.stage.input[0]] = Number(input.value)), { type: 'input' });
     });
     {
         const input = getId('stageInputType');
+        input.addEventListener('input', () => visualUpdate());
         input.addEventListener('change', () => {
             const input = getId('stageInputType') as HTMLInputElement;
             const value = Math.trunc(Number(input.value));
-            input.value = format((player.stage.input[0] = Math.min(Math.max(1, isNaN(value) ? 1 : value), playerStart.stage.input.length - 1)), { type: 'input' });
+            input.value = `${player.stage.input[0] = Math.min(Math.max(1, isNaN(value) ? 1 : value), playerStart.stage.input.length - 1)}`;
+            visualUpdate();
         });
-        input.addEventListener('blur', () => { visualUpdate(); });
     }
     getId('vaporizationInput').addEventListener('change', () => {
         const input = getId('vaporizationInput') as HTMLInputElement;
@@ -1720,7 +1757,7 @@ try { //Start everything
     });
     getId('versionButton').addEventListener('click', openVersionInfo);
     getId('hotkeysButton').addEventListener('click', openHotkeys);
-    getId('save').addEventListener('click', () => { saveGame(); });
+    getId('save').addEventListener('click', () => { saveGame(false, true); });
     getId('file').addEventListener('change', async() => {
         const id = getId('file') as HTMLInputElement;
         try {
@@ -1728,40 +1765,47 @@ try { //Start everything
         } finally { id.value = ''; }
     });
     const exportReward = () => {
-        if (player.proggress.main < 17 && (player.inflation.vacuum || player.proggress.main < 11)) { return; }
-        if (globalSave.developerMode) { return Notify("Export reward is disabled when using 'devMode', disable it by writting this into save options (case sensitive)"); }
+        if (player.progress.main < 17 && (player.inflation.vacuum || player.progress.main < 11)) { return; }
+        if (globalSave.developerMode) { return Notify("Export reward is not disabled when using 'devMode'\nDisable it by writting that string exactly into the advanced save options"); }
 
         const exportReward = player.time.export;
         if (exportReward[0] <= 0) { return; }
         const claimPer = player.inflation.ends[0] >= 1 ? 1 : 2.5;
         const conversion = Math.min(exportReward[0] / 43200_000, 1);
 
+        let claimed = false;
         if (player.inflation.ends[1] >= 1 && exportReward[3] > 0) {
             const value = exportReward[3] / 5 * conversion;
             player.cosmon[1].current += value;
             player.cosmon[1].total += value;
-            exportReward[3] -= Math.max(exportReward[3] - value, 0);
-        } else if (player.challenges.active !== null && global.challengesInfo[player.challenges.active].resetType !== 'stage') { return; }
-        if (exportReward[2] > 0) {
-            const value = exportReward[2] / claimPer * conversion;
-            player.strange[1].current += value;
-            player.strange[1].total += value;
-            exportReward[2] -= Math.max(exportReward[2] - value, 0);
-            assignBuildingsProduction.strange1();
-        } {
-            const value = (exportReward[1] / claimPer + 1) * conversion;
-            player.strange[0].current += value;
-            player.strange[0].total += value;
-            exportReward[1] = Math.max(exportReward[1] - value, 0);
-            assignBuildingsProduction.strange0();
+            exportReward[3] = Math.max(exportReward[3] - value, 0);
+            claimed = true;
         }
-        exportReward[0] = 0;
-        numbersUpdate();
+        if (player.challenges.active === null || global.challengesInfo[player.challenges.active].resetType === 'stage') {
+            if (exportReward[2] > 0) {
+                const value = exportReward[2] / claimPer * conversion;
+                player.strange[1].current += value;
+                player.strange[1].total += value;
+                exportReward[2] = Math.max(exportReward[2] - value, 0);
+                assignBuildingsProduction.strange1();
+            } {
+                const value = (exportReward[1] / claimPer + 1) * conversion;
+                player.strange[0].current += value;
+                player.strange[0].total += value;
+                exportReward[1] = Math.max(exportReward[1] - value, 0);
+                assignBuildingsProduction.strange0();
+            }
+            claimed = true;
+        }
+        if (claimed) {
+            exportReward[0] = 0;
+            numbersUpdate();
+        }
     };
     getId('export').addEventListener('click', () => {
         exportReward();
 
-        const save = saveGame(globalSave.developerMode);
+        const save = saveGame(globalSave.developerMode, true);
         if (save === null) { return; }
         const a = document.createElement('a');
         a.href = `data:text/plain,${save}`;
@@ -1769,7 +1813,7 @@ try { //Start everything
         a.click();
     });
     getId('saveConsole').addEventListener('click', async() => {
-        let value = await Prompt("Available options:\n'Copy' ‒ copy save file to the clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it");
+        let value = await Prompt(`Available options:\n'Copy' ‒ copy save file to the clipboard${localStorage.getItem('save') !== null ? "\n'Legacy' ‒ copy legacy save if it exist" : ''}\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it`);
         if (value === null || value === '') { return; }
         let lower = value.trim().toLowerCase();
         if (lower === 'global') {
@@ -1778,20 +1822,19 @@ try { //Start everything
             lower = `global_${value.trim().toLowerCase()}`;
         }
 
-        if (lower === 'copy' || lower === 'global_copy') {
-            const save = lower === 'global_copy' ? saveGlobalSettings(true) : saveGame(true);
-            if (save !== null) {
-                try {
-                    await navigator.clipboard.writeText(save);
-                    Notify(`${lower === 'global_copy' ? 'Settings have' : 'Save has'} been copied to the clipboard`);
-                } catch (error) {
-                    console.warn(`Full error for being unable to write to the clipboard:\n${error}`);
-                    if (await Confirm("Could not copy text into clipboard, press 'Confrim' to save it as a file instead")) {
-                        const a = document.createElement('a');
-                        a.href = `data:text/plain,${save}`;
-                        a.download = `Fundamental ${lower === 'global_copy' ? 'settings' : 'save'} clipboard`;
-                        a.click();
-                    }
+        if (lower === 'copy' || lower === 'global_copy' || lower === 'legacy') {
+            const save = lower === 'global_copy' ? saveGlobalSettings(true) : lower === 'copy' ? saveGame(true) : localStorage.getItem('save');
+            if (save === null) { return Notify('Could not copy text into the clipboard'); }
+            try {
+                await navigator.clipboard.writeText(save);
+                Notify('Text has been successfully copied to the clipboard');
+            } catch (error) {
+                console.warn(`Full clipboard write error:\n${error}`);
+                if (await Confirm("Could not copy text into the clipboard, press 'Confrim' to save it as a file instead")) {
+                    const a = document.createElement('a');
+                    a.href = `data:text/plain,${save}`;
+                    a.download = `Fundamental ${lower === 'global_copy' ? 'settings' : `${lower === 'legacy' ? 'legacy ' : ''}save`} clipboard`;
+                    a.click();
                 }
             }
         } else if (lower === 'delete' || lower === 'clear' || lower === 'global_reset') {
@@ -1808,20 +1851,20 @@ try { //Start everything
             saveGlobalSettings();
         } else if (lower === 'console' && globalSave.developerMode) {
             console.log(deepClone(player), deepClone(globalSave), deepClone(global));
-        } else if (lower === 'achievement') {
-            Notify('Unlocked a new Achievement! (If there were any)');
-        } else if (lower === 'slow' || lower === 'free' || lower === 'boost') {
+        } else if (lower === 'achievement' || lower === 'secret_achievement') {
+            Notify(`Unlocked a new ${lower === 'achievement' ? '' : 'super secret'} Achievement! (If there were any)`);
+        } else if (lower === 'slow' || lower === 'free' || lower === 'boost' || lower === 'speedup') {
             Notify('Game speed was increased by 1x');
         } else if (lower === 'secret' || lower === 'global_secret' || lower === 'secret_secret') {
-            Notify(`Found a ${lower === 'secret_secret' ? "ultra rare secret, but it doesn't proof anything" : `${lower === 'global_secret' ? 'global' : 'rare'} secret, don't share it with anybody`}`);
+            Notify(`Found ${lower === 'secret_secret' ? "an ultra rare secret, but it doesn't proof anything" : `a ${lower === 'global_secret' ? 'global' : 'rare'} secret, don't share it with anybody`}`);
         } else if (lower === 'secret_proof') {
             Notify('Found a proof that you were looking for!');
-        } else if (lower === 'quantum') {
-            getId('body').style.display = 'none';
-            document.documentElement.style.backgroundColor = 'black';
-            await Alert('Close when you are done enjoying the Quantum Vacuum');
-            document.documentElement.style.backgroundColor = '';
-            getId('body').style.display = '';
+        } else if (globalSave.developerMode && value === 'April1st') {
+            enableApril();
+            Notify(`April mode ${global.april.active ? 'enabled' : 'disabled'}`);
+        } else if (lower === (global.april.light ? 'dark' : 'light')) {
+            enableLightness();
+            Notify(`${global.april.light ? 'Lightness' : 'Darkness'} has returned`);
         } else {
             if (value.length < 20) { return void Alert(`Input '${value}' doesn't match anything`); }
             if (lower.includes('global_')) {
@@ -1884,8 +1927,8 @@ try { //Start everything
         input.value = `${globalSave.intervals.autoSave / 1000}`;
         saveGlobalSettings();
         if (!global.paused) {
-            clearTimeout(global.intervalsId.autoSave);
-            global.intervalsId.autoSave = setTimeout(saveGame, globalSave.intervals.autoSave);
+            clearInterval(global.intervalsId.autoSave);
+            global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
         }
     });
     getId('thousandSeparator').addEventListener('change', () => changeFormat(false));
@@ -1995,10 +2038,8 @@ try { //Start everything
     document.head.append(specialHTML.styleSheet);
     stageUpdate(true, true);
     if (globalSave.theme !== null) {
-        getId('currentTheme').textContent = global.stageInfo.word[globalSave.theme];
-        getId(`switchTheme${globalSave.theme}`).style.textDecoration = 'underline';
         getId('switchTheme0').style.textDecoration = '';
-        setTheme();
+        setTheme(globalSave.theme, true);
     }
     if (save !== null) {
         global.lastSave = handleOfflineTime();

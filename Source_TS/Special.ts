@@ -1,9 +1,9 @@
 import { assignHotkeys, detectShift, removeHotkey } from './Hotkeys';
-import { cloneArray, deepClone, getId, getQuery, globalSaveStart, pauseGame } from './Main';
-import { global, player } from './Player';
-import { assignResetInformation, setActiveStage } from './Stage';
-import type { globalSaveType, hotkeysList, numbersList } from './Types';
-import { format, stageUpdate, switchTab, visualProggressUnlocks, visualUpdate } from './Update';
+import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, pauseGame, playerStart } from './Main';
+import { global, player, prepareVacuum, updatePlayer } from './Player';
+import { assignResetInformation, setActiveStage, toggleChallengeType } from './Stage';
+import type { Quantum, globalSaveType, hotkeysList, numbersList } from './Types';
+import { format, stageUpdate, switchTab, visualProgressUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -16,6 +16,8 @@ export const globalSave: globalSaveType = {
         toggleAll: ['Shift A', 'Shift A'],
         createAll: ['U', 'U'],
         toggleUpgrades: ['None', 'None'],
+        strangeness: ['None', 'None'],
+        toggleStrangeness: ['None', 'None'],
         discharge: ['D', 'D'],
         toggleDischarge: ['None', 'None'],
         vaporization: ['V', 'V'],
@@ -49,7 +51,7 @@ export const globalSave: globalSaveType = {
         toggleStructure: 'Numpad',
         enterChallenge: 'Shift Numbers'
     },
-    toggles: [false, false, false, false, false, false, true, true, false],
+    toggles: [false, false, false, false, false, false, true, false, false, false],
     format: ['.', ''],
     theme: null,
     fontSize: 16,
@@ -123,7 +125,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 export const specialHTML = { //Images here are from true vacuum for easier cache
     /** [textContent] */
     resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', 'Nucleation'],
-    longestBuilding: 7, //+1
+    lastBuilding: 7, //+1, starting value has to be biggest length
     /** [src] */
     buildingHTML: [
         [],
@@ -134,7 +136,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Nebula.png', 'Star%20cluster.png', 'Galaxy.png'],
         ['Dark%20planet.png']
     ],
-    longestUpgrade: 14,
+    lastUpgrade: 14, //Starting value has to be biggest length
     /** [src] */
     upgradeHTML: [
         [], [
@@ -194,7 +196,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'Missing.png'
         ]
     ],
-    longestResearch: 9,
+    lastResearch: 9, //Starting value has to be biggest length
     /** [src, className] */
     researchHTML: [
         [], [
@@ -242,7 +244,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchD4.png', 'stage3borderImage']
         ]
     ],
-    longestResearchExtra: 6,
+    lastResearchExtra: 6, //Starting value has to be biggest length
     /** [src, className, hoverText] */
     researchExtraDivHTML: [
         [],
@@ -296,7 +298,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['ResearchDark5.png', 'stage6borderImage']
         ]
     ],
-    longestFooterStats: 3,
+    lastFooterStat: 3, //Starting value has to be biggest length
     /** [src, className, textcontent] */
     footerStatsHTML: [
         [], [
@@ -387,19 +389,24 @@ export const preventImageUnload = () => {
         images += `<img src="Used_art/${text}.png" loading="lazy">`;
     }
     specialHTML.cache.imagesDiv.innerHTML = images;
+    for (const img of document.querySelectorAll('#logoLinks img')) { //Reload SVG's
+        (img as HTMLImageElement).src = (img as HTMLImageElement).src;
+    }
 
     setTimeout(preventImageUnload, 3600_000);
 };
 
 /** Not providing value for 'theme' will make it use one from globalSave and remove all checks */
-export const setTheme = (theme = 'current' as 'current' | number | null) => {
+export const setTheme = (theme = 'current' as 'current' | number | null, firstLoad = false) => {
     if (theme !== 'current') {
-        getId(`switchTheme${globalSave.theme ?? 0}`).style.textDecoration = '';
+        if (!firstLoad) {
+            if (globalSave.theme === null || globalSave.theme > 0) { getId(`switchTheme${globalSave.theme ?? 0}`).style.textDecoration = ''; }
 
-        globalSave.theme = theme;
-        saveGlobalSettings();
-        getId('currentTheme').textContent = theme === null ? 'Default' : global.stageInfo.word[theme];
-        getId(`switchTheme${theme ?? 0}`).style.textDecoration = 'underline';
+            globalSave.theme = theme;
+            saveGlobalSettings();
+        }
+        getId('currentTheme').textContent = theme === null ? 'Default' : theme === -1 ? 'Quantum' : global.stageInfo.word[theme];
+        if (theme === null || theme > 0) { getId(`switchTheme${theme ?? 0}`).style.textDecoration = 'underline'; }
     } else { theme = globalSave.theme; }
 
     const upgradeTypes = ['upgrade', 'element'];
@@ -423,14 +430,14 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
         '--button-text': '#e3e3e3',
         '--main-text': 'var(--cyan-text)',
         '--white-text': 'white',
-        //'--cyan-text': '#03d3d3',
+        //'--cyan-text': '#00d6d6',
         '--blue-text': 'dodgerblue',
         '--orange-text': 'darkorange',
         '--gray-text': '#8f8f8f',
         '--orchid-text': '#e14bdb',
         '--darkorchid-text': '#bd24ef',
         '--darkviolet-text': '#8b3cec',
-        //'--brown-text': '#9b7346',
+        '--brown-text': '#9b7346',
         '--red-text': '#eb0000',
         '--green-text': '#00e900',
         '--yellow-text': '#fafa00'
@@ -467,7 +474,7 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             properties['--main-text'] = 'var(--blue-text)';
             properties['--gray-text'] = '#9b9b9b';
             properties['--darkorchid-text'] = '#c71bff';
-            properties['--darkviolet-text'] = '#8766ff';
+            properties['--darkviolet-text'] = '#9061ff';
             properties['--green-text'] = '#82cb3b';
             properties['--red-text'] = '#f70000';
             break;
@@ -582,6 +589,38 @@ export const setTheme = (theme = 'current' as 'current' | number | null) => {
             properties['--darkviolet-text'] = '#8157ff';
             properties['--red-text'] = 'red';
             properties['--yellow-text'] = 'var(--green-text)';
+            break;
+        case -1:
+            for (const text of upgradeTypes) {
+                getId(`${text}Text`).style.color = 'var(--cyan-text)';
+                getId(`${text}Effect`).style.color = 'var(--blue-text)';
+                getId(`${text}Cost`).style.color = 'var(--brown-text)';
+            }
+            properties['--background-color'] = '#041004';
+            properties['--window-color'] = '#063003';
+            properties['--window-border'] = '#008500';
+            properties['--footer-color'] = '#055205';
+            properties['--button-color'] = '#094e04';
+            properties['--button-border'] = '#00a300';
+            properties['--button-hover'] = '#5c401f';
+            properties['--building-afford'] = 'var(--tab-active)';
+            properties['--tab-active'] = '#8c2eff';
+            properties['--tab-strangeness'] = '#0093ad';
+            properties['--tab-inflation'] = 'var(--tab-active)';
+            properties['--hollow-hover'] = '#0e5309';
+            properties['--footerButton-hover'] = '#251f18';
+            properties['--input-border'] = '#008ba3';
+            properties['--input-text'] = '#05c7c7';
+            properties['--button-text'] = '#ccffff';
+            properties['--main-text'] = 'var(--green-text)';
+            properties['--white-text'] = '#f5ffff';
+            properties['--blue-text'] = '#3399ff';
+            properties['--gray-text'] = '#999999';
+            properties['--darkorchid-text'] = '#c33df0';
+            properties['--darkviolet-text'] = '#a052ff';
+            properties['--brown-text'] = '#a97e4c';
+            properties['--green-text'] = '#00e000';
+            properties['--yellow-text'] = 'var(--cyan-text)';
     }
 
     const bodyStyle = document.documentElement.style;
@@ -897,89 +936,735 @@ export const changeFormat = (point: boolean) => {
     saveGlobalSettings();
 };
 
+export const enableApril = (firstLoad = false) => {
+    const active = !global.april.active;
+    global.april.active = active;
+    const names1U = global.upgradesInfo[1].name;
+    names1U[2] = active ? 'Positrons' : 'Electrons';
+    for (let i = 3; i < 9; i++) {
+        if (i === 5) { continue; }
+        names1U[i] = active ? `Anti${names1U[i][0].toLowerCase()}${names1U[i].slice(1)}` :
+            `${names1U[i][4].toUpperCase()}${names1U[i].slice(5)}`;
+    }
+    specialHTML.upgradeHTML[1][2] = `UpgradeQ3${active ? '_A' : ''}.png`;
+    specialHTML.upgradeHTML[1][3] = `UpgradeQ4${active ? '_A' : ''}.png`;
+    specialHTML.upgradeHTML[1][4] = `UpgradeQ5${active ? '_A' : ''}.png`;
+    for (const ID of getClass('newAntiName')) {
+        const current = ID.textContent as string;
+        ID.textContent = active ? `Anti${current[0].toLowerCase()}${current.slice(1)}` :
+            `${current[4].toUpperCase()}${current.slice(5)}`;
+    }
+    const names4U = global.upgradesInfo[4].name;
+    names4U[1] = `${active ? 'Antiproton-Antiproton' : 'Proton-Proton'} chain`;
+    names4U[2] = `${active ? 'Anticarbon-Antinitrogen-Antioxygen' : 'Carbon-Nitrogen-Oxygen'} cycle`;
+    names4U[3] = `${active ? 'Antihelium' : 'Helium'} fusion`;
+    names4U[5] = `${active ? 'Antiproton' : 'Proton'} capture`;
+    global.researchesInfo[1].name[0] = `Stronger ${names1U[6]}`;
+    global.researchesInfo[1].name[1] = `Better ${names1U[7]}`;
+    global.researchesInfo[1].name[2] = `Improved ${names1U[8]}`;
+    const namesE = global.elementsInfo.name;
+    for (let i = 0; i < namesE.length; i++) {
+        const index = namesE[i].indexOf(' ') + 1;
+        namesE[i] = active ? `${namesE[i].slice(0, index)}Anti${namesE[i][index].toLowerCase()}${namesE[i].slice(index + 1)}` :
+            `${namesE[i].slice(0, index)}${namesE[i][index + 4].toUpperCase()}${namesE[i].slice(index + 5)}`;
+        (getId(`element${i}`) as HTMLInputElement).alt = namesE[i];
+    }
+    global.strangenessInfo[4].name[8] = active ? 'Antineutronium' : 'Neutronium';
+    global.challengesInfo[0].rewardText[0][4][2] = `'${global.strangenessInfo[4].name[8]}' (Interstellar)`;
+    (getQuery('#strange9Stage4 > input') as HTMLInputElement).alt = global.strangenessInfo[4].name[8];
+
+    if (firstLoad) { return; }
+    if (!active) {
+        if (global.april.ultravoid === false) { toggleChallengeType(true); }
+        if (global.april.quantum) {
+            global.april.quantum = false;
+            global.challengesInfo[1].name = 'Vacuum stability';
+        }
+        if (global.april.light) { enableLightness(); }
+    }
+    stageUpdate();
+    global.offline.cacheUpdate = false;
+    preventImageUnload();
+};
+export const enableLightness = () => {
+    const active = !global.april.light;
+    global.april.light = active;
+    const Light = active ? 'Light' : 'Dark';
+    const Dark = active ? 'Dark' : 'Light';
+    for (const ID of getClass('newLightName')) { ID.textContent = Light; }
+    const nameS6 = global.buildingsInfo.name[6];
+    for (let i = 0; i < nameS6.length; i++) { nameS6[i] = nameS6[i].replace(Dark, Light); }
+    for (const type of ['upgradesInfo', 'researchesInfo', 'researchesExtraInfo'] as const) {
+        const names = global[type][6].name;
+        for (let i = 0; i < names.length; i++) {
+            names[i] = names[i].replace(Dark, Light);
+        }
+    }
+    global.upgradesInfo[6].name[0] = global.upgradesInfo[6].name[0].replace(Dark, Light);
+    global.researchesInfo[6].name[0] = global.researchesInfo[6].name[0].replace(Dark, Light);
+    global.buildingsInfo.hoverText[6][0] = `${nameS6[0]} softcap`;
+    global.stageInfo.costName[6] = nameS6[0];
+
+    specialHTML.researchExtraDivHTML[6][2] = `${Light} energy`;
+    getQuery('#verse0 > div > p:last-of-type').dataset.title = nameS6[0];
+    getId('energyGainStage6').ariaLabel = `${Light} energy gain`;
+    const darknessInfo = global.challengesInfo[2];
+    darknessInfo.name = active ? 'Lightness' : 'Darkness';
+    for (let i = 0; i < darknessInfo.rewardText.length; i++) {
+        darknessInfo.rewardText[i] = darknessInfo.rewardText[i].replace(Dark, Light);
+    }
+    (getId('challenge3') as HTMLInputElement).alt = darknessInfo.name;
+    global.strangenessInfo[6].name[3] = darknessInfo.name;
+    (getId('strange4Stage6') as HTMLInputElement).alt = darknessInfo.name;
+    specialHTML.buildingHTML[6][0] = `${Light}%20planet.png`;
+    specialHTML.footerStatsHTML[6][0][0] = `${Light}%20matter.png`;
+    (getQuery('#globalStat5 img') as HTMLImageElement).src = `Used_art/${specialHTML.footerStatsHTML[6][0][0]}`;
+    specialHTML.upgradeHTML[6][0] = `UpgradeD1${active ? '_L' : ''}.png`;
+    specialHTML.researchHTML[6][0][0] = `ResearchD1${active ? '_L' : ''}.png`;
+    specialHTML.researchHTML[6][2][0] = `ResearchD3${active ? '_L' : ''}.png`;
+    specialHTML.researchExtraHTML[6][0][0] = `ResearchDark1${active ? '_L' : ''}.png`;
+    specialHTML.researchExtraHTML[6][3][0] = `ResearchDark4${active ? '_L' : ''}.png`;
+
+    stageUpdate();
+    global.offline.cacheUpdate = false;
+    preventImageUnload();
+};
+export const enterUltravoid = () => {
+    global.april.ultravoid = true;
+    const lastSave = global.lastSave;
+    const currentSave = deepClone(player);
+
+    prepareVacuum(false); //Set buildings values
+    updatePlayer(deepClone(playerStart), false);
+    stageUpdate(true, true);
+    const time = Date.now();
+    player.time.started = time;
+    player.time.updated = time;
+    setTimeout(() => {
+        if (specialHTML.alert[0] !== null) { (specialHTML.alert[1] as () => undefined)(); }
+        global.april.ultravoid = false;
+        enableApril();
+        updatePlayer(currentSave, false);
+        stageUpdate(true, true);
+        global.lastSave = lastSave;
+        Notify('Must have been a bad dream');
+    }, 30_000);
+};
+export const enterQuantum = () => {
+    pauseGame();
+    const html = document.documentElement;
+    html.style.backgroundColor = 'black';
+    getId('body').style.display = 'none';
+    getId('notifications').style.display = 'none';
+    const continuation = player.progress.quantum !== undefined;
+    let finished = false;
+    setTimeout(() => {
+        const cache: Record<string, Array<[string, () => any]>> = {};
+        const query = (which: string): HTMLElement => {
+            cache[which] ??= [];
+            return getQuery(which);
+        };
+        const addEvent = (which: string, eventType: string, event: (...any: any) => any) => {
+            const addTo = query(which);
+            cache[which].push([eventType, event]);
+            addTo.addEventListener(eventType, event);
+        };
+        const styleSheet = document.createElement('style');
+
+        const oldTheme = globalSave.theme;
+        let timeoutID: undefined | number;
+        const intervalsID: Array<undefined | number> = [];
+        const main = document.createElement('div');
+        main.id = 'quantum';
+        main.innerHTML = '<input type="image" src="Used_art/False%20vacuum.png" alt="Exit" draggable="false" id="leaveQuantum" class="interactiveImage" style="opacity: 0; cursor: help;">';
+        main.className = 'insideTab';
+        styleSheet.textContent = `#leaveQuantum { width: 48px; height: 48px; transition: opacity ${continuation ? 6 : 30}s; }`;
+        document.body.append(main);
+        document.head.append(styleSheet);
+        query('#leaveQuantum').addEventListener('click', () => {
+            clearTimeout(timeoutID);
+            clearTimeout(intervalsID[0]);
+            clearTimeout(intervalsID[1]);
+            for (const remove in cache) {
+                const pointer = cache[remove];
+                if (pointer.length > 0) {
+                    const element = getQuery(remove);
+                    for (let i = 0; i < pointer.length; i++) {
+                        element.removeEventListener(pointer[i][0], pointer[i][1]);
+                    }
+                }
+                specialHTML.cache.queryMap.delete(remove);
+            }
+            main.remove();
+            styleSheet.remove();
+            html.style.backgroundColor = '';
+            getId('body').style.display = '';
+            getId('notifications').style.display = '';
+            global.hotkeys.disabled = false;
+            globalSave.theme = oldTheme;
+            setTheme(finished ? -1 : undefined);
+            pauseGame(false);
+        }, { once: true });
+        timeoutID = setTimeout(() => {
+            query('#leaveQuantum').style.opacity = '';
+            timeoutID = setTimeout(() => {
+                styleSheet.textContent += ` html { transition: background-color ${continuation ? 6 : 120}s; }`;
+                html.style.background = '#041004';
+                query('#leaveQuantum').style.cursor = '';
+                timeoutID = setTimeout(() => {
+                    globalSave.theme = -1;
+                    setTheme();
+
+                    const div = document.createElement('div');
+                    div.innerHTML = `<button type="button" id="quantize" style="opacity: 0; transition: opacity ${continuation ? 4 : 30}s;">Ready to Quantize</button>`;
+                    div.id = 'quantizeMain';
+                    styleSheet.textContent += ' #quantize { padding: 0 0.6em; }';
+                    main.append(div);
+                    setTimeout(() => { query('#quantize').style.opacity = ''; }, 1_000);
+                    query('#quantize').addEventListener('click', () => {
+                        query('#quantize').style.transition = '';
+                        const data: Quantum = {
+                            active: null,
+                            sliderTypes: ['foam', 'particles', 'quasiparts', 'gravitons', 'chronons'],
+                            widthCache: [0, 0, 0],
+                            lastTick: Date.now(),
+                            offline: 0,
+                            upgradesInfo: {
+                                totalLevels: 0,
+                                name: [
+                                    'Quantum gain', //[0]
+                                    'Quantum improvement', //[1]
+                                    'Quantum fluctuations', //[2]
+                                    'Quantum accumulation', //[3]
+                                    'Quantum maximum', //[4]
+                                    'Virtual gain', //[5]
+                                    'Virtual improvement', //[6]
+                                    'Virtual decrease', //[7]
+                                    'Quantum automatization', //[8]
+                                    'Quantum gravity', //[9]
+                                    'Virtual maximum', //[10]
+                                    'Virtual accumulation', //[11]
+                                    'Virtual automatization', //[12]
+                                    'Virtual minimum', //[13]
+                                    'Gravitational automatization', //[14]
+                                    'Virtual quantum', //[15]
+                                    'Quasi-gain', //[16]
+                                    'Quasi-improvement', //[17]
+                                    'Gravitational potential', //[18]
+                                    'Quasi-automatization', //[19]
+                                    'Quasi-quantum', //[20]
+                                    'Virtual Black hole' //[21]
+                                ],
+                                effect: [
+                                    `${format(1.1)}x Quantum foam gain`, //[0]
+                                    `${format(1.2)}x Quantum foam gain`, //[1]
+                                    `${format(1.3)}x Quantum foam gain`, //[2]
+                                    `+${format(0.1)}x to the Foam gain per any Upgrade level`, //[3]
+                                    '+1 to the first 3 Quantum Upgrades max levels', //[4]
+                                    `${format(1.2)}x Virtual particles gain`, //[5]
+                                    `${format(1.4)}x Virtual particles gain`, //[6]
+                                    `${format(1.4)}x cheaper Virtual particles`, //[7]
+                                    'Auto Quantum foam', //[8]
+                                    `Gravitons ${format(1.5)}x gain and ${format(1.3)}x use rate`, //[9]
+                                    '+1 to the first 3 Virtual Upgrades max levels', //[10]
+                                    `+${format(0.1)}x to the Particles gain per any Upgrade level`, //[11]
+                                    'Auto Virtual particles', //[12],
+                                    `+${format(0.1)}x Cheaper Particles per any Upgrade level`, //[13]
+                                    'Auto Gravitons', //[14]
+                                    'Virtual particles boost is now multiplicative', //[15]
+                                    `${format(1.3)}x Quasiparticles gain`, //[16]
+                                    `${format(1.5)}x Quasiparticles gain`, //[17]
+                                    `Gravitons ${format(1.5)}x use rate`, //[18]
+                                    'Auto Quasiparticles', //[19]
+                                    'Quasiparticles boost is now multiplicative', //[20]
+                                    'Quasiparticles boost Foam gain' //[21]
+                                ],
+                                cost: [24, 36, 54, 100, 200, 800, 1200, 18000, 2e5, 2e6, 2e6, 1e8, 1e8, 1e11, 1e13, 1e14, 2e16, 8e16, 2e17, 6e19, 8e20, 1e22],
+                                scaling: [2, 2, 2, 1, 4, 4, 4, 3, 1, 6, 6, 1, 1, 1, 1, 1, 8, 8, 20, 1, 1, 1],
+                                max: [
+                                    () => data.quantization - 2 + data.upgrades[4], //[0]
+                                    () => data.quantization - 2 + data.upgrades[4], //[1]
+                                    () => data.quantization - 2 + data.upgrades[4], //[2]
+                                    () => data.quantization < 4 ? 0 : 1, //[3]
+                                    () => data.quantization - 3, //[4]
+                                    () => data.quantization - 4 + data.upgrades[10], //[5]
+                                    () => data.quantization - 4 + data.upgrades[10], //[6]
+                                    () => data.quantization - 5 + data.upgrades[10], //[7]
+                                    () => data.quantization < 6 ? 0 : 1, //[8]
+                                    () => data.quantization - 6, //[9]
+                                    () => data.quantization - 6, //[10]
+                                    () => data.quantization < 8 ? 0 : 1, //[11]
+                                    () => data.quantization < 8 ? 0 : 1, //[12]
+                                    () => data.quantization < 9 ? 0 : 1, //[13]
+                                    () => data.quantization < 10 ? 0 : 1, //[14]
+                                    () => data.quantization < 10 ? 0 : 1, //[15]
+                                    () => data.quantization < 11 ? 0 : data.quantization - 9, //[16]
+                                    () => data.quantization < 11 ? 0 : data.quantization - 9, //[17]
+                                    () => data.quantization - 10, //[18]
+                                    () => data.quantization < 12 ? 0 : 1, //[19]
+                                    () => data.quantization < 12 ? 0 : 1, //[20]
+                                    () => data.quantization < 12 ? 0 : 1 //[21]
+                                ]
+                            },
+                            requirement: [0, 8, 24, 100, 800, 24000, 1e6, 2e7, 1e10, 4e12, 1e16, 4e18, 1e28],
+                            upgrades: [],
+                            quantization: 12,
+                            foam: 0,
+                            particles: 0,
+                            quasiparts: 0,
+                            gravitons: 0,
+                            chronons: 0,
+                            auto: [true, true]
+                        };
+                        const replay = player.progress.quantum === -1;
+                        if (replay) {
+                            const input = document.createElement('input');
+                            input.id = 'quantizeInput';
+                            input.type = 'number';
+                            input.value = '12';
+                            input.step = '1';
+                            query('#quantizeMain').append(input);
+                            addEvent('#quantizeInput', 'change', () => {
+                                const value = Math.min(Math.max(Number((query('#quantizeInput') as HTMLInputElement).value), 0), data.requirement.length - 1);
+                                quantizeUser(isNaN(value) ? 12 : value);
+                            });
+                            styleSheet.textContent += `#quantizeMain { display: flex; }
+                            #quantizeInput { width: 1.8em; height: 2.08em; border-radius: 0; border-left: none; }`;
+                        } else if (continuation) {
+                            data.quantization = player.progress.quantum as number;
+                        } else { player.progress.quantum = 12; }
+
+                        const sliders = document.createElement('div');
+                        sliders.innerHTML = `<button type="button" id="foamMain" class="greenBorderImage greenText hollowButton"><span>Quantum foam: <span>0</span></span>
+                            <span>Click & Hold</span><span>0 per second</span>
+                        </button>
+                        <button type="button" id="particlesMain" class="greenBorderImage greenText hollowButton"><span>Virtual particles: <span>0</span></span>
+                            <span>Click & Hold</span><span>0 per second</span>
+                        </button>
+                        <button type="button" id="quasipartsMain" class="greenBorderImage greenText hollowButton"><span>Quasiparticles: <span>0</span></span>
+                            <span>Click & Hold</span><span>0 per second</span>
+                        </button>
+                        <button type="button" id="gravitonsMain" class="greenBorderImage greenText hollowButton"><span>Gravitons: <span>0</span></span>
+                            <span>Click & Hold</span><span>0 per second</span>
+                        </button>
+                        <button type="button" id="chrononsMain" class="greenBorderImage greenText hollowButton"><span>Chronons: <span>0</span></span>
+                            <span>Click & Hold</span><span>0 per second</span>
+                        </button>`;
+                        sliders.id = 'sliders';
+                        const upgrades = document.createElement('div');
+                        upgrades.id = 'upgradesQ';
+                        let upgradesHTML = `<button type="button" id="autoVP" class="hollowButton">
+                            <span class="greenText biggerWord">Toggle Virtual automatization</span>
+                            <span class="yellowText bigWord">Disable auto Virtual particles</span>
+                            <span>0 Quantum foam</span>
+                        </button>
+                        <button type="button" id="autoQP" class="hollowButton">
+                            <span class="greenText biggerWord">Toggle Quasi-automatization</span>
+                            <span class="yellowText bigWord">Disable auto Quasiparticles</span>
+                            <span>0 Quantum foam</span>
+                        </button>`;
+                        for (let i = 0; i < data.upgradesInfo.name.length; i++) {
+                            upgradesHTML += `<button type="button" id="upgradeQ${i + 1}" class="hollowButton">
+                                <span class="greenText biggerWord">${data.upgradesInfo.name[i]}</span>
+                                <span class="yellowText bigWord">${data.upgradesInfo.effect[i]}</span>
+                                <span>Undefined</span>
+                            </button>`;
+                            data.upgrades[i] = 0;
+                        }
+                        upgrades.innerHTML = upgradesHTML;
+                        main.append(sliders, upgrades);
+                        styleSheet.textContent += ` #sliders { display: flex; flex-direction: column; row-gap: 0.6em; }
+                        #sliders button { display: flex; align-items: center; column-gap: 0.6em; padding: 0 0.6em; font-size: 0.88em; }
+                        #sliders button > span:nth-of-type(2) { display: flex; align-items: center; border: 2px solid; border-color: inherit; border-top: none; border-bottom: none; height: 100%; width: max-content; padding: 0 0.6em; }
+                        #upgradesQ { display: flex; flex-direction: column; padding-top: 2px; }
+                        #upgradesQ button { display: flex; flex-direction: column; align-items: center; height: unset; padding: 0.2em 0.6em 0.25em; margin-top: -2px; background-color: var(--window-color); }
+                        #upgradesQ button:focus-visible { z-index: 1; }
+                        .hollowButton:hover { background-color: var(--hollow-hover) !important; }`;
+                        const MD = globalSave.MDSettings[0];
+                        const SR = globalSave.SRSettings[0];
+                        const PC = !MD || globalSave.MDSettings[1];
+                        {
+                            const cancel = () => { data.active = null; };
+                            if (PC) {
+                                addEvent('html', 'mouseup', cancel);
+                                addEvent('html', 'mouseleave', cancel);
+                            }
+                            if (MD) {
+                                addEvent('html', 'touchend', cancel);
+                                addEvent('html', 'touchcancel', cancel);
+                            }
+                            if (PC || SR) {
+                                addEvent('html', 'keyup', (event: KeyboardEvent) => {
+                                    if (event.code === 'Space' || event.code === 'Enter') {
+                                        data.active = null;
+                                        return;
+                                    }
+
+                                    const numberTest = Number(event.code.replace('Digit', '').replace('Numpad', ''));
+                                    if (!isNaN(numberTest) && data.active === data.sliderTypes[numberTest - 1]) { data.active = null; }
+                                });
+                                addEvent('html', 'keydown', (event: KeyboardEvent) => {
+                                    const activeType = (document.activeElement as HTMLInputElement)?.type;
+                                    if (activeType === 'text' || activeType === 'number' || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) { return; }
+
+                                    const numberTest = Number(event.code.replace('Digit', '').replace('Numpad', ''));
+                                    if (!isNaN(numberTest)) {
+                                        const type = data.sliderTypes[numberTest - 1];
+                                        if (type !== undefined) {
+                                            data.active = type;
+                                            event.preventDefault();
+                                        }
+                                    } else {
+                                        const string = globalSave.toggles[0] ? event.key.toUpperCase() : event.code.replace('Key', '');
+                                        if (string === 'Q') {
+                                            quantizeUser();
+                                        } else { return; }
+                                        event.preventDefault();
+                                    }
+                                });
+                            }
+                        }
+                        for (const type of data.sliderTypes) {
+                            const onClick = () => { data.active = type; };
+                            if (PC) {
+                                addEvent(`#${type}Main`, 'mousedown', onClick);
+                            }
+                            if (MD) {
+                                addEvent(`#${type}Main`, 'touchstart', onClick);
+                            }
+                            if (PC || SR) {
+                                addEvent(`#${type}Main`, 'keydown', (event: KeyboardEvent) => {
+                                    if (event.code === 'Space' || event.code === 'Enter') { onClick(); }
+                                });
+                            }
+                        }
+                        const quantizeUser = (force = null as null | number) => {
+                            if (data.foam >= data.requirement[data.quantization] || force !== null) {
+                                if (force === null) {
+                                    data.quantization--;
+                                    if (player.progress.quantum as number > data.quantization) { player.progress.quantum = data.quantization; }
+                                } else { data.quantization = force; }
+                                data.foam = 0;
+                                data.particles = 0;
+                                data.quasiparts = 0;
+                                data.gravitons = 0;
+                                data.chronons = 0;
+                                data.upgradesInfo.totalLevels = 0;
+                                for (let i = 0; i < data.upgrades.length; i++) { data.upgrades[i] = 0; }
+                                if (data.quantization < 0) { finished = true; }
+                                if (replay) { (query('#quantizeInput') as HTMLInputElement).value = `${data.quantization}`; }
+                                update1();
+                                update2();
+                            }
+                        };
+                        addEvent('#quantize', 'click', () => quantizeUser());
+                        addEvent('#autoVP', 'click', () => {
+                            data.auto[0] = !data.auto[0];
+                            query('#autoVP > span.bigWord').textContent = `${data.auto[0] ? 'Disable' : 'Enable'} auto Virtual particles`;
+                        });
+                        addEvent('#autoQP', 'click', () => {
+                            data.auto[1] = !data.auto[1];
+                            query('#autoQP > span.bigWord').textContent = `${data.auto[1] ? 'Disable' : 'Enable'} auto Quasiparticles`;
+                        });
+                        for (let i = 0; i < data.upgradesInfo.cost.length; i++) {
+                            addEvent(`#upgradeQ${i + 1}`, 'click', () => {
+                                const cost = calculate.upgradeCost(i);
+                                if (data.foam < cost) { return; }
+                                const max = data.upgradesInfo.max[i]();
+                                if (data.upgrades[i] >= max) { return; }
+                                data.upgradesInfo.totalLevels++;
+                                data.foam -= cost;
+                                data.upgrades[i]++;
+                                if (i === 4 || i === 10 || data.upgrades[i] >= max) { update2(); }
+                            });
+                        }
+                        const update1 = () => {
+                            const autoFoam = data.upgrades[8] >= 1;
+                            const autoParts = data.upgrades[12] >= 1 && data.auto[0];
+                            const autoQuasi = data.upgrades[19] >= 1 && data.auto[1];
+                            let totalAutos = autoFoam ? 1 : 0;
+                            if (autoParts) { totalAutos++; }
+                            if (autoQuasi) { totalAutos++; }
+                            query('#quantize').textContent = data.foam >= data.requirement[data.quantization] ? 'Ready to Quantize' : `${format(data.requirement[data.quantization])} Quantum foam`;
+                            let changed = false;
+                            for (const type of data.sliderTypes) {
+                                query(`#${type}Main > span > span`).textContent = format(data[type], { padding: true });
+                                let base = calculate[type]();
+                                if (data.active === 'chronons') {
+                                    if (type === 'chronons') {
+                                        base = -totalAutos;
+                                    } else if (type === 'gravitons') {
+                                        if (data.upgrades[14] < 1) { base = 0; }
+                                        base -= totalAutos * calculate.gravitonsUse();
+                                    } else { base *= 4 * calculate.gravitonsUse(); }
+                                }
+                                if (type === 'foam') {
+                                    if (data.active === 'foam' && data.gravitons > 0) { base *= 4 * calculate.gravitonsUse(); }
+                                    if (autoParts || data.active === 'particles') {
+                                        if (!autoFoam) { base = 0; }
+                                        let gain = calculate.particles(); //Due to weirdness this needs to be divided by 1 / timeSinceLastTick
+                                        if (data.active === 'chronons' || (data.active === 'particles' && data.gravitons > 0)) { gain *= 4 * calculate.gravitonsUse(); }
+                                        base -= gain * ((gain / 100 + data.particles - 0.5) * calculate.particlesScaling() + 1);
+                                    }
+                                } else if (type === 'particles') {
+                                    if (data.active === 'particles' && data.gravitons > 0) { base *= 4 * calculate.gravitonsUse(); }
+                                    if (autoQuasi || data.active === 'quasiparts') {
+                                        if (!autoParts) { base = 0; }
+                                        let gain = calculate.quasiparts();
+                                        if (data.active === 'chronons' || (data.active === 'quasiparts' && data.gravitons > 0)) { gain *= 4 * calculate.gravitonsUse(); }
+                                        base -= gain * ((gain / 100 + data.quasiparts - 0.5) * calculate.quasipartsScaling() + 1);
+                                    }
+                                } else if (type === 'quasiparts') {
+                                    if (data.active === 'quasiparts' && data.gravitons > 0) { base *= 4 * calculate.gravitonsUse(); }
+                                } else if (type === 'gravitons') {
+                                    if (data.active === 'foam' || data.active === 'particles' || data.active === 'quasiparts') {
+                                        if (data.upgrades[14] < 1) { base = 0; }
+                                        base -= calculate.gravitonsUse();
+                                    }
+                                }
+                                const last = query(`#${type}Main > span:last-of-type`);
+                                last.textContent = format(base, { type: 'income' });
+                                const widthTest1 = query(`#${type}Main > span`).getBoundingClientRect().width;
+                                if (data.widthCache[0] < widthTest1) {
+                                    data.widthCache[0] = widthTest1;
+                                    changed = true;
+                                }
+                                const widthTest2 = last.getBoundingClientRect().width;
+                                if (data.widthCache[1] < widthTest2) {
+                                    data.widthCache[1] = widthTest2;
+                                    changed = true;
+                                }
+                                const button = query(`#${type}Main > span:nth-of-type(2)`);
+                                const next = `var(--${data.active === type ? 'green' : 'red'}-text)`;
+                                if (button.style.color !== next) { button.style.color = next; }
+                            }
+                            if (changed) {
+                                for (const type of data.sliderTypes) {
+                                    query(`#${type}Main > span`).style.minWidth = `${data.widthCache[0]}px`;
+                                    query(`#${type}Main > span:last-of-type`).style.minWidth = `${data.widthCache[1]}px`;
+                                }
+                            }
+                            for (let i = 0; i < data.upgradesInfo.cost.length; i++) {
+                                query(`#upgradeQ${i + 1} > span:last-of-type`).textContent = `${format(calculate.upgradeCost(i))} Quantum foam`;
+                            }
+                        };
+                        const update2 = () => {
+                            const quantization = data.quantization;
+                            query('#quantizeMain').style.display = quantization >= 0 ? '' : 'none';
+                            query('#sliders').style.display = quantization > 0 ? '' : 'none';
+                            query('#particlesMain').style.display = quantization > 4 ? '' : 'none';
+                            query('#quasipartsMain').style.display = quantization > 8 ? '' : 'none';
+                            query('#gravitonsMain').style.display = quantization > 6 ? '' : 'none';
+                            query('#chrononsMain').style.display = quantization > 10 ? '' : 'none';
+                            query('#autoVP').style.display = data.upgrades[12] >= 1 ? '' : 'none';
+                            query('#autoQP').style.display = data.upgrades[19] >= 1 ? '' : 'none';
+                            const upgradesID = query('#upgradesQ');
+                            upgradesID.style.display = quantization > 2 ? '' : 'none';
+                            for (let i = 0; i < data.upgradesInfo.max.length; i++) {
+                                query(`#upgradeQ${i + 1}`).style.display = data.upgradesInfo.max[i]() > data.upgrades[i] ? '' : 'none';
+                            }
+                            const widthTest = upgradesID.getBoundingClientRect().width;
+                            if (widthTest > data.widthCache[2]) {
+                                upgradesID.style.minWidth = `${widthTest}px`;
+                                data.widthCache[2] = widthTest;
+                            }
+                        };
+                        const calculate = {
+                            foam: (): number => {
+                                let base = data.quantization;
+                                if (data.upgrades[15] >= 1) {
+                                    base *= data.particles / 4 + 1;
+                                } else { base += data.particles / 4; }
+                                if (data.upgrades[3] >= 1) { base *= data.upgradesInfo.totalLevels / 10 + 1; }
+                                if (data.upgrades[21] >= 1) { base *= data.quasiparts / 4 + 1; }
+                                return base * (1.1 ** data.upgrades[0]) * (1.2 ** data.upgrades[1]) * (1.3 ** data.upgrades[2]);
+                            },
+                            particles: (): number => {
+                                let base = Math.max(data.quantization - 4, 0);
+                                if (data.upgrades[20] >= 1) {
+                                    base *= data.quasiparts / 4 + 1;
+                                } else { base += data.quasiparts / 4; }
+                                if (data.upgrades[11] >= 1) { base *= data.upgradesInfo.totalLevels / 10 + 1; }
+                                return base * (1.2 ** data.upgrades[5]) * (1.4 ** data.upgrades[6]);
+                            },
+                            particlesScaling: (): number => {
+                                let base = 5 / data.quantization / (1.4 ** data.upgrades[7]);
+                                if (data.upgrades[13] >= 1) {
+                                    base /= data.upgradesInfo.totalLevels / 10 + 1;
+                                }
+                                return base;
+                            },
+                            quasiparts: (): number => Math.max(data.quantization - 8, 0) * (1.3 ** data.upgrades[16]) * (1.5 ** data.upgrades[17]),
+                            quasipartsScaling: (): number => 5 / (data.quantization - 4),
+                            gravitons: (): number => Math.max(data.quantization - 6, 0) * (1.5 ** data.upgrades[9]),
+                            gravitonsUse: (): number => Math.max(data.quantization - 6, 0) / 2 * (1.3 ** data.upgrades[9]) * (1.5 ** data.upgrades[18]),
+                            chronons: (): number => data.quantization >= 11 ? Math.max(data.quantization - 7, 0) / 4 : 0,
+                            chrononsMax: (): number => (data.quantization - 6) * 2,
+                            /** Automatically adds/substructs resources */
+                            resourceGain: (type: 'particles' | 'quasiparts', uses: 'foam' | 'particles', time: number) => {
+                                const gain = calculate[type]();
+                                const scaling = calculate[`${type}Scaling`]();
+                                const simplify = 1 + data[type] * scaling - scaling / 2;
+                                const maxGain = Math.min(((simplify ** 2 + 2 * scaling * data[uses]) ** 0.5 - simplify) / scaling, time * gain);
+                                if (maxGain > 0) {
+                                    data[uses] -= maxGain * (maxGain * scaling / 2 + simplify);
+                                    data[type] += maxGain;
+                                    if (data.active === type && data.gravitons > 0) {
+                                        const rate = calculate.gravitonsUse();
+                                        const improved = gain * (4 * rate - 1);
+                                        const simplify = 1 + data[type] * scaling - scaling / 2;
+                                        const maxGain = Math.min(((simplify ** 2 + 2 * scaling * data[uses]) ** 0.5 - simplify) / scaling, Math.min(data.gravitons / rate, time) * improved);
+                                        if (maxGain > 0) {
+                                            data[uses] -= maxGain * (maxGain * scaling / 2 + simplify);
+                                            data[type] += maxGain;
+                                            data.gravitons -= maxGain * rate / improved;
+                                            if (data.gravitons <= 1e-4) { data.gravitons = 0; }
+                                        }
+                                    }
+                                    if (data[uses] <= 1e-4) { data[uses] = 0; } //Makes numbers more pretty (yes, really)
+                                }
+                            },
+                            upgradeCost: (which: number): number => data.upgradesInfo.cost[which] * data.upgradesInfo.scaling[which] ** data.upgrades[which]
+                        };
+                        const mainInterval = (warp = false) => {
+                            if (!warp) {
+                                const currentTime = Date.now();
+                                data.offline += currentTime - data.lastTick;
+                                data.lastTick = currentTime;
+                                if (data.offline < 20) { return; }
+                                if (data.offline > 6e4) { data.offline = 6e4; }
+                            }
+                            data.offline -= 20;
+                            let passedTime = 0.02;
+                            const autoFoam = data.upgrades[8] >= 1;
+                            const autoParts = data.upgrades[12] >= 1 && data.auto[0];
+                            const autoQuasi = data.upgrades[19] >= 1 && data.auto[1];
+                            if (data.active !== null && !document.hasFocus()) { data.active = null; }
+                            if (data.upgrades[14] >= 1 || data.active === 'gravitons') { data.gravitons += passedTime * calculate.gravitons(); }
+                            if (data.active === 'chronons') {
+                                let totalAutos = autoFoam ? 1 : 0;
+                                if (autoParts) { totalAutos++; }
+                                if (autoQuasi) { totalAutos++; }
+
+                                const rate = calculate.gravitonsUse();
+                                const remains = Math.min(data.gravitons / (rate * totalAutos), data.chronons / totalAutos, passedTime);
+                                if (totalAutos !== 0 && remains > 0) {
+                                    data.chronons -= remains * totalAutos;
+                                    data.gravitons -= remains * rate * totalAutos;
+                                    passedTime += remains * (4 * rate - 1);
+                                    if (data.chronons <= 1e-4) { data.chronons = 0; }
+                                    if (data.gravitons <= 1e-4) { data.gravitons = 0; }
+                                }
+                            } else { data.chronons = Math.min(data.chronons + passedTime * calculate.chronons(), calculate.chrononsMax()); }
+                            if (autoFoam || data.active === 'foam') {
+                                const gain = calculate.foam();
+                                data.foam += passedTime * gain;
+                                if (data.active === 'foam' && data.gravitons > 0) {
+                                    const rate = calculate.gravitonsUse();
+                                    const remains = Math.min(data.gravitons / rate, passedTime);
+                                    data.foam += remains * gain * (4 * rate - 1);
+                                    data.gravitons -= remains * rate;
+                                    if (data.gravitons <= 1e-4) { data.gravitons = 0; }
+                                }
+                            }
+                            if (autoParts || data.active === 'particles') { calculate.resourceGain('particles', 'foam', passedTime); }
+                            if (autoQuasi || data.active === 'quasiparts') { calculate.resourceGain('quasiparts', 'particles', passedTime); }
+                            if (data.offline > 20) { mainInterval(true); }
+                        };
+                        intervalsID[0] = setInterval(mainInterval, 20);
+                        intervalsID[1] = setInterval(update1, globalSave.intervals.numbers);
+                        update1();
+                        update2();
+                    }, { once: true });
+                }, continuation ? 6_000 : 120_000); //Adds reset button
+            }, continuation ? 2_000 : 30_000); //Changes theme
+        }, continuation ? 2_000 : 4_000); //Makes button visible
+    }, continuation ? 0 : 6_000); //Adds exit button
+};
+
 export const MDStrangenessPage = (stageIndex: number) => {
     getId(`strangenessSection${global.debug.MDStrangePage}`).style.display = 'none';
     getId(`strangenessSection${stageIndex}`).style.display = '';
     global.debug.MDStrangePage = stageIndex;
 };
 
-export const checkProggress = () => {
-    proggressMain();
+export const checkProgress = () => {
+    progressMain();
 
-    const universes = player.inflation.vacuum ? player.verses[0].true : player.verses[0].other[2];
-    if (universes > player.proggress.universe) { player.proggress.universe = universes; }
+    if (player.verses[0].true > player.progress.universes[1]) { player.progress.universes[1] = player.verses[0].true; }
+    if (player.verses[0].other[2] > player.progress.universes[0]) { player.progress.universes[0] = player.verses[0].other[2]; }
     const index = player.inflation.vacuum ? 1 : 0;
-    for (let i = player.proggress.element[index] + 1; i < global.elementsInfo.maxActive; i++) {
+    for (let i = player.progress.element[index] + 1; i < global.elementsInfo.cost.length; i++) {
         if (player.elements[i] === 0) { break; }
-        player.proggress.element[index] = i;
+        player.progress.element[index] = i;
     }
-    for (let i = player.proggress.results; i < 1; i++) {
+    for (let i = player.progress.results; i < 2; i++) {
         if (player.merge.rewards[i] < 1) { break; }
-        player.proggress.results = i + 1;
+        player.progress.results = i + 1;
     }
 };
-const proggressMain = () => {
-    const proggress = player.proggress.main;
-    if (proggress >= 24 || global.offline.active) { return; }
-    if (player.inflation.ends[1] >= 1) { return proggressUp(24); }
-    if (proggress >= 23) { return; }
-    if (player.darkness.energy >= 1000) { return proggressUp(23, 12); }
-    if (proggress >= 22) { return; }
-    if (player.verses[0].true >= 5) { return proggressUp(22, 11); }
-    if (proggress >= 21) { return; }
-    if (player.inflation.ends[0] >= 1) { return proggressUp(21); }
-    if (proggress >= 20) { return; }
+const progressMain = () => {
+    const progress = player.progress.main;
+    if (progress >= 24 || global.offline.active) { return; }
+    if (player.inflation.ends[1] >= 1) { return progressUp(24); }
+    if (progress >= 23) { return; }
+    if (player.darkness.energy >= 1000) { return progressUp(23, 12); }
+    if (progress >= 22) { return; }
+    if (player.verses[0].true >= 5) { return progressUp(22, 11); }
+    if (progress >= 21) { return; }
+    if (player.cosmon[1].total > 0) { return progressUp(21); }
+    if (progress >= 20) { return; }
     if (player.inflation.vacuum) {
-        if (player.verses[0].total >= 1) { return proggressUp(20, 10); }
-        if (proggress >= 18) { return; }
-        if (player.merge.resets >= 1) { return proggressUp(18, 8); }
-        if (proggress >= 17) { return; }
-        if (player.stage.resets >= 1) { return proggressUp(17, 7); }
-        if (proggress >= 16) { return; }
-        if (player.stage.current >= 5) { return proggressUp(16); }
-        if (proggress >= 15) { return; }
-        proggressUp(15, 6);
-    } else if (proggress < 19) {
-        if (player.verses[0].total >= 1) { return proggressUp(19, 9); }
-        if (proggress >= 14) { return; }
-        if (player.stage.resets >= 7) { return proggressUp(14); }
-        if (proggress >= 13) { return; }
-        if (player.stage.resets >= 6) { return proggressUp(13); }
-        if (proggress >= 12) { return; }
-        if (player.stage.resets >= 5) { return proggressUp(12); }
-        if (proggress >= 11) { return; }
-        if (player.stage.resets >= 4) { return proggressUp(11); }
-        if (proggress >= 10) { return; }
-        if (player.stage.active >= 5) { return proggressUp(10, 5); }
-        if (proggress >= 9) { return; }
-        if (player.stage.current >= 5) { return proggressUp(9); }
-        if (proggress >= 8) { return; }
-        if (player.collapse.stars[1] >= 1) { return proggressUp(8, 4); }
-        if (proggress >= 7) { return; }
-        if (player.stage.current >= 4) { return proggressUp(7); }
-        if (proggress >= 6) { return; }
-        if (player.buildings[3][0].current.moreOrEqual(5e29)) { return proggressUp(6, 3); }
-        if (proggress >= 5) { return; }
-        if (player.stage.current >= 3) { return proggressUp(5); }
-        if (proggress >= 4) { return; }
-        if (assignResetInformation.newClouds() + player.vaporization.clouds > 1e4) { return proggressUp(4, 2); }
-        if (proggress >= 3) { return; }
-        if (player.stage.current >= 2) { return proggressUp(3); }
-        if (proggress >= 2) { return; }
-        if (player.upgrades[1][9] === 1) { return proggressUp(2, 1); }
-        if (proggress >= 1) { return; }
-        if (player.buildings[1][1].true >= 12) { proggressUp(1); }
+        if (player.verses[0].total >= 1) { return progressUp(20, 10); }
+        if (progress >= 18) { return; }
+        if (player.merge.resets >= 1) { return progressUp(18, 8); }
+        if (progress >= 17) { return; }
+        if (player.strange[0].total > 0) { return progressUp(17, 7); }
+        if (progress >= 16) { return; }
+        if (player.stage.current >= 5) { return progressUp(16); }
+        if (progress >= 15) { return; }
+        progressUp(15, 6);
+    } else if (progress < 19) {
+        if (player.verses[0].total >= 1) { return progressUp(19, 9); }
+        if (progress >= 14) { return; }
+        if (player.stage.resets >= 7) { return progressUp(14); }
+        if (progress >= 13) { return; }
+        if (player.stage.resets >= 6) { return progressUp(13); }
+        if (progress >= 12) { return; }
+        if (player.stage.resets >= 5) { return progressUp(12); }
+        if (progress >= 11) { return; }
+        if (player.strange[0].total > 0) { return progressUp(11); }
+        if (progress >= 10) { return; }
+        if (player.stage.active >= 5) { return progressUp(10, 5); }
+        if (progress >= 9) { return; }
+        if (player.stage.current >= 5) { return progressUp(9); }
+        if (progress >= 8) { return; }
+        if (player.collapse.stars[1] >= 1) { return progressUp(8, 4); }
+        if (progress >= 7) { return; }
+        if (player.stage.current >= 4) { return progressUp(7); }
+        if (progress >= 6) { return; }
+        if (player.buildings[3][0].current.moreOrEqual(5e29)) { return progressUp(6, 3); }
+        if (progress >= 5) { return; }
+        if (player.stage.current >= 3) { return progressUp(5); }
+        if (progress >= 4) { return; }
+        if (assignResetInformation.newClouds() + player.vaporization.clouds > 1e4) { return progressUp(4, 2); }
+        if (progress >= 3) { return; }
+        if (player.stage.current >= 2) { return progressUp(3); }
+        if (progress >= 2) { return; }
+        if (player.upgrades[1][9] === 1) { return progressUp(2, 1); }
+        if (progress >= 1) { return; }
+        if (player.buildings[1][1].true >= 12) { progressUp(1); }
     }
 };
-const proggressUp = (newValue: number, event = null as null | number) => {
-    const old = player.proggress.main;
-    player.proggress.main = newValue;
+const progressUp = (newValue: number, event = null as null | number) => {
+    const old = player.progress.main;
+    player.progress.main = newValue;
     if (event !== null) { playEvent(event, false); }
     if (old < 6 && newValue >= 6) {
         assignResetInformation.maxRank();
         global.debug.rankUpdated = null;
     }
-    visualProggressUnlocks();
+    visualProgressUnlocks();
     if (global.tabs.current === 'stage') {
         if (old < 15 && newValue >= 15) { switchTab(); }
     } else if (global.tabs.current === 'strangeness') {
@@ -995,23 +1680,23 @@ const proggressUp = (newValue: number, event = null as null | number) => {
             stageUpdate();
         });
     }
-    if (globalSave.developerMode) { Notify(`Game proggress had increased to ${newValue}`); }
+    if (globalSave.developerMode) { Notify(`Game progress had increased to ${newValue}`); }
 };
 
 export const replayEvent = async() => {
-    const proggress = player.proggress.main;
-    const last = proggress >= 23 ? 12 :
-        proggress >= 22 ? 11 :
-        proggress >= 20 ? 10 :
-        proggress >= 19 ? 9 :
-        proggress >= 18 ? 8 :
-        proggress >= 17 ? 7 :
-        proggress >= 15 ? 6 :
-        proggress >= 10 ? 5 :
-        proggress >= 8 ? 4 :
-        proggress >= 6 ? 3 :
-        proggress >= 4 ? 2 :
-        proggress >= 2 ? 1 : 0;
+    const progress = player.progress.main;
+    const last = progress >= 23 ? 12 :
+        progress >= 22 ? 11 :
+        progress >= 20 ? 10 :
+        progress >= 19 ? 9 :
+        progress >= 18 ? 8 :
+        progress >= 17 ? 7 :
+        progress >= 15 ? 6 :
+        progress >= 10 ? 5 :
+        progress >= 8 ? 4 :
+        progress >= 6 ? 3 :
+        progress >= 4 ? 2 :
+        progress >= 2 ? 1 : 0;
     if (last < 1) { return void Alert('There are no unlocked events'); }
 
     let text = 'Which event do you want to see again?\nEvent 1: Stage reset';
@@ -1045,21 +1730,21 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 4) {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis.';
     } else if (event === 5) {
-        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Intergalactic Stars are combined Interstellar Stars. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)";
+        text = `There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '${global.elementsInfo.name[26]}' will improve Stage reset reward based on total produced Stardust.\n(Intergalactic Stars are combined Interstellar Stars. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)`;
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
-        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the very first Challenge ‒ 'Void'. Check it out in the 'Advanced' subtab.\n(There is no reason to stay inside Challenges past time limit)";
+        text = "With Vacuum decaying, the remaining matter had rearranged itself, which had lead to the formation of the very first Challenge ‒ 'Void'. Check it out in the Advanced subtab.\n(There is no reason to stay inside Challenges past time limit)";
     } else if (event === 8) {
         text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
     } else if (event === 9) {
-        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the 'Inflation' tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' unlocks more Elements based on self-made Universes)";
+        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the Inflation tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' unlocks more Elements based on self-made Universes)";
     } else if (event === 10) {
-        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Will need to click the 'Void' button to toggle into Supervoid. End reset reward base will be increased by +1 if inside true Vacuum)";
+        text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Base for End resets reward is increased by +1 while inside true Vacuum, not affected by multipliers)";
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.";
     } else if (event === 12) {
-        text = "Unlocked a new type of End resets ‒ 'Big Rip', this one adds non-self-made Universes into Cosmons gain base.\n(Also unlocked ability to create new type of self-made Universes)";
+        text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one just adds non-self-made Universes into Cosmons gain base.\n(Doing it for the first time will also unlock new Inflation, false Vacuum Strangeness and ability to create new types of self-made Universes)`;
     }
     if (!replay) {
         text += "\n\n(Can be viewed again with 'Events' button in Settings tab)";
@@ -1071,9 +1756,9 @@ const playEvent = (event: number, replay = true) => {
 const buildBigWindow = (subWindow: string): null | HTMLElement => {
     if (getId('closeBigWindow', true) === null) {
         getId('bigWindow').innerHTML = '<article role="dialog" aria-modal="false"><button type="button" id="closeBigWindow">Close</button></article>';
-        specialHTML.styleSheet.textContent += `#bigWindow > article { display: flex; flex-direction: column; align-items: center; width: 38rem; max-width: 80vw; height: 42rem; max-height: 90vh; background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }
+        specialHTML.styleSheet.textContent += ` #bigWindow > article { display: flex; flex-direction: column; align-items: center; width: 38rem; max-width: 80vw; height: 42rem; max-height: 90vh; background-color: var(--window-color); border: 3px solid var(--window-border); border-radius: 12px; padding: 1em 1em 0.8em; row-gap: 1em; }
             #bigWindow > article > button { flex-shrink: 0; border-radius: 4px; width: 6em; font-size: 0.92em; }
-            #bigWindow > article > div { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior-y: none; } `;
+            #bigWindow > article > div { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior-y: none; }`;
     }
 
     if (getId(subWindow, true) !== null) { return null; }
@@ -1144,9 +1829,9 @@ export const openVersionInfo = () => {
         <h6>v0.0.2</h6><p>- Stats subtab</p>
         <h6>v0.0.1</h6><p>- Submerged Stage rework\n\n- Mobile device support</p>
         <h6>v0.0.0</h6><p>- First published version\n\n- Submerged Stage placeholder</p>`;
-        specialHTML.styleSheet.textContent += `#versionHTML h6 { font-size: 1.18em; }
+        specialHTML.styleSheet.textContent += ` #versionHTML h6 { font-size: 1.18em; }
             #versionHTML p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; }
-            #versionHTML p:last-of-type { margin-bottom: 0; } `;
+            #versionHTML p:last-of-type { margin-bottom: 0; }`;
     }
 
     specialHTML.bigWindow = 'version';
@@ -1174,6 +1859,7 @@ export const openHotkeys = () => {
         <p id="exitChallengeHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">exit out of the current Challenge</span></label></p>
         <div>
             <label id="createAllHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Upgrades</span></label>
+            <label id="strangenessHotkey" class="greenText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Strangeness</span></label>
             <label id="dischargeHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
             <label id="vaporizationHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
             <label id="rankHotkey" class="darkorchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
@@ -1195,6 +1881,7 @@ export const openHotkeys = () => {
         <p id="toggleAllHotkey"><span></span> <span class="whiteText">or</span> <label><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">toggle all auto Structures</span></label></p>
         <div>
             <label id="toggleUpgradesHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Upgrades</span></label>
+            <label id="toggleStrangenessHotkey" class="greenText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Strangeness</span></label>
             <label id="toggleDischargeHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
             <label id="toggleVaporizationHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
             <label id="toggleRankHotkey" class="darkorchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
@@ -1212,9 +1899,9 @@ export const openHotkeys = () => {
         const toggle = getId('globalToggle0');
         getId('hotkeysToggleLabel').append(toggle);
         toggle.style.display = '';
-        specialHTML.styleSheet.textContent += `#hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
+        specialHTML.styleSheet.textContent += ` #hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
             #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; }
-            #hotkeysHTML > div label { justify-self: center; width: max-content; } `;
+            #hotkeysHTML > div label { justify-self: center; width: max-content; }`;
 
         const changeHotkey = async(number: boolean): Promise<string | string[] | null> => {
             return await new Promise((resolve) => {
@@ -1355,6 +2042,6 @@ export const openHotkeys = () => {
     specialHTML.bigWindow = 'hotkeys';
     addCloseEvents(getId('hotkeysHTML'), getQuery('#tabRightHotkey button'));
     getQuery('#bigWindow > article').ariaLabel = 'Hotkeys menu';
-    visualProggressUnlocks();
+    visualProgressUnlocks();
     visualUpdate();
 };

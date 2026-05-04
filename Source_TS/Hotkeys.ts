@@ -1,8 +1,8 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { numbersUpdate, switchTab, visualUpdate } from './Update';
-import { buyBuilding, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleSupervoid, vaporizationResetUser } from './Stage';
-import { pauseGameUser, playerStart, simulateOffline, toggleSwap } from './Main';
+import { buyBuilding, buyStrangenessMax, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleChallengeType, vaporizationResetUser } from './Stage';
+import { pauseGameUser, simulateOffline, toggleSwap } from './Main';
 import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
 
@@ -29,6 +29,12 @@ const basicFunctions: Record<hotkeysList, () => void> = {
             player.toggles.auto[i] = !anyOn;
             toggleSwap(i, 'auto');
         }
+    },
+    strangeness: () => strangenessAll(),
+    toggleStrangeness: () => {
+        if (global.hotkeys.last === 'toggle11') { return; }
+        global.hotkeys.last = 'toggle11';
+        toggleSwap(11, 'auto', true);
     },
     discharge: () => void dischargeResetUser(),
     toggleDischarge: () => {
@@ -95,9 +101,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         global.hotkeys.last = 'toggle0';
         toggleSwap(0, 'auto', true);
     },
-    verses: () => {
-        for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
-    },
+    verses: () => buyVerse(),
     end: () => void endResetUser(),
     exitChallenge: () => {
         if (global.hotkeys.last === 'exit') { return; }
@@ -107,7 +111,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
     supervoid: () => {
         if (global.hotkeys.last === 'super') { return; }
         global.hotkeys.last = 'super';
-        if (toggleSupervoid(true)) { Notify(`Toggled into the '${global.challengesInfo[0].name}'`); }
+        if (toggleChallengeType(true)) { Notify(`Toggled into the ${global.challengesInfo[0].name}`); }
     },
     warp: () => offlineWarp(),
     pause: () => {
@@ -285,7 +289,17 @@ export const createAll = () => {
     for (let i = 0; i < global.researchesInfo[active].maxActive; i++) { buyUpgrades(i, active, 'researches'); }
     for (let i = 0; i < global.researchesExtraInfo[active].maxActive; i++) { buyUpgrades(i, active, 'researchesExtra'); }
     if (active === 4 || active === 5) {
-        for (let i = 1; i < global.elementsInfo.maxActive; i++) { buyUpgrades(i, 4, 'elements'); }
+        for (let i = 1; i < global.elementsInfo.cost.length; i++) { buyUpgrades(i, 4, 'elements'); }
+    }
+};
+export const strangenessAll = () => {
+    if (globalSave.MDSettings[0]) {
+        const s = global.debug.MDStrangePage;
+        for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
+    } else {
+        for (let s = 1; s < global.strangenessInfo.length; s++) {
+            for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
+        }
     }
 };
 export const toggleAll = () => {
