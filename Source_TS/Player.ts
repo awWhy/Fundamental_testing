@@ -1843,6 +1843,10 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             delete load.accretion['input' as keyof unknown];
 
             /* Can be shortened */
+            load.stage = deepClone(playerStart.stage); //To be moved only with elements
+            load.elements = cloneArray(playerStart.elements);
+            load.time = deepClone(playerStart.time);
+            load.toggles = deepClone(playerStart.toggles);
             load.verses = deepClone(playerStart.verses);
             if (load.buildings[6] !== undefined) { load.verses[0].true = load.buildings[6][1].true; }
             load.buildings = deepClone(playerStart.buildings);
@@ -1853,14 +1857,10 @@ export const updatePlayer = (load: playerType, decode = true): string => {
         }
         if (load.version === 'v0.2.7') {
             load.version = 'v0.2.8';
-            load.time = deepClone(playerStart.time);
-            load.toggles = deepClone(playerStart.toggles);
             load.progress = deepClone(playerStart.progress);
             const trueVerses = load.verses[0].true;
             const highestUniverse = Math.max(load.inflation.ends !== undefined ? (load.inflation.ends as number[])[2] : 0, trueVerses) + (load.inflation['voidVerses' as keyof unknown] as number ?? 0);
             load.verses = deepClone(playerStart.verses);
-            load.stage = deepClone(playerStart.stage);
-            load.elements = cloneArray(playerStart.elements);
             load.discharge = deepClone(playerStart.discharge);
             load.vaporization = deepClone(playerStart.vaporization);
             load.collapse = deepClone(playerStart.collapse);
@@ -1868,6 +1868,8 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.researches[6] = cloneArray(playerStart.researches[6]);
             load.researchesExtra[6] = cloneArray(playerStart.researchesExtra[6]);
             load.strangeness[6] = cloneArray(playerStart.strangeness[6]);
+            load.stage.peak = cloneArray(playerStart.stage.peak);
+            load.stage.input = cloneArray(playerStart.stage.input);
             load.darkness = deepClone(playerStart.darkness);
             load.challenges = deepClone(playerStart.challenges);
             load.cosmon = deepClone(playerStart.cosmon);
@@ -1880,7 +1882,9 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             }
 
             /* Can be shortened */
+            load.tree = deepClone(playerStart.tree); //Remove
             load.buildings[6] = deepClone(playerStart.buildings[6]);
+            load.time.export[3] = 0;
             if (highestUniverse > 2) {
                 load.cosmon[1].current = highestUniverse - 2;
                 load.cosmon[1].total = load.cosmon[1].current;

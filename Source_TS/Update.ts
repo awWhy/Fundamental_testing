@@ -1285,7 +1285,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 const notChanging = document.activeElement !== input2;
                 const type = stageResetType(notChanging ? player.stage.input[0] : Math.min(Number(input2.value), 3));
                 if (notChanging) { input2.value = `${type}`; }
-                input1.value = format(player.stage.input[type], { type: 'input' });
+                if (document.activeElement !== input1) { input1.value = format(player.stage.input[type], { type: 'input' }); }
                 getId('stageAutoType').textContent = ['Strange quarks', 'seconds this Stage', 'seconds since peak'][type - 1];
                 getQuery('#stageAutoInterstellar2 > span:last-of-type').textContent = `${stageResetType(3)}`;
                 if (!vacuum) {

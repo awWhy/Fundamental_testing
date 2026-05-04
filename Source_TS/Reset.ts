@@ -296,7 +296,6 @@ export const resetVacuum = (level = 0) => {
     global.debug.timeLimit = false;
     global.historyStorage.stage = [];
     player.history.stage.best = cloneArray(playerStart.history.stage.best);
-    player.challenges.void = cloneArray(playerStart.challenges.void);
 
     for (let i = 1; i < playerStart.strange.length; i++) {
         player.strange[i].current = 0;
@@ -333,10 +332,14 @@ export const resetVacuum = (level = 0) => {
     player.darkness.fluid = 0;
 
     if (player.challenges.stability >= 3 && vacuum) {
-        const voidP = player.challenges.void;
-        const total = voidP[1] + voidP[2] + voidP[3] + voidP[4] + voidP[5];
+        const superP = player.challenges.supervoid;
+        player.challenges.void = cloneArray(superP);
+        const total = superP[1] + superP[2] + superP[3] + superP[4] + superP[5];
         player.strange[0].current = total * (1 + total) / 2;
-    } else { player.strange[0].current = 0; }
+    } else {
+        player.challenges.void = cloneArray(playerStart.challenges.void);
+        player.strange[0].current = 0;
+    }
     if (universes >= 1) {
         player.strange[0].current += Math.ceil(global.inflationInfo.trueUniverses ** 1.5);
         if (vacuum) { player.strangeness[1][8] = 2; }
