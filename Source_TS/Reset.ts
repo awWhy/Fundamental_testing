@@ -222,7 +222,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     }
 };
 
-/** Level 0 is Vacuum reset, level 1 is Universe reset, level 2 is End reset */
+/** Level 0 is Vacuum reset, level 1 is Universe reset, level 2 is Multiverse reset, level 3 is End reset */
 export const resetVacuum = (level = 0) => {
     const strangenesss3S6 = player.strangeness[6][3];
     const vacuum = player.inflation.vacuum;
@@ -230,7 +230,11 @@ export const resetVacuum = (level = 0) => {
         player.verses[0].true = 0;
         player.verses[0].other = [0, 0, 0];
         global.inflationInfo.trueUniverses = 0;
-        player.verses[0].current = player.inflation.ends[0] >= 1 ? player.verses[0].highest : 0;
+        if (level >= 3) {
+            player.verses[0].current = player.inflation.ends[0] >= 1 ? player.verses[0].highest : 0;
+            player.verses[1].true = 0;
+            player.verses[1].current = 0;
+        }
         for (let i = 0; i < playerStart.tree[0].length; i++) {
             player.tree[0][i] = 0;
             assignMaxLevel(i, 0, 'inflation');

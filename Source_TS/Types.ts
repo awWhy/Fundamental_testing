@@ -493,12 +493,7 @@ export interface globalType {
 }
 /** Important starting values for Vacuum states */
 export interface vacuumStartType {
-    true: {
-        upgradesS6: Overlimit[]
-        researchesS4: Overlimit[]
-        researchesS6: Overlimit[]
-        extrasS4: Overlimit[]
-    } & vacuumTemplate
+    true: vacuumTemplate
     false: vacuumTemplate
 }
 interface vacuumTemplate {
@@ -506,19 +501,19 @@ interface vacuumTemplate {
     build0Start: Overlimit[]
     buildS1Cost: number[]
     upgradesS1: number[]
-    /** False Vacuum index needs to be reduced by -3 */
+    /** First 3 Upgrades are skipped */
     upgradesS4: Overlimit[]
-    /** False Vacuum index needs to be reduced by -3 */
+    /** First 3 Upgrades are skipped */
     upgradesS5: Overlimit[]
-    /** False Vacuum index needs to be reduced by -2 */
+    /** First 2 Researches are skipped */
     researchesS5: Overlimit[]
-    /** False Vacuum index needs to be reduced by -1 */
+    /** First Research is skipped */
     extrasS5: Overlimit[]
     researchesS1Cost: number[]
     researchesS1Scale: number[]
     ASRS1: number[]
     ASR3S3: number
-    /** False Vacuum index needs to be reduced by -27 */
+    /** First 26 Elements are skipped (first index is 27) */
     elements: Overlimit[]
     strangenessS1Cost: number[]
     strangenessS1Scale: number[]
@@ -651,7 +646,6 @@ export interface calculateEffectsType {
     S4Research4: (post?: boolean, level?: number) => number
     S4Extra1: () => number
     mergeRequirement: () => number
-    /** Returns 0 if Merge isn't unlocked */
     mergeMaxResets: (safe?: boolean) => number
     /** Other is only for index 0 and its Clusters effect */
     reward: Array<(post?: boolean, other?: number) => number>
@@ -675,6 +669,7 @@ export interface calculateEffectsType {
     S6Upgrade0: () => number
     S2Strange9: (unlocked?: boolean) => number
     trueUniversesAll: () => number
+    universeTypes: () => number
     /** Self-made Universes, but only for the current Challenge */
     trueUniverses: () => number
     T0Inflation0: () => number

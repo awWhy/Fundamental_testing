@@ -223,7 +223,9 @@ export const calculateEffects: calculateEffectsType = {
         let effect = player.vaporization.clouds + 1;
         if (post) { effect += global.vaporizationInfo.get; }
 
-        if (effect > 1e4) { effect = (effect - 1e4) ** 0.7 + 1e4; }
+        if (player.challenges.active === 0 && player.toggles.supervoid) {
+            effect **= 0.7;
+        } else if (effect > 1e4) { effect = (effect - 1e4) ** 0.7 + 1e4; }
         return effect;
     },
     cloudsGain: () => player.challenges.active === 0 ? 0.4 : player.inflation.vacuum ? 0.5 : 0.6,
@@ -387,7 +389,6 @@ export const calculateEffects: calculateEffectsType = {
     S4Extra1: () => (10 + player.researches[4][1]) / 10,
     mergeRequirement: () => 22 + (player.challenges.active === 1 ? player.challenges.stability : global.inflationInfo.trueUniverses),
     mergeMaxResets: (safe = false) => {
-        if (player.upgrades[5][3] !== 1) { return 0; }
         let max = 2 + player.researchesExtra[5][3];
         if (player.elements[30] >= 1) { max += player.collapse.highest - 29; }
         if (safe) { return max; }
@@ -449,10 +450,16 @@ export const calculateEffects: calculateEffectsType = {
         }
         return total;
     },
+    universeTypes: () => {
+        let total = player.verses[0].true !== 0 ? 1 : 0;
+        for (let i = 0; i < player.verses[0].other.length; i++) {
+            if (player.verses[0].other[i] !== 0) { total++; }
+        }
+        return total;
+    },
     trueUniverses: () => {
         if (!player.inflation.vacuum) { return player.verses[0].other[2]; }
-        const challenge = player.challenges.active;
-        return challenge === null ? player.verses[0].true : player.verses[0].other[challenge === 0 && !player.toggles.supervoid ? 0 : 1];
+        return player.challenges.active !== 0 ? player.verses[0].true : player.verses[0].other[!player.toggles.supervoid ? 0 : 1];
     },
     T0Inflation0: () => player.challenges.stability >= 1 ? 2 : Math.max(2 ** (1 - player.time.stage / 3600), 1),
     TOInflation1_softcap: () => (player.challenges.active === 0 && player.toggles.supervoid ? 1 : 1e6) * ((1 + player.researchesExtra[6][1]) ** 2),
@@ -467,15 +474,14 @@ export const calculateEffects: calculateEffectsType = {
             (!quarks ? 0 : player.strangeness[5][3] >= 1 ? 5 : 4) :
             (player.milestones[1][0] >= 6 ? 2 : 1);
         if (interstellar) { base = (base + effectsCache.element26) * effectsCache.strangeMiltipliers; }
-        if (quarks || !vacuum) {
+        if (quarks) {
             base *= (1.4 ** player.strangeness[5][2]) * (1.4 ** player.tree[0][2]) * (1.2 ** player.tree[1][1]);
             if (player.challenges.active === 1) {
                 const completions = player.challenges.stability;
                 base /= 2 ** Math.max(player.stage.resets + completions - 7, 0) * 2 ** completions;
                 if (!interstellar) { base /= 2 ** completions * 4; }
             }
-        }
-        if (!quarks) { base *= (vacuum ? 2 : 1.4) ** (player.strangeness[6][1] + player.tree[1][3]); }
+        } else if (!quarks) { base *= (vacuum ? 2 : 1.4) ** (player.strangeness[6][1] + player.tree[1][3]); }
         return base * global.strangeInfo.strangeletsInfo[1] * effectsCache.T0Inflation3;
     },
     cosmonGain: () => {
@@ -639,17 +645,13 @@ export const assignBuildingsProduction = {
         const rain = calculateEffects.S2Extra1(global.vaporizationInfo.S2Extra1);
         const flow = (player.tree[1][5] >= 3 ? 1.28 : 1.24) ** player.strangeness[2][7]; //True vacuum
 
-        const inSuper = player.challenges.active === 0 && player.toggles.supervoid;
         producings[6] = structures[6].true < 1 ? 1 : (player.upgrades[2][8] === 1 ? 1.1 : 1.08) ** structures[6].true * flow;
-        const cur5 = structures[5].current.toNumber();
-        producings[5] = Math.max((inSuper && cur5 !== 0 ? 1 + cur5 : 2 * cur5) * calculateEffects.S2Extra2(rain) * flow, 1);
-        const cur4 = structures[4].current.toNumber();
-        producings[4] = Math.max((inSuper && cur4 !== 0 ? 1 + cur4 : 2 * cur4) * flow, 1);
-        const cur3 = structures[3].current.toNumber();
-        producings[3] = Math.max((inSuper && cur3 !== 0 ? 1 + cur3 : 2 * cur3) * flow, 1);
+        producings[5] = Math.max(2 * structures[5].current.toNumber() * calculateEffects.S2Extra2(rain) * flow, 1);
+        producings[4] = Math.max(2 * structures[4].current.toNumber() * flow, 1);
+        producings[3] = Math.max(2 * structures[3].current.toNumber() * flow, 1);
         if (visual) { return 0; }
 
-        let multiplier = (player.challenges.active === 0 ? 6e-4 : 4.8) * structures[2].current.toNumber() * calculateEffects.clouds() * producings[3] * producings[4] * producings[5] * producings[6] * effectsCache.S2Upgrade3 * effectsCache.S2Upgrade4 * ((inSuper ? 1.6 : 2) ** global.vaporizationInfo.S2Research1) * rain * ((player.inflation.vacuum ? (player.tree[1][5] >= 3 ? 2 : 1.8) : 1.6) ** player.strangeness[2][1]);
+        let multiplier = (player.challenges.active === 0 ? 6e-4 : 4.8) * structures[2].current.toNumber() * calculateEffects.clouds() * producings[3] * producings[4] * producings[5] * producings[6] * effectsCache.S2Upgrade3 * effectsCache.S2Upgrade4 * ((player.challenges.active === 0 && player.toggles.supervoid ? 1.6 : 2) ** global.vaporizationInfo.S2Research1) * rain * ((player.inflation.vacuum ? (player.tree[1][5] >= 3 ? 2 : 1.8) : 1.6) ** player.strangeness[2][1]);
         if (player.upgrades[2][1] === 1) { multiplier *= calculateEffects.S2Upgrade1(); }
         if (player.inflation.vacuum) {
             multiplier *= calculateEffects.S3Extra4();
@@ -1169,6 +1171,7 @@ export const calculateBuildingsCost = (index: number, stageIndex: number): Overl
     } else if (stageIndex === 4) {
         if (player.elements[2] >= 1) { increase -= 0.1; }
         if (player.elements[8] >= 1) { increase -= 0.05; }
+        if (index === 5 && player.challenges.active === 0) { increase *= 10; }
         firstCost /= 2 ** player.strangeness[4][1];
         if (player.researchesExtra[4][3] >= 1) { firstCost /= effectsCache.star[1]; }
         if (player.elements[13] >= 1) { firstCost /= 100; }
@@ -1200,43 +1203,52 @@ export const calculateBuildingsCost = (index: number, stageIndex: number): Overl
     return new Overlimit(increase).power(player.buildings[stageIndex][index as 1].true).multiply(firstCost);
 };
 
-export const buyVerse = () => {
-    if (!checkVerse() || calculateVerseCost() > calculateEffects.mergeScore()) { return; }
+export const buyVerse = (index: number) => {
+    if (!checkVerse(index) || calculateVerseCost(index) > (index === 0 ? calculateEffects.mergeScore() : calculateEffects.universeTypes())) { return; }
     const challenge = player.challenges.active;
 
-    const verse = player.verses[0];
-    if (!player.inflation.vacuum) {
+    const verse = player.verses[index as 0];
+    if (index !== 0) {
+        verse.true++;
+    } else if (!player.inflation.vacuum) {
         verse.other[2]++;
     } else if (challenge !== null) {
-        if (player.toggles.supervoid) { return Notify('Not implemented'); }
-        verse.other[0]++;
+        verse.other[player.toggles.supervoid ? 1 : 0]++;
     } else { verse.true++; }
     verse.current++;
     verse.total++;
 
-    global.inflationInfo.trueUniverses = calculateEffects.trueUniversesAll();
-    const income = global.inflationInfo.trueUniverses;
-    player.cosmon[0].current += income;
-    player.cosmon[0].total += income;
-    player.inflation.resets++;
-    player.time.export[1] = 0;
-    player.time.export[2] = 0;
-    if (player.inflation.vacuum) {
-        player.inflation.vacuum = false;
-        prepareVacuum(false);
+    if (index === 0) {
+        global.inflationInfo.trueUniverses = calculateEffects.trueUniversesAll();
+        const income = calculateEffects.trueUniverses();
+        player.cosmon[0].current += income;
+        player.cosmon[0].total += income;
+        player.inflation.resets++;
+        player.time.export[1] = 0;
+        player.time.export[2] = 0;
+        if (player.inflation.vacuum) {
+            player.inflation.vacuum = false;
+            prepareVacuum(false);
+        }
+        player.challenges.active = null;
+        player.clone = {};
+        if ((player.stage.active !== 1 && player.toggles.normal[0]) || player.stage.active < 6) { setActiveStage(1); }
+        resetVacuum(1);
+    } else {
+        endReset(true);
+        //const income = calculateVerseCost(index);
+        //player.cosmon[0].current += income;
+        //player.cosmon[0].total += income;
     }
-    player.challenges.active = null;
-    player.clone = {};
-    if ((player.stage.active !== 1 && player.toggles.normal[0]) || player.stage.active < 6) { setActiveStage(1); }
-    resetVacuum(1);
-    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Caused Universe reset'; }
+    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = `Caused ${index === 0 ? 'Universe' : 'Multiverse'} reset`; }
 };
 
-export const calculateVerseCost = (): number => {
+export const calculateVerseCost = (index: number): number => {
+    if (index !== 0) { return 2 + player.verses[1].true; }
     let base = 120 * 1.5 ** calculateEffects.trueUniverses();
     const maxSafe = calculateEffects.mergeMaxResets(true);
     if (player.merge.resets > maxSafe) { base *= (player.merge.resets + 1) / (maxSafe + 1); }
-    return Math.ceil(base);
+    return base;
 };
 
 const gainBuildings = (get: number, stageIndex: number, time: number) => {
@@ -1581,10 +1593,23 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 if (player.clone.depth === 'stage') { player.clone.ASR[1] = global.ASRInfo.max[1]; }
                 player.ASR[1] = global.ASRInfo.max[1];
             } else if (upgrade === 6) {
+                const autoS = global.automatization.autoS;
+                for (let i = 0; i < autoS.length; i++) {
+                    const index = autoS[i][0];
+                    const stageIndex = autoS[i][1];
+                    if ((index === 6 && stageIndex === 2) || (index === 7 && (stageIndex === 3 || stageIndex === 4 || stageIndex === 5))) {
+                        autoS.splice(i, 1);
+                        i--;
+                    }
+                }
                 assignUpgradeCost(6, 2, 'strangeness');
                 assignUpgradeCost(7, 3, 'strangeness');
                 assignUpgradeCost(7, 4, 'strangeness');
                 assignUpgradeCost(7, 5, 'strangeness');
+                autoStrangenessAdd(2, 6);
+                autoStrangenessAdd(3, 7);
+                autoStrangenessAdd(4, 7);
+                autoStrangenessAdd(5, 7);
             } else if (upgrade === 7) {
                 assignResetInformation.trueEnergy();
             }
@@ -1602,10 +1627,23 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 if (player.clone.depth === 'stage') { player.clone.ASR[2] = global.ASRInfo.max[2]; }
                 player.ASR[2] = global.ASRInfo.max[2];
             } else if (upgrade === 6) {
+                const autoS = global.automatization.autoS;
+                for (let i = 0; i < autoS.length; i++) {
+                    const index = autoS[i][0];
+                    const stageIndex = autoS[i][1];
+                    if ((index === 6 && stageIndex === 1) || (index === 7 && (stageIndex === 3 || stageIndex === 4 || stageIndex === 5))) {
+                        autoS.splice(i, 1);
+                        i--;
+                    }
+                }
                 assignUpgradeCost(6, 1, 'strangeness');
                 assignUpgradeCost(7, 3, 'strangeness');
                 assignUpgradeCost(7, 4, 'strangeness');
                 assignUpgradeCost(7, 5, 'strangeness');
+                autoStrangenessAdd(1, 6);
+                autoStrangenessAdd(3, 7);
+                autoStrangenessAdd(4, 7);
+                autoStrangenessAdd(5, 7);
             } else if (upgrade === 8) {
                 assignMaxLevel(2, 2, 'researches', true);
                 assignMaxLevel(3, 2, 'researches', true);
@@ -1627,10 +1665,23 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 if (player.clone.depth === 'stage') { player.clone.researchesAuto[0] = Math.max(strangeness[6], player.clone.researchesAuto[0]); }
                 player.researchesAuto[0] = Math.max(strangeness[6], player.researchesAuto[0]);
             } else if (upgrade === 7) {
+                const autoS = global.automatization.autoS;
+                for (let i = 0; i < autoS.length; i++) {
+                    const index = autoS[i][0];
+                    const stageIndex = autoS[i][1];
+                    if ((index === 6 && (stageIndex === 1 || stageIndex === 2)) || (index === 7 && (stageIndex === 4 || stageIndex === 5))) {
+                        autoS.splice(i, 1);
+                        i--;
+                    }
+                }
                 assignUpgradeCost(6, 1, 'strangeness');
                 assignUpgradeCost(6, 2, 'strangeness');
                 assignUpgradeCost(7, 4, 'strangeness');
                 assignUpgradeCost(7, 5, 'strangeness');
+                autoStrangenessAdd(1, 6);
+                autoStrangenessAdd(2, 6);
+                autoStrangenessAdd(4, 7);
+                autoStrangenessAdd(5, 7);
             } else if (upgrade === 9) {
                 global.debug.rankUpdated = null;
                 assignResetInformation.maxRank();
@@ -1652,10 +1703,23 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 }
             } else if (upgrade === 7) {
                 if (player.verses[0].current >= 13) { assignBuildingsProduction.strange0(); }
+                const autoS = global.automatization.autoS;
+                for (let i = 0; i < autoS.length; i++) {
+                    const index = autoS[i][0];
+                    const stageIndex = autoS[i][1];
+                    if ((index === 6 && (stageIndex === 1 || stageIndex === 2)) || (index === 7 && (stageIndex === 3 || stageIndex === 5))) {
+                        autoS.splice(i, 1);
+                        i--;
+                    }
+                }
                 assignUpgradeCost(6, 1, 'strangeness');
                 assignUpgradeCost(6, 2, 'strangeness');
                 assignUpgradeCost(7, 3, 'strangeness');
                 assignUpgradeCost(7, 5, 'strangeness');
+                autoStrangenessAdd(1, 6);
+                autoStrangenessAdd(2, 6);
+                autoStrangenessAdd(3, 7);
+                autoStrangenessAdd(5, 7);
             } else if (upgrade === 8) {
                 if (player.clone.depth === 'stage') { player.clone.elements[0] = 1; }
                 if (player.elements[0] < 1) { player.elements[0] = 1; }
@@ -1676,10 +1740,23 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                 if (player.clone.depth === 'stage') { player.clone.ASR[5] = newLevel; }
                 player.ASR[5] = newLevel;
             } else if (upgrade === 7) {
+                const autoS = global.automatization.autoS;
+                for (let i = 0; i < autoS.length; i++) {
+                    const index = autoS[i][0];
+                    const stageIndex = autoS[i][1];
+                    if ((index === 6 && (stageIndex === 1 || stageIndex === 2)) || (index === 7 && (stageIndex === 3 || stageIndex === 4))) {
+                        autoS.splice(i, 1);
+                        i--;
+                    }
+                }
                 assignUpgradeCost(6, 1, 'strangeness');
                 assignUpgradeCost(6, 2, 'strangeness');
                 assignUpgradeCost(7, 3, 'strangeness');
                 assignUpgradeCost(7, 4, 'strangeness');
+                autoStrangenessAdd(1, 6);
+                autoStrangenessAdd(2, 6);
+                autoStrangenessAdd(3, 7);
+                autoStrangenessAdd(4, 7);
             } else if (upgrade === 10) {
                 assignResetInformation.trueEnergy();
             }
@@ -1725,13 +1802,18 @@ export const buyStrangeness = (upgrade: number, stageIndex: number, type: 'stran
                     }
                 }
             } else if (upgrade === 4) {
+                if (player.darkness.active && player.tree[0][5] >= 1) {
+                    const falseVacuum = !player.inflation.vacuum;
+                    if (falseVacuum || player.clone.inflation?.vacuum === false) { prepareDarkness(true, falseVacuum); }
+                    if (falseVacuum) { stageUpdate(); }
+                }
                 if (player.challenges.active === 1) {
                     for (let i = 0; i < global.challengesInfo.length; i++) {
                         assignChallengeInformation(i);
                     }
                 }
             } else if (upgrade === 5) {
-                if (player.darkness.active) {
+                if (player.darkness.active && player.tree[0][4] >= 1) {
                     const falseVacuum = !player.inflation.vacuum;
                     if (falseVacuum || player.clone.inflation?.vacuum === false) { prepareDarkness(true, falseVacuum); }
                     if (falseVacuum) { stageUpdate(); }
@@ -1777,7 +1859,7 @@ export const inflationRefund = async(noConfirmation = false, loadout = false): P
     if (inflaton.current === inflaton.total && player.tree[0][0] < 1) { return true; }
     const challenge = player.challenges.active;
     if (!noConfirmation && !await Confirm(`This will force a Stage reset${challenge !== null ? ' and restart current Challenge' : ''} to refund Inflations${loadout ? ' and load this loadout' : ''}, continue?\n(Holding shift will automatically accept this)`)) { return false; }
-    const falseDark = player.darkness.active && player.tree[0][5] >= 1;
+    const falseDark = player.darkness.active && player.tree[0][5] >= 1 && player.tree[0][4] >= 1;
 
     if (challenge !== null) { challengeReset(); }
     stageFullReset();
@@ -1986,7 +2068,7 @@ export const assignMaxLevel = (research: number, stageIndex: number, type: 'rese
         } else if (stageIndex === 4) {
             max = player.inflation.vacuum ? 5 : 4;
         } else if (stageIndex === 6) {
-            max = player.darkness.active && (player.inflation.vacuum || player.tree[0][5] >= 1) ? 1 : 0;
+            max = player.darkness.active && (player.inflation.vacuum || (player.tree[0][5] >= 1 && player.tree[0][4] >= 1)) ? 1 : 0;
         }
     } else if (type === 'strangeness') {
         if (stageIndex === 1) {
@@ -2113,7 +2195,7 @@ const autoUpgrades = (stageIndex: number) => {
     const level = player.upgrades[stageIndex];
     if (auto.length === 0) {
         for (let i = 0; i < global.upgradesInfo[stageIndex].maxActive; i++) {
-            if (level[i] < 1) { auto.push(i); }
+            if (level[i] === 0) { auto.push(i); }
         }
 
         const cost = global.upgradesInfo[stageIndex].cost;
@@ -2293,7 +2375,7 @@ export const endResetUser = async() => {
 
     if (player.toggles.confirm[6] !== 'None') {
         const array = [];
-        if ((player.inflation.vacuum || player.challenges.active !== null) && calculateVerseCost() <= calculateEffects.mergeScore()) {
+        if ((player.inflation.vacuum || player.challenges.active !== null) && calculateVerseCost(0) <= calculateEffects.mergeScore()) {
             array.push('can create the Universe');
         }
         if (!(player.clone.inflation?.vacuum as boolean ?? player.inflation.vacuum)) {
@@ -2313,7 +2395,7 @@ export const endResetUser = async() => {
     if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Caused End reset'; }
 };
 
-const endReset = () => {
+const endReset = (multiverse = false) => {
     const income = calculateEffects.cosmonGain();
     player.cosmon[1].current += income;
     player.cosmon[1].total += income;
@@ -2323,7 +2405,7 @@ const endReset = () => {
 
     const history = player.history.end;
     const storage = global.historyStorage.end;
-    const type = player.darkness.energy >= 1000 ? 1 : 0;
+    const type = !multiverse && player.darkness.energy >= 1000 ? 1 : 0;
     storage.unshift([player.time.end, income, type, player.inflation.peak[0], player.inflation.peak[1]]);
     if (income / player.time.end > history.best[1] / history.best[0]) { history.best = cloneArray(storage[0]); }
     if (storage.length > 100) { storage.length = 100; }
@@ -2345,7 +2427,7 @@ const endReset = () => {
     player.challenges.active = null;
     player.clone = {};
     if ((player.stage.active !== 1 && player.toggles.normal[0]) || player.stage.active < 6) { setActiveStage(1); }
-    resetVacuum(2);
+    resetVacuum(multiverse ? 2 : 3);
 };
 
 /** Returns true for Auto, only if reset happened */
@@ -2366,7 +2448,7 @@ export const stageResetCheck = (stageIndex: number, quarks = null as number | nu
             gainStrange(0, quarks);
 
             if (!player.toggles.auto[0] || player.strangeness[5][6] < (player.inflation.vacuum ? 1 : 2) || player.challenges.active !== null ||
-                (player.toggles.normal[4] && player.toggles.auto[9] && player.strangeness[5][9] >= 1 && player.merge.input[0] <= 0 && player.merge.resets < calculateEffects.mergeMaxResets())) { return false; }
+                (player.toggles.normal[4] && player.toggles.auto[9] && player.strangeness[5][9] >= 1 && player.merge.input[0] <= 0 && (player.inflation.vacuum || player.tree[0][5] >= 1) && player.merge.resets < calculateEffects.mergeMaxResets())) { return false; }
             const which = stageResetType();
             if (stage.input[which] <= 0 || stage.input[which] > (which === 3 ? player.time.stage - stage.peak[1] : which === 2 ? player.time.stage : global.strangeInfo.strange0Gain)) { return false; }
             stageResetReward(stageIndex);
@@ -2418,10 +2500,10 @@ export const stageResetUser = async() => {
         const array = [];
         if (active === 5) {
             if (player.inflation.vacuum || (player.tree[0][5] >= 1 && player.challenges.active !== 1)) {
-                if (calculateVerseCost() <= calculateEffects.mergeScore()) {
+                if (calculateVerseCost(0) <= calculateEffects.mergeScore()) {
                     array.push('can create the Universe');
                 }
-                if (player.merge.resets < calculateEffects.mergeMaxResets()) {
+                if (player.upgrades[5][3] === 1 && player.merge.resets < calculateEffects.mergeMaxResets()) {
                     array.push('still capable to do more Merge resets');
                 }
             } else if (player.upgrades[5][3] === 1 && player.buildings[5][3].true >= calculateEffects.mergeRequirement()) {
@@ -3312,7 +3394,7 @@ const awardStabilityReward = () => {
 
 /** Requires calling stageUpdate afterwards */
 export const prepareDarkness = (enterExit = false as boolean | null, fullReset = true) => {
-    const enabled = player.darkness.active && (player.tree[0][5] >= 1 || player.inflation.vacuum);
+    const enabled = player.darkness.active && (player.inflation.vacuum || (player.tree[0][5] >= 1 && player.tree[0][4] >= 1));
     const infoB = global.buildingsInfo;
     const infoU = global.upgradesInfo[6];
     const infoR = global.researchesInfo[6];
@@ -3323,7 +3405,7 @@ export const prepareDarkness = (enterExit = false as boolean | null, fullReset =
         player.ASR[6] = enabled && player.verses[0].lowest[0] <= 5 ? 1 : 0;
     }
     if (enterExit && player.challenges.active !== null) {
-        const enabledOutside = player.darkness.active && (player.tree[0][5] >= 1 || (player.clone.inflation?.vacuum as boolean ?? player.inflation.vacuum));
+        const enabledOutside = player.darkness.active && ((player.clone.inflation?.vacuum as boolean ?? player.inflation.vacuum) || (player.tree[0][5] >= 1 && player.tree[0][4] >= 1));
         player.clone.ASR[6] = enabledOutside && player.verses[0].lowest[0] <= 5 ? 1 : 0;
     }
     if (enabled) {

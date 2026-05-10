@@ -47,7 +47,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.researchesExtra[4][0] >= 1; }
         if (index === 3) { return player.researchesExtra[4][0] >= 2; }
         if (index === 4) { return player.researchesExtra[4][0] >= 3; }
-        if (index === 5) { return player.elements[26] >= 1 && player.challenges.active !== 0; }
+        if (index === 5) { return player.elements[26] >= 1 && (player.tree[0][5] >= 1 || player.challenges.active !== 0); }
     } else if (stageIndex === 5) {
         if (index === 1) { return player.inflation.vacuum || player.milestones[2][0] >= 7; }
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
@@ -59,10 +59,13 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
     return false;
 };
 
-export const checkVerse = (): boolean => {
-    const challenge = player.challenges.active;
-    return challenge === null ? (player.inflation.vacuum || player.tree[0][5] >= 1) :
-        (challenge === 0 && global.challengesInfo[0].time >= player.time[global.challengesInfo[0].resetType]);
+export const checkVerse = (index: number): boolean => {
+    if (index === 0) {
+        const challenge = player.challenges.active;
+        return challenge === null ? (player.inflation.vacuum || player.tree[0][5] >= 1) :
+            (challenge === 0 && global.challengesInfo[0].time >= player.time[global.challengesInfo[0].resetType]);
+    }
+    return index === 1;
 };
 
 export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements' | 'strangeness' | 'inflation'): boolean => {
@@ -245,7 +248,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 4) { return player.challenges.supervoid[1] >= 1; }
                 if (upgrade === 5) { return player.challenges.supervoid[2] >= 1; }
                 if (upgrade === 6) { return player.challenges.supervoid[3] >= 1; }
-                if (upgrade === 7) { return false; }
+                if (upgrade === 7) { return player.challenges.supervoid[4] >= 1; }
                 if (upgrade === 8) { return player.challenges.supervoid[1] >= 3; }
                 return true;
             }

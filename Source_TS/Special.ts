@@ -885,23 +885,21 @@ export const errorNotify = (text: string) => {
 export const resetMinSizes = (full = true) => {
     for (let i = 1; i <= 3; i++) {
         const element = getQuery(`#special${i} > p`);
-        specialHTML.cache.innerHTML.set(element, '');
+        specialHTML.cache.innerHTML.set(element, [0, 0]);
         element.style.minWidth = '';
     }
     for (let i = 0; i < global.researchesInfo[player.stage.active].maxActive; i++) {
-        const element = getQuery(`#research${i + 1} span`);
-        specialHTML.cache.innerHTML.set(element, '');
-        element.style.minWidth = '';
+        specialHTML.cache.innerHTML.set(`#research${i + 1}`, 0);
+        getQuery(`#research${i + 1} span`).style.minWidth = '';
     }
     for (let i = 0; i < global.researchesExtraInfo[player.stage.active].maxActive; i++) {
-        const element = getQuery(`#researchExtra${i + 1} span`);
-        specialHTML.cache.innerHTML.set(element, '');
-        element.style.minWidth = '';
+        specialHTML.cache.innerHTML.set(`#researchExtra${i + 1}`, 0);
+        getQuery(`#researchExtra${i + 1} span`).style.minWidth = '';
     }
 
     if (!full) { return; }
     const mile = getId('milestonesMultiline').parentElement as HTMLElement;
-    specialHTML.cache.innerHTML.set(mile, '');
+    specialHTML.cache.innerHTML.set(mile, 0);
     mile.style.minHeight = '';
 };
 
@@ -1605,6 +1603,10 @@ export const checkProgress = () => {
 };
 const progressMain = () => {
     const progress = player.progress.main;
+    if (progress >= 26 || global.offline.active) { return; }
+    if (player.verses[1].total >= 1) { return progressUp(26, 13); }
+    if (progress >= 25) { return; }
+    if (player.verses[0].other[2] >= 1 || player.verses[0].other[0] >= 1) { return progressUp(25); }
     if (progress >= 24 || global.offline.active) { return; }
     if (player.inflation.ends[1] >= 1) { return progressUp(24); }
     if (progress >= 23) { return; }
@@ -1685,7 +1687,8 @@ const progressUp = (newValue: number, event = null as null | number) => {
 
 export const replayEvent = async() => {
     const progress = player.progress.main;
-    const last = progress >= 23 ? 12 :
+    const last = progress >= 26 ? 13 :
+        progress >= 23 ? 12 :
         progress >= 22 ? 11 :
         progress >= 20 ? 10 :
         progress >= 19 ? 9 :
@@ -1711,6 +1714,7 @@ export const replayEvent = async() => {
     if (last >= 10) { text += '\nEvent 10: Universal End'; }
     if (last >= 11) { text += '\nEvent 11: Stability unlocked'; }
     if (last >= 12) { text += '\nEvent 12: Better End'; }
+    if (last >= 13) { text += '\nEvent 13: Miltiverse'; }
 
     const event = Number(await Prompt(text, `${last}`));
     if (event <= 0 || !isFinite(event)) { return; }
@@ -1744,7 +1748,9 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.";
     } else if (event === 12) {
-        text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one just adds non-self-made Universes into Cosmons gain base.\n(Doing it for the first time will also unlock new Inflation, false Vacuum Strangeness and ability to create new types of self-made Universes)`;
+        text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one just adds non-self-made Universes into Cosmons gain base.\n(Doing it for the first time will also unlock new Inflation and false Vacuum Strangeness)`;
+    } else if (event === 13) {
+        text = 'Multiverse placeholder text, creating it forces Big Crunch. Any End reset will reset Multiverses.';
     }
     if (!replay) {
         text += "\n\n(Can be viewed again with 'Events' button in Settings tab)";

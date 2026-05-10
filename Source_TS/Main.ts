@@ -1,7 +1,7 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
 import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleChallengeType, vaporizationResetUser } from './Stage';
-import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness } from './Special';
+import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness, resetMinSizes } from './Special';
 import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, strangenessAll, toggleAll } from './Hotkeys';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
@@ -622,7 +622,11 @@ const loadoutsLoadAuto = () => {
         for (let i = 0; i < firstCost.length; i++) {
             firstCost[i] = new Overlimit(firstCost[i]);
             upgradesInfo[s].cost[i] = new Overlimit(firstCost[i]);
-            if (s >= 4 && s <= 6) { trueInfo[`upgradesS${s as 4}`][i] = new Overlimit(firstCost[i]); }
+            if (s === 4) {
+                if (i >= 3) { trueInfo.upgradesS4[i - 3] = new Overlimit(firstCost[i]); }
+            } else if (s === 5) {
+                if (i >= 3) { trueInfo.upgradesS5[i - 3] = new Overlimit(firstCost[i]); }
+            }
         }
     }
     for (const upgradeType of ['researches', 'researchesExtra'] as const) {
@@ -637,7 +641,13 @@ const loadoutsLoadAuto = () => {
             for (let i = 0; i < firstCost.length; i++) {
                 firstCost[i] = new Overlimit(firstCost[i]);
                 pointer[s].cost[i] = new Overlimit(firstCost[i]);
-                if (s === 4 || s === 5 || (s === 6 && upgradeType === 'researches')) { trueInfo[`${upgradeType === 'researches' ? 'researches' : 'extras'}S${s as 4}`][i] = new Overlimit(firstCost[i]); }
+                if (s === 5) {
+                    if (upgradeType === 'researches') {
+                        if (i >= 2) { trueInfo.researchesS5[i - 2] = new Overlimit(firstCost[i]); }
+                    } else {
+                        if (i >= 1) { trueInfo.extrasS5[i - 1] = new Overlimit(firstCost[i]); }
+                    }
+                }
             }
             global.automatization[`auto${upgradeType === 'researches' ? 'R' : 'E'}`][s] = [];
         }
@@ -655,7 +665,7 @@ const loadoutsLoadAuto = () => {
         for (let i = 0; i < firstCost.length; i++) {
             cost[i] = new Overlimit(firstCost[i]);
             firstCost[i] = new Overlimit(firstCost[i]);
-            trueInfo.elements[i] = new Overlimit(firstCost[i]);
+            if (i >= 27) { trueInfo.elements[i - 27] = new Overlimit(firstCost[i]); }
         }
     }
     for (let s = 1; s < strangenessInfo.length; s++) {
@@ -1091,9 +1101,9 @@ try { //Start everything
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
         if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
     }
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < playerStart.verses.length; i++) {
         const button = getId(`verse${i}Btn`);
-        const clickFunc = () => buyVerse();
+        const clickFunc = () => buyVerse(i);
         button.addEventListener('click', clickFunc);
         if (PC) { button.addEventListener('mousedown', () => repeatFunction(clickFunc)); }
         if (MD) { button.addEventListener('touchstart', () => repeatFunction(clickFunc)); }
@@ -2036,6 +2046,7 @@ try { //Start everything
 
     /* Post */
     document.head.append(specialHTML.styleSheet);
+    resetMinSizes(); //Sets default values
     stageUpdate(true, true);
     if (globalSave.theme !== null) {
         getId('switchTheme0').style.textDecoration = '';
