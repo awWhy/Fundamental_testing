@@ -497,7 +497,7 @@ export const global: globalType = {
             ],
             cost: [], //False Vacuum uses separate Array
             firstCost: [1e56, 1e60, 1e120, 1e160, 1e200, 1e210, '1e360'] as unknown as Overlimit[],
-            maxActive: 7 //Required
+            maxActive: 7
         }, { //Stage 6
             name: [
                 'Dark nucleation',
@@ -512,7 +512,7 @@ export const global: globalType = {
             ],
             cost: [],
             firstCost: [8e12, 2e20] as unknown as Overlimit[],
-            maxActive: 2 //Required
+            maxActive: 0
         }
     ],
     researchesInfo: [
@@ -540,7 +540,7 @@ export const global: globalType = {
             firstCost: [1600, 4800, 16000, 32000, 16000, 24000],
             scaling: [400, 1200, 8000, 40000, 16000, 16000],
             max: [5, 4, 8, 2, 4, 3],
-            maxActive: 6 //Required
+            maxActive: 6
         }, { //Stage 2
             name: [
                 'Better Mole production',
@@ -601,7 +601,7 @@ export const global: globalType = {
             firstCost: [1e-16, 1e-15, 1e-5, 1e2, 1e10, 1e11, 1e15, 1e14, 1e12] as unknown as Overlimit[],
             scaling: [11, 111, 22, 10, 100, 100, 10, 1e4, 1e3],
             max: [9, 3, 8, 8, 2, 2, 6, 4, 4],
-            maxActive: 9 //Required
+            maxActive: 9
         }, { //Stage 4
             name: [
                 'Planetary system',
@@ -657,7 +657,7 @@ export const global: globalType = {
             firstCost: [1e54, 1e58, 1e280, 1e290, '1e550'] as unknown as Overlimit[],
             scaling: [1e8, 1e8, 1e30, 1e30, 1e60],
             max: [4, 4, 1, 1, 1],
-            maxActive: 5 //Required
+            maxActive: 5
         }, { //Stage 6
             name: [
                 'Dark aggregation',
@@ -675,7 +675,7 @@ export const global: globalType = {
             firstCost: [2e6, 2e9, 8e9, 5e15] as unknown as Overlimit[],
             scaling: [2, 2, 3, 20],
             max: [20, 8, 5, 4],
-            maxActive: 4 //Required
+            maxActive: 0
         }
     ],
     researchesExtraInfo: [
@@ -819,7 +819,7 @@ export const global: globalType = {
             firstCost: [1e80, 1e270, '1e360', '1e390', '1e570', '1e600'] as unknown as Overlimit[],
             scaling: [1, 1e120, 1e30, 1e90, 1e240, 1e90],
             max: [1, 1, 1, 1, 1, 1],
-            maxActive: 6 //Required
+            maxActive: 6
         }, { //Stage 6
             name: [
                 'Faster aggregation',
@@ -848,7 +848,7 @@ export const global: globalType = {
             firstCost: [25, 25, 50, 100, 100],
             scaling: [25, 25, 50, 100, 200],
             max: [4, 4, 5, 8, 4],
-            maxActive: 5 //Required
+            maxActive: 0
         }
     ],
     researchesAutoInfo: {
@@ -1070,6 +1070,7 @@ export const global: globalType = {
             cost: [],
             firstCost: [1, 1, 1, 2, 12, 2, 24, 2, 12, 15600],
             scaling: [2.46, 2, 6, 4, 400, 1, 2.5e14, 6, 10, 1e308],
+            scalingType: [false, false, false, false, false, false, false],
             max: [6, 4, 4, 2, 1, 1, 1, 2, 2, 1],
             maxActive: 7
         }, { //Stage 2
@@ -1103,6 +1104,7 @@ export const global: globalType = {
             cost: [],
             firstCost: [1, 1, 2, 2, 12, 4, 24, 16, 800, 9600],
             scaling: [2.46, 2, 3, 4, 800, 1, 2.5e14, 3.4, 3, 1],
+            scalingType: [false, false, false, false, false, false, false],
             max: [4, 8, 3, 2, 1, 1, 1, 6, 3, 1],
             maxActive: 7
         }, { //Stage 3
@@ -1141,6 +1143,7 @@ export const global: globalType = {
             cost: [],
             firstCost: [1, 2, 2, 24, 12, 4, 4, 24, 18000, 2.16e6],
             scaling: [2, 3.4, 3, 1, 100, 1, 1.74, 2.5e14, 2.46, 1e7],
+            scalingType: [false, false, false, false, false, false, false, false],
             max: [8, 4, 3, 1, 1, 1, 3, 1, 6, 1],
             maxActive: 8
         }, { //Stage 4
@@ -1171,8 +1174,9 @@ export const global: globalType = {
             cost: [],
             firstCost: [1, 2, 4, 2, 12, 6, 6, 24, 12000, 2.4e5],
             scaling: [2, 3.4, 3, 4, 1900, 1, 1.74, 2.5e14, 2, 3],
+            scalingType: [false, false, false, false, false, false, true, false, false, false],
             max: [8, 4, 3, 2, 1, 1, 1, 1, 8, 3],
-            maxActive: 10 //Required
+            maxActive: 10
         }, { //Stage 5
             name: [
                 'Bigger Structures',
@@ -1223,6 +1227,7 @@ export const global: globalType = {
             cost: [],
             firstCost: [24, 36, 4, 24, 15600, 24, 480, 120, 6000, 6e6, 2e7],
             scaling: [2, 2, 4, 1, 1e308, 1, 1, 5e13, 1e308, 1e308, 3],
+            scalingType: [false, false, true, false, false, false, true, false, false, false],
             max: [8, 8, 2, 1, 1, 1, 1, 1, 1, 1, 3],
             maxActive: 8
         }, { //Stage 6
@@ -1230,18 +1235,21 @@ export const global: globalType = {
                 'Global boost',
                 'Stranger gain',
                 'More Strangeness',
-                'Darkness'
+                'Darkness',
+                'Stage Synergy'
             ],
             effectText: [
                 () => `Boost global speed by ${format(1.4)}.`,
-                () => `Gain ${player.inflation.vacuum ? format(1.4) : 2} times more Strangelets from the Stage resets.`,
+                () => `Gain ${format(1.4)} times more Strangelets from the Stage resets.`,
                 () => "Increase max levels for a lot of Strangeness by +1, these include:\n'Fundamental boost', 'Bigger Puddles', 'Faster Accretion', 'Hotter Stars' and 'Bigger Structures'.",
-                () => `Unlock a new mini Stage '${global.challengesInfo[2].name}', activated in the 'Advanced' subtab.\n(This Strangeness persists through Vacuum resets)`
+                () => `Unlock a new mini Stage '${global.challengesInfo[2].name}', activated in the 'Advanced' subtab.\n(This Strangeness persists through Vacuum resets)`,
+                () => 'Boost Strangelets gain base by +Stage resets.\n(WIP) Also auto Stage now works with Darkness.'
             ],
             cost: [],
-            firstCost: [1e15, 2e15, 4e15, 4e14],
-            scaling: [4, 4, 6, 1],
-            max: [9, 9, 6, 1],
+            firstCost: [1e15, 2e15, 4e15, 4e14, Infinity],
+            scaling: [4, 4, 6, 1, 1],
+            scalingType: [false, false, false, false, false],
+            max: [9, 9, 6, 1, 1],
             maxActive: 0
         }
     ],
@@ -1467,7 +1475,7 @@ export const global: globalType = {
         ], [
             [],
             ["'Discharge improvement' (Cosmons)", "'Indestructible matter' (Milestone)", "'Conservation of resources' (Cosmons)"],
-            ["'Vaporization improvement' (Cosmons, WIP)", "'Better rewards' (Inflatons, WIP)", "'Work in progress"],
+            ["'Vaporization improvement' (Cosmons)", "'Better rewards' (Inflatons, WIP)", "'Work in progress"],
             ["'Rank improvement' (Cosmons)", "'Passive Ranks' (Milestone)", "'More Cosmons' (Cosmons)", "'Improved Offline' (Inflatons)", "'Improved conservation' (Milestone)", 'Work in progress'],
             ["'Collapse improvement' (Cosmons)", "'Stranger gain' (Cosmons and Inflatons, WIP)", "'Main Stars' (Milestone, WIP)", "'Limitless Mass' (Milestone, WIP)", "'Inflationary boost' (Inflatons, WIP)"],
             ['Work in progress', 'Work in progress', 'Work in progress', 'Work in progress']
@@ -1486,7 +1494,7 @@ export const global: globalType = {
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Intergalactic Upgrade 'Galactic Merger' cost ${format(1e10)} times more\n‒ Merge requirement is set to ${22 + completions}${player.tree[0][5] >= 1 ? '\n‒ Creation of Universes is disabled' : ''}</p>`;
         },
         needText: [['1 Completion', '2 Completions', '3 Completions', '4 Completions (WIP)', '5 Completions (WIP)', '6 Completions (WIP)', '7 Completions (WIP)', '8 Completions (WIP)', '9 Completions (WIP)'],
-            ['Stabilize false Vacuum', '1 false Universe (WIP)']],
+            ['Stabilize false Vacuum', '1 false Universe', '2 false Universe (WIP)']],
         rewardText: [[
             "Improve 'Overboost' and 'Strange gain' Inflations", //1
             "Make 'Instability' Inflation immune to End resets", //2
@@ -1498,8 +1506,9 @@ export const global: globalType = {
             'Intergalactic Milestones no longer reset (WIP)', //8
             'Start Universe resets with true Vacuum state (WIP)' //9
         ], [
-            "Protogalaxy Upgrades, Merging don't change Vacuum state", //0
-            "'Omnipresent reality', Abyss Strangeness" //1
+            "Protogalaxy Upgrades, Merging doesn't change Vacuum state", //0
+            "'Darkness' (Abyss), 'Stage Synergy' (Abyss)", //1
+            "'Dark boost' (Abyss), 'Stranger gain' (Abyss)" //2
         ]],
         resetType: 'vacuum',
         time: 5400,
@@ -1511,7 +1520,7 @@ export const global: globalType = {
             <p class="orchidText">‒ ${global.challengesInfo[2].name} uses separate automatizations\n‒ Currently ${player.tree[0][5] >= 1 && player.tree[0][4] >= 1 ? 'Enabled' : 'Disabled'} in false Vacuum\n‒ Cost for everything is increased by 10 while inside any Void\nMore information to be revealed (WIP)</p>
             <p class="cyanText">‒ Time limit is based on Universe age\n‒ Time limit is always active (WIP)\nMore information to be revealed (WIP)</p>`,
         rewardText: [
-            'Work in progress', //0
+            'Permanent, auto Stage for false Vacuum (WIP)', //0
             'Darkness Tier can be increased to 2 (WIP)', //1
             'Auto Dark energy Researches', //2
             'Auto Nucleation', //3
@@ -1559,6 +1568,8 @@ export const vacuumStart: vacuumStartType = {
         strangenessS4Scale: [],
         strangenessS5Cost: [],
         strangenessS5Scale: [],
+        strangenessS6Cost: [],
+        strangenessS6Scale: [],
         rest: [new Overlimit(global.upgradesInfo[2].firstCost[0]), global.researchesInfo[2].scaling[2], global.researchesInfo[2].scaling[3]]
     },
     false: {
@@ -1566,7 +1577,7 @@ export const vacuumStart: vacuumStartType = {
         buildS1Cost: [0, 3, 24, 3],
         upgradesS1: [0, 0, 12, 36, 120, 240, 480, 1600, 3200, 20800],
         upgradesS4: [new Overlimit(1e52), new Overlimit(1e200)],
-        upgradesS5: [new Overlimit(1e150), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000')],
+        upgradesS5: [new Overlimit(1e150), new Overlimit(1e230), new Overlimit(1e240), new Overlimit('1e9000')],
         researchesS1Cost: [600, 2000, 4000, 4000, 6000, 6000],
         researchesS1Scale: [200, 400, 2000, 12000, 4000, 6000],
         researchesS5: [new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000')],
@@ -1575,7 +1586,7 @@ export const vacuumStart: vacuumStartType = {
         ASR3S3: 2e30,
         elements: [ //Starts at [27]
             new Overlimit(1e52), new Overlimit(1e54), new Overlimit(1e200),
-            new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000')
+            new Overlimit(1e260), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000'), new Overlimit('1e9000')
         ],
         strangenessS1Cost: [1.25, 1, 1.5, 2, 4, 2, 24],
         strangenessS1Scale: [0.75, 0.5, 0.5, 2, 0, 0, 0],
@@ -1583,10 +1594,12 @@ export const vacuumStart: vacuumStartType = {
         strangenessS2Scale: [0.5, 0.6, 1, 2, 0, 0, 0],
         strangenessS3Cost: [1.2, 1, 2, 4, 4, 2, 4, 24],
         strangenessS3Scale: [0.6, 1, 1, 0, 0, 0, 2, 0],
-        strangenessS4Cost: [1.5, 1.5, 4, 2, 4, 2, 4, 24, 1e300, 2e8],
-        strangenessS4Scale: [0.75, 1.5, 1, 2, 0, 0, 68, 0, 0, 1000],
-        strangenessS5Cost: [20, 24, 240, 24, 6000, 24, 20, 120, 1e300, 6e6],
-        strangenessS5Scale: [20, 24, 240, 0, 0, 0, 220, 0, 0, 0],
+        strangenessS4Cost: [1.5, 1.5, 4, 2, 4, 2, 4, 24, Infinity, 2e8],
+        strangenessS4Scale: [0.75, 1.5, 1, 2, 0, 0, 18, 0, 0, 0],
+        strangenessS5Cost: [20, 24, 240, 24, 6000, 24, 20, 120, Infinity, 6e6],
+        strangenessS5Scale: [20, 24, 2, 0, 0, 0, 12, 0, 0, 0],
+        strangenessS6Cost: [Infinity, Infinity, Infinity, 3e9, 1e9],
+        strangenessS6Scale: [0, 0, 0, 0, 0],
         rest: [new Overlimit(1e4), 1e3, 1e2]
     }
 };
@@ -1649,16 +1662,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
     for (let i = 0; i < info.elements.length; i++) { elementsInfo.firstCost[i + 27].setValue(info.elements[i]); }
     global.ASRInfo.costRange[1] = cloneArray(info.ASRS1);
     global.ASRInfo.costRange[3][3] = info.ASR3S3;
-    strangenessInfo[1].firstCost = cloneArray(info.strangenessS1Cost);
-    strangenessInfo[1].scaling = cloneArray(info.strangenessS1Scale);
-    strangenessInfo[2].firstCost = cloneArray(info.strangenessS2Cost);
-    strangenessInfo[2].scaling = cloneArray(info.strangenessS2Scale);
-    strangenessInfo[3].firstCost = cloneArray(info.strangenessS3Cost);
-    strangenessInfo[3].scaling = cloneArray(info.strangenessS3Scale);
-    strangenessInfo[4].firstCost = cloneArray(info.strangenessS4Cost);
-    strangenessInfo[4].scaling = cloneArray(info.strangenessS4Scale);
-    strangenessInfo[5].firstCost = cloneArray(info.strangenessS5Cost);
-    strangenessInfo[5].scaling = cloneArray(info.strangenessS5Scale);
+    for (let s = 1; s <= 6; s++) {
+        strangenessInfo[s].firstCost = cloneArray(info[`strangenessS${s as 1}Cost`]);
+        strangenessInfo[s].scaling = cloneArray(info[`strangenessS${s as 1}Scale`]);
+    }
 
     const milestone1S1 = getQuery('#milestone1Stage1Div > input') as HTMLImageElement;
     const milestone1S2 = getQuery('#milestone1Stage2Div > input') as HTMLImageElement;
@@ -1760,12 +1767,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         researchesExtraInfo[2].maxActive = 3;
         researchesExtraInfo[3].maxActive = 4;
         researchesExtraInfo[4].maxActive = 3;
-        strangenessInfo[1].maxActive = 7;
-        strangenessInfo[2].maxActive = 7;
-        strangenessInfo[3].maxActive = 8;
-        strangenessInfo[5].maxActive = 10;
-        strangenessInfo[6].maxActive = 0;
-
+        for (let s = 1; s < 6; s++) {
+            if (s === 4) { continue; }
+            strangenessInfo[s].maxActive = strangenessInfo[s].scalingType.length;
+        }
         getId('milestonesExtra').innerHTML = 'Completing any tier will award 1 <span class="greenText">Strange quark</span>';
         milestone1S1.src = 'Used_art/Quarks.png';
         global.milestonesInfo[2].name[0] = 'A Nebula of Drops';
@@ -1784,7 +1789,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
 
         getId('strange10Stage4').style.display = '';
         getId('strange8Stage5').style.display = '';
-        getId('strange10Stage5').style.display = '';
+        getId('strange5Stage6').style.display = '';
         getId('milestonesProgressArea').style.display = '';
         getQuery('#stageAutoInterstellar1 span').style.display = '';
         getId('stageAutoFalse').style.display = '';
@@ -1805,6 +1810,9 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('strange1Unlocked').style.display = 'none';
         getId('strange9Stage4').style.display = 'none';
         getId('strange9Stage5').style.display = 'none';
+        getId('strange1Stage6').style.display = 'none';
+        getId('strange2Stage6').style.display = 'none';
+        getId('strange3Stage6').style.display = 'none';
         getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = 'none';
         for (let s = 1; s <= 5; s++) {
             for (let i = strangenessInfo[s].maxActive + 1; i <= strangenessInfo[s].cost.length; i++) {
@@ -1907,7 +1915,6 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.toggles.normal[5] = false;
             //load.cosmon[0].current = load.cosmon[0].total;
             //load.cosmon[1].current = load.cosmon[1].total;
-            //load.verses[0].other[0] = 0;
             load.progress.void = cloneArray(load.challenges.void);
             load.progress.universes = cloneArray(playerStart.progress.universes);
             delete load.challenges['voidCheck' as keyof unknown];
@@ -1918,8 +1925,11 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             throw new ReferenceError(`Save file version ${load.version} is not allowed`);
         }
     }
-    if (load.progress.void[5] !== load.challenges.void[5]) { //Remove
-        load.progress.void = cloneArray(load.challenges.void);
+    for (let s = 1; s < 6; s++) { //Remove
+        if (load.progress.void[s] !== load.challenges.void[s]) {
+            load.progress.void = cloneArray(load.challenges.void);
+            break;
+        }
     }
 
     for (let s = 1; s <= 6; s++) {
@@ -2089,6 +2099,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
     (getId('stageHistoryShow') as HTMLInputElement).value = `${player.history.stage.input[1]}`;
     (getId('endHistorySave') as HTMLInputElement).value = `${player.history.end.input[0]}`;
     (getId('endHistoryShow') as HTMLInputElement).value = `${player.history.end.input[1]}`;
+    for (let i = 0; i < 1; i++) { toggleSwap(i, 'verses'); } //playerStart.toggles.verses.length
     for (let i = 0; i < playerStart.toggles.normal.length; i++) { toggleSwap(i, 'normal'); }
     for (let i = 0; i < playerStart.toggles.confirm.length; i++) { toggleConfirm(i); }
     for (let i = 0; i < playerStart.toggles.hover.length; i++) { toggleSwap(i, 'hover'); }

@@ -354,7 +354,7 @@ export const resetVacuum = (level = 0) => {
     }
     if (universes >= 5 && vacuum) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    if (universes >= 13 && vacuum) { player.strangeness[5][8] = 1; }
+    if (universes >= 21 || (universes >= 13 && vacuum)) { player.strangeness[5][8] = 1; }
     player.strange[0].total = player.strange[0].current;
     prepareDarkness();
 

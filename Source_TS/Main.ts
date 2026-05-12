@@ -610,6 +610,7 @@ const loadoutsLoadAuto = () => {
     trueInfo.buildS1Cost = cloneArray(buildingsInfo.firstCost[1]);
     toggles.verses = createArray(player.verses.length, false);
     for (let s = 1; s < upgradesInfo.length; s++) {
+        const newArray = []; //To have better Array type
         const firstCost = upgradesInfo[s].firstCost;
         player.upgrades[s] = createArray(firstCost.length, 0);
         global.automatization.autoU[s] = [];
@@ -620,7 +621,7 @@ const loadoutsLoadAuto = () => {
             continue;
         }
         for (let i = 0; i < firstCost.length; i++) {
-            firstCost[i] = new Overlimit(firstCost[i]);
+            newArray[i] = new Overlimit(firstCost[i]);
             upgradesInfo[s].cost[i] = new Overlimit(firstCost[i]);
             if (s === 4) {
                 if (i >= 3) { trueInfo.upgradesS4[i - 3] = new Overlimit(firstCost[i]); }
@@ -628,10 +629,13 @@ const loadoutsLoadAuto = () => {
                 if (i >= 3) { trueInfo.upgradesS5[i - 3] = new Overlimit(firstCost[i]); }
             }
         }
+        upgradesInfo[s].firstCost = newArray;
     }
+    upgradesInfo[5].maxActive = upgradesInfo[5].firstCost.length;
     for (const upgradeType of ['researches', 'researchesExtra'] as const) {
         const pointer = global[`${upgradeType}Info`];
         for (let s = 1; s < pointer.length; s++) {
+            const newArray = []; //To have better Array type
             const firstCost = pointer[s].firstCost;
             player[upgradeType][s] = createArray(firstCost.length, 0);
             if (s === 1 || (s === 6 && upgradeType === 'researchesExtra')) {
@@ -639,7 +643,7 @@ const loadoutsLoadAuto = () => {
                 continue;
             }
             for (let i = 0; i < firstCost.length; i++) {
-                firstCost[i] = new Overlimit(firstCost[i]);
+                newArray[i] = new Overlimit(firstCost[i]);
                 pointer[s].cost[i] = new Overlimit(firstCost[i]);
                 if (s === 5) {
                     if (upgradeType === 'researches') {
@@ -649,33 +653,40 @@ const loadoutsLoadAuto = () => {
                     }
                 }
             }
+            pointer[s].firstCost = newArray;
             global.automatization[`auto${upgradeType === 'researches' ? 'R' : 'E'}`][s] = [];
         }
         if (upgradeType === 'researches') {
             trueInfo.researchesS1Cost = cloneArray(pointer[1].firstCost);
             trueInfo.researchesS1Scale = cloneArray(pointer[1].scaling);
+            pointer[1].maxActive = pointer[1].firstCost.length;
+            pointer[3].maxActive = pointer[3].firstCost.length;
         }
+        pointer[5].maxActive = pointer[5].firstCost.length;
     }
     player.researchesAuto = createArray(global.researchesAutoInfo.costRange.length, 0);
     player.ASR = createArray(global.ASRInfo.costRange.length, 0);
     trueInfo.ASRS1 = cloneArray(global.ASRInfo.costRange[1]);
     {
+        const newArray = []; //To have better Array type
         const { firstCost, cost } = global.elementsInfo;
         player.elements = createArray(firstCost.length, 0);
         for (let i = 0; i < firstCost.length; i++) {
             cost[i] = new Overlimit(firstCost[i]);
-            firstCost[i] = new Overlimit(firstCost[i]);
+            newArray[i] = new Overlimit(firstCost[i]);
             if (i >= 27) { trueInfo.elements[i - 27] = new Overlimit(firstCost[i]); }
         }
+        global.elementsInfo.firstCost = newArray;
     }
     for (let s = 1; s < strangenessInfo.length; s++) {
         const firstCost = strangenessInfo[s].firstCost;
         player.strangeness[s] = createArray(firstCost.length, 0);
         strangenessInfo[s].cost = cloneArray(firstCost);
-        if (s > 5) { continue; }
         trueInfo[`strangenessS${s as 1}Cost`] = cloneArray(firstCost);
         trueInfo[`strangenessS${s as 1}Scale`] = cloneArray(strangenessInfo[s].scaling);
     }
+    strangenessInfo[4].maxActive = strangenessInfo[4].firstCost.length;
+    strangenessInfo[6].maxActive = strangenessInfo[6].firstCost.length;
     for (let s = 1; s < milestonesInfo.length; s++) {
         player.milestones[s] = createArray(milestonesInfo[s].needText.length, 0);
         for (let i = 0; i < milestonesInfo[s].needText.length; i++) {
@@ -791,7 +802,6 @@ try { //Start everything
         specialHTML.styleSheet.textContent += ` html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
             #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
-        (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
         global.debug.MDStrangePage = 1;
 
         for (let i = 0; i <= 2; i++) {
@@ -841,10 +851,12 @@ try { //Start everything
         MDToggle1.innerHTML = '<label>Keep mouse events<button type="button" id="MDToggle1" class="specialToggle">OFF</button></label>';
         const MDToggle2 = document.createElement('li');
         MDToggle2.innerHTML = '<label>Allow zoom<button type="button" id="MDToggle2" class="specialToggle">OFF</button></label>';
-        getId('MDLi').after(MDToggle1, MDToggle2);
+        const MDToggle3 = document.createElement('li');
+        MDToggle3.innerHTML = '<label>Fix import and inputs<button type="button" id="MDToggle3" class="specialToggle">OFF</button></label>';
+        getId('MDLi').after(MDToggle1, MDToggle3, MDToggle2);
         for (let i = 1; i < globalSaveStart.MDSettings.length; i++) {
             getId(`MDToggle${i}`).addEventListener('click', () => {
-                toggleSpecial(i, 'mobile', true, i === 1);
+                toggleSpecial(i, 'mobile', true, i === 1 || i === 3);
                 if (i === 2) {
                     (getId('viewportMeta') as HTMLMetaElement).content = `width=device-width${globalSave.MDSettings[2] ? '' : ', minimum-scale=1.0, maximum-scale=1.0'}, initial-scale=1.0`;
                 }
@@ -852,6 +864,12 @@ try { //Start everything
             toggleSpecial(i, 'mobile');
         }
         if (globalSave.MDSettings[2]) { (getId('viewportMeta') as HTMLMetaElement).content = 'width=device-width, initial-scale=1.0'; }
+        if (globalSave.MDSettings[3]) {
+            (getId('file') as HTMLInputElement).accept = ''; //Accept for unknown reason not properly supported on phones
+            (getId('vaporizationInputMax') as HTMLInputElement).type = 'text'; //Some browsers ignore inputmode
+            (getId('collapseAddNewPoint') as HTMLInputElement).type = 'text';
+            (getId('collapseInputWait') as HTMLInputElement).type = 'text';
+        }
     }
     if (globalSave.SRSettings[0]) {
         const message = getId('SRMessage1');
@@ -990,6 +1008,9 @@ try { //Start everything
     for (let i = 1; i < specialHTML.lastBuilding; i++) {
         getId(`toggleBuilding${i}`).addEventListener('click', () => toggleSwap(i, 'buildings', true));
     }
+    for (let i = 0; i < 1; i++) { //playerStart.toggles.verses.length
+        getId(`toggleVerse${i}`).addEventListener('click', () => toggleSwap(i, 'verses', true));
+    }
     for (let i = 0; i < playerStart.toggles.normal.length; i++) {
         getId(`toggleNormal${i}`).addEventListener('click', () => toggleSwap(i, 'normal', true));
     }
@@ -1127,8 +1148,10 @@ try { //Start everything
         showAndFix(window);
         const input = getId('buyAnyInput') as HTMLInputElement;
         const change = () => {
-            player.toggles.shop.input = Math.max(Math.trunc(Number(input.value)), 0);
-            input.value = format(player.toggles.shop.input, { type: 'input' });
+            let value = input.value === '' ? playerStart.toggles.shop.input : Math.max(Math.trunc(Number(input.value)), 0);
+            if (!isFinite(value)) { value = playerStart.toggles.shop.input; }
+            player.toggles.shop.input = value;
+            input.value = format(value, { type: 'input' });
             numbersUpdate();
         };
         input.addEventListener('change', change);
@@ -1142,8 +1165,10 @@ try { //Start everything
         showAndFix(window);
         const input = getId('autoWaitInput') as HTMLInputElement;
         const change = () => {
-            const value = Math.max(Number(input.value), 1);
-            input.value = format((player.toggles.shop.wait[player.stage.active] = isNaN(value) ? 2 : value), { type: 'input' });
+            let value = input.value === '' ? 2 : Math.max(Number(input.value), 1);
+            if (!isFinite(value)) { value = 2; }
+            player.toggles.shop.wait[player.stage.active] = value;
+            input.value = format(value, { type: 'input' });
         };
         input.addEventListener('change', change);
         input.addEventListener('blur', () => {
@@ -1703,7 +1728,10 @@ try { //Start everything
     }
     getId('stageInput').addEventListener('change', () => {
         const input = getId('stageInput') as HTMLInputElement;
-        input.value = format((player.stage.input[player.stage.input[0]] = Number(input.value)), { type: 'input' });
+        let value = Number(input.value);
+        if (!isFinite(value)) { value = 0; }
+        player.stage.input[player.stage.input[0]] = value;
+        input.value = format(value, { type: 'input' });
     });
     {
         const input = getId('stageInputType');
@@ -1711,43 +1739,56 @@ try { //Start everything
         input.addEventListener('change', () => {
             const input = getId('stageInputType') as HTMLInputElement;
             const value = Math.trunc(Number(input.value));
-            input.value = `${player.stage.input[0] = Math.min(Math.max(1, isNaN(value) ? 1 : value), playerStart.stage.input.length - 1)}`;
+            player.stage.input[0] = Math.min(Math.max(1, !isFinite(value) ? 1 : value), playerStart.stage.input.length - 1);
+            input.value = `${player.stage.input[0]}`;
             visualUpdate();
         });
     }
     getId('vaporizationInput').addEventListener('change', () => {
         const input = getId('vaporizationInput') as HTMLInputElement;
-        input.value = format((player.vaporization.input[0] = Math.max(Number(input.value), 0)), { type: 'input' });
+        let value = input.value === '' ? playerStart.vaporization.input[0] : Number(input.value);
+        if (!isFinite(value) || value <= 1) { value = playerStart.vaporization.input[0]; }
+        player.vaporization.input[0] = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('vaporizationInputMax').addEventListener('change', () => {
         const input = getId('vaporizationInputMax') as HTMLInputElement;
-        input.value = format((player.vaporization.input[1] = Number(input.value)), { type: 'input' });
+        let value = input.value === '' ? playerStart.vaporization.input[1] : Number(input.value);
+        if (!isFinite(value)) { value = playerStart.vaporization.input[1]; }
+        player.vaporization.input[1] = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('collapseInput').addEventListener('change', () => {
         const input = getId('collapseInput') as HTMLInputElement;
-        input.value = format((player.collapse.input[0] = Math.max(Number(input.value), 1)), { type: 'input' });
+        let value = input.value === '' ? playerStart.collapse.input[0] : Number(input.value);
+        if (!isFinite(value) || value <= 1) { value = playerStart.collapse.input[0]; }
+        player.collapse.input[0] = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('collapseInputWait').addEventListener('change', () => {
         const input = getId('collapseInputWait') as HTMLInputElement;
-        input.value = format((player.collapse.input[1] = Number(input.value)), { type: 'input' });
+        let value = input.value === '' ? playerStart.collapse.input[1] : Number(input.value);
+        if (!isFinite(value)) { value = playerStart.collapse.input[1]; }
+        player.collapse.input[1] = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('collapseAddNewPoint').addEventListener('change', () => {
         const input = getId('collapseAddNewPoint') as HTMLInputElement;
+        if (input.value === '') { return; }
         const value = Number(input.value);
         input.value = '';
-        if (isFinite(value)) {
-            if (value === 0) {
-                player.collapse.points = [];
-            } else {
-                const points = player.collapse.points;
-                const index = points.indexOf(Math.abs(value));
-                if (value > 0 && index === -1) {
-                    points.push(value);
-                    points.sort((a, b) => a - b);
-                } else if (value < 0 && index !== -1) {
-                    points.splice(index, 1);
-                    points.sort((a, b) => a - b);
-                }
+        if (!isFinite(value)) { return; }
+        if (value === 0) {
+            player.collapse.points = [];
+        } else {
+            const points = player.collapse.points;
+            const index = points.indexOf(Math.abs(value));
+            if (value > 0 && index === -1) {
+                points.push(value);
+                points.sort((a, b) => a - b);
+            } else if (value < 0 && index !== -1) {
+                points.splice(index, 1);
+                points.sort((a, b) => a - b);
             }
         }
         global.collapseInfo.pointsLoop = 0;
@@ -1755,15 +1796,24 @@ try { //Start everything
     });
     getId('mergeInput').addEventListener('change', () => {
         const input = getId('mergeInput') as HTMLInputElement;
-        input.value = format((player.merge.input[0] = Math.trunc(Number(input.value))), { type: 'input' });
+        let value = input.value === '' ? playerStart.merge.input[0] : Math.trunc(Number(input.value));
+        if (!isFinite(value)) { value = playerStart.merge.input[0]; }
+        player.merge.input[0] = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('mergeInputSince').addEventListener('change', () => {
         const input = getId('mergeInputSince') as HTMLInputElement;
-        input.value = format((player.merge.input[1] = Number(input.value)), { type: 'input' });
+        let value = input.value === '' ? playerStart.merge.input[1] : Number(input.value);
+        if (!isFinite(value)) { value = playerStart.merge.input[1]; }
+        player.merge.input[1] = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('nucleationInput').addEventListener('change', () => {
         const input = getId('nucleationInput') as HTMLInputElement;
-        input.value = format((player.darkness.input = Math.max(Number(input.value), 0)), { type: 'input' });
+        let value = input.value === '' ? playerStart.darkness.input : Number(input.value);
+        if (!isFinite(value) || value <= 1) { value = playerStart.darkness.input; }
+        player.darkness.input = value;
+        input.value = format(value, { type: 'input' });
     });
     getId('versionButton').addEventListener('click', openVersionInfo);
     getId('hotkeysButton').addEventListener('click', openHotkeys);
@@ -1772,6 +1822,9 @@ try { //Start everything
         const id = getId('file') as HTMLInputElement;
         try {
             loadGame(await (id.files as FileList)[0].text());
+        } catch (error) {
+            Notify('Failed to import');
+            console.error(`Full import error\n${error}`);
         } finally { id.value = ''; }
     });
     const exportReward = () => {
@@ -1903,7 +1956,7 @@ try { //Start everything
         changePreview();
         const change = () => {
             let testValue = input.value.trim();
-            if (testValue.length === 0) {
+            if (testValue === '') {
                 testValue = playerStart.fileName;
                 input.value = testValue;
             }
@@ -1919,22 +1972,28 @@ try { //Start everything
     });
     getId('numbersInterval').addEventListener('change', () => {
         const input = getId('numbersInterval') as HTMLInputElement;
-        globalSave.intervals.numbers = Math.min(Math.max(Math.trunc(Number(input.value)), 40), 200);
-        input.value = `${globalSave.intervals.numbers}`;
+        let value = input.value === '' ? globalSaveStart.intervals.numbers : Math.min(Math.max(Math.trunc(Number(input.value)), 40), 200);
+        if (!isFinite(value)) { value = globalSaveStart.intervals.numbers; }
+        globalSave.intervals.numbers = value;
+        input.value = `${value}`;
         saveGlobalSettings();
         changeIntervals();
     });
     getId('visualInterval').addEventListener('change', () => {
         const input = getId('visualInterval') as HTMLInputElement;
-        globalSave.intervals.visual = Math.min(Math.max(Math.trunc(Number(input.value)), 200), 2000);
-        input.value = `${globalSave.intervals.visual}`;
+        let value = input.value === '' ? globalSaveStart.intervals.visual : Math.min(Math.max(Math.trunc(Number(input.value)), 200), 2000);
+        if (!isFinite(value)) { value = globalSaveStart.intervals.visual; }
+        globalSave.intervals.visual = value;
+        input.value = `${value}`;
         saveGlobalSettings();
         changeIntervals();
     });
     getId('autoSaveInterval').addEventListener('change', () => {
         const input = getId('autoSaveInterval') as HTMLInputElement;
-        globalSave.intervals.autoSave = Math.min(Math.max(Math.trunc(Number(input.value)), 5), 9999) * 1000;
-        input.value = `${globalSave.intervals.autoSave / 1000}`;
+        let value = input.value === '' ? globalSaveStart.intervals.autoSave : Math.min(Math.max(Math.trunc(Number(input.value)), 5), 9999) * 1000;
+        if (!isFinite(value)) { value = globalSaveStart.intervals.autoSave; }
+        globalSave.intervals.autoSave = value;
+        input.value = `${value / 1000}`;
         saveGlobalSettings();
         if (!global.paused) {
             clearInterval(global.intervalsId.autoSave);

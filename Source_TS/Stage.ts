@@ -46,6 +46,7 @@ export const timeUpdate = (tick: number, timeWarp: null | number = null) => {
     player.inflation.age += passedSeconds;
 
     if (player.toggles.normal[3]) { exitChallengeAuto(); }
+    if (player.toggles.verses[0] && universes.current >= 21) { buyVerse(0, true); }
     endResetCheck(true);
     if (player.inflation.vacuum) {
         stageResetCheck(5, trueSeconds);
@@ -481,7 +482,10 @@ export const calculateEffects: calculateEffectsType = {
                 base /= 2 ** Math.max(player.stage.resets + completions - 7, 0) * 2 ** completions;
                 if (!interstellar) { base /= 2 ** completions * 4; }
             }
-        } else if (!quarks) { base *= (vacuum ? 2 : 1.4) ** (player.strangeness[6][1] + player.tree[1][3]); }
+        } else if (!quarks) {
+            if (!vacuum && player.strangeness[6][4] >= 1) { base += player.stage.resets; }
+            base *= (1.4 ** player.strangeness[6][1]) * ((vacuum ? 2 : 1.4) ** player.tree[1][3]);
+        }
         return base * global.strangeInfo.strangeletsInfo[1] * effectsCache.T0Inflation3;
     },
     cosmonGain: () => {
@@ -1203,7 +1207,7 @@ export const calculateBuildingsCost = (index: number, stageIndex: number): Overl
     return new Overlimit(increase).power(player.buildings[stageIndex][index as 1].true).multiply(firstCost);
 };
 
-export const buyVerse = (index: number) => {
+export const buyVerse = (index: number, auto = false) => {
     if (!checkVerse(index) || calculateVerseCost(index) > (index === 0 ? calculateEffects.mergeScore() : calculateEffects.universeTypes())) { return; }
     const challenge = player.challenges.active;
 
@@ -1240,7 +1244,7 @@ export const buyVerse = (index: number) => {
         //player.cosmon[0].current += income;
         //player.cosmon[0].total += income;
     }
-    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = `Caused ${index === 0 ? 'Universe' : 'Multiverse'} reset`; }
+    if (!auto && globalSave.SRSettings[0]) { getId('SRMain').textContent = `Caused ${index === 0 ? 'Universe' : 'Multiverse'} reset`; }
 };
 
 export const calculateVerseCost = (index: number): number => {
@@ -1958,7 +1962,7 @@ export const calculateStrangenessCost = (index: number, stageIndex: number, leve
         if (player.strangeness[5][7] >= 2) { total++; }
         scaling *= 100 ** total;
     }
-    return player.inflation.vacuum ?
+    return player.inflation.vacuum || pointer.scalingType[index] ?
         Math.floor(Math.round((pointer.firstCost[index] * scaling ** level) * 100) / 100) :
         Math.floor(Math.round((pointer.firstCost[index] + scaling * level) * 100) / 100);
 };

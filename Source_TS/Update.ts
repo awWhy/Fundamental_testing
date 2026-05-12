@@ -830,6 +830,9 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('timeSinceGalaxy').style.display = player.researchesExtra[5][0] >= 1 ? '' : 'none';
                 getId('autoWaitMain').style.display = player.tree[1][8] < 4 ? '' : 'none';
             } else if (active === 6) {
+                const unlocked = player.verses[0].current >= 21;
+                getId('verse0Btn').tabIndex = unlocked && player.toggles.verses[0] ? -1 : 0;
+                getId('toggleVerse0').style.display = unlocked ? '' : 'none';
                 const stable = vacuum || player.tree[0][5] >= 1;
                 const darkEnergy = (vacuum || (player.tree[0][5] >= 1 && player.tree[0][4] >= 1)) && player.upgrades[6][0] === 1;
                 getId('reset0Main').style.display = darkEnergy ? '' : 'none';
@@ -1146,9 +1149,10 @@ export const visualUpdate = (ignoreOffline = false) => {
         if (subtab === 'Matter') {
             const strangeness = player.strangeness;
             const universes = player.verses[0].current;
-            const show1 = universes < 2 || global.sessionToggles[1];
-            const show2 = universes < 3 || global.sessionToggles[1];
-            const show3 = universes < 5 || global.sessionToggles[1];
+            const showX = global.sessionToggles[1];
+            const show1 = universes < 2 || showX;
+            const show2 = universes < 3 || showX;
+            const show3 = universes < 5 || showX;
             const strangeletsUnlocked = vacuum ? strangeness[5][8] >= 1 : (player.darkness.active && player.tree[0][5] >= 1 && player.tree[0][4] >= 1);
             getId('strange1').style.display = strangeletsUnlocked || player.strange[1].total > 0 ? '' : 'none';
             if (getId('strange0EffectsMain').style.display !== 'none') {
@@ -1165,7 +1169,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('strange1Unlocked').style.display = strangeletsUnlocked ? '' : 'none';
                 getId('strange5Stage1').style.display = voidProgress[4] >= 1 || show3 ? '' : 'none';
                 getId('strange8Stage1').style.display = voidProgress[1] >= 1 ? '' : 'none';
-                getId('strange9Stage1').style.display = (universes >= 1 ? global.sessionToggles[1] : voidProgress[1] >= 2) ? '' : 'none';
+                getId('strange9Stage1').style.display = (universes >= 1 ? showX : voidProgress[1] >= 2) ? '' : 'none';
                 getId('strange10Stage1').style.display = voidProgress[4] >= 2 ? '' : 'none';
                 getId('strange5Stage2').style.display = voidProgress[4] >= 1 || show3 ? '' : 'none';
                 getId('strange8Stage2').style.display = voidProgress[1] >= 3 ? '' : 'none';
@@ -1182,16 +1186,17 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('strange5Stage5').style.display = (universes >= 5 ? show3 : voidProgress[4] >= 1) && bound ? '' : 'none';
                 getId('strange6Stage5').style.display = show1 && bound ? '' : 'none';
                 getId('strange8Stage5').style.display = bound ? '' : 'none';
-                getId('strange9Stage5').style.display = voidProgress[5] >= 2 || (universes >= 13 ? global.sessionToggles[1] : voidProgress[3] >= 5) ? '' : 'none';
+                getId('strange9Stage5').style.display = voidProgress[5] >= 2 || (universes >= 13 ? showX : voidProgress[3] >= 5) ? '' : 'none';
                 getId('strange10Stage5').style.display = (universes >= 5 ? show3 : voidProgress[3] >= 6) && bound ? '' : 'none';
                 getId('strange11Stage5').style.display = voidProgress[2] >= 3 && bound ? '' : 'none';
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = voidProgress[5] >= 2 ? '' : 'none';
-                getId('strange4Stage6').style.display = player.strangeness[6][3] < 1 || global.sessionToggles[1] ? '' : 'none';
+                getId('strange4Stage6').style.display = player.strangeness[6][3] < 1 || showX ? '' : 'none';
                 if (globalSave.MDSettings[0] && global.debug.MDStrangePage === 6 && voidProgress[5] < 2) { MDStrangenessPage(1); }
             } else {
                 const milestones = player.milestones;
                 const strange5 = milestones[4][0] >= 8;
                 const firstTwo = milestones[2][0] >= 7 || milestones[3][0] >= 7;
+                const falseUniverses = player.verses[0].other[2];
 
                 getId('strange0Type').textContent = global.strangeInfo.name[strangeletsUnlocked && active === 6 ? 1 : 0];
                 getId('strangeRateType').textContent = global.strangeInfo.name[strangeletsUnlocked && active === 6 ? 1 : 0];
@@ -1207,10 +1212,13 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('strange2Stage5').style.display = firstTwo ? '' : 'none';
                 getId('strange3Stage5').style.display = milestones[5][0] >= 8 ? '' : 'none';
                 getId('strange4Stage5').style.display = firstTwo ? '' : 'none';
+                getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = strange5 ? '' : 'none';
                 getId('strange5Stage5').style.display = show3 && milestones[4][1] >= 8 ? '' : 'none';
                 getId('strange6Stage5').style.display = show1 && firstTwo ? '' : 'none';
-                getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = strange5 ? '' : 'none';
-                if (globalSave.MDSettings[0] && ((global.debug.MDStrangePage === 5 && !strange5) || global.debug.MDStrangePage > 5)) { MDStrangenessPage(1); }
+                getId('strange10Stage5').style.display = universes >= 21 && showX ? '' : 'none';
+                getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = falseUniverses >= 1 ? '' : 'none';
+                getId('strange4Stage6').style.display = player.strangeness[6][3] < 1 || showX ? '' : 'none';
+                if (globalSave.MDSettings[0] && ((global.debug.MDStrangePage === 5 && !strange5) || (global.debug.MDStrangePage === 6 && falseUniverses < 1))) { MDStrangenessPage(1); }
                 if (highest < 24) {
                     if (highest < 15) { getId('strange0').style.cursor = milestones[4][0] < 8 ? 'unset' : ''; }
                     getId('strange10Stage4').style.display = 'none';
@@ -1223,7 +1231,7 @@ export const visualUpdate = (ignoreOffline = false) => {
             getId('strange7Stage3').style.display = show2 ? '' : 'none';
             getId('strange6Stage4').style.display = show1 ? '' : 'none';
             getId('strange7Stage4').style.display = show2 ? '' : 'none';
-            getId('strange7Stage5').style.display = universes < 8 || global.sessionToggles[1] ? '' : 'none';
+            getId('strange7Stage5').style.display = universes < 8 || showX ? '' : 'none';
         } else if (subtab === 'Milestones') {
             if (!vacuum) {
                 const milestonesS4 = player.milestones[4];
@@ -1257,7 +1265,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId(`endMilestone${i + 1}`).classList[ends[i] >= 1 ? 'add' : 'remove']('completed');
             }
             const current = player.verses[0].current;
-            for (let i = 1, f1 = 1, f2 = 1, old = f1; i < 8; i++, f1 = f2, f2 += old, old = f1) {
+            for (let i = 1, f1 = 1, f2 = 1, old = f1; i < 9; i++, f1 = f2, f2 += old, old = f1) {
                 getId(`inflationMilestone${i}`).classList[current >= f2 ? 'add' : 'remove']('completed');
             }
         }
@@ -1846,7 +1854,7 @@ export const getChallengeRewards = () => {
         const best = stable ? player.progress.universes[0] + 1 : player.challenges.stability;
         const current = stable ? player.verses[0].other[2] + 1 : player.challenges.stability;
         getId('stabilityRewardsHead').textContent = `${stable ? 'Stabilization unlocks' : 'Completions rewards'}:`;
-        text += `${stable ? "False Vacuum is stabilized by activating 'Stability' Inflation\nFalse Universes unlocks related to Strangeness" : `${current} Completions, can be increased by Merging Galaxies while active\nAlso gain a single Inflaton after 1 more completion`}</p>`;
+        text += `${stable ? "False Vacuum is stabilized by activating 'Stability' Inflation\nFalse Universes unlocks are related to Strangeness" : `${current} Completions, can be increased by Merging Galaxies while active\nAlso gain a single Inflaton after 1 more completion`}</p>`;
         for (let i = 0; i < rewardText.length; i++) {
             const unlocked = i === 0 && stable ? player.tree[0][5] >= 1 : current > i;
             let failText;
@@ -2018,7 +2026,7 @@ const setRemnants = () => {
         const img2 = getQuery('#special2 > img') as HTMLImageElement;
         if (specialHTML.cache.innerHTML.get(img2) !== src2) {
             specialHTML.cache.innerHTML.set(img2, src2);
-            const name = global.april.active ? 'Antineutron' : 'neutron';
+            const name = global.april.active ? 'Antineutron' : 'Neutron';
             img2.src = `Used_art/${src2}.png`;
             img2.alt = quarkStar ? `Quark stars (${name} stars)` : `${name} stars`;
             getId('special2').dataset.title = img2.alt;

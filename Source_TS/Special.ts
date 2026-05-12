@@ -55,7 +55,7 @@ export const globalSave: globalSaveType = {
     format: ['.', ''],
     theme: null,
     fontSize: 16,
-    MDSettings: [false, false, false],
+    MDSettings: [false, false, false, false],
     SRSettings: [false, false],
     developerMode: false
 };
@@ -905,7 +905,8 @@ export const resetMinSizes = (full = true) => {
 
 export const changeFontSize = (initial = false) => {
     const input = getId('customFontSize') as HTMLInputElement;
-    const size = Math.min(Math.max(initial ? globalSave.fontSize : (input.value === '' ? 16 : Math.floor(Number(input.value) * 100) / 100), 12), 24);
+    let size = Math.min(Math.max(initial ? globalSave.fontSize : (input.value === '' ? 16 : Math.floor(Number(input.value) * 100) / 100), 12), 24);
+    if (!isFinite(size)) { size = 16; }
     if (!initial) {
         globalSave.fontSize = size;
         saveGlobalSettings();

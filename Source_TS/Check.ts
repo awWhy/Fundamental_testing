@@ -107,7 +107,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 3) { return player.inflation.vacuum ? player.accretion.rank >= 7 : player.milestones[5][1] >= 8; }
                 return player.inflation.vacuum ? player.accretion.rank >= 7 : player.tree[0][5] >= 1;
             } else if (stageIndex === 6) {
-                return upgrade === 0;
+                if (upgrade === 1) { return false; } //player.inflation.vacuum
+                return true;
             }
             break;
         case 'researches':
@@ -163,7 +164,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 0) { return (player.inflation.vacuum || player.milestones[4][1] >= 8) && player.strangeness[5][3] >= 1; }
                 return player.inflation.vacuum ? player.accretion.rank >= 7 : (player.tree[0][5] >= 1 && player.challenges.active !== 1);
             } else if (stageIndex === 6) {
-                return player.upgrades[6][0] === 1;
+                return true;
             }
             break;
         case 'researchesAuto': {
@@ -209,6 +210,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 10) { return player.challenges.void[2] >= 3; }
                     if ([0, 1, 5, 7].includes(upgrade)) { return player.strangeness[5][3] >= 1; }
                 } else if (stageIndex === 6) {
+                    if (upgrade === 4) { return false; }
                     return player.challenges.void[5] >= 2;
                 }
             } else {
@@ -233,6 +235,9 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if ([0, 1, 3, 5].includes(upgrade)) { return player.milestones[2][0] >= 7 || player.milestones[3][0] >= 7; }
                     if (upgrade === 8) { return false; }
                     if (upgrade === 9) { return player.progress.main >= 24; }
+                } else if (stageIndex === 6) {
+                    if (upgrade === 3 || upgrade === 4) { return player.verses[0].other[2] >= 1; }
+                    return false;
                 }
             }
             return true;
