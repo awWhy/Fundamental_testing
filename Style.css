@@ -102,7 +102,7 @@ body {
 .stage4borderImage { border-color: #e87400 !important; }
 .stage5borderImage { border-color: #b324e2 !important; }
 .stage6borderImage { border-color: #5300c1 !important; }
-.stageAllborderImage { border-color: var(--stage-image-borderColor) !important; }
+.stageAllBorderImage { border-color: var(--stage-image-borderColor) !important; }
 
 /* These colors are shared with --button-border */
 .stage1borderButton { border-color: darkcyan !important; }
@@ -111,7 +111,7 @@ body {
 .stage4borderButton { border-color: #a35700 !important; }
 .stage5borderButton { border-color: #8f004c !important; }
 .stage6borderButton { border-color: #6c1ad1 !important; }
-.stageAllborderButton { border-color: var(--stage-button-border) !important; }
+.stageAllBorderButton { border-color: var(--stage-button-border) !important; }
 
 /* These colors are shared with --window-color */
 .stage1windowBackground { background-color: #12121c !important; }

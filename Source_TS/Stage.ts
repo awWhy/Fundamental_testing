@@ -52,13 +52,23 @@ export const timeUpdate = (tick: number, timeWarp: null | number = null) => {
         stageResetCheck(5, trueSeconds);
     } else {
         if ((player.toggles.normal[5] || player.challenges.active === 1) && auto[9]) { mergeResetCheck(null); }
-        if (activeAll.includes(4)) { stageResetCheck(5, trueSeconds); }
-        if (activeAll.includes(3)) { stageResetCheck(3, 0); }
-        if (activeAll.includes(2)) { stageResetCheck(2, 0); }
-        if (activeAll.includes(1)) { stageResetCheck(1, 0); }
-        if (player.challenges.active === 1 && time.stage > 600 && stageResetCheck(player.stage.current)) {
-            stageResetReward(player.stage.current);
-            Notify('Stage reset has been forced');
+        if (player.toggles.normal[6] && universes.lowest[0] <= 1) { stageResetCheck(6, 0); }
+        stageResetCheck(5, trueSeconds);
+        stageResetCheck(3, 0);
+        stageResetCheck(2, 0);
+        stageResetCheck(1, 0);
+        if (player.challenges.active === 1 && time.stage > 600) {
+            if (stageResetCheck(player.stage.current)) {
+                stageResetReward(player.stage.current);
+                Notify('Stage reset has been forced');
+            } else if (!player.toggles.normal[3] || player.strangeness[5][6] < 2) {
+                if (player.stage.active < 6) { setActiveStage(1); }
+                resetVacuum();
+                Notify('Vacuum reset has been forced');
+            } else {
+                challengeReset();
+                Notify(`Automatically exited the ${global.challengesInfo[1].name}`);
+            }
         }
     }
     const vacuum = player.inflation.vacuum;
@@ -388,12 +398,12 @@ export const calculateEffects: calculateEffectsType = {
         return effect;
     },
     S4Extra1: () => (10 + player.researches[4][1]) / 10,
-    mergeRequirement: () => 22 + (player.challenges.active === 1 ? player.challenges.stability : global.inflationInfo.trueUniverses),
+    mergeRequirement: () => 22 + (player.challenges.active === 1 ? player.challenges.stability : global.inflationInfo.trueUniverses + player.verses[1].true),
     mergeMaxResets: (safe = false) => {
         let max = 2 + player.researchesExtra[5][3];
         if (player.elements[30] >= 1) { max += player.collapse.highest - 29; }
         if (safe) { return max; }
-        if (player.tree[0][5] >= 1) { max += calculateEffects.trueUniverses(); }
+        if (player.tree[0][5] >= 1) { max += calculateEffects.trueUniverses(false); }
         return max;
     },
     reward: [
@@ -458,9 +468,11 @@ export const calculateEffects: calculateEffectsType = {
         }
         return total;
     },
-    trueUniverses: () => {
-        if (!player.inflation.vacuum) { return player.verses[0].other[2]; }
-        return player.challenges.active !== 0 ? player.verses[0].true : player.verses[0].other[!player.toggles.supervoid ? 0 : 1];
+    trueUniverses: (allowEffective = true) => {
+        let self = !player.inflation.vacuum ? player.verses[0].other[2] :
+            player.challenges.active !== 0 ? player.verses[0].true : player.verses[0].other[!player.toggles.supervoid ? 0 : 1];
+        if (allowEffective) { self += player.verses[1].true; }
+        return self;
     },
     T0Inflation0: () => player.challenges.stability >= 1 ? 2 : Math.max(2 ** (1 - player.time.stage / 3600), 1),
     TOInflation1_softcap: () => (player.challenges.active === 0 && player.toggles.supervoid ? 1 : 1e6) * ((1 + player.researchesExtra[6][1]) ** 2),
@@ -488,9 +500,9 @@ export const calculateEffects: calculateEffectsType = {
         }
         return base * global.strangeInfo.strangeletsInfo[1] * effectsCache.T0Inflation3;
     },
-    cosmonGain: () => {
-        const trueVerses = global.inflationInfo.trueUniverses;
-        let base = player.darkness.energy >= 1000 ? player.verses[0].current : trueVerses;
+    cosmonGain: (bigRip = player.darkness.energy >= 1000) => {
+        const trueVerses = global.inflationInfo.trueUniverses * (1 + player.verses[1].true);
+        let base = bigRip ? player.verses[0].current : trueVerses;
         if (player.inflation.ends[1] >= 1) { base += (trueVerses - 1) * trueVerses * Math.min(player.inflation.ends[1] + 2, 10) / 40; } //Step is divided by 2
         base *= 1.4 ** player.tree[1][2];
         if (player.clone.inflation?.vacuum as boolean ?? player.inflation.vacuum) { base++; }
@@ -1224,7 +1236,7 @@ export const buyVerse = (index: number, auto = false) => {
 
     if (index === 0) {
         global.inflationInfo.trueUniverses = calculateEffects.trueUniversesAll();
-        const income = calculateEffects.trueUniverses();
+        const income = calculateEffects.trueUniverses(false);
         player.cosmon[0].current += income;
         player.cosmon[0].total += income;
         player.inflation.resets++;
@@ -1249,7 +1261,7 @@ export const buyVerse = (index: number, auto = false) => {
 
 export const calculateVerseCost = (index: number): number => {
     if (index !== 0) { return 2 + player.verses[1].true; }
-    let base = 120 * 1.5 ** calculateEffects.trueUniverses();
+    let base = 120 * 1.5 ** (calculateEffects.trueUniverses(false) + player.verses[1].true);
     const maxSafe = calculateEffects.mergeMaxResets(true);
     if (player.merge.resets > maxSafe) { base *= (player.merge.resets + 1) / (maxSafe + 1); }
     return base;
@@ -2400,7 +2412,8 @@ export const endResetUser = async() => {
 };
 
 const endReset = (multiverse = false) => {
-    const income = calculateEffects.cosmonGain();
+    const type = !multiverse && player.darkness.energy >= 1000 ? 1 : 0;
+    const income = calculateEffects.cosmonGain(type === 1);
     player.cosmon[1].current += income;
     player.cosmon[1].total += income;
     if (player.cosmon[1].current < 1e6) { //Attempt to fix floats
@@ -2409,7 +2422,6 @@ const endReset = (multiverse = false) => {
 
     const history = player.history.end;
     const storage = global.historyStorage.end;
-    const type = !multiverse && player.darkness.energy >= 1000 ? 1 : 0;
     storage.unshift([player.time.end, income, type, player.inflation.peak[0], player.inflation.peak[1]]);
     if (income / player.time.end > history.best[1] / history.best[0]) { history.best = cloneArray(storage[0]); }
     if (storage.length > 100) { storage.length = 100; }

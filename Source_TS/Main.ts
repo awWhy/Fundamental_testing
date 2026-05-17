@@ -2,7 +2,7 @@ import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumS
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
 import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageResetUser, switchStage, timeUpdate, toggleChallengeType, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness, resetMinSizes } from './Special';
-import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, offlineWarp, strangenessAll, toggleAll } from './Hotkeys';
+import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, hotkeys, offlineWarp, strangenessAll, toggleAll } from './Hotkeys';
 import { checkUpgrade } from './Check';
 import type { hotkeysList } from './Types';
 import Overlimit from './Limit';
@@ -126,10 +126,11 @@ export const simulateOffline = async(offline: number, autoConfirm = globalSave.t
     const deaccelBtn = getId('offlineDeaccelerate');
     const cancelBtn = getId('offlineCancel');
     const oldFocus = document.activeElement as HTMLElement | null;
-    const accelerate = () => { tick *= 2; };
-    const deaccelerate = () => { tick = Math.max(tick / 2, 20); };
-    const finish = () => { tick = 0; };
-    const key = (event: KeyboardEvent) => {
+    const control = new AbortController();
+    accelBtn.addEventListener('click', () => { tick *= 2; }, { signal: control.signal });
+    deaccelBtn.addEventListener('click', () => { tick = Math.max(tick / 2, 20); }, { signal: control.signal });
+    cancelBtn.addEventListener('click', () => { tick = Math.max(tick / 2, 20); }, { signal: control.signal });
+    body.addEventListener('keydown', (event: KeyboardEvent) => {
         const shift = detectShift(event);
         if (shift === null || event.code !== 'Tab') { return; }
         if (shift && document.activeElement === accelBtn) {
@@ -138,7 +139,7 @@ export const simulateOffline = async(offline: number, autoConfirm = globalSave.t
             accelBtn.focus();
         } else { return; }
         event.preventDefault();
-    };
+    }, { signal: control.signal });
     const end = () => {
         pauseGame(false);
         if (info.stage[0] !== null) {
@@ -151,11 +152,8 @@ export const simulateOffline = async(offline: number, autoConfirm = globalSave.t
             visualUpdate();
             numbersUpdate();
         }
+        control.abort();
         mainHTML.style.display = 'none';
-        accelBtn.removeEventListener('click', accelerate);
-        deaccelBtn.removeEventListener('click', deaccelerate);
-        cancelBtn.removeEventListener('click', finish);
-        body.removeEventListener('keydown', key);
         oldFocus?.focus();
         if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Offline calculation ended'; }
 
@@ -164,10 +162,6 @@ export const simulateOffline = async(offline: number, autoConfirm = globalSave.t
             saveGame(false, true);
         }
     };
-    accelBtn.addEventListener('click', accelerate);
-    deaccelBtn.addEventListener('click', deaccelerate);
-    cancelBtn.addEventListener('click', finish);
-    body.addEventListener('keydown', key);
     if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Offline calculation started'; }
     mainHTML.style.display = '';
     accelBtn.focus();
@@ -523,27 +517,21 @@ export const loadoutsFinal = (load: number[]) => {
     (getId('loadoutsEdit') as HTMLInputElement).value = string;
 };
 const loadoutsRecreate = () => {
-    const old = global.loadouts.buttons;
-    for (let i = 0; i < old.length; i++) { old[i][0].removeEventListener('click', old[i][1]); }
-    const newOld: typeof old = [];
     const listHTML = getQuery('#loadoutsList > span');
-    listHTML.textContent = '';
+    listHTML.innerHTML = '';
     for (let i = 0; i < player.inflation.loadouts.length; i++) {
         const button = document.createElement('button');
         button.textContent = player.inflation.loadouts[i][0];
         button.className = 'selectBtn redText';
         button.type = 'button';
-        const event = () => {
+        listHTML.append(button, ', ');
+        button.addEventListener('click', () => {
             const loadout = player.inflation.loadouts[i];
             (getId('loadoutsName') as HTMLInputElement).value = loadout[0];
             loadoutsFinal(cloneArray(loadout[1]));
             if (global.hotkeys.shift) { void loadoutsLoad(loadout[1]); }
-        };
-        newOld[i] = [button, event];
-        listHTML.append(button, ', ');
-        button.addEventListener('click', event);
+        });
     }
-    global.loadouts.buttons = newOld;
 };
 const loadoutsSave = () => {
     const name = (getId('loadoutsName') as HTMLInputElement).value;
@@ -587,6 +575,7 @@ const loadoutsLoadAuto = () => {
         for (let i = 0; i < length; i++) { array.push(value); }
         return array as startValue[];
     };
+    globalSave.hotkeys[1] = deepClone(globalSave.hotkeys[0]);
 
     const trueInfo = vacuumStart.true;
     const { toggles, buildings } = player;
@@ -716,23 +705,32 @@ try { //Start everything
     const globalSettings = localStorage.getItem(specialHTML.localStorage.settings);
     if (globalSettings !== null) {
         try {
-            Object.assign(globalSave, JSON.parse(atob(globalSettings)));
+            const parsed = JSON.parse(atob(globalSettings)) as typeof globalSave;
+            const oldVersion = parsed.version;
+            Object.assign(globalSave, parsed);
+            if (oldVersion === undefined) {
+                globalSave.version = 0;
+                globalSave.hotkeys = deepClone(globalSaveStart.hotkeys);
+                for (const key in globalSave.numbers) {
+                    if (globalSave.numbers[key as keyof unknown] === 'None') {
+                        delete globalSave.numbers[key as keyof unknown];
+                    }
+                }
+
+                delete globalSave.intervals['offline' as keyof unknown];
+                Notify('Hotkeys have been reset');
+            }
             const decoder = new TextDecoder();
-            for (const key in globalSave.hotkeys) { //Restore decoded data
-                const array = globalSave.hotkeys[key as hotkeysList];
-                for (let i = 0; i < array.length; i++) {
-                    array[i] = decoder.decode(Uint8Array.from(array[i], (c) => c.codePointAt(0) as number));
+            for (let i = 0; i < 2; i++) {
+                const pointer = globalSave.hotkeys[i];
+                for (const key in pointer) { //Restore decoded data
+                    pointer[key as hotkeysList] = decoder.decode(Uint8Array.from(pointer[key as hotkeysList], (c) => c.codePointAt(0) as number));
                 }
             }
             fillMissingValues(globalSave.toggles, globalSaveStart.toggles, false);
             fillMissingValues(globalSave.MDSettings, globalSaveStart.MDSettings, false);
             fillMissingValues(globalSave.SRSettings, globalSaveStart.SRSettings, false);
-            for (const key in globalSaveStart.hotkeys) {
-                globalSave.hotkeys[key as hotkeysList] ??= ['None', 'None'];
-            }
-
-            delete globalSave.intervals['offline' as keyof unknown];
-            delete globalSave.hotkeys['universe' as keyof unknown];
+            if (oldVersion !== globalSave.version) { saveGlobalSettings(); }
         } catch (error) {
             Notify('Global settings failed to parse, default ones will be used instead');
             console.log(`(Full parse error) ${error}`);
@@ -891,10 +889,6 @@ try { //Start everything
             getId(`SRToggle${i}`).addEventListener('click', () => { toggleSpecial(i, 'reader', true); });
             toggleSpecial(i, 'reader');
         }
-    } else {
-        const index = globalSave.toggles[0] ? 0 : 1;
-        getQuery('#SRMessage1 span').textContent = `${globalSave.hotkeys.tabLeft[index]} and ${globalSave.hotkeys.tabRight[index]}`;
-        getQuery('#SRMessage1 span:last-of-type').textContent = `${globalSave.hotkeys.subtabDown[index]} and ${globalSave.hotkeys.subtabUp[index]}`;
     }
 
     let oldVersion = player.version;
@@ -992,8 +986,10 @@ try { //Start everything
             toggleSpecial(i, 'global', true, refreshOnThese.includes(i));
             if (i === 0) {
                 assignHotkeys();
-                const index = globalSave.toggles[0] ? 0 : 1;
-                for (const key in globalSaveStart.hotkeys) { getQuery(`#${key}Hotkey button`).textContent = globalSave.hotkeys[key as hotkeysList][index]; }
+                const pointer = globalSave.hotkeys[globalSave.toggles[0] ? 0 : 1];
+                for (const key of hotkeys.main) {
+                    getQuery(`#${key}Hotkey button`).textContent = pointer[key] ?? 'None';
+                }
             } else if (i === 2) {
                 document.documentElement.classList[globalSave.toggles[2] ? 'remove' : 'add']('noTextSelection');
             } else if (i === 4) {
@@ -1948,26 +1944,25 @@ try { //Start everything
     getId('saveFileNameInput').addEventListener('focus', () => {
         const window = getId('saveFileNameLabel');
         const input = getId('saveFileNameInput') as HTMLInputElement;
+        const control = new AbortController();
         const changePreview = () => {
             const value = input.value.trim();
             getId('saveFileNamePreview').textContent = replaceSaveFileSpecials(value.length === 0 ? playerStart.fileName : value);
         };
         showAndFix(window);
         changePreview();
-        const change = () => {
+        input.addEventListener('change', () => {
             let testValue = input.value.trim();
             if (testValue === '') {
                 testValue = playerStart.fileName;
                 input.value = testValue;
             }
             player.fileName = testValue;
-        };
-        input.addEventListener('change', change);
-        input.addEventListener('input', changePreview);
+        }, { signal: control.signal });
+        input.addEventListener('input', changePreview, { signal: control.signal });
         input.addEventListener('blur', () => {
+            control.abort();
             window.style.display = 'none';
-            input.removeEventListener('input', changePreview);
-            input.removeEventListener('change', change);
         }, { once: true });
     });
     getId('numbersInterval').addEventListener('change', () => {
@@ -2053,6 +2048,7 @@ try { //Start everything
             const screenHeight = body.clientHeight;
 
             const html = event.currentTarget as HTMLElement;
+            const control = new AbortController();
             const current = html.getBoundingClientRect();
             const offsetX = current.right - (mouse ? event.clientX : event.changedTouches[0].clientX);
             const offsetY = current.bottom - (mouse ? event.clientY : event.changedTouches[0].clientY);
@@ -2063,26 +2059,20 @@ try { //Start everything
 
                 if (!mouse) { html.style.opacity = '1'; }
             };
-            const removeEvents = mouse ? () => {
-                body.removeEventListener('mousemove', move);
-                body.removeEventListener('mouseup', removeEvents);
-                body.removeEventListener('mouseleave', removeEvents);
-                html.style.opacity = '';
-            } : () => {
-                body.removeEventListener('touchmove', move);
-                body.removeEventListener('touchend', removeEvents);
-                body.removeEventListener('touchcancel', removeEvents);
+            const removeEvents = () => {
+                control.abort();
+                if (mouse) { html.style.opacity = ''; }
             };
             if (mouse) {
-                body.addEventListener('mousemove', move);
-                body.addEventListener('mouseup', removeEvents);
-                body.addEventListener('mouseleave', removeEvents);
+                body.addEventListener('mousemove', move, { signal: control.signal });
+                body.addEventListener('mouseup', removeEvents, { signal: control.signal });
+                body.addEventListener('mouseleave', removeEvents, { signal: control.signal });
                 html.style.opacity = '1';
             } else {
                 event.preventDefault(); //To prevent scrolling, doesn't work sometimes
-                body.addEventListener('touchmove', move);
-                body.addEventListener('touchend', removeEvents);
-                body.addEventListener('touchcancel', removeEvents);
+                body.addEventListener('touchmove', move, { signal: control.signal });
+                body.addEventListener('touchend', removeEvents, { signal: control.signal });
+                body.addEventListener('touchcancel', removeEvents, { signal: control.signal });
                 html.style.opacity = '0.2';
             }
         };

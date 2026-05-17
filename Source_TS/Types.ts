@@ -159,7 +159,7 @@ export interface playerType {
     }
     toggles: {
         /** Stay till time out[0], Auto disable Vaporization[1], Auto disable Stage[2], Automatic leave[3],
-         * Stay till no Merges[4], Allow Vacuum change[5] */
+         * Stay till no Merges[4], Allow Vacuum change[5], Reset Abyss[6] */
         normal: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6], Nucleation[7] */
         confirm: Array<'All' | 'Safe' | 'None'>
@@ -490,8 +490,6 @@ export interface globalType {
     loadouts: {
         input: number[]
         open: boolean
-        /** Only used to remove events */
-        buttons: Array<[HTMLElement, () => void]>
     }
 }
 /** Important starting values for Vacuum states */
@@ -545,7 +543,7 @@ export interface globalSaveType {
         autoSave: number
     }
     /** hotkeyFunction: [key, code] */
-    hotkeys: Record<hotkeysList, string[]>
+    hotkeys: Array<Record<hotkeysList, string>>
     numbers: Record<numbersList, string>
     /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4],
      * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7], Swap alert buttons[8],
@@ -560,6 +558,7 @@ export interface globalSaveType {
     /** Status[0], Keep tabindex on Upgrades[1] */
     SRSettings: boolean[]
     developerMode: boolean
+    version: number
 }
 
 export interface Quantum {
@@ -590,8 +589,8 @@ export interface Quantum {
     auto: boolean[]
 }
 
-export type hotkeysList = 'makeAll' | 'galaxy' | 'verses' | 'createAll' | 'strangeness' |
-    'toggleAll' | 'toggleUpgrades' | 'toggleStrangeness' |
+export type hotkeysList = 'makeAll' | 'galaxy' | 'universe' | 'multiverse' | 'createAll' | 'strangeness' |
+    'toggleAll' | 'toggleUpgrades' | 'toggleStrangeness' | 'toggleUniverse' |
     'discharge' | 'vaporization' | 'rank' | 'collapse' | 'nucleation' | 'merge' | 'stage' | 'end' |
     'toggleDischarge' | 'toggleVaporization' | 'toggleRank' | 'toggleCollapse' | 'toggleMerge' | 'toggleNucleation' | 'toggleStage' |
     'exitChallenge' | 'supervoid' | 'warp' | 'pause' |
@@ -676,11 +675,11 @@ export interface calculateEffectsType {
     trueUniversesAll: () => number
     universeTypes: () => number
     /** Self-made Universes, but only for the current Challenge */
-    trueUniverses: () => number
+    trueUniverses: (allowEffective?: boolean) => number
     T0Inflation0: () => number
     TOInflation1_softcap: () => number
     T0Inflation1: () => number
     T0Inflation3: () => number
     strangeGain: (interstellar: boolean, quarks?: boolean) => number
-    cosmonGain: () => number
+    cosmonGain: (bigRip?: boolean) => number
 }

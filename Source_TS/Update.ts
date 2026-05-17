@@ -494,7 +494,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
         if (subtab === 'Matter') {
             getId('cosmon0Span').textContent = format(player.cosmon[0].current, { padding: 'exponent' });
             getId('cosmon1Span').textContent = format(player.cosmon[1].current, { padding: true });
-            getId('inflatonGainTrue').textContent = format((!vacuum && (player.tree[0][5] < 1 || challenge === 1) ? player.verses[0].true : calculateEffects.trueUniverses()) + 1, { padding: 'exponent' });
+            getId('inflatonGainTrue').textContent = format((!vacuum && (player.tree[0][5] < 1 || challenge === 1) ? player.verses[0].true : calculateEffects.trueUniverses(false)) + 1, { padding: 'exponent' });
             getId('endTime').textContent = format(player.time.end, { type: 'time' });
             const cosmonGain = calculateEffects.cosmonGain();
             getQuery('#cosmonGain > span').textContent = format(cosmonGain, { padding: true });
@@ -644,6 +644,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
             getId('strange0StatTotal').textContent = format(player.strange[0].total, { padding: true });
             getId('strange1StatTotal').textContent = format(player.strange[1].total, { padding: true });
             getId('verse0StatTotal').textContent = format(player.verses[0].total, { padding: 'exponent' });
+            getId('verse1StatTotal').textContent = format(player.verses[1].total, { padding: 'exponent' });
             getId('cosmon0StatTotal').textContent = format(player.cosmon[0].total, { padding: 'exponent' });
             getId('cosmon1StatTotal').textContent = format(player.cosmon[1].total, { padding: true });
         }
@@ -1215,7 +1216,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}5`).style.display = strange5 ? '' : 'none';
                 getId('strange5Stage5').style.display = show3 && milestones[4][1] >= 8 ? '' : 'none';
                 getId('strange6Stage5').style.display = show1 && firstTwo ? '' : 'none';
-                getId('strange10Stage5').style.display = universes >= 21 && showX ? '' : 'none';
+                getId('strange10Stage5').style.display = universes < 21 || showX ? '' : 'none';
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = falseUniverses >= 1 ? '' : 'none';
                 getId('strange4Stage6').style.display = player.strangeness[6][3] < 1 || showX ? '' : 'none';
                 if (globalSave.MDSettings[0] && ((global.debug.MDStrangePage === 5 && !strange5) || (global.debug.MDStrangePage === 6 && falseUniverses < 1))) { MDStrangenessPage(1); }
@@ -1264,6 +1265,10 @@ export const visualUpdate = (ignoreOffline = false) => {
             for (let i = 0; i < 3; i++) {
                 getId(`endMilestone${i + 1}`).classList[ends[i] >= 1 ? 'add' : 'remove']('completed');
             }
+            const multi = player.verses[1].current;
+            for (let i = 1; i < 2; i++) {
+                getId(`multiMilestone${i}`).classList[multi >= i ? 'add' : 'remove']('completed');
+            }
             const current = player.verses[0].current;
             for (let i = 1, f1 = 1, f2 = 1, old = f1; i < 9; i++, f1 = f2, f2 += old, old = f1) {
                 getId(`inflationMilestone${i}`).classList[current >= f2 ? 'add' : 'remove']('completed');
@@ -1307,6 +1312,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 if (!vacuum) {
                     getId('stageAutoInterstellar1').style.display = strangeness[5][6] >= 2 ? '' : 'none';
                     getId('stageAutoInterstellar2').style.display = strangeness[5][6] >= 2 ? '' : 'none';
+                    getId('stageAutoAbyss').style.display = player.verses[0].lowest[0] <= 1 ? '' : 'none';
                     getId('stageAutoMerge').style.display = stable && player.challenges.active !== 1 ? '' : 'none';
                 }
             }
@@ -1498,6 +1504,7 @@ export const visualProgressUnlocks = () => {
     getId('trueUniversesStats').style.display = highest >= 21 ? '' : 'none';
     getId('trueUniversesLow').style.display = highest >= 24 ? '' : 'none';
     getId('strangeAllStats').style.display = highest >= 17 || (!vacuum && highest >= 11) ? '' : 'none';
+    getId('verse1Stat').style.display = highest >= 25 ? '' : 'none';
     getId('inflatonStat').style.display = highest >= 19 ? '' : 'none';
     getId('cosmon1Stat').style.display = highest >= 21 ? '' : 'none';
     getId('effectiveEnergyStat').style.display = highest >= 1 ? '' : 'none';
@@ -1533,7 +1540,9 @@ export const visualProgressUnlocks = () => {
         getId('stageLeftHotkey').style.display = highest >= 9 ? '' : 'none';
         getId('enterChallengeHotkey').style.display = highest >= 17 ? '' : 'none';
         getId('exitChallengeHotkey').style.display = highest >= 17 ? '' : 'none';
-        getId('versesHotkey').style.display = highest >= 18 ? '' : 'none';
+        getId('universeHotkey').style.display = highest >= 18 ? '' : 'none';
+        getId('multiverseHotkey').style.display = highest >= 25 ? '' : 'none';
+        getId('toggleUniverseHotkey').style.display = highest >= 25 ? '' : 'none';
         getId('createAllHotkey').style.display = highest >= 1 ? '' : 'none';
         getId('strangenessHotkey').style.display = highest >= 11 ? '' : 'none';
         getId('toggleStrangenessHotkey').style.display = highest >= 19 ? '' : 'none';
@@ -1706,7 +1715,7 @@ export const getUpgradeDescription = (type: 'upgrades' | 'researches' | 'researc
                 stageIndex === 1 && player.upgrades[1][5] !== 1 && ((index === 3 || index === 4) && player.buildings[1][(player.inflation.vacuum ? 4 : 2) + (index === 3 ? 0 : 1)].total.equal(0)) ? `Requires any amount of ${index === 3 ? 'Atoms' : 'Molecules'} to create.` :
                 stageIndex === 2 && index === 0 && player.buildings[2][1].true < 1 && player.buildings[2][2].true < 1 ? 'Requires any amount of self-made Drops to create.' :
                 stageIndex === 4 && global.collapseInfo.unlockU[index] > player.collapse.mass && player.researchesExtra[5][0] < 1 ? `Unlocked at ${format(global.collapseInfo.unlockU[index])} Mass.` :
-                notEnoughUniverses ? `Unlocked at ${global.mergeInfo.unlockU[index]} ${universeName()} Universes.` :
+                notEnoughUniverses ? `Unlocked after ${global.mergeInfo.unlockU[index] - calculateEffects.trueUniverses()} more ${universeName()} Universes.` :
                 `${format(pointer.cost[index])} ${global.stageInfo.costName[stageIndex]}.`;
         } else if (type === 'researches' || type === 'researchesExtra') {
             const pointer = global[`${type}Info`][stageIndex];
@@ -1723,7 +1732,7 @@ export const getUpgradeDescription = (type: 'upgrades' | 'researches' | 'researc
             } else if (stageIndex === 5 && type === 'researchesExtra' && player.strangeness[5][3] < 1) {
                 getId('upgradeCost').textContent = "Requires 'Gravitational bound' Strangeness.";
             } else if (notEnoughUniverses) {
-                getId('upgradeCost').textContent = `Unlocked at ${global.mergeInfo[`unlock${type === 'researches' ? 'R' : 'E'}`][index]} ${universeName()} Universes.`;
+                getId('upgradeCost').textContent = `Unlocked after ${global.mergeInfo[`unlock${type === 'researches' ? 'R' : 'E'}`][index] - calculateEffects.trueUniverses()} more ${universeName()} Universes.`;
             } else {
                 let newLevels = 1;
                 let cost = pointer.cost[index];
@@ -1799,13 +1808,18 @@ export const getChallengeDescription = () => {
     (nameID.parentElement as HTMLElement).style.display = unlocked ? '' : 'none';
     let text = !unlocked ? '' : `<p class="whiteText">${info.description()}</p>
     <article><h4 class="${info.color}Text bigWord">Effects:</h4>
-    <div>${info.effectText()}</article>
-    <p class="blueText">${isActive || index === 2 ? 'Remaining time' : 'Time limit'} is <span class="cyanText">${format(info.time - (isActive || index === 2 ? time : 0), { type: 'time' })}</span></p></div>`;
+    <div>${info.effectText()}</div></article>`;
+    if (unlocked) {
+        const timerActive = isActive || index === 2;
+        getId('challengeTimeLimit').style.display = '';
+        getQuery('#challengeTimeLimit > span').textContent = timerActive ? 'Remaining time' : 'Time limit';
+        getQuery('#challengeTimeLimit > span:last-of-type').textContent = format(info.time - (timerActive ? time : 0), { type: 'time' });
+    } else { getId('challengeTimeLimit').style.display = 'none'; }
 
     if (index === 1) {
         const vacuum = player.inflation.vacuum;
         const stable = vacuum || (player.tree[0][5] >= 1 && player.challenges.active !== 1);
-        const gain = stable ? calculateEffects.trueUniverses() + 1 : 1;
+        const gain = stable ? calculateEffects.trueUniverses(false) + 1 : 1;
         text += `${unlocked ? '<article>' : ''}<h3 class="darkorchidText bigWord">Vacuum information</h3>
         <p class="orchidText">Vacuum state: <span class="${vacuum ? 'greenText">true' : 'redText">false'}</span> | Resets: <span class="darkorchidText">${player.inflation.resets}</span></p>
         ${player.progress.main >= 19 ? `<p class="darkvioletText">Current Inflatons gain: <span class="${stable ? 'green' : 'red'}Text">${format(gain, { padding: 'exponent' })}</span> | Rate: <span class="${vacuum ? 'green' : 'red'}Text">${format(gain / time, { type: 'income' })}</span></p>` : ''}

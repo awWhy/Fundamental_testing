@@ -2,11 +2,10 @@ import { global, player } from './Player';
 import { checkTab } from './Check';
 import { numbersUpdate, switchTab, visualUpdate } from './Update';
 import { buyBuilding, buyStrangenessMax, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleChallengeType, vaporizationResetUser } from './Stage';
-import { pauseGameUser, playerStart, simulateOffline, toggleSwap } from './Main';
+import { pauseGameUser, simulateOffline, toggleSwap } from './Main';
 import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
 
-const hotkeys = {} as Record<string, hotkeysList | numbersList>;
 const basicFunctions: Record<hotkeysList, () => void> = {
     makeAll: () => buyAll(),
     toggleAll: () => {
@@ -101,8 +100,12 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         global.hotkeys.last = 'toggle0';
         toggleSwap(0, 'auto', true);
     },
-    verses: () => {
-        for (let i = 0; i < playerStart.verses.length; i++) { buyVerse(i); }
+    universe: () => buyVerse(0),
+    multiverse: () => buyVerse(1),
+    toggleUniverse: () => {
+        if (global.hotkeys.last === 'toggleV0') { return; }
+        global.hotkeys.last = 'toggleV0';
+        toggleSwap(0, 'verses', true);
     },
     end: () => void endResetUser(),
     exitChallenge: () => {
@@ -159,7 +162,7 @@ const numberFunctions: Record<numbersList, (number: number) => void> = {
         } else { buyAll(); }
     },
     toggleStructure: (number) => {
-        const repeat = `build${number}`;
+        const repeat = `toggleB${number}`;
         if (global.hotkeys.last === repeat) { return; }
         global.hotkeys.last = repeat;
         if (number === 0) {
@@ -177,37 +180,24 @@ const numberFunctions: Record<numbersList, (number: number) => void> = {
         } else { enterExitChallengeUser(null); }
     }
 };
+export const hotkeys = {
+    main: new Set(Object.keys(basicFunctions)) as Set<hotkeysList>,
+    numbers: new Set(Object.keys(numberFunctions)) as Set<numbersList>,
+    active: {} as Record<string, hotkeysList | numbersList>
+};
 
 /** Will remove identical hotkeys from globalSave */
 export const assignHotkeys = () => {
-    for (const key in hotkeys) { delete hotkeys[key]; } //Don't know better way for now
-    const index = globalSave.toggles[0] ? 0 : 1;
-    for (const key in globalSave.hotkeys) {
-        const hotkey = globalSave.hotkeys[key as hotkeysList][index];
-        if (hotkey === 'None') { continue; }
-        if (hotkeys[hotkey] !== undefined) {
-            globalSave.hotkeys[key as hotkeysList] = ['None', 'None'];
-        } else { hotkeys[hotkey] = key as hotkeysList; }
+    hotkeys.active = {};
+    const pointer = globalSave.hotkeys[globalSave.toggles[0] ? 0 : 1];
+    for (const key in pointer) {
+        if (!hotkeys.main.has(key as hotkeysList)) { continue; }
+        hotkeys.active[pointer[key as hotkeysList]] = key as hotkeysList;
     }
     for (const key in globalSave.numbers) {
-        const hotkey = globalSave.numbers[key as numbersList];
-        if (hotkey === 'None') { continue; }
-        if (hotkeys[hotkey] !== undefined) {
-            globalSave.numbers[key as numbersList] = 'None';
-        } else { hotkeys[hotkey] = key as numbersList; }
+        if (!hotkeys.numbers.has(key as numbersList)) { continue; }
+        hotkeys.active[globalSave.numbers[key as numbersList]] = key as numbersList;
     }
-};
-
-/** Removes hotkey if exist, returns name of removed hotkey */
-export const removeHotkey = (remove: string, number = false): string | null => {
-    const test = hotkeys[remove];
-    if (test === undefined) { return null; }
-    if (number) {
-        globalSave.numbers[test as numbersList] = 'None';
-    } else {
-        globalSave.hotkeys[test as hotkeysList] = ['None', 'None'];
-    }
-    return test;
 };
 
 /** Returns true if only Shift is holded, false if nothing is holded, null if any of Ctrl/Alt/Meta is holded */
@@ -241,12 +231,12 @@ export const detectHotkey = (check: KeyboardEvent) => {
 
     if (code === 'Escape') {
         if (detectShift(check) === null || specialHTML.alert[0] !== null || specialHTML.bigWindow !== null) { return; }
-        const notifications = specialHTML.notifications;
         if (check.shiftKey) {
-            if (globalSave.developerMode || notifications[0] === undefined) { return; }
-            notifications[0][1](true);
+            if (globalSave.developerMode) { return; }
+            const notification = specialHTML.notifications.values().next().value;
+            if (notification !== undefined) { notification(true); }
         } else {
-            for (let i = notifications.length - 1; i >= 0; i--) { notifications[i][1](true); }
+            for (const notification of specialHTML.notifications.values()) { notification(true); }
         }
         check.preventDefault();
         return;
@@ -256,7 +246,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
     let prefix = check.ctrlKey ? 'Ctrl ' : '';
     if (check.shiftKey) { prefix += 'Shift '; }
     if (check.altKey) { prefix += 'Alt '; }
-    const functionTest = basicFunctions[hotkeys[prefix + (number ?
+    const functionTest = basicFunctions[hotkeys.active[prefix + (number ?
         code.replace('Digit', '').replace('Numpad', 'Num ') : globalSave.toggles[0] ?
             (key.length === 1 ? key.toUpperCase() : key.replaceAll(/([A-Z]+)/g, ' $1').trimStart()) :
             (key.length === 1 ? code.replace('Key', '') : code.replaceAll(/([A-Z]+)/g, ' $1').trimStart()))
@@ -265,7 +255,7 @@ export const detectHotkey = (check: KeyboardEvent) => {
         functionTest();
         check.preventDefault();
     } else if (number) {
-        const functionTest = numberFunctions[hotkeys[prefix + (code.includes('Numpad') ? 'Numpad' : 'Numbers')] as numbersList];
+        const functionTest = numberFunctions[hotkeys.active[prefix + (code.includes('Numpad') ? 'Numpad' : 'Numbers')] as numbersList];
         if (functionTest !== undefined) {
             const test = Number(code.replace('Digit', '').replace('Numpad', ''));
             if (isNaN(test)) { return; }

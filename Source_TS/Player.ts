@@ -1243,7 +1243,7 @@ export const global: globalType = {
                 () => `Gain ${format(1.4)} times more Strangelets from the Stage resets.`,
                 () => "Increase max levels for a lot of Strangeness by +1, these include:\n'Fundamental boost', 'Bigger Puddles', 'Faster Accretion', 'Hotter Stars' and 'Bigger Structures'.",
                 () => `Unlock a new mini Stage '${global.challengesInfo[2].name}', activated in the 'Advanced' subtab.\n(This Strangeness persists through Vacuum resets)`,
-                () => 'Boost Strangelets gain base by +Stage resets.\n(WIP) Also auto Stage now works with Darkness.'
+                () => 'Increase Strangelets gain base by +1 per Stage reset.'
             ],
             cost: [],
             firstCost: [1e15, 2e15, 4e15, 4e14, Infinity],
@@ -1272,7 +1272,7 @@ export const global: globalType = {
             () => `Gain ${format(1.4)} times more Strange quarks from Stage resets per level.${player.challenges.stability >= 1 ? `\nFirst ${player.challenges.stability} levels (1 per Vacuum stability completion) will also boost global speed by ${format(1.1)}, but only while inside any Challenge.` : ''}`,
             () => `Boost global speed and Stage reset reward by ${format(calculateEffects.T0Inflation3())}, strength is based on Supervoid progress${player.challenges.stability < 2 ? ' in the current End reset' : ''}.`,
             () => `For false Vacuum it will remove time limit from Milestones${player.tree[0][5] >= 1 ? `, also enable ${global.challengesInfo[2].name}, prevent it from being reset by other Stages and allow to be reset for Strangelets` : ''}.\nFor true Vacuum it will unlock false Vacuum Milestones for Void. Their effects are active anywhere, but only if this Inflation is active.`,
-            () => "Increase max allowed non-safe Merge resets by +current relevant self-made Universes. (Universe cost is adjusted after every Merge reset above safe value)\nWhile in false Vacuum stabilize it, allow creation of false Universes and add new effect for 'Void Milestones' Inflation. (Related unlocks can be found in the Advanced subtab Vacuum information)\nWhile in Void it will allow creation of Quasi-stars, but they won't produce anything and will scale in cost 10 times faster.",
+            () => "Increase max allowed non-safe Merge resets by +1 per relevant self-made Universes. (Universe cost is adjusted after every Merge reset above safe value)\nWhile in false Vacuum stabilize it, allow creation of false Universes and add new effect for 'Void Milestones' Inflation. (Related unlocks can be found in the Advanced subtab Vacuum information)\nWhile in Void it will allow creation of Quasi-stars, but they won't produce anything and will scale in cost 10 times faster.",
             () => { //[6]
                 const level = player.tree[0][6];
                 return `Unlock 1 minute Warps for the price of ${Math.min(7 - level, 6)}${level > 0 && level < 4 ? ` ⟶ ${6 - level}` : ''} minutes of stored Offline time.\nIncrease Export storage by +${(2 + 2 * level) * level}%${level < 4 ? ` ⟶ ${(4 + 2 * level) * (level + 1)}%` : ''} of the Stage reset value after any Stage reset.\nIf inside any Challenge, then it will boost global speed by ${format(5 / (5 - level))}${level < 4 ? ` ⟶ ${format(5 / (4 - level))}` : ''}, but decrease time limit by ${format(6 / (6 - level))}${level < 4 ? ` ⟶ ${format(6 / (5 - level))}` : ''}.\n(Offline time can be stored by rejecting it, max storage is 12 hours)`;
@@ -1490,7 +1490,7 @@ export const global: globalType = {
             if (global.april.quantum) { return '<p class="cyanText">‒ Global speed is set to 0\n‒ Stage resets are disabled\n‒ All Stages are removed from reset cycle</p>'; }
             const completions = player.challenges.stability;
             return `<p class="orchidText">‒ Global speed is decreased by ${format(4 * 8 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
-            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset</p>
+            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset\n‒ If can't reset after 10 minutes then Vacuum reset is forced instead</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Intergalactic Upgrade 'Galactic Merger' cost ${format(1e10)} times more\n‒ Merge requirement is set to ${22 + completions}${player.tree[0][5] >= 1 ? '\n‒ Creation of Universes is disabled' : ''}</p>`;
         },
         needText: [['1 Completion', '2 Completions', '3 Completions', '4 Completions (WIP)', '5 Completions (WIP)', '6 Completions (WIP)', '7 Completions (WIP)', '8 Completions (WIP)', '9 Completions (WIP)'],
@@ -1520,8 +1520,8 @@ export const global: globalType = {
             <p class="orchidText">‒ ${global.challengesInfo[2].name} uses separate automatizations\n‒ Currently ${player.tree[0][5] >= 1 && player.tree[0][4] >= 1 ? 'Enabled' : 'Disabled'} in false Vacuum\n‒ Cost for everything is increased by 10 while inside any Void\nMore information to be revealed (WIP)</p>
             <p class="cyanText">‒ Time limit is based on Universe age\n‒ Time limit is always active (WIP)\nMore information to be revealed (WIP)</p>`,
         rewardText: [
-            'Permanent, auto Stage for false Vacuum (WIP)', //0
-            'Darkness Tier can be increased to 2 (WIP)', //1
+            'Darkness Tier can be increased to 2 (WIP)', //0
+            'Auto Stage for false Vacuum', //1
             'Auto Dark energy Researches', //2
             'Auto Nucleation', //3
             'Auto Abyss Upgrades', //4
@@ -1538,8 +1538,7 @@ export const global: globalType = {
     },
     loadouts: {
         input: [],
-        open: false,
-        buttons: []
+        open: false
     }
 };
 
@@ -1610,7 +1609,7 @@ const visualUniverseLevels = (...unlocks: number[]): string => {
     const universes = calculateEffects.trueUniverses();
     for (let i = 0; i < unlocks.length; i++) {
         if (universes >= unlocks[i]) { continue; }
-        return `\n(Max level will be increased at ${unlocks[i]} ${universeName()} Universes)`;
+        return `\n(Max level will be increased after ${unlocks[i] - universes} more ${universeName()} Universes)`;
     }
     return '';
 };
@@ -1726,6 +1725,9 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('strange8Stage4').style.display = '';
         getId('strange3Stage5').style.display = '';
         getId('strange4Stage5').style.display = '';
+        getId('strange1Stage6').style.display = '';
+        getId('strange2Stage6').style.display = '';
+        getId('strange3Stage6').style.display = '';
         getId('milestone1Stage5Div').style.display = '';
         getId('milestone2Stage5Div').style.display = '';
         getId('stageAutoInterstellar1').style.display = '';
@@ -1736,8 +1738,10 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('mergeMain').style.display = '';
         getId('mergeSolarWait').style.display = '';
 
+        getId('strange5Stage6').style.display = 'none';
         getId('mergeFalse').style.display = 'none';
         getQuery('#stageAutoInterstellar1 span').style.display = 'none';
+        getId('stageAutoAbyss').style.display = 'none';
         getId('stageAutoFalse').style.display = 'none';
     } else {
         specialHTML.footerStatsHTML[1][0] = ['Quarks.png', 'stage1borderImage cyanText', 'Quarks'];
