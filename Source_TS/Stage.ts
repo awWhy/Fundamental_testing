@@ -264,6 +264,7 @@ export const calculateEffects: calculateEffectsType = {
     S2Extra2: (rain, level = player.researchesExtra[2][2]) => level >= 1 ? (rain + 31) / 32 : 1,
     submersion: () => {
         const drops = player.buildings[2][1].current.toNumber() + 1;
+        if (player.tree[1][5] >= 2) { return Math.log2(drops * (player.vaporization.clouds + 1) + 1); }
         return Math.log2(drops ** 0.6 / Math.min(drops, 1e10) ** 0.4 + 1); //^0.2 before softcap, ^0.6 after
     },
     rankCost: () => {
@@ -501,12 +502,12 @@ export const calculateEffects: calculateEffectsType = {
         return base * global.strangeInfo.strangeletsInfo[1] * effectsCache.T0Inflation3;
     },
     cosmonGain: (bigRip = player.darkness.energy >= 1000) => {
-        const trueVerses = global.inflationInfo.trueUniverses * (1 + player.verses[1].true);
+        const trueVerses = global.inflationInfo.trueUniverses;
         let base = bigRip ? player.verses[0].current : trueVerses;
         if (player.inflation.ends[1] >= 1) { base += (trueVerses - 1) * trueVerses * Math.min(player.inflation.ends[1] + 2, 10) / 40; } //Step is divided by 2
         base *= 1.4 ** player.tree[1][2];
         if (player.clone.inflation?.vacuum as boolean ?? player.inflation.vacuum) { base++; }
-        return base;
+        return base * (2 ** player.verses[1].true);
     }
 };
 
@@ -3114,7 +3115,9 @@ const mergeReset = (vacuumChange = false) => {
     player.merge.rewards[1] += global.mergeInfo.checkReward[1];
     player.buildings[5][3].true = 0;
     player.merge.claimed = [0, 0];
-    reset('galaxy', player.inflation.vacuum ? [1, 2, 3, 4, 5] : [4, 5]);
+    const resetThese = [4, 5];
+    if (player.inflation.vacuum) { player.tree[1][5] < 4 ? resetThese.unshift(1, 2, 3) : resetThese.unshift(1, 3); }
+    reset('galaxy', resetThese);
     assignMaxLevel(0, 4, 'researches');
     assignMaxLevel(1, 4, 'researches');
     assignMaxLevel(2, 4, 'researches');
@@ -3170,7 +3173,7 @@ export const nucleationResetUser = async() => {
 
 const nucleationReset = () => {
     if (global.inflationInfo.newFluid > 0) { player.darkness.fluid += global.inflationInfo.newFluid; }
-    player.challenges.active === 0 ? reset('collapse', [1, 2, 3, 4, 5, 6]) : reset('rank', [6]);
+    player.challenges.active === 0 ? reset('collapse', player.tree[1][5] < 4 ? [1, 2, 3, 4, 5, 6] : [1, 3, 4, 5, 6]) : reset('rank', [6]);
 };
 
 export const assignMilestoneInformation = (index: number, stageIndex: number) => {

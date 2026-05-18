@@ -24,7 +24,7 @@ type allowedTypes = string | number | bigint | [number, number] | Overlimit;
  * If mantissa is 0, then exponent must be 0, same if exponent is -Infinity;\
  * if any part is NaN or Infinity, then both must be NaN or Infinity
  */
-export default class Overlimit extends Array<number> { //This is version is sligthly modified
+export default class Overlimit extends Array<number> { //This is version is slightly modified
     constructor(number: allowedTypes) {
         const after = technical.convert(number);
         super(after[0], after[1]);

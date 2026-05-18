@@ -721,11 +721,12 @@ export const global: globalType = {
                 'Jeans Mass'
             ],
             effectText: [
-                () => {
-                    if (!player.inflation.vacuum || player.tree[1][5] < 2) { return 'When formed, Clouds will use Drops produced this reset instead of current ones.'; }
+                () => { //[0]
+                    const text = 'When formed, Clouds will use Drops produced this reset instead of current ones.';
+                    if (!player.inflation.vacuum || player.tree[1][5] < 2) { return text; }
                     const level = player.researchesExtra[2][0];
                     const extra = player.strangeness[2][4] >= 2 ? 0.4 : 4;
-                    return `Passively gain ${format((level + 3) * level / extra)}% ⟶ ${format((level + 4) * (level + 1) / extra)}% Clouds per second. (Not affected by global speed)`;
+                    return `${text} (Always active)\nPassively gain ${format((level + 3) * level / extra)}% ⟶ ${format((level + 4) * (level + 1) / extra)}% Clouds per second. (Not affected by global speed)`;
                 },
                 () => { //[1]
                     const maxLevel = player.researchesExtra[2][1];
@@ -1300,7 +1301,7 @@ export const global: globalType = {
             () => `Gain ${format(1.4)} times more Cosmons from End resets.\n(Max level will be increased after spending ${format((4 ** (global.treeInfo[1].max[2] + 2) - 4) / 1.5 - player.cosmon[1].total + player.cosmon[1].current, { padding: true })} more Cosmons)`,
             () => `Boost Strangelets gain from the Stage resets by ${format(1.4)} (2 in false Vacuum) and increase max level of 'Strange gain' Inflation by +1.`,
             () => `True Vacuum only, gain +1 free Goal, improve Discharge base by +${format(0.1)} (immune to the softcap) and decrease requirement scaling by -${format(0.5)} with every level.`,
-            () => `True Vacuum only, make 'Ocean world' Strangeness old effect always active and add new effect to improve related formula.\nSecond level will make 'Natural Vaporization' Cloud Research old effect of 'Clouds use total Drops this reset' always active and add new effect to unlock 1% > 10% passive Clouds gain over 5 levels, 10 times stronger with 'Automatic Vaporization' Strangeness level 2.\nThird level will improve a lot of Strangeness, also max level will be affected by Void for the first two in the list: +${format(0.5)} to 'Better improvement', +${format(0.2)} to 'More Moles' and 'Bigger Puddles', +${format(0.04)} to 'Improved flow' and finally new Upgrade from 'Galactic tide' level 2.\nFinal level will make most of Submerged immune to pre-Merge resets, Vaporization will still reset Submerged, but never higher Stages.`,
+            () => "True Vacuum only, make 'Ocean world' Strangeness old effect always active and add new effect to improve related formula.\nSecond level will make 'Natural Vaporization' Cloud Research old effect always active and add new effect to unlock 1% > 10% passive Clouds gain over 5 levels, 10 times stronger with 'Automatic Vaporization' level 2, also this level will slightly improve Submersion formula.\nThird level will slightly improve effects for the following Strangeness: 'Better improvement', 'More Moles', 'Bigger Puddles', 'Improved flow', also will make Void increase max level for the first two and finally this level will add new Upgrade for 'Galactic tide' level 2.\nFinal level will make most of Submerged immune to pre-Stage resets, Vaporization will still reset Submerged, but never higher Stages.",
             () => `True Vacuum only, make effective Rank boost even more: (all effects are per Rank)\n+${format(0.5)} Discharge goals at level 1, +1 to max level of 'Planetary system' Interstellar Research at level 2, ${format(1.01)}x to the Solar mass gain at level 3 and finally ${format(1.02)}x to Stage reset reward at level 4.`,
             () => "True Vacuum only, reclaim up to 25% of Remnants once (doesn't affect Milestones).\nSecond level will increase max level of 'Galactic tide' Strangeness, but without passive effects until level 3.\nFinal level will increase max level of 'Automatic Collapse' Strangeness.",
             () => { //[8]
@@ -1893,8 +1894,6 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             }
 
             /* Can be shortened */
-            load.tree = deepClone(playerStart.tree); //Remove
-            load.buildings[6] = deepClone(playerStart.buildings[6]);
             load.time.export[3] = 0;
             if (highestUniverse > 2) {
                 load.cosmon[1].current = highestUniverse - 2;
@@ -1904,35 +1903,33 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.verses[0].current = Math.min(highestUniverse, 2);
             load.verses[0].total = load.verses[0].current;
             load.verses[0].highest = load.verses[0].current;
-            load.cosmon[0].current = trueVerses >= 2 ? 4 : trueVerses >= 1 ? 1 : 0;
-            if (state && trueVerses >= 1) { load.cosmon[0].current++; }
-            load.cosmon[0].total = load.cosmon[0].current;
-            load.toggles.confirm[6] = 'All';
             load.toggles.supervoid = false;
         }
         if (load.version === 'v0.2.8') {
-            //load.version = 'v0.2.9';
-            load.version = 'v0.2.8_will_be_deleted';
-            //load.tree = deepClone(playerStart.tree);
+            load.version = 'v0.2.9';
+            load.tree = deepClone(playerStart.tree);
 
             /* Can be shortened */
             load.toggles.normal[5] = false;
-            //load.cosmon[0].current = load.cosmon[0].total;
-            //load.cosmon[1].current = load.cosmon[1].total;
+            const supervoid = load.challenges.supervoid;
+            load.challenges.supervoid[2] = 0;
+            load.challenges.supervoidMax[2] = 0;
+            load.challenges.supervoid[4] = 0;
+            load.challenges.supervoidMax[4] = 0;
+            load.cosmon[0].current = (2 + (load.verses[0].true - 1) / 2) * load.verses[0].true + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + load.challenges.stability;
+            if (load.inflation.vacuum && load.inflation.ends[0] > 0) { load.cosmon[0].current++; }
+            load.cosmon[0].total = load.cosmon[0].current;
+            load.cosmon[1].current = load.cosmon[1].total;
+            load.verses[0].other = cloneArray(playerStart.verses[0].other);
             load.progress.void = cloneArray(load.challenges.void);
             load.progress.universes = cloneArray(playerStart.progress.universes);
             delete load.challenges['voidCheck' as keyof unknown];
             delete load.progress['universe' as keyof unknown];
         }
+        if (load.version === 'v0.2.9') { load.version = 'v0.2.8_will_be_deleted'; }
 
         if (load.version !== playerStart.version) {
             throw new ReferenceError(`Save file version ${load.version} is not allowed`);
-        }
-    }
-    for (let s = 1; s < 6; s++) { //Remove
-        if (load.progress.void[s] !== load.challenges.void[s]) {
-            load.progress.void = cloneArray(load.challenges.void);
-            break;
         }
     }
 
