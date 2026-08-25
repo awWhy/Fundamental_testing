@@ -53,7 +53,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
             if (!allowedToBeReset(i, s, 'structures')) {
                 if (!player.inflation.vacuum) { continue; }
                 const selfmade = building[i as 1].true;
-                if (s === 1) {
+                if (s !== 5) {
                     building[1].current.setValue(selfmade);
                     building[1].total.setValue(selfmade);
                 }
@@ -229,7 +229,8 @@ export const resetVacuum = (level = 0) => {
     if (level >= 2) {
         player.verses[0].true = 0;
         player.verses[0].other = [0, 0, 0];
-        global.inflationInfo.trueUniverses = 0;
+        global.versesInfo.true = 0;
+        global.versesInfo.types = 0;
         if (level >= 3) {
             player.verses[0].current = player.inflation.ends[0] >= 1 ? player.verses[0].highest : 0;
             player.verses[1].true = 0;
@@ -345,7 +346,7 @@ export const resetVacuum = (level = 0) => {
         player.strange[0].current = 0;
     }
     if (universes >= 1) {
-        player.strange[0].current += Math.ceil(global.inflationInfo.trueUniverses ** 1.5);
+        player.strange[0].current += Math.ceil(global.versesInfo.true ** 1.5);
         if (vacuum) { player.strangeness[1][8] = 2; }
     }
     if (universes >= 3) {
@@ -354,7 +355,6 @@ export const resetVacuum = (level = 0) => {
     }
     if (universes >= 21 || (universes >= 5 && vacuum)) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    if (universes >= 13 && vacuum) { player.strangeness[5][8] = 1; }
     player.strange[0].total = player.strange[0].current;
     prepareDarkness();
 

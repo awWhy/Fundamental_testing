@@ -2,7 +2,7 @@ import { global, player } from './Player';
 import { checkTab } from './Check';
 import { numbersUpdate, switchTab, visualUpdate } from './Update';
 import { buyBuilding, buyStrangenessMax, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleChallengeType, vaporizationResetUser } from './Stage';
-import { pauseGameUser, simulateOffline, toggleSwap } from './Main';
+import { getId, pauseGameUser, simulateOffline, toggleSwap } from './Main';
 import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
 
@@ -209,10 +209,7 @@ export const detectShift = (check: KeyboardEvent): boolean | null => {
 export const detectHotkey = (check: KeyboardEvent) => {
     const { key, code } = check;
     const info = global.hotkeys;
-    if (check.shiftKey && !info.shift) {
-        info.shift = true;
-        numbersUpdate();
-    }
+    if (check.shiftKey && !info.shift) { toggleShift(true); }
     if (check.ctrlKey && !info.ctrl) {
         info.ctrl = true;
         numbersUpdate();
@@ -310,11 +307,21 @@ export const toggleAll = () => {
     visualUpdate();
 };
 
+export const toggleShift = (value: boolean) => {
+    const button = getId('shiftFooter');
+    button.style.borderColor = value ? 'forestgreen' : '';
+    button.style.color = value ? 'var(--green-text)' : '';
+    global.hotkeys.shift = value;
+    numbersUpdate();
+};
+
 export const offlineWarp = () => {
-    const required = 60_000 * (7 - player.tree[0][6]);
-    if (global.offline.active || player.time.offline < required) { return; }
-    if (player.tree[0][6] < 1) { return Notify("'Improved Offline' has to be at least level 1"); }
-    player.time.offline -= required;
+    if (!globalSave.developerMode) {
+        const required = 60_000 * (7 - player.tree[0][6]);
+        if (global.offline.active || player.time.offline < required) { return; }
+        if (player.tree[0][6] < 1) { return Notify("'Improved Offline' has to be at least level 1"); }
+        player.time.offline -= required;
+    }
     void simulateOffline(60_000, true);
 };
 
