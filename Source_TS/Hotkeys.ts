@@ -317,9 +317,9 @@ export const toggleShift = (value: boolean) => {
 
 export const offlineWarp = () => {
     if (!globalSave.developerMode) {
-        const required = 60_000 * (7 - player.tree[0][6]);
+        const required = 60_000 * (7 - player.tree[0][5]);
         if (global.offline.active || player.time.offline < required) { return; }
-        if (player.tree[0][6] < 1) { return Notify("'Improved Offline' has to be at least level 1"); }
+        if (player.tree[0][5] < 1) { return Notify("'Improved Offline' has to be at least level 1"); }
         player.time.offline -= required;
     }
     void simulateOffline(60_000, true);

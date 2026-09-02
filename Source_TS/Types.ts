@@ -95,9 +95,8 @@ export interface playerType {
     }
     darkness: {
         active: boolean
-        /** [tier, ...lowest Universes on Big Rip[]] \
-         * Tier 1: 0 - 6
-         */
+        /** [False, true] Vacuum */
+        unlocked: [boolean, boolean]
         tier: number
         energy: number
         fluid: number
@@ -176,7 +175,7 @@ export interface playerType {
         /** Researches[0], Strangeness[1], Inflations[2] */
         max: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Upgrades[5], Researches[6],
-         * ResearchesExtra[7], Elements[8], Merge[9], Nucleation[10], Strangeness[11] */
+         * ResearchesExtra[7], Elements[8], Merge[9], Nucleation[10], Strangeness[11], Darkness[12] */
         auto: boolean[]
         /** [0] is not used */
         buildings: boolean[][]
@@ -284,7 +283,7 @@ export interface globalType {
     lastInflation: [number | null, number]
     lastMilestone: [number | null, number]
     lastChallenge: [number, number]
-    /** Void reward type[0], Strangeness shown[1], Vacuum information type[2] */
+    /** Void reward type[0], Strangeness shown[1] */
     sessionToggles: boolean[]
     /** Sorted cheapest first, -1 inserted to the start if auto is done */
     automatization: {
@@ -473,8 +472,8 @@ export interface globalType {
         /** [Void, Supervoid] */
         rewardText: string[][][]
     }, challengeBase & {
-        needText: string[][]
-        rewardText: string[][]
+        needText: string[]
+        rewardText: string[]
     }, challengeBase & {
         /** Unlocks are in reverse */
         rewardText: string[]
@@ -667,9 +666,9 @@ export interface calculateEffectsType {
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
     S2Strange9: (unlocked?: boolean) => number
-    /** Self-made Universes */
-    trueVersesAll: () => number
-    /** Self-made Universes for current Challenge or Vacuum state if called with argument as true */
+    /** Self-made Universes, trueOnly will count all true Vacuum based Universes */
+    trueVersesAll: (trueOnly?: boolean) => number
+    /** Self-made Universes for current Challenge or all related to current Vacuum state */
     trueVerses: (statesOnly?: boolean) => number
     /** Self-made Universes */
     versesTypes: () => number

@@ -1534,9 +1534,9 @@ export const checkProgress = () => {
 const progressMain = () => {
     const progress = player.progress.main;
     if (progress === 26 || global.offline.active) { return; }
-    if (player.verses[1].total >= 1) { return progressUp(26, 13); }
+    if (player.verses[1].total >= 1) { return progressUp(26); }
     if (progress === 25) { return; }
-    if (player.verses[0].other[2] >= 1 || player.verses[0].other[0] >= 1) { return progressUp(25); }
+    if (player.verses[0].other[2] >= 1 || player.verses[0].other[0] >= 1) { return progressUp(25, 13); }
     if (progress === 24 || global.offline.active) { return; }
     if (player.inflation.ends[1] >= 1) { return progressUp(24); }
     if (progress === 23) { return; }
@@ -1676,9 +1676,9 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 10) {
         text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Base for End resets reward is increased by +1 while inside true Vacuum)";
     } else if (event === 11) {
-        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.\n(Also improves 'Strange gain' Inflation)";
+        text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.\n(Also improved 'Strange gain' Inflation)";
     } else if (event === 12) {
-        text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one increases rewards base by +1 per bonus Universe.\n(Doing it for the first time also unlocks new Inflation, false Vacuum Strangeness and allow creation of new types of self-made Universes)`;
+        text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one increases rewards base by +1 per bonus Universe.\n(Doing it for the first time will also unlock new Inflation that helps with creation of new types of self-made Universes)`;
     } else if (event === 13) {
         text = 'Multiverse placeholder text, creating it forces Big Crunch. Any End reset will reset Multiverses.';
     }

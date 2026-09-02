@@ -255,7 +255,7 @@
                             <p class="grayText"><span class="newLightName">Dark</span> matter softcap starts at <span id="darkSoftcap" class="cyanText">0</span></p>
                             <p id="nucleationBoostTotal" class="grayText">Total boost after Nucleation: <span class="blueText">0</span></p>
                             <p id="darkEnergySpent" class="grayText">Missing <span class="newLightName">Dark</span> energy: <span class="orangeText last">0</span></p>
-                            <p id="mergeResetsS6" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max<span id="mergeResetsS6Safe" class="hasTitle" data-title="Max resets before Universes cost increases"> (<span class="greenText">1</span> Safe)</span></p>
+                            <p id="mergeResetsS6" class="darkvioletText">Merge resets: <span>0</span> | <span class="greenText">1</span> Max<span id="mergeResetsS6Safe" class="hasTitle" data-title="Max resets before Universe cost increases while keeping same cost to resets ration"> (<span class="greenText">1</span> Safe)</span></p>
                             <article id="mergeScore" class="stage6borderImage" aria-label="Merge score">
                                 <p id="mergeScore0" class="grayText"><span>Galaxies:</span> <span id="mergeScore0Cur" class="greenText">0</span> <span>(<span class="greenText">1</span> per)</span></p>
                                 <p id="mergeScore1" class="grayText"><span>Groups:</span> <span id="mergeScore1Cur" class="greenText">0</span> <span>(<span class="greenText">2</span> per)</span></p>
@@ -298,7 +298,7 @@
                                     <button type="button" id="voidReward4" class="hollowButton stage4borderButton orangeText" aria-controls="challengeRewardsMultiline">Interstellar</button>
                                     <button type="button" id="voidReward5" class="hollowButton stage5borderButton darkorchidText" aria-controls="challengeRewardsMultiline">Intergalactic</button>
                                 </div>
-                                <button type="button" id="stabilityRewardsHead" class="selectBtn darkorchidText bigWord" style="display: none;">Completions rewards:</button>
+                                <h3 id="stabilityRewardsHead" class="darkorchidText bigWord" style="display: none;">Completions rewards:</h3>
                                 <div id="darknessTierMain" class="bigWord" style="display: none;">
                                     <button type="button" id="darknessTierMinus" class="hollowButton">-</button>
                                     <h3 id="darknessTier" class="grayText">Tier: <span class="whiteText">1</span>/<span class="whiteText">1</span></h3>
@@ -889,12 +889,12 @@
                                 <input type="image" src="Used_art/Milestones.png" alt="" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
-                            <label id="inflation6Tree1" class="whiteText stage5borderImage">
-                                <input type="image" src="Used_art/Stability.png" alt="" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation6Tree1" class="whiteText stage2borderImage">
+                                <input type="image" src="Used_art/Offline.png" alt="" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
-                            <label id="inflation7Tree1" class="whiteText stage2borderImage">
-                                <input type="image" src="Used_art/Offline.png" alt="" draggable="false" aria-controls="inflationCost inflationEffect">
+                            <label id="inflation7Tree1" class="whiteText stageAllBorderImage">
+                                <input type="image" src="Used_art/ResearchAuto3.png" alt="" draggable="false" class="stageBorderImage" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
                         </section>
@@ -933,6 +933,10 @@
                             </label>
                             <label id="inflation9Tree2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Drops%20recycle.png" alt="" draggable="false" aria-controls="inflationCost inflationEffect">
+                                <span>Missing</span>
+                            </label>
+                            <label id="inflation10Tree2" class="whiteText stage5borderImage">
+                                <input type="image" src="Used_art/Stability.png" alt="" draggable="false" aria-controls="inflationCost inflationEffect">
                                 <span>Missing</span>
                             </label>
                         </section>
@@ -1173,6 +1177,7 @@
                             <label id="autoUMain" class="whiteText">Upgrades <span class="mainText">⟶</span><button type="button" id="toggleAuto5" class="toggleAuto">Auto OFF</button></label>
                             <label id="autoRMain" class="whiteText">Stage Researches <span class="mainText">⟶</span><button type="button" id="toggleAuto6" class="toggleAuto">Auto OFF</button></label>
                             <label id="autoEMain" class="whiteText">Special Researches <span class="mainText">⟶</span><button type="button" id="toggleAuto7" class="toggleAuto">Auto OFF</button></label>
+                            <label id="autoDMain" class="whiteText">Darkness Upgrades <span class="mainText">⟶</span><button type="button" id="toggleAuto12" class="toggleAuto">Auto OFF</button></label>
                         </article>
                         <article id="themeArea" aria-hidden="true">
                             <h3>Current theme</h3>

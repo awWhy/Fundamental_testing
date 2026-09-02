@@ -1233,10 +1233,6 @@ try { //Start everything
         global.sessionToggles[0] = !global.sessionToggles[0];
         getChallengeRewards();
     });
-    getId('stabilityRewardsHead').addEventListener('click', () => {
-        global.sessionToggles[2] = !global.sessionToggles[2];
-        getChallengeRewards();
-    });
     for (let s = 1; s <= 5; s++) {
         const image = getId(`voidReward${s}`);
         const clickFunc = () => {
