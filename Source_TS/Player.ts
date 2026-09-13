@@ -1,7 +1,7 @@
 import Overlimit from './Limit';
 import { assignInnerHTML, cloneArray, deepClone, getId, getQuery, playerStart, toggleConfirm, toggleSwap } from './Main';
 import { globalSave, specialHTML } from './Special';
-import { assignMaxLevel, assignMilestoneInformation, calculateEffects, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, logAny, toggleChallengeType, prepareDarkness, assignUpgradeCost, calculateTreeCost } from './Stage';
+import { assignMaxLevel, assignMilestoneInformation, calculateEffects, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, logAny, toggleChallengeType, assignUpgradeCost, calculateTreeCost } from './Stage';
 import type { globalType, playerType, vacuumStartType } from './Types';
 import { format, switchTab, updateCollapsePoints, visualProgressUnlocks } from './Update';
 
@@ -42,7 +42,6 @@ export const player: playerType = {
         since: 0
     },
     darkness: {
-        active: false,
         unlocked: [false, false],
         tier: 0,
         energy: 0,
@@ -128,6 +127,7 @@ export const player: playerType = {
         auto: [], //Class 'toggleAuto'
         buildings: [[]],
         verses: [],
+        mergeType: false,
         supervoid: false,
         shop: {
             input: 0,
@@ -1275,7 +1275,7 @@ export const global: globalType = {
             'Better rewards'
         ],
         effectText: [
-            () => `Boost global speed by 2, but reduce time limit for ${player.challenges.stability >= 1 ? 'Challenges' : 'on everything that has it'} by 4, if level is below 2.\nIf ${player.challenges.stability >= 1 ? 'not inside any Challenge' : 'there is no time limit'}, then 2nd level will instead boost global speed by ${player.challenges.stability >= 1 ? 2 : `${format(calculateEffects.T0Inflation0(), { padding: true })} (strength depletes over 1 hour of the Stage time)`}.`,
+            () => `Boost global speed by 2, but reduce time limit for ${player.challenges.stability >= 1 ? 'Challenges' : 'on everything that has it'} by 4, if level is below 2.\nIf ${player.challenges.stability >= 1 ? 'not inside any Challenge' : 'there is no time limit'}, then 2nd level will instead boost global speed by ${player.challenges.stability >= 1 ? 2 : `${format(calculateEffects.T0Inflation0(), { padding: true })} (strength depletes over 1 hour of the Stage time)`}.${global.treeInfo[0].max[0] > 2 ? '\n(Every level above 2 increases speed by 2)' : ''}`,
             () => { //[1]
                 const effect = calculateEffects.T0Inflation1();
                 return `Boost global speed by unspent ${global.buildingsInfo.name[6][0]} ^${format((effect > 1 ? logAny(effect, player.buildings[6][0].current.toNumber() + 1) : 0.04) * player.tree[0][1], { padding: true })}.\n(Boost per level: ${format(effect, { padding: true })}, softcaps after ${format(calculateEffects.TOInflation1_softcap())} ${global.buildingsInfo.name[6][0]}. Global speed doesn't speed up game ticks)`;
@@ -1329,7 +1329,7 @@ export const global: globalType = {
         cost: [],
         firstCost: [1, 1, 16, 4, 1.2, 12, 1, 24, 6, 16],
         scaling: [0.5, 0.5, 1, 4, 0.8, 12, 2.8, 24, 2, 0],
-        max: [1e6, 1e6, 4, 1, 4, 4, 4, 1, 4, 1]
+        max: [8, 8, 4, 1, 4, 4, 4, 1, 4, 1]
     }, { //Tachyon
         name: [
             'More resources',
@@ -1339,15 +1339,15 @@ export const global: globalType = {
             'Conversion'
         ],
         effectText: [
-            () => `Increase non-reset related resources gain by ${format(1.4)}x.\n(This includes Dark matter, ...)`,
+            () => `Increase basic resources gain by ${format(1.4)}.\n(This includes Molecules, Moles, Drops, Mass, Stardust and Dark matter)`,
             () => `Increase max level for 'More global speed', 'More Strange quarks' and 'More Strangelets' by +4.\nCosmon costs for new levels are ${format(calculateTreeCost(0, 1, 9 + player.tree[2][0] * 4))}, ${format(calculateTreeCost(1, 1, 9 + player.tree[2][0] * 4))} and ${format(calculateTreeCost(2, 1, 5 + player.tree[2][0] * 4))}.`,
             () => "Increase max level for 'Overboost' by +1 and 'Strange gain' by +2.",
             () => 'Gain extra 1 + Multiverses extra Inflatons per level.',
-            () => 'Convert 1 unsafe Merge reset into safe.'
+            () => 'Convert 1 unsafe Merge reset into safe.\nIf there is no unsafe resets to convert, then adds one.'
         ],
         cost: [],
-        firstCost: [Infinity, Infinity, Infinity, Infinity, Infinity],
-        scaling: [10, 10, 100, 1000, 1e4],
+        firstCost: [1, 100, 1e4, 2e4, Infinity],
+        scaling: [20, 10, 40, 5, 1e6],
         max: [1e6, 1e6, 1e6, 1e6, 1e6]
     }],
     milestonesInfo: [
@@ -1385,7 +1385,7 @@ export const global: globalType = {
                 () => `${player.inflation.vacuum ? 'Vaporize to' : 'Have'} at least ${format(global.milestonesInfo[2].need[1])} ${player.inflation.vacuum ? 'Clouds' : 'Puddles at the same time'}.`
             ],
             rewardText: [
-                () => player.inflation.vacuum ? `Puddles strength increased by ${format(global.milestonesInfo[2].reward[0], { padding: true })}.` : 'First Intergalactic Structure. (Nebula)',
+                () => player.inflation.vacuum ? `Puddles strength increased by ${format(global.milestonesInfo[2].reward[0], { padding: true })}.` : "First Intergalactic Structure. (Nebula)\n(Half of the requirement to over-extend 'Remnants of past' time limit)",
                 () => player.inflation.vacuum ? `Decrease Drops requirement to get a Cloud by ${format(global.milestonesInfo[2].reward[1], { padding: true })}.` : 'Permanent Submerged Stage.'
             ],
             progress: [
@@ -1409,7 +1409,7 @@ export const global: globalType = {
                 () => `Have more or equal to ${format(global.milestonesInfo[3].need[1])} Satellites${player.inflation.vacuum ? ' and Subsatellites' : ''}.`
             ],
             rewardText: [
-                () => player.inflation.vacuum ? `Cosmic dust strength increased by ${format(global.milestonesInfo[3].reward[0], { padding: true })}.` : 'Second Intergalactic Structure. (Star cluster)',
+                () => player.inflation.vacuum ? `Cosmic dust strength increased by ${format(global.milestonesInfo[3].reward[0], { padding: true })}.` : "Second Intergalactic Structure. (Star cluster)\n(Half of the requirement to over-extend 'Remnants of past' time limit)",
                 () => player.inflation.vacuum ? `Increase effective Rank by +${format(global.milestonesInfo[3].reward[1])}.` : 'Permanent Accretion Stage.'
             ],
             progress: [
@@ -1551,27 +1551,27 @@ export const global: globalType = {
         },
         needText: ['1 Completion', '2 Completions', '3 Completions', '4 Completions (WIP)', '5 Completions (WIP)', '6 Completions (WIP)', '7 Completions (WIP)', '8 Completions (WIP)', '9 Completions (WIP)'],
         rewardText: [
-            "Improve level 2 of 'Overboost' Inflation", //1
+            "Improve level 2 of 'Overboost' Inflation\n(Remove boost decay and make it always work in false Vacuum)", //1
             "Make 'Instability' Inflation immune to resets", //2
             'Start true Vacuum with Void equal to Supervoid', //3
-            'Microworld Milestones no longer reset (WIP)', //4
-            'Submerged Milestones no longer reset (WIP)', //5
-            'Accretion Milestones no longer reset (WIP)', //6
-            'Interstellar Milestones no longer reset (WIP)', //7
-            'Intergalactic Milestones no longer reset (WIP)', //8
-            'Start Universe resets with true Vacuum state (WIP)' //9
+            'Start Universe resets with true Vacuum state (WIP)', //4
+            'Microworld Milestones no longer reset (WIP)', //5
+            'Submerged Milestones no longer reset (WIP)', //6
+            'Accretion Milestones no longer reset (WIP)', //7
+            'Interstellar Milestones no longer reset (WIP)', //8
+            'Intergalactic Milestones no longer reset (WIP)' //9
         ],
         resetType: 'vacuum',
         time: 5400,
         color: 'darkorchid'
     }, { //Challenge [2]
         name: 'Darkness',
-        description: () => `Expansion for the Abyss Stage through ${global.buildingsInfo.name[6][0]} Upgrades\n(Activating doesn't reset anything, effects are always active once unlocked)`,
+        description: () => `Expansion for the Abyss Stage through ${global.buildingsInfo.name[6][0]} Upgrades\n(Can't be entered because all effects are already always active)`,
         effectText: () => {
             const [falseU, trueU] = player.darkness.unlocked;
-            return `<p class="darkvioletText">‒ Doesn't count as a Challenge\n‒ Disables Big Crunches while active${player.progress.main >= 23 ? ` (Big Rip reward is at ${format(calculateEffects.cosmonGain(true))} Cosmons)` : ''}\n‒ Currently ${falseU || trueU ? `enabled in ${falseU ? 'false' : ''}${trueU ? `${falseU ? ', ' : ''}true` : ''}` : 'disabled in false, true'} Vacuum states</p>
+            return `<p class="darkvioletText">‒ Having ${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy will replace Big Crunch with Big Rip\n‒ Big Rip only increments Big Rip stats, current reward is at ${format(calculateEffects.cosmonGain(true))} Cosmons\n‒ Currently ${falseU || trueU ? `enabled in ${falseU ? 'false' : ''}${trueU ? `${falseU ? ', ' : ''}true` : ''}` : 'disabled in false, true'} Vacuum states</p>
             <p class="orchidText">‒ ${global.challengesInfo[2].name} is not immune to Stage resets\n‒ Requires special automatizations (Needs to be enabled in Settings)\n‒ In true Vacuum boosts Dark matter production by ${format(global.mergeInfo.galaxies / 1000 + 1, { padding: true })} (Galaxies / ${format(1000)} + 1)\n‒ In false Vacuum makes it immune to non-Abyss Stage resets\n‒ Inside Void cost for everything is increased by 10\nMore information to be revealed (WIP)</p>
-            <p class="cyanText">‒ Time limit is based on Universe age\n‒ Time limit is always active even when not unlocked (WIP)\nMore information to be revealed (WIP)</p>`;
+            <p class="cyanText">‒ Time limit is based on Universe age\nMore information to be revealed (WIP)</p>`;
         },
         rewardText: [
             'Darkness Tier can be increased to 2 (WIP)', //0
@@ -1789,6 +1789,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         getId('mergeMain').style.display = '';
         getId('mergeSolarWait').style.display = '';
 
+        getId('mergeSwap').style.display = 'none';
         getId('strange5Stage6').style.display = 'none';
         getId('mergeFalse').style.display = 'none';
         getQuery('#stageAutoInterstellar1 span').style.display = 'none';
@@ -1977,19 +1978,20 @@ export const updatePlayer = (load: playerType, decode = true): string => {
                     } else if (loadout[i] > 5) { loadout[i]--; }
                 }
             }
-            load.darkness.unlocked = cloneArray(playerStart.darkness.unlocked);
+            load.toggles.mergeType = false;
             load.time.online = Math.floor(load.time.online);
             const supervoid = load.challenges.supervoid;
             load.cosmon[0].total = (2 + (load.verses[0].true - 1) / 2) * load.verses[0].true + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + load.challenges.stability;
             if (load.inflation.vacuum && load.inflation.ends[0] > 0) { load.cosmon[0].total++; }
             load.cosmon[0].current = load.cosmon[0].total;
+            load.darkness.unlocked = cloneArray(playerStart.darkness.unlocked);
+            delete load.darkness['active' as keyof unknown];
         }
 
         if (load.version !== playerStart.version) {
             throw new ReferenceError(`Save file version ${load.version} is not allowed`);
         }
     }
-    load.darkness.unlocked ??= cloneArray(playerStart.darkness.unlocked); //Remove
     for (let s = 1; s <= 6; s++) {
         fillMissingValues(load.buildings[s], playerStart.buildings[s]);
         fillMissingValues(load.toggles.buildings[s], playerStart.toggles.buildings[s]);
@@ -2072,7 +2074,6 @@ export const updatePlayer = (load: playerType, decode = true): string => {
     Object.assign(player, load);
 
     /* Final preparations */
-    prepareDarkness();
     global.trueActive = player.stage.active;
     global.debug.historyStage = null;
     global.debug.historyEnd = null;

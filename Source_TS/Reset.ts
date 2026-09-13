@@ -1,7 +1,7 @@
 import { allowedToBeReset } from './Check';
 import { cloneArray, playerStart } from './Main';
 import { global, player } from './Player';
-import { assignMaxLevel, assignUpgradeCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, prepareDarkness, resetDarkness } from './Stage';
+import { assignMaxLevel, assignUpgradeCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation } from './Stage';
 import { stageUpdate, switchTab } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
@@ -223,6 +223,11 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     }
 };
 
+export const resetDarkness = (outside = false) => {
+    player.ASR[6] = player.darkness.unlocked[player.inflation.vacuum ? 1 : 0] && player.verses[0].lowest[0] <= 5 ? 1 : 0;
+    if (outside) { player.clone.ASR[6] = player.ASR[6]; }
+};
+
 /** Level 0 is Vacuum reset, level 1 is Universe reset, level 2 is Multiverse reset, level 3 is End reset */
 export const resetVacuum = (level = 0) => {
     const vacuum = player.inflation.vacuum;
@@ -241,14 +246,13 @@ export const resetVacuum = (level = 0) => {
             assignMaxLevel(i, 0, 'inflation');
         }
         const supervoid = player.challenges.supervoid;
-        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5];
+        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + (1 + player.verses[1].true) * player.tree[2][3];
         if (player.inflation.vacuum) { total++; }
         player.cosmon[0].current = total;
         player.cosmon[0].total = total;
         player.inflation.resets = 0;
         player.inflation.peak = [0, 0];
         player.time.end = 0;
-        player.darkness.active = false;
         player.darkness.unlocked = [false, false];
         if (player.challenges.stability < 2) {
             player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoidMax);
@@ -357,7 +361,6 @@ export const resetVacuum = (level = 0) => {
     if (universes >= 21 || (universes >= 5 && vacuum)) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
     player.strange[0].total = player.strange[0].current;
-    prepareDarkness();
     resetDarkness();
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { assignMaxLevel(i, 0, 'researchesAuto'); }
@@ -563,7 +566,6 @@ export const loadFromClone = () => {
         global.automatization.autoS = [];
         global.lastStrangeness = [null, 0];
         global.lastMilestone = [null, 0];
-        prepareDarkness();
     }
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { assignMaxLevel(i, 0, 'researchesAuto'); }

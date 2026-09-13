@@ -623,6 +623,7 @@ const loadoutsLoadAuto = () => {
         upgradesInfo[s].firstCost = newArray;
     }
     upgradesInfo[5].maxActive = upgradesInfo[5].firstCost.length;
+    upgradesInfo[6].maxActive = upgradesInfo[6].firstCost.length;
     for (const upgradeType of ['researches', 'researchesExtra'] as const) {
         const pointer = global[`${upgradeType}Info`];
         for (let s = 1; s < pointer.length; s++) {
@@ -654,6 +655,7 @@ const loadoutsLoadAuto = () => {
             pointer[3].maxActive = pointer[3].firstCost.length;
         }
         pointer[5].maxActive = pointer[5].firstCost.length;
+        pointer[6].maxActive = pointer[6].firstCost.length;
     }
     player.researchesAuto = createArray(global.researchesAutoInfo.costRange.length, 0);
     player.ASR = createArray(global.ASRInfo.costRange.length, 0);
@@ -803,7 +805,9 @@ try { //Start everything
     toggleSpecial(0, 'mobile');
     toggleSpecial(0, 'reader');
 
-    if (globalSave.MDSettings[0]) {
+    const MD = globalSave.MDSettings[0];
+    const SR = globalSave.SRSettings[0];
+    if (MD) {
         specialHTML.styleSheet.textContent += ` html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
             #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
@@ -813,14 +817,18 @@ try { //Start everything
             const arrow = document.createElement('button');
             arrow.innerHTML = '<span class="downArrow"></span>';
             arrow.type = 'button';
-            getId(`reset${i}Main`).append(arrow);
+            if (i !== 0) {
+                const div = document.createElement('div');
+                getId(`reset${i}Main`).append(div);
+                div.append(getId(`reset${i}Button`));
+            }
+            getQuery(`#reset${i}Main div`).append(arrow);
             arrow.addEventListener('click', () => getId(`reset${i}Main`).classList.toggle('open'));
             arrow.addEventListener('blur', () => getId(`reset${i}Main`).classList.remove('open'));
         }
         specialHTML.styleSheet.textContent += ` #resets { row-gap: 1em; }
-            #resets > section { position: relative; flex-direction: row; justify-content: center; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; }
+            #resets > section { position: relative; width: unset; padding: unset; row-gap: unset; background-color: unset; border: unset; }
             #resets > section:not(.open) > p { display: none !important; }
-            #resets > section > button:last-of-type { display: flex; justify-content: center; align-items: center; width: 2.2em; margin-left: -2px; }
             #resets .downArrow { width: 1.24em; height: 1.24em; }
             #resets p { position: absolute; width: 17.4em; padding: 0.5em 0.6em 0.6em; background-color: var(--window-color); border: 2px solid var(--window-border); top: calc(100% - 2px); z-index: 2; box-sizing: content-box; }`;
 
@@ -876,7 +884,7 @@ try { //Start everything
             (getId('collapseInputWait') as HTMLInputElement).type = 'text';
         }
     }
-    if (globalSave.SRSettings[0]) {
+    if (SR) {
         const message = getId('SRMessage1');
         message.textContent = 'Screen reader support is enabled, disable it if its not required';
         message.className = 'greenText';
@@ -933,8 +941,6 @@ try { //Start everything
 
     /* Global */
     assignHotkeys();
-    const MD = globalSave.MDSettings[0];
-    const SR = globalSave.SRSettings[0];
     const PC = !MD || globalSave.MDSettings[1];
     const releaseHotkey = (event: KeyboardEvent | null) => {
         const hotkeys = global.hotkeys;
@@ -1132,6 +1138,11 @@ try { //Start everything
         if (PC) { button.addEventListener('mousedown', repeatFunc); }
         if (MD) { button.addEventListener('touchstart', repeatFunc); }
     }
+    getId('mergeSwap').addEventListener('click', () => {
+        player.toggles.mergeType = !player.toggles.mergeType;
+        visualUpdate();
+        numbersUpdate();
+    });
     const getMakeCount = () => global.hotkeys.shift ? (global.hotkeys.ctrl ? 100 : 1) : global.hotkeys.ctrl ? 10 : undefined;
     for (let i = 1; i < specialHTML.lastBuilding; i++) {
         const button = getId(`building${i}Btn`);

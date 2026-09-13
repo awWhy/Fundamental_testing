@@ -94,7 +94,6 @@ export interface playerType {
         since: number
     }
     darkness: {
-        active: boolean
         /** [False, true] Vacuum */
         unlocked: [boolean, boolean]
         tier: number
@@ -180,6 +179,7 @@ export interface playerType {
         /** [0] is not used */
         buildings: boolean[][]
         verses: boolean[]
+        mergeType: boolean
         supervoid: boolean
         shop: {
             input: number

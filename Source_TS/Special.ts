@@ -1533,9 +1533,7 @@ export const checkProgress = () => {
 };
 const progressMain = () => {
     const progress = player.progress.main;
-    if (progress === 26 || global.offline.active) { return; }
-    if (player.verses[1].total >= 1) { return progressUp(26); }
-    if (progress === 25) { return; }
+    if (progress === 25 || global.offline.active) { return; }
     if (player.verses[0].other[2] >= 1 || player.verses[0].other[0] >= 1) { return progressUp(25, 13); }
     if (progress === 24 || global.offline.active) { return; }
     if (player.inflation.ends[1] >= 1) { return progressUp(24); }
@@ -1617,7 +1615,7 @@ const progressUp = (newValue: number, event = null as null | number) => {
 
 export const replayEvent = async() => {
     const progress = player.progress.main;
-    const last = progress >= 26 ? 13 :
+    const last = progress >= 25 ? 13 :
         progress >= 23 ? 12 :
         progress >= 22 ? 11 :
         progress >= 20 ? 10 :
@@ -1680,7 +1678,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 12) {
         text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one increases rewards base by +1 per bonus Universe.\n(Doing it for the first time will also unlock new Inflation that helps with creation of new types of self-made Universes)`;
     } else if (event === 13) {
-        text = 'Multiverse placeholder text, creating it forces Big Crunch. Any End reset will reset Multiverses.';
+        text = "Unlocked a new Verse ‒ 'Multiverse' and also another row of Inflations ‒ Tachyon. Creating Multiverse forces Big Crunch, but keeps bonus Universes.\n(Multiverses are not immune to End resets)";
     }
     if (!replay) {
         text += "\n\n(Can be viewed again with 'Events' button in Settings tab)";
