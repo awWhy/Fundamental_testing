@@ -170,6 +170,11 @@ img {
     font-size: 0.66rem;
 }
 
+svg {
+    background-color: #0000;
+    object-fit: scale-down;
+}
+
 p > img {
     float: left;
     margin: 0.5em 0.5em 0 0.2em;
@@ -474,11 +479,26 @@ input:-webkit-autofill { /* Chrome related pain */
     box-sizing: content-box;
 }
 
+#resets div { display: flex; }
+
 #resets button {
     width: 16.8em;
     height: 2.2em;
     font-size: 0.86em;
     margin-top: auto;
+}
+
+#resets button:not(:first-of-type) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2em;
+    margin-left: -2px;
+}
+
+#mergeSwap svg {
+    fill: var(--button-text);
+    height: 20px;
 }
 
 #buildings {
@@ -1195,7 +1215,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
 }
 
 #logoLinks img {
-    background-color: var(--window-color);
+    background-color: #0000;
     object-fit: scale-down;
     height: 25px;
     width: initial;
@@ -1206,7 +1226,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     margin: 3px 0;
 }
 
-#logoLinks > *:hover, #logoLinks > *:hover img { background-color: var(--hollow-hover); }
+#logoLinks > *:hover { background-color: var(--hollow-hover); }
 
 #saveButtonGroup {
     display: flex;

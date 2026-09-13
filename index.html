@@ -61,7 +61,14 @@
                             <p class="whiteText stage4Only"><span class="orchidText">Collapse</span> resets Structures, Upgrades and all Researches for <span class="cyanText">Solar mass</span> and <span class="darkorchidText">Star remnants</span>.</p>
                             <p class="whiteText stage5Only"><span id="mergeTrue"><span class="darkvioletText">Merge</span> does a <span class="grayText">Galaxy</span> reset, while also converting all self-made <span class="grayText">Galaxies</span> into bonus ones</span><span id="mergeFalse">Missing</span>.</p>
                             <p class="whiteText stage6Only"><span class="orangeText">Nucleation</span> resets <span class="grayText"><span class="newLightName">Dark</span> energy</span>, <span class="newLightName">Dark</span> Structures, <span class="darkvioletText">Abyss</span> Upgrades and Researches for <span class="darkvioletText"><span class="newLightName">Dark</span> fluid</span>.</p>
-                            <button type="button" id="reset0Button">Missing</button>
+                            <div>
+                                <button type="button" id="reset0Button">Missing</button>
+                                <button type="button" id="mergeSwap" aria-label="Swap reset type">
+                                    <svg viewBox="0 0 24 24"> <!-- Used_art/SVG/Reload.svg -->
+                                        <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </section>
                     </article>
                     <article id="buildings" aria-label="Structures">
@@ -262,7 +269,6 @@
                                 <p id="mergeScore2" class="grayText"><span>Clusters:</span> <span id="mergeScore2Cur" class="greenText">0</span> <span>(<span class="greenText">4</span> per)</span></p>
                                 <p class="darkvioletText"><span>Score total:</span> <span id="mergeScoreTotal" class="greenText">0</span> <span class="hasTitle" data-title="Merge score if to use up remaining resets while resetting with same amount of Galaxies every time">(<span id="mergeScoreAfter" class="greenText">0</span> post)</span></p>
                             </article>
-                            <p id="universeTypes" class="darkvioletText">Different self-made Universes: <span class="orangeText">0 seconds</span> | Max allowed: <span class="orangeText">0 seconds</span></span></p>
                             <p id="universeTime" class="grayText">Universe age: <span class="orangeText">0 seconds</span><span id="universeTimeReal"> (Real: <span class="orangeText">0 seconds</span>)</span></p>
                         </div>
                     </section>
@@ -859,7 +865,7 @@
                             <div id="cosmon2InfoMain" class="popUpMenu mainText" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Tachyon softcap information:</h4>
                                 <ul class="whiteText">
-                                    <li>Softcap ^<span id="cosmon2InfoSoft">0.5</span> starts at max(600 seconds of pre-softcap production, 1)</li>
+                                    <li>Softcap ^<span id="cosmon2InfoSoft">0.25</span> starts at max(600 seconds of pre-softcap production, 1)</li>
                                     <li>Which is equal to <span id="cosmon2InfoStart">1</span> | Pre-softcap production is <span id="cosmon2InfoPre">1</span></li>
                                     <li>Post softcap production is <span id="cosmon2InfoPost">1</span></li>
                                 </ul>
@@ -1007,8 +1013,8 @@
                         <section id="inflationMilestone4"><h4>Requires 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
                         <section id="inflationMilestone5"><h4>Requires 8 Universes:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Unlock new mode for auto Stage that uses seconds since peak</span></section>
                         <section id="inflationMilestone6"><h4>Requires 13 Universes:</h4><span>Unlock auto Strangeness (needs to be enabled in Settings)<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
-                        <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Also unlock auto Universes and basic auto loadout (2nd part is WIP)</span></section>
-                        <section id="inflationMilestone8"><h4>Requires 34 Universes: (WIP)</h4><span>Unlock auto End resets and advanced auto loadout</span></section>
+                        <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Also unlock auto Universes</span></section>
+                        <section id="inflationMilestone8"><h4>Requires 34 Universes: (WIP)</h4><span>Unlock auto End resets (needs to be enabled in Settings)<br>Also auto load choosen loadout after End resets</span></section>
                     </article>
                 </section>
             </section>
@@ -1200,7 +1206,7 @@
                     <section class="stats" role="none">
                         <p>Started playing: <span class="whiteText"><span id="firstPlay">00.00.0000, 00:00:00</span> (<span id="firstPlayAgo">0 seconds</span> ago)</span> | Online time: <span id="onlineTotal" class="whiteText">0 seconds</span><span id="offlineStorage"> | Offline storage <span class="whiteText">0 seconds</span></span></p>
                         <p id="exportStats" class="hasTitle" data-title="Value inside parentheses is storage and is equal to the highest reset value">Max export: <span id="exportQuarksMax">1</span> <span class="whiteText">Strange quarks</span><span id="exportStrangeletsMax">, <span>0</span> <span class="whiteText">Strangelets</span></span><span id="exportCosmonMax">, <span>0</span> <span class="whiteText">Cosmons</span></span> in <span id="exportTimeToMax" class="whiteText">24 hours</span></p>
-                        <p id="universesExtraStats">Highest self-made Universes on Big Crunch: <span class="whiteText">0</span><span id="trueUniversesLow"> | Lowest on Tier 1 Big Rip: <span class="whiteText">0</span></span></p>
+                        <p id="universesExtraStats">Highest self-made Universes on Big Crunch: <span class="whiteText">0</span><span id="trueUniversesLow"> | Lowest on Big Rip: <span class="whiteText">0</span></span></p>
                         <p id="endResets">Big Crunches: <span class="whiteText">0</span> | Big Rips: <span id="endResetsType2" class="whiteText">0</span> | Big Freezes: <span id="endResetsType3" class="whiteText">0</span></p>
                         <p id="stageResets">Stage resets: <span class="whiteText">0</span></p>
                         <article class="statsWindows" aria-label="Structures">
