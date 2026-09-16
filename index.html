@@ -286,7 +286,7 @@
                     <div id="challengesMain">
                         <article aria-label="Challenges">
                             <input type="image" src="Used_art/Void.png" alt="Void" draggable="false" id="challenge1" aria-controls="challengeMultiline challengeTimeLimit">
-                            <input type="image" src="Used_art/False%20vacuum.png" alt="Vacuum information" draggable="false" id="challenge2" aria-controls="challengeMultiline challengeTimeLimit">
+                            <input type="image" src="Used_art/False%20vacuum.png" alt="Vacuum information" draggable="false" id="challenge2" aria-controls="challengeMultiline challengeTimeLimit vacuumInfo">
                             <input type="image" src="Used_art/Darkness.png" alt="Darkness" draggable="false" id="challenge3" aria-controls="challengeMultiline challengeTimeLimit">
                         </article>
                         <div>
@@ -294,6 +294,12 @@
                                 <h3 class="bigWord"><button type="button" id="challengeName" class="selectBtn" disabled>Missing</button><span id="challengeActive" class="greenText" style="display: none;">, active</span></h3>
                                 <div id="challengeMultiline"></div>
                                 <p id="challengeTimeLimit" class="blueText"><span>Time limit</span> is <span class="cyanText">1 eons</span></p>
+                                <article id="vacuumInfo">
+                                    <h3 class="darkorchidText bigWord">Vacuum information</h3>
+                                    <p class="orchidText">Vacuum state: <span id="vacuumInfoState">false</span> | Resets: <span id="vacuumInfoResets" class="darkorchidText">0</span></p>
+                                    <p id="vacuumInfoGain" class="darkvioletText">Current Inflatons gain: <span>0</span> | Rate: <span>0 per eon</span></p>
+                                    <p class="orchidText">Time since last reset: <span id="vacuumInfoTime" class="darkorchidText">0</span><span id="vacuumInfoTimeReal"> (Real: <span class="darkorchidText">0</span>)</span></p>
+                                </article>
                             </section>
                             <article id="challengeRewards" aria-labelledby="voidRewardsHead stabilityRewardsHead darknessTier">
                                 <button type="button" id="voidRewardsHead" class="selectBtn darkvioletText bigWord" style="display: none;">Void rewards:</button>
@@ -1007,7 +1013,7 @@
                         <section id="endMilestone1"><h4>Requires 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports can fully claim Strange quarks and Strangelets storages</span></section>
                         <section id="endMilestone2"><h4>Requires 1 Big Rip:</h4><span>Improve End resets rewards base with Arithmetic progression of self-made Universes and a Step of <span>0.2</span><br>Exports can award Cosmons</span></section>
                         <section id="endMilestone3"><h4>Requires 1 Big Freeze: (WIP)</h4><span>Start End resets with another bonus Universe, improve Big Rip Milestone Step and starting value by +<span>0.1</span> per Big Freeze<br>Exports max timer and max reward increased by 2</span></section>
-                        <section id="inflationMilestone1"><h4>Requires 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to self-made Universes ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness level 2</span></section>
+                        <section id="inflationMilestone1"><h4>Requires 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to max(current self-made Universes, highest on Big Crunch) ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness level 2</span></section>
                         <section id="inflationMilestone2"><h4>Requires 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
                         <section id="inflationMilestone3"><h4>Requires 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
                         <section id="inflationMilestone4"><h4>Requires 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
@@ -1088,7 +1094,7 @@
                                     <button type="button" id="toggleConfirm5" class="toggleConfirm">Safe</button>
                                     <button type="button" id="toggleAuto9Info" class="hollowButton stage5borderButton" aria-label="Settings" aria-haspopup="menu" aria-controls="toggleAuto9Menu">!</button>
                                     <div id="toggleAuto9Menu" class="popUpMenu" style="display: none;" role="menu" aria-label="Settings menu">
-                                        <div id="mergeMain"><p><label>Merge if current self-made Galaxies are at least <input type="number" id="mergeInput" step="1"></label> and <label><input type="number" id="mergeInputSince" step="any"> seconds passed since last Galaxy<span id="mergeSolarWait">, will wait for Solar mass hardcap instead if set to 0<span></label></p>
+                                        <div id="mergeMain"><p><label>Merge if current self-made Galaxies are at least <input type="number" id="mergeInput" step="1"></label> and <label><input type="number" id="mergeInputSince" step="any"> seconds passed since last Galaxy<span id="mergeSolarWait">, will wait for Solar mass hardcap instead if set to 0</span></label></p>
                                         <p>(Requires for auto Collapse to fail to reset)</p></div>
                                         <label id="mergeVacuumChange">Change Vacuum state to true <button type="button" id="toggleNormal5" class="toggleNormal">ON</button>, ignores Stability</label>
                                     </div>
@@ -1159,7 +1165,7 @@
                             </li>
                             <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label><button type="button" id="pauseButton" class="hollowButton hasTitle" data-title="Pauses game ticks and resets autosave interval">Pause</button></li>
                             <li><label>Visual update and events interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
-                            <li><label>Game autosave interval <input type="number" id="autoSaveInterval" min="5" max="9999" step="1"> s</label></li>
+                            <li class="hasTitle" data-title="Setting to negative value will disable it"><label>Game autosave interval <input type="number" id="autoSaveInterval" min="4" max="3600" step="1"> s</label></li>
                             <li><label class="hasTitle" data-title="Game must be not paused for this to work">Autosave on tab out or page refresh<button type="button" id="globalToggle7" class="specialToggle">OFF</button></label></li>
                             <li><label>Auto accept Offline time<button type="button" id="globalToggle9" class="specialToggle">OFF</button></label><button type="button" id="warpButton" class="hollowButton">0 Warps</button></li>
                             <li id="autoStageSwitch"><label class="hasTitle" data-title="Automatically clicks new Stages in the footer">Automatically change active Stage<button type="button" id="toggleNormal0" class="toggleNormal">OFF</button></label></li>
@@ -1197,6 +1203,7 @@
                                     <button type="button" id="switchTheme4" class="stage4borderButton hollowButton orangeText">Interstellar</button>
                                     <button type="button" id="switchTheme5" class="stage5borderButton hollowButton darkorchidText">Intergalactic</button>
                                     <button type="button" id="switchTheme6" class="stage6borderButton hollowButton darkvioletText">Abyss</button>
+                                    <button type="button" id="switchThemeQuantum" class="hollowButton greenText" style="border-color: #00a300;">Quantum</button>
                                 </div>
                             </div>
                         </article>
