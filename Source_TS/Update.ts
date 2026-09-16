@@ -61,7 +61,7 @@ export const switchTab = (tab = null as null | gameTab, subtab = null as null | 
     }
 
     const active = player.stage.active;
-    if ((tab === 'upgrade' && global.tabs.upgrade.current === 'Elements') || tab === 'Elements') {
+    if (tab === 'upgrade' ? global.tabs.upgrade.current === 'Elements' : tab === 'Elements') {
         if (active !== 4 && active !== 5) {
             if (tab === 'upgrade' && subtab === null) {
                 switchTab('upgrade', 'Upgrades');
@@ -666,7 +666,7 @@ export const visualUpdate = (ignoreOffline = false) => {
     const highest = player.progress.main;
 
     {
-        let showReset1 = (tab === 'stage' && subtab === 'Structures') || tab === 'upgrade' || tab === 'Elements';
+        let showReset1 = tab === 'stage' ? subtab === 'Structures' : (tab === 'upgrade' || tab === 'Elements');
         if (globalSave.toggles[1]) { getId('ElementsTabBtn').style.display = player.upgrades[4][1] === 1 ? '' : 'none'; }
         if (active === 1) {
             if (player.upgrades[1][5] !== 1) { showReset1 = false; }
@@ -1230,7 +1230,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('strange10Stage5').style.display = (universes < 21 || showX) && player.tree[1][9] >= 1 ? '' : 'none';
                 getId(`strangeness${globalSave.MDSettings[0] ? 'Page' : 'Section'}6`).style.display = falseUniverses >= 1 ? '' : 'none';
                 getId('strange4Stage6').style.display = player.strangeness[6][3] < 1 || showX ? '' : 'none';
-                if (globalSave.MDSettings[0] && ((global.debug.MDStrangePage === 5 && !strange5) || (global.debug.MDStrangePage === 6 && falseUniverses < 1))) { MDStrangenessPage(1); }
+                if (globalSave.MDSettings[0] && (global.debug.MDStrangePage === 5 ? !strange5 : (global.debug.MDStrangePage === 6 && falseUniverses < 1))) { MDStrangenessPage(1); }
                 if (highest < 15) { getId('strange0').style.cursor = milestones[4][0] < 8 ? 'unset' : ''; }
             }
             getId('strange6Stage1').style.display = show1 ? '' : 'none';
@@ -1481,6 +1481,8 @@ export const visualProgressUnlocks = () => {
     getId('challenge1').style.display = highest >= 17 ? '' : 'none';
     (getId('challenge2') as HTMLInputElement).alt = highest >= 22 ? global.challengesInfo[1].name : 'Vacuum information';
     (getId('voidRewardsHead') as HTMLButtonElement).disabled = highest < 20;
+    getId('vacuumInfoGain').style.display = highest >= 19 ? '' : 'none';
+    getId('vacuumInfoTimeReal').style.display = highest >= 19 ? '' : 'none';
     getId('researchAuto3').style.display = highest >= 19 ? '' : 'none';
     getId('toggleHover0').style.display = highest >= 3 ? '' : 'none';
     getId('toggleMax0').style.display = highest >= 7 ? '' : 'none';
@@ -1519,6 +1521,7 @@ export const visualProgressUnlocks = () => {
     getId('switchTheme4').style.display = highest >= 7 ? '' : 'none';
     getId('switchTheme5').style.display = highest >= 10 ? '' : 'none';
     getId('switchTheme6').style.display = highest >= 18 ? '' : 'none';
+    getId('switchThemeQuantum').style.display = highest >= 20 ? '' : 'none';
     getId('saveFileNameStage').style.display = highest >= 2 ? '' : 'none';
     getId('saveFileNameStrange').style.display = highest >= 17 || (!vacuum && highest >= 11) ? '' : 'none';
     getId('saveFileNameVacuum').style.display = highest >= 15 ? '' : 'none';
@@ -1825,7 +1828,7 @@ export const getChallengeDescription = () => {
 
     const unlocked = index !== 1 || player.progress.main >= 22;
     (nameID.parentElement as HTMLElement).style.display = unlocked ? '' : 'none';
-    let text = !unlocked ? '' : `<p class="whiteText">${info.description()}</p>
+    const text = !unlocked ? '' : `<p class="whiteText">${info.description()}</p>
     <article><h4 class="${info.color}Text bigWord">Effects:</h4>
     <div>${info.effectText()}</div></article>`;
     if (unlocked) {
@@ -1836,13 +1839,14 @@ export const getChallengeDescription = () => {
     } else { getId('challengeTimeLimit').style.display = 'none'; }
 
     if (index === 1) {
-        const vacuum = player.inflation.vacuum;
-        const gain = (vacuum || (player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && player.challenges.active !== 1)) ? calculateEffects.trueVerses() + 1 : 1;
-        text += `${unlocked ? '<article>' : ''}<h3 class="darkorchidText bigWord">Vacuum information</h3>
-        <p class="orchidText">Vacuum state: <span class="${vacuum ? 'greenText">true' : 'redText">false'}</span> | Resets: <span class="darkorchidText">${player.inflation.resets}</span></p>
-        ${player.progress.main >= 19 ? `<p class="darkvioletText">Current Inflatons gain: <span class="${vacuum ? 'green' : 'red'}Text">${format(gain, { padding: 'exponent' })}</span> | Rate: <span class="${vacuum ? 'green' : 'red'}Text">${format(gain / player.time.vacuum, { type: 'income' })}</span></p>` : ''}
-        <p class="orchidText">Time since last reset: <span class="darkorchidText">${format(player.inflation.time, { type: 'time' })}</span>${player.progress.main >= 19 ? ` (Real: <span class="darkorchidText">${format(player.time.vacuum, { type: 'time' })}</span>)` : ''}</p>${unlocked ? '</article>' : ''}`;
-    }
+        const gain = (player.inflation.vacuum || (player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && player.challenges.active !== 1)) ? calculateEffects.trueVerses() + 1 : 1;
+        getId('vacuumInfo').style.display = '';
+        getId('vacuumInfoResets').textContent = format(player.inflation.resets);
+        getQuery('#vacuumInfoGain > span').textContent = format(gain, { padding: 'exponent' });
+        getQuery('#vacuumInfoGain > span:last-of-type').textContent = format(gain / player.time.vacuum, { type: 'income' });
+        getId('vacuumInfoTime').textContent = format(player.inflation.time, { type: 'time' });
+        getQuery('#vacuumInfoTimeReal > span').textContent = format(player.time.vacuum, { type: 'time' });
+    } else { getId('vacuumInfo').style.display = 'none'; }
     assignInnerHTML('#challengeMultiline', text);
 };
 

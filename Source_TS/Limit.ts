@@ -401,7 +401,7 @@ const technical = {
             if (left[0] < 0 || isNaN(left[0]) || isNaN(power)) {
                 left[0] = NaN;
                 left[1] = NaN;
-            } else if ((power === -Infinity && left[1] >= 0) || (power === Infinity && left[1] < 0)) {
+            } else if (power === Infinity ? left[1] < 0 : (power === -Infinity && left[1] >= 0)) {
                 left[0] = 0;
                 left[1] = 0;
             } else {

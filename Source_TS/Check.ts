@@ -59,7 +59,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
 };
 
 export const checkVerse = (index: number): boolean => {
-    if (index === 0) { return (player.challenges.active === null && (player.inflation.vacuum || player.tree[0][4] >= 1)) || (player.challenges.active === 0 && global.challengesInfo[0].time >= player.time[global.challengesInfo[0].resetType]); }
+    if (index === 0) { return player.challenges.active === null ? (player.inflation.vacuum || player.tree[0][4] >= 1) : (player.challenges.active === 0 && global.challengesInfo[0].time >= player.time[global.challengesInfo[0].resetType]); }
     return index === 1;
 };
 
@@ -308,4 +308,14 @@ export const milestoneCheck = (index: number, stageIndex: number): boolean => {
         (player.tree[0][4] < 1 && pointer.reward[index] < player.time.stage)
     ) { return false; }
     return pointer.need[index].lessOrEqual(pointer.progress[index]());
+};
+
+export const checkTheme = (theme: any): boolean => {
+    if (theme === 2) { return player.progress.main >= 3; }
+    if (theme === 3) { return player.progress.main >= 5; }
+    if (theme === 4) { return player.progress.main >= 7; }
+    if (theme === 5) { return player.progress.main >= 10; }
+    if (theme === 6) { return player.progress.main >= 18; }
+    if (theme === 'Quantum') { return player.progress.quantum === -1; }
+    return theme === null || theme === 1;
 };

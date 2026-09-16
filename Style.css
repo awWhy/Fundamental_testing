@@ -677,7 +677,7 @@ input:-webkit-autofill { /* Chrome related pain */
 }
 
 #challengeMultiline p { white-space: pre-line; }
-#challengeMultiline > article { margin-top: 1.2em; }
+#challengeMultiline > article, #vacuumInfo { margin-top: 1.2em; }
 
 #challengeMultiline div {
     display: flex;

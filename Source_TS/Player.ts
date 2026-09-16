@@ -1253,7 +1253,7 @@ export const global: globalType = {
                 () => `Boost global speed by ${format(1.4)}.`,
                 () => `Gain ${format(1.4)} times more Strangelets from the Stage resets.`,
                 () => "Increase max levels for a lot of Strangeness, these include:\n'Fundamental boost', 'Better improvement', 'Free Discharge', 'More Moles', 'Bigger Puddles', 'Improved flow', 'Faster Accretion', 'Intense weathering', 'Hotter Stars', 'Cheaper Stars' and 'Bigger Structures'.",
-                () => `Unlock a new mini Stage '${global.challengesInfo[2].name}', activated in the 'Advanced' subtab.\n(This Strangeness persists through Vacuum resets)`,
+                () => `Unlock a new mini Stage '${global.challengesInfo[2].name}', will be found in the 'Advanced' subtab.\n(This Strangeness persists through ${player.inflation.vacuum} Vacuum resets)`,
                 () => 'Increase Strangelets gain base by +1 per Stage reset.'
             ],
             cost: [],
@@ -1328,7 +1328,7 @@ export const global: globalType = {
         ],
         cost: [],
         firstCost: [1, 1, 16, 4, 1.2, 12, 1, 24, 6, 16],
-        scaling: [0.5, 0.5, 1, 4, 0.8, 12, 2.8, 24, 2, 0],
+        scaling: [0.5, 0.5, 0.5, 4, 0.8, 12, 2.8, 24, 2, 0],
         max: [8, 8, 4, 1, 4, 4, 4, 1, 4, 1]
     }, { //Tachyon
         name: [
@@ -1340,13 +1340,13 @@ export const global: globalType = {
         ],
         effectText: [
             () => `Increase basic resources gain by ${format(1.4)}.\n(This includes Molecules, Moles, Drops, Mass, Stardust and Dark matter)`,
-            () => `Increase max level for 'More global speed', 'More Strange quarks' and 'More Strangelets' by +4.\nCosmon costs for new levels are ${format(calculateTreeCost(0, 1, 9 + player.tree[2][0] * 4))}, ${format(calculateTreeCost(1, 1, 9 + player.tree[2][0] * 4))} and ${format(calculateTreeCost(2, 1, 5 + player.tree[2][0] * 4))}.`,
+            () => `Increase max level for 'More global speed', 'More Strange quarks' and 'More Strangelets' by +4.\nCosmon costs for new levels are ${format(calculateTreeCost(0, 1, 8 + player.tree[2][1] * 4))}, ${format(calculateTreeCost(1, 1, 8 + player.tree[2][1] * 4))} and ${format(calculateTreeCost(2, 1, 4 + player.tree[2][1] * 4))}.`,
             () => "Increase max level for 'Overboost' by +1 and 'Strange gain' by +2.",
             () => 'Gain extra 1 + Multiverses extra Inflatons per level.',
-            () => 'Convert 1 unsafe Merge reset into safe.\nIf there is no unsafe resets to convert, then adds one.'
+            () => 'Convert 1 unsafe Merge reset into safe.\nIf there is no unsafe resets to convert, before this Inflation, then adds one.'
         ],
         cost: [],
-        firstCost: [1, 100, 1e4, 2e4, Infinity],
+        firstCost: [1, 1e3, 5e4, 1e5, Infinity],
         scaling: [20, 10, 40, 5, 1e6],
         max: [1e6, 1e6, 1e6, 1e6, 1e6]
     }],
@@ -1554,12 +1554,12 @@ export const global: globalType = {
             "Improve level 2 of 'Overboost' Inflation\n(Remove boost decay and make it always work in false Vacuum)", //1
             "Make 'Instability' Inflation immune to resets", //2
             'Start true Vacuum with Void equal to Supervoid', //3
-            'Start Universe resets with true Vacuum state (WIP)', //4
-            'Microworld Milestones no longer reset (WIP)', //5
-            'Submerged Milestones no longer reset (WIP)', //6
-            'Accretion Milestones no longer reset (WIP)', //7
-            'Interstellar Milestones no longer reset (WIP)', //8
-            'Intergalactic Milestones no longer reset (WIP)' //9
+            'Microworld Milestones no longer reset (WIP)', //4
+            'Submerged Milestones no longer reset (WIP)', //5
+            'Accretion Milestones no longer reset (WIP)', //6
+            'Interstellar Milestones no longer reset (WIP)', //7
+            'Intergalactic Milestones no longer reset (WIP)', //8
+            'Start Universe resets with true Vacuum state (WIP)' //9
         ],
         resetType: 'vacuum',
         time: 5400,
@@ -1717,6 +1717,11 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         strangenessInfo[s].scaling = cloneArray(info[`strangenessS${s as 1}Scale`]);
     }
 
+    const vacuumInfoState = getId('vacuumInfoState');
+    vacuumInfoState.textContent = `${state}`;
+    vacuumInfoState.style.color = `var(--${state ? 'green' : 'red'}-text)`;
+    getQuery('#vacuumInfoGain > span').style.color = `var(--${state ? 'green' : 'red'}-text)`;
+    getQuery('#vacuumInfoGain > span:last-of-type').style.color = `var(--${state ? 'green' : 'red'}-text)`;
     const milestone1S1 = getQuery('#milestone1Stage1Div > input') as HTMLImageElement;
     const milestone1S2 = getQuery('#milestone1Stage2Div > input') as HTMLImageElement;
     const milestone2S2 = getQuery('#milestone2Stage2Div > input') as HTMLImageElement;
@@ -1966,6 +1971,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
 
             /* Can be shortened */
             if (load.verses[0].highest > 9) { load.verses[0].highest = 9; }
+            if (load.progress.main > 24) { load.progress.main = 24; }
             for (let i = 1; i < 6; i++) {
                 if (load.progress.void[i] < load.challenges.void[i]) { load.progress.void[i] = load.challenges.void[i]; }
             }

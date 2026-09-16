@@ -215,7 +215,7 @@ export const pauseGame = (pause = true) => {
         global.paused = false;
         if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Game unpaused'; }
 
-        global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
+        global.intervalsId.autoSave = globalSave.intervals.autoSave > 0 ? setInterval(saveGame, globalSave.intervals.autoSave) : undefined;
     }
     global.hotkeys.disabled = pause;
     global.offline.active = pause;
@@ -272,13 +272,13 @@ const saveGame = (noSaving = false, manual = false): string | null => {
             global.lastSave = 0;
             if (manual && !global.paused) {
                 clearInterval(global.intervalsId.autoSave);
-                global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
+                global.intervalsId.autoSave = globalSave.intervals.autoSave > 0 ? setInterval(saveGame, globalSave.intervals.autoSave) : undefined;
             }
         }
         return save;
     } catch (error) {
         const stack = (error as { stack?: string }).stack;
-        void Alert(`Failed to save the game\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`, 1);
+        Notify(`Failed to save the game\n${typeof stack === 'string' ? stack.replaceAll(`${window.location.origin}/`, '') : error}`);
         throw error;
     }
 };
@@ -712,20 +712,26 @@ try { //Start everything
             const parsed = JSON.parse(atob(globalSettings)) as typeof globalSave;
             const oldVersion = parsed.version;
             Object.assign(globalSave, parsed);
-            if (oldVersion === undefined) {
-                globalSave.version = 0;
-                globalSave.hotkeys = deepClone(globalSaveStart.hotkeys);
-                for (const key in globalSave.numbers) {
-                    if (globalSave.numbers[key as keyof unknown] === 'None') {
-                        delete globalSave.numbers[key as keyof unknown];
-                    }
+            if (globalSaveStart.version !== oldVersion) {
+                if (oldVersion === undefined) {
+                    globalSave.version = 0;
+                    globalSave.hotkeys = deepClone(globalSaveStart.hotkeys);
+                    globalSave.numbers = deepClone(globalSaveStart.numbers);
+                    delete globalSave.intervals['offline' as keyof unknown];
                 }
-
-                delete globalSave.intervals['offline' as keyof unknown];
-                Notify('Hotkeys have been reset');
+                if (globalSave.version === 0) {
+                    globalSave.version = 1;
+                    const encoder = new TextEncoder();
+                    globalSave.format[0] = String.fromCharCode(...encoder.encode(globalSave.format[0]));
+                    globalSave.format[1] = String.fromCharCode(...encoder.encode(globalSave.format[1]));
+                    if (globalSave.theme === -1) { globalSave.theme = 'Quantum'; }
+                }
+                if (globalSaveStart.version !== globalSave.version) { throw new ReferenceError("Global settings version doesn't match"); }
             }
             const decoder = new TextDecoder();
             for (let i = 0; i < 2; i++) {
+                globalSave.format[i] = decoder.decode(Uint8Array.from(globalSave.format[i], (c) => c.codePointAt(0) as number));
+
                 const pointer = globalSave.hotkeys[i];
                 for (const key in pointer) { //Restore decoded data
                     pointer[key as hotkeysList] = decoder.decode(Uint8Array.from(pointer[key as hotkeysList], (c) => c.codePointAt(0) as number));
@@ -736,8 +742,9 @@ try { //Start everything
             fillMissingValues(globalSave.SRSettings, globalSaveStart.SRSettings, false);
             if (oldVersion !== globalSave.version) { saveGlobalSettings(); }
         } catch (error) {
-            Notify('Global settings failed to parse, default ones will be used instead');
-            console.log(`(Full parse error) ${error}`);
+            Notify(`Failed to load global settings, default ones used instead\n${error}`);
+            console.warn(`Global settings load error, ${error}`);
+            Object.assign(globalSave, deepClone(globalSaveStart));
         }
     }
     (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0];
@@ -907,18 +914,12 @@ try { //Start everything
     }
 
     let oldVersion = player.version;
-    const save = localStorage.getItem(specialHTML.localStorage.main);
+    const save = localStorage.getItem(specialHTML.localStorage.main) ?? localStorage.getItem('save');
     if (save !== null) {
         oldVersion = updatePlayer(JSON.parse(atob(save)));
     } else {
-        const oldSave = localStorage.getItem('save');
-        if (oldSave !== null) {
-            oldVersion = updatePlayer(JSON.parse(atob(oldSave)));
-            Notify('Save file has been updated to newest version\nOld save can be retrieved in the advanced save settings');
-        } else {
-            prepareVacuum(false); //Set buildings values
-            updatePlayer(deepClone(playerStart), false);
-        }
+        prepareVacuum(false); //Set buildings values
+        updatePlayer(deepClone(playerStart), false);
     }
 
     const observerX = new ResizeObserver((entries) => {
@@ -1935,7 +1936,7 @@ try { //Start everything
         a.click();
     });
     getId('saveConsole').addEventListener('click', async() => {
-        let value = await Prompt(`Available options:\n'Copy' ‒ copy save file to the clipboard${localStorage.getItem('save') !== null ? "\n'Legacy' ‒ copy legacy save file" : ''}\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n'Dev' ‒ open developer settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it`);
+        let value = await Prompt("Available options:\n'Copy' ‒ copy save file to the clipboard\n'Delete' ‒ delete your save file\n'Clear' ‒ clear all the domain data\n'Global' ‒ open options for global settings\n'Dev' ‒ open developer settings\n(Adding '_' will skip options menu)\nOr insert save file text here to load it");
         if (value === null || value === '') { return; }
         let lower = value.trim().toLowerCase();
         if (lower === 'global') {
@@ -1950,8 +1951,8 @@ try { //Start everything
             lower = value.trim().toLowerCase();
         }
 
-        if (lower === 'copy' || lower === 'global_copy' || lower === 'legacy') {
-            const save = lower === 'global_copy' ? saveGlobalSettings(true) : lower === 'copy' ? saveGame(true) : localStorage.getItem('save');
+        if (lower === 'copy' || lower === 'global_copy') {
+            const save = lower === 'global_copy' ? saveGlobalSettings(true) : saveGame(true);
             if (save === null) { return Notify('Could not copy text into the clipboard'); }
             try {
                 await navigator.clipboard.writeText(save);
@@ -1961,14 +1962,14 @@ try { //Start everything
                 if (await Confirm("Could not copy text into the clipboard, press 'Confrim' to save it as a file instead")) {
                     const a = document.createElement('a');
                     a.href = `data:text/plain,${save}`;
-                    a.download = `Fundamental ${lower === 'global_copy' ? 'settings' : `${lower === 'legacy' ? 'legacy ' : ''}save`} clipboard`;
+                    a.download = `Fundamental ${lower === 'global_copy' ? 'settings' : 'save'} clipboard`;
                     a.click();
                 }
             }
         } else if (lower === 'delete' || lower === 'clear' || lower === 'global_reset') {
             pauseGame();
             if (lower === 'delete') {
-                localStorage.removeItem('save');
+                localStorage.removeItem('save'); //Legacy
                 localStorage.removeItem(specialHTML.localStorage.main);
             } else if (lower === 'global_reset') {
                 localStorage.removeItem(specialHTML.localStorage.settings);
@@ -2072,6 +2073,10 @@ try { //Start everything
         }
     });
     getId('switchTheme0').addEventListener('click', () => setTheme(null));
+    getId('switchThemeQuantum').addEventListener('click', () => {
+        setTheme('Quantum');
+        if (globalSave.theme !== 'Quantum') { Notify('Secret theme, hint to unlock:\n"Enter through alternative means and look for it"'); }
+    });
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`switchTheme${i}`).addEventListener('click', () => setTheme(i));
     } {
@@ -2122,14 +2127,19 @@ try { //Start everything
     } {
         const input = getId('autoSaveInterval') as HTMLInputElement;
         input.addEventListener('change', () => {
-            let value = input.value === '' ? globalSaveStart.intervals.autoSave : Math.min(Math.max(Math.trunc(Number(input.value)), 5), 9999) * 1000;
-            if (!isFinite(value)) { value = globalSaveStart.intervals.autoSave; }
+            let value = Math.trunc(Number(input.value));
+            if (input.value !== '') {
+                const negative = value < 0;
+                value = Math.min(Math.max(Math.abs(value), 4), 3600) * 1000;
+                if (negative) { value *= -1; }
+                if (!isFinite(value)) { value = globalSaveStart.intervals.autoSave; }
+            } else { value = globalSaveStart.intervals.autoSave; }
             globalSave.intervals.autoSave = value;
             input.value = `${value / 1000}`;
             saveGlobalSettings();
             if (!global.paused) {
                 clearInterval(global.intervalsId.autoSave);
-                global.intervalsId.autoSave = setInterval(saveGame, globalSave.intervals.autoSave);
+                global.intervalsId.autoSave = value > 0 ? setInterval(saveGame, value) : undefined;
             }
         });
     }
@@ -2237,8 +2247,12 @@ try { //Start everything
     document.head.append(specialHTML.styleSheet);
     stageUpdate(true, true);
     if (globalSave.theme !== null) {
-        getId('switchTheme0').style.textDecoration = '';
-        setTheme(globalSave.theme, true);
+        if (getId(`switchTheme${globalSave.theme}`, true) === null) {
+            globalSave.theme = null;
+        } else {
+            getId('switchTheme0').style.textDecoration = '';
+            setTheme(globalSave.theme, true);
+        }
     }
     if (save !== null) {
         global.lastSave = handleOfflineTime();

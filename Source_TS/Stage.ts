@@ -883,7 +883,7 @@ export const assignBuildingsProduction = {
     verse1: (): number => {
         const self = player.verses[1].true;
         if (self < 1) { return 0; }
-        return 3e-7 * (self ** self);
+        return 3e-6 * (self ** self);
     },
     /** Quarks */
     strange0: (iron = player.elements[26] >= 1) => {
@@ -1263,7 +1263,7 @@ export const buyVerse = (index: number, auto = false): boolean => {
         }
         player.challenges.active = null;
         player.clone = {};
-        if ((player.stage.active !== 1 && player.toggles.normal[0]) || player.stage.active < 6) { setActiveStage(1); }
+        if (player.toggles.normal[0] || player.stage.active < 6) { setActiveStage(1); }
         resetVacuum(1);
     } else { endReset(true); }
     if (!auto && globalSave.SRSettings[0]) { getId('SRMain').textContent = `Caused ${index === 0 ? 'Universe' : 'Multiverse'} reset`; }
@@ -1980,7 +1980,7 @@ export const assignUpgradeCost = (index: number, stageIndex: number, type: 'upgr
 export const calculateStrangenessCost = (index: number, stageIndex: number, level = player.strangeness[stageIndex][index]): number => {
     const pointer = global.strangenessInfo[stageIndex];
     let scaling = pointer.scaling[index];
-    if ((index === 6 && (stageIndex === 1 || stageIndex === 2)) || (index === 7 && stageIndex >= 3 && stageIndex <= 5)) {
+    if (index === 6 ? (stageIndex === 1 || stageIndex === 2) : (index === 7 && stageIndex >= 3 && stageIndex <= 5)) {
         let total = player.strangeness[1][6] >= 2 ? 1 : 0;
         if (player.strangeness[2][6] >= 2) { total++; }
         if (player.strangeness[3][7] >= 2) { total++; }
@@ -1999,10 +1999,10 @@ export const calculateTreeCost = (index: number, stageIndex: number, level = pla
         if (index === 3 || index === 8 || stageIndex === 2) {
             return Math.floor(Math.round((firstCost * scaling ** level) * 100) / 100);
         } else if (index === 0 || index === 1 || index === 2) {
-            if (index === 2) { level += 8; }
-            const base = Math.floor(level / 4);
+            let base = Math.floor(level / 4);
+            if (index === 2) { base += 2; }
             const steps = (base + 1) * base / 2;
-            firstCost += index === 0 ? steps : -steps;
+            if (index !== 2) { firstCost += index === 0 ? steps : -steps; }
             scaling *= steps + 1;
         }
     }
@@ -2425,7 +2425,7 @@ export const endResetUser = async() => {
 
     if (player.toggles.confirm[6] !== 'None') {
         const array = [];
-        if (checkVerse(1) && calculateVerseCost(1) <= global.versesInfo.types && player.darkness.energy < 1000) {
+        if (calculateVerseCost(1) <= global.versesInfo.types && player.darkness.energy < 1000) {
             array.push('can do Big Crunch by creating Multiverse instead');
         }
         if (checkVerse(0) && calculateVerseCost(0) <= calculateEffects.mergeScore()) {
@@ -2479,7 +2479,7 @@ const endReset = (multiverse = false) => {
     }
     player.challenges.active = null;
     player.clone = {};
-    if ((player.stage.active !== 1 && player.toggles.normal[0]) || player.stage.active < 6) { setActiveStage(1); }
+    if (player.toggles.normal[0] || player.stage.active < 6) { setActiveStage(1); }
     resetVacuum(multiverse ? 2 : 3);
 };
 
@@ -2562,7 +2562,7 @@ export const stageResetUser = async() => {
             } else if (player.upgrades[5][3] === 1 && player.buildings[5][3].true >= calculateEffects.mergeRequirement()) {
                 array.push('can Collapse Vacuum into its true state');
             }
-            if (checkBuilding(3, 5)) {
+            if (player.researchesExtra[5][0] >= 1) {
                 const galaxyCost = calculateBuildingsCost(3, 5).toNumber();
                 if (galaxyCost <= Math.max(player.collapse.mass, global.collapseInfo.newMass)) {
                     array.push(`can afford a Galaxy${galaxyCost > player.collapse.mass ? ' after Collapse' : ''}`);
@@ -2605,7 +2605,7 @@ const stageResetReward = (stageIndex: number) => {
             } else { update = false; }
         } else {
             stage.current = player.milestones[1][1] < 6 ? 1 : player.milestones[2][1] < 7 ? 2 : player.milestones[3][1] < 7 ? 3 : 4;
-            if ((stage.active === 4 && stage.current !== 4) || stage.active === 5) {
+            if (stage.active === 4 ? stage.current !== 4 : stage.active === 5) {
                 setActiveStage(stage.current);
             } else { update = false; }
             resetThese.unshift(4);
@@ -2728,6 +2728,7 @@ export const switchStage = (stage: number, active = stage) => {
 
 /** Doesn't check for Stage being unlocked, requires stageUpdate() call afterwards */
 export const setActiveStage = (stage: number, active = stage) => {
+    if (player.stage.active === stage && global.trueActive === active) { return; }
     if (!global.offline.active) { getId(`stageSwitch${player.stage.active}`).style.textDecoration = ''; }
     player.stage.active = stage;
     global.trueActive = active;
@@ -3014,7 +3015,7 @@ export const collapseResetUser = async() => {
         const array = [];
         if (player.inflation.vacuum) {
             const timeUntil = assignResetInformation.timeUntil();
-            const unlockedG = checkBuilding(3, 5);
+            const unlockedG = player.researchesExtra[5][0] >= 1;
             const cantAffordG = !unlockedG || calculateBuildingsCost(3, 5).toNumber() > global.collapseInfo.newMass;
             if (timeUntil > 0 && timeUntil < 1e6 && cantAffordG) {
                 array.push(`${unlockedG ? 'will not be able to afford new Galaxy and ' : ''}Solar mass isn't hardcapped, but can be hardcapped soon`);
