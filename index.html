@@ -18,6 +18,8 @@
             <noscript>Java Script is disabled, game cannot work without it</noscript>
         </aside>
         <button type="button" id="globalToggle0" class="specialToggle" style="display: none;">OFF</button>
+        <button type="button" id="globalToggle4" class="specialToggle" style="display: none;">OFF</button>
+        <button type="button" id="globalToggle10" class="specialToggle" style="display: none;">OFF</button>
         <div id="bigWindow" style="display: none;"></div>
         <div id="alertMain" style="display: none;">
             <article role="alertdialog" aria-modal="true" aria-label="Alert window">
@@ -585,7 +587,7 @@
                                 <span>Missing</span>
                             </label>
                         </section>
-                        <section id="strangenessSection2" class="researchesDiv stage2borderImage" style="display: none;" aria-label="Submerged">
+                        <section id="strangenessSection2" class="researchesDiv stage2borderImage" aria-label="Submerged">
                             <label id="strange1Stage2" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Water+.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span>Missing</span>
@@ -627,7 +629,7 @@
                                 <span>Missing</span>
                             </label>
                         </section>
-                        <section id="strangenessSection3" class="researchesDiv stage3borderImage" style="display: none;" aria-label="Accretion">
+                        <section id="strangenessSection3" class="researchesDiv stage3borderImage" aria-label="Accretion">
                             <label id="strange1Stage3" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/ResearchA1.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span>Missing</span>
@@ -669,7 +671,7 @@
                                 <span>Missing</span>
                             </label>
                         </section>
-                        <section id="strangenessSection4" class="researchesDiv stage4borderImage" style="display: none;" aria-label="Interstellar">
+                        <section id="strangenessSection4" class="researchesDiv stage4borderImage" aria-label="Interstellar">
                             <label id="strange1Stage4" class="whiteText stage1borderImage">
                                 <input type="image" src="Used_art/Brown%20dwarf%20hot.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span>Missing</span>
@@ -711,7 +713,7 @@
                                 <span>Missing</span>
                             </label>
                         </section>
-                        <section id="strangenessSection5" class="researchesDiv stage5borderImage" style="display: none;" aria-label="Intergalactic">
+                        <section id="strangenessSection5" class="researchesDiv stage5borderImage" aria-label="Intergalactic">
                             <label id="strange1Stage5" class="whiteText stage2borderImage">
                                 <input type="image" src="Used_art/Nebula+.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span>Missing</span>
@@ -757,7 +759,7 @@
                                 <span>Missing</span>
                             </label>
                         </section>
-                        <section id="strangenessSection6" class="researchesDiv stage6borderImage" style="display: none;" aria-label="Abyss">
+                        <section id="strangenessSection6" class="researchesDiv stage6borderImage" aria-label="Abyss">
                             <label id="strange1Stage6" class="whiteText stage4borderImage">
                                 <input type="image" src="Used_art/Time.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span>Missing</span>
@@ -772,10 +774,6 @@
                             </label>
                             <label id="strange4Stage6" class="whiteText stage3borderImage">
                                 <input type="image" src="Used_art/Stage%202.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
-                                <span>Missing</span>
-                            </label>
-                            <label id="strange5Stage6" class="whiteText redBorderImage">
-                                <input type="image" src="Used_art/Missing.png" alt="" draggable="false" aria-controls="strangenessCost strangenessEffect">
                                 <span>Missing</span>
                             </label>
                         </section>
@@ -1013,14 +1011,14 @@
                         <section id="endMilestone1"><h4>Requires 1 Big Crunch:</h4><span>Start End resets with bonus Universes equal to the highest sum of all self-made Universe types on Big Crunch<br>Exports can fully claim Strange quarks and Strangelets storages</span></section>
                         <section id="endMilestone2"><h4>Requires 1 Big Rip:</h4><span>Improve End resets rewards base with Arithmetic progression of self-made Universes and a Step of <span>0.2</span><br>Exports can award Cosmons</span></section>
                         <section id="endMilestone3"><h4>Requires 1 Big Freeze: (WIP)</h4><span>Start End resets with another bonus Universe, improve Big Rip Milestone Step and starting value by +<span>0.1</span> per Big Freeze<br>Exports max timer and max reward increased by 2</span></section>
-                        <section id="inflationMilestone1"><h4>Requires 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to max(current self-made Universes, highest on Big Crunch) ^<span>1.5</span> rounded up<br>True Vacuum will also start with 'Conservation of Mass' Strangeness level 2</span></section>
+                        <section id="inflationMilestone1"><h4>Requires 1 Universe:</h4><span>Start Vacuum resets with Strange quarks equal to max(current self-made Universes, highest on Big Crunch) ^<span>1.5</span> rounded up<br>True Vacuum starts with 'Conservation of Mass' Strangeness level 2</span></section>
                         <section id="inflationMilestone2"><h4>Requires 2 Universes:</h4><span>Start Vacuum resets with all 'Auto Structures' automatization Researches and Strangeness maxed</span><br>'Automatic Galaxy' Strangeness is improved to be able to use post Solar mass on Collapse</section>
-                        <section id="inflationMilestone3"><h4>Requires 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness will no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
+                        <section id="inflationMilestone3"><h4>Requires 3 Universes:</h4><span>Start Vacuum resets with 'Upgrade automatization' and 'Element automatization' Strangeness maxed<br>'Gravitational bound' Strangeness is no longer be required for Intergalactic auto Upgrades/Researches to work</span></section>
                         <section id="inflationMilestone4"><h4>Requires 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
                         <section id="inflationMilestone5"><h4>Requires 8 Universes:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Unlock new mode for auto Stage that uses seconds since peak</span></section>
-                        <section id="inflationMilestone6"><h4>Requires 13 Universes:</h4><span>Unlock auto Strangeness (needs to be enabled in Settings)<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
-                        <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Also unlock auto Universes</span></section>
-                        <section id="inflationMilestone8"><h4>Requires 34 Universes: (WIP)</h4><span>Unlock auto End resets (needs to be enabled in Settings)<br>Also auto load choosen loadout after End resets</span></section>
+                        <section id="inflationMilestone6"><h4>Requires 13 Universes:</h4><span>Unlock auto Strangeness and improve first Inflation Milestone to affect Strangelets<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
+                        <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Unlock auto Universes and start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Improve auto Merge to reset when can afford new Universe (WIP)</span></section>
+                        <section id="inflationMilestone8"><h4>Requires 34 Universes: (WIP)</h4><span>Unlock auto End resets and auto load choosen loadout after any End reset</span></section>
                     </article>
                 </section>
             </section>
@@ -1096,7 +1094,7 @@
                                     <div id="toggleAuto9Menu" class="popUpMenu" style="display: none;" role="menu" aria-label="Settings menu">
                                         <div id="mergeMain"><p><label>Merge if current self-made Galaxies are at least <input type="number" id="mergeInput" step="1"></label> and <label><input type="number" id="mergeInputSince" step="any"> seconds passed since last Galaxy<span id="mergeSolarWait">, will wait for Solar mass hardcap instead if set to 0</span></label></p>
                                         <p>(Requires for auto Collapse to fail to reset)</p></div>
-                                        <label id="mergeVacuumChange">Change Vacuum state to true <button type="button" id="toggleNormal5" class="toggleNormal">ON</button>, ignores Stability</label>
+                                        <label id="mergeVacuumChange">Change Vacuum state to true <button type="button" id="toggleNormal5" class="toggleNormal">ON</button></label>
                                     </div>
                                 </div>
                                 <button type="button" id="toggleAuto9" class="toggleAuto">Auto OFF</button>
@@ -1118,6 +1116,7 @@
                         <a href="https://discord.gg/DfpuhDTseN" target="_blank" rel="noopener noreferrer"><img src="Used_art/SVG/Discord.svg" alt="" loading="lazy" draggable="false">Discord</a>
                         <button type="button" id="hotkeysButton" aria-haspopup="dialog"><img src="Used_art/SVG/Keyboard.svg" alt="" loading="lazy" draggable="false">Hotkeys</button>
                         <button type="button" id="versionButton" aria-haspopup="dialog"><img src="Used_art/SVG/Files.svg" alt="" loading="lazy" draggable="false">Version</button>
+                        <button type="button" id="globalStatsButton" aria-haspopup="dialog" aria-label="Edit global resources window"><img src="Used_art/SVG/Notepad.svg" alt="" loading="lazy" draggable="false">Resources</button>
                     </aside>
                     <article id="saveButtonGroup" aria-label="Save file buttons">
                         <h3 class="bigWord">Please export save file regularly</h3>
@@ -1170,15 +1169,14 @@
                             <li><label>Auto accept Offline time<button type="button" id="globalToggle9" class="specialToggle">OFF</button></label><button type="button" id="warpButton" class="hollowButton">0 Warps</button></li>
                             <li id="autoStageSwitch"><label class="hasTitle" data-title="Automatically clicks new Stages in the footer">Automatically change active Stage<button type="button" id="toggleNormal0" class="toggleNormal">OFF</button></label></li>
                             <li>Format type: <label>point <input type="text" id="decimalPoint" class="miniInput" maxlength="1" autocomplete="off"></label>, <label>separator <input type="text" id="thousandSeparator" class="miniInput" maxlength="1" autocomplete="off"></label></li>
-                            <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle">OFF</button></label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
+                            <li id="MDLi"><label>Mobile device support<button type="button" id="MDToggle0" class="specialToggle" aria-description="Not supported for Screen readers">OFF</button></label><button type="button" id="fullscreenButton" class="hollowButton">Fullscreen</button></li>
                             <li id="SRLi"><label>Screen reader support<button type="button" id="SRToggle0" class="specialToggle">OFF</button></label></li>
                             <li><label>Swap alert confirmation buttons<button type="button" id="globalToggle8" class="specialToggle">OFF</button></label></li>
                             <li><label>Visually hide body scrollbar<button type="button" id="globalToggle5" class="specialToggle">OFF</button></label></li>
-                            <li id="hideGlobalStats"><label>Hide global stats window<button type="button" id="globalToggle4" class="specialToggle">OFF</button></label></li>
                             <li><label>Allow text selection<button type="button" id="globalToggle2" class="specialToggle">OFF</button></label></li>
                             <li><label>Footer at the top<button type="button" id="globalToggle3" class="specialToggle">OFF</button></label></li>
                             <li id="elementsAsTab"><label>Elements as Tab<button type="button" id="globalToggle1" class="specialToggle">OFF</button></label></li>
-                            <li class="hasTitle" data-title="Default is 16px. Art doesn't scale"><label>Font size: <input type="number" id="customFontSize" step="any" min="12" max="24" value="16" tabindex="-1"> px</label></li>
+                            <li class="hasTitle" data-title="Default is 16px. Art doesn't scale"><label>Font size: <input type="number" id="customFontSize" step="any" min="12" max="24" value="16"> px</label></li>
                         </ul>
                     </section>
                     <div class="options">

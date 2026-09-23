@@ -79,7 +79,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         toggleSwap(9, 'auto', true);
     },
     nucleation: () => {
-        if (global.hotkeys.last === 'reset6') { return; }
+        if (global.hotkeys.last === 'reset6' && global.dischargeInfo.energyStage[6] <= player.darkness.energy) { return; }
         global.hotkeys.last = 'reset6';
         void nucleationResetUser();
     },
@@ -282,7 +282,7 @@ export const createAll = () => {
     }
 };
 export const strangenessAll = () => {
-    if (globalSave.MDSettings[0]) {
+    if (global.debug.MDStrangePage !== null) {
         const s = global.debug.MDStrangePage;
         for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
     } else {

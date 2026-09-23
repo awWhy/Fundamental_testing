@@ -1,7 +1,7 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
 import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageFullReset, stageResetUser, switchStage, timeUpdate, toggleChallengeType, vaporizationResetUser } from './Stage';
-import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness } from './Special';
+import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness, openGlobalStats } from './Special';
 import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, hotkeys, offlineWarp, strangenessAll, toggleAll, toggleShift } from './Hotkeys';
 import { checkUpgrade, stageResetType } from './Check';
 import type { hotkeysList } from './Types';
@@ -365,7 +365,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         format(player.cosmon[1].total, { type: 'input', padding: true }),
         `${player.inflation.vacuum}`,
         `${format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' })} [${format(player.buildings[5][3].true, { type: 'input', padding: 'exponent' })}]`,
-        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${format(global.versesInfo.true, { type: 'input', padding: 'exponent' })}]`
+        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${format(global.versesInfo.true[0] + global.versesInfo.true[1], { type: 'input', padding: 'exponent' })}]`
     ];
     for (let i = 0; i < special.length; i++) {
         name = name.replace(special[i], replaceWith[i]);
@@ -448,6 +448,24 @@ const showAndFix = (element: HTMLElement) => {
     } else if (rect.right > document.documentElement.clientWidth) {
         element.style.right = `calc(50% + ${rect.right - document.documentElement.clientWidth}px)`;
     }
+};
+export const showHoverTitle = (event: MouseEvent) => {
+    const element = event.currentTarget as HTMLElement;
+    const window = getId('hoverWindow');
+    specialHTML.hoverText = () => { window.textContent = element.dataset.title as string; };
+    specialHTML.hoverText();
+    window.style.display = '';
+    const position = (event: MouseEvent) => {
+        window.style.left = `${Math.min(event.clientX + 10, document.documentElement.clientWidth - window.offsetWidth - 1)}px`;
+        window.style.top = `${event.clientY + 10}px`;
+    };
+    position(event);
+    element.addEventListener('mousemove', position);
+    element.addEventListener('mouseleave', () => {
+        specialHTML.hoverText = null;
+        window.style.display = 'none';
+        element.removeEventListener('mousemove', position);
+    }, { once: true });
 };
 
 const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researchesExtra' | 'researchesAuto' | 'ASR' | 'elements') => {
@@ -754,6 +772,15 @@ try { //Start everything
     (getId('autoSaveInterval') as HTMLInputElement).value = `${globalSave.intervals.autoSave / 1000}`;
     for (let i = 0; i < globalSaveStart.toggles.length; i++) { toggleSpecial(i, 'global'); }
     if (globalSave.fontSize !== 16) { changeFontSize(true); } //Also sets breakpoints for screen size
+    if (globalSave.toggles[10]) {
+        getId('footerStats').after(getId('globalStats'));
+        specialHTML.styleSheet.textContent += ' #globalStats { bottom: unset; right: unset; }';
+    } else {
+        specialHTML.styleSheet.textContent += ` #globalStats { display: flex; flex-direction: column; position: fixed; background-color: var(--window-color); border: 2px solid var(--window-border); border-radius: 8px; padding: 0.4em; row-gap: 0.4em; cursor: move; z-index: 7; }
+            #globalStats:hover { opacity: 0.2; }
+            #globalStats p { border-radius: 0 4px 4px 0; width: 100%; }
+            #globalStats span { margin-left: auto; width: 4.4em; }`;
+    }
     if (globalSave.toggles[8]) { getId('alertCancel').after(getId('alertConfirm')); }
     if (globalSave.toggles[7]) {
         document.addEventListener('visibilitychange', () => {
@@ -782,7 +809,7 @@ try { //Start everything
             #subtabs { flex-flow: column-reverse wrap; gap: 0.6em !important; align-self: end; margin: 0 auto 0 0 !important; max-height: 6.72em; width: 0; /* min-width: 7em; */ }
             #footerMain button, #shortcuts button { width: min-content; min-width: 4em; height: 2em; border-radius: 10px; font-size: 0.92em; }
             #subtabs button { width: 100%; min-width: 7em; }
-            #globalStats { bottom: 3.04em; right: calc(50vw - 6.325em); }
+            ${globalSave.toggles[10] ? '' : '#globalStats { bottom: 3.04em; right: calc(50vw - 6.325em); }'}
             #shortcuts { flex-direction: row-reverse; gap: 0.4em; justify-content: center; position: fixed; width: 100vw; max-width: unset; bottom: 0.6em; margin: 0; }
             #fakeFooter { height: 3.04em; }`;
     } else {
@@ -815,10 +842,9 @@ try { //Start everything
     const MD = globalSave.MDSettings[0];
     const SR = globalSave.SRSettings[0];
     if (MD) {
-        specialHTML.styleSheet.textContent += ` html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p, #globalStats { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
+        specialHTML.styleSheet.textContent += ` html.noTextSelection, img, input[type = "image"], button, #load, a, #notifications > p${globalSave.toggles[10] ? '' : ', #globalStats'} { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } /* Safari junk to disable image hold menu and text selection */
             #themeArea > div > div { position: unset; display: flex; width: 15em; }
             #themeArea > div > button { display: none; } /* More Safari junk to make windows work without focus */`;
-        global.debug.MDStrangePage = 1;
 
         for (let i = 0; i <= 2; i++) {
             const arrow = document.createElement('button');
@@ -855,7 +881,10 @@ try { //Start everything
 
         const pages = document.createElement('div');
         pages.id = 'strangenessPages';
-        pages.innerHTML = '<button type="button" id="strangenessPage1" class="stage1borderImage hollowButton">1</button><button type="button" id="strangenessPage2" class="stage2borderImage hollowButton">2</button><button type="button" id="strangenessPage3" class="stage3borderImage hollowButton">3</button><button type="button" id="strangenessPage4" class="stage4borderImage hollowButton">4</button><button type="button" id="strangenessPage5" class="stage5borderImage hollowButton">5</button><button type="button" id="strangenessPage6" class="stage6borderImage hollowButton">6</button>';
+        let pagesInner = '';
+        for (let i = 1; i <= 6; i++) { pagesInner += `<button type="button" id="strangenessPage${i}" class="stage${i}borderImage hollowButton">${i}</button>`; }
+        pagesInner += '<button type="button" id="strangenessPageAll" class="stageAllborderImage hollowButton">All</button>';
+        pages.innerHTML = pagesInner;
         specialHTML.styleSheet.textContent += ` #strangenessPages { display: flex; justify-content: center; column-gap: 0.36em; }
             #strangenessPages button { width: 2.08em; height: calc(2.08em - 2px); border-top: none; border-radius: 0 0 4px 4px; }`;
         getId('strangenessResearch').append(pages);
@@ -970,16 +999,18 @@ try { //Start everything
         body.addEventListener('touchstart', (event) => {
             specialHTML.mobileDevice.start = [event.touches[0].clientX, event.touches[0].clientY];
         });
+        const notAllowed = [getId('footerMain')];
+        const globalStats = getId('globalStats');
+        if (!globalSave.toggles[10]) { notAllowed.push(globalStats); }
         body.addEventListener('touchend', (event) => {
             cancelRepeat();
-            const notAllowed = [getId('globalStats'), getId('footerMain')]; //[0] Shouldn't be changed
             for (let target = event.target as HTMLElement; target != null; target = target.parentElement as HTMLElement) {
                 if (notAllowed.includes(target)) {
-                    if (target !== notAllowed[0]) { notAllowed[0].style.opacity = '1'; }
+                    if (!globalSave.toggles[10] && target !== globalStats) { globalStats.style.opacity = '1'; }
                     return;
                 }
             }
-            notAllowed[0].style.opacity = '1';
+            if (!globalSave.toggles[10]) { globalStats.style.opacity = '1'; }
             handleTouchHotkeys(event);
         });
         body.addEventListener('touchcancel', () => {
@@ -988,29 +1019,10 @@ try { //Start everything
         });
     } else {
         body.addEventListener('touchstart', () => Notify('Touch events require mobile device support enabled in settings'), { once: true });
-    } {
-        const hoverEvent = (event: MouseEvent) => {
-            const element = event.currentTarget as HTMLElement;
-            const window = getId('hoverWindow');
-            specialHTML.hoverText = () => { window.textContent = element.dataset.title as string; };
-            specialHTML.hoverText();
-            window.style.display = '';
-            const position = (event: MouseEvent) => {
-                window.style.left = `${Math.min(event.clientX + 10, document.documentElement.clientWidth - window.offsetWidth - 1)}px`;
-                window.style.top = `${event.clientY + 10}px`;
-            };
-            position(event);
-            element.addEventListener('mousemove', position);
-            element.addEventListener('mouseleave', () => {
-                specialHTML.hoverText = null;
-                window.style.display = 'none';
-                element.removeEventListener('mousemove', position);
-            }, { once: true });
-        };
-        for (const element of getClass('hasTitle')) { element.addEventListener('mouseenter', hoverEvent); }
     }
+    for (const element of getClass('hasTitle')) { element.addEventListener('mouseenter', showHoverTitle); }
+    const refreshOnThese = [1, 3, 5, 7, 10];
     for (let i = 0; i < globalSaveStart.toggles.length; i++) {
-        const refreshOnThese = [1, 3, 5, 7];
         getId(`globalToggle${i}`).addEventListener('click', () => {
             toggleSpecial(i, 'global', true, refreshOnThese.includes(i));
             if (i === 0) {
@@ -1104,7 +1116,7 @@ try { //Start everything
             }
         };
         const repeatFunc = () => repeatFunction(() => {
-            if (player.stage.active !== 1 && player.stage.active !== 3) { return; }
+            if (player.stage.active !== 1 && player.stage.active !== 3 && (player.stage.active !== 6 || global.dischargeInfo.energyStage[6] <= player.darkness.energy)) { return; }
             clickFunc();
         });
         button.addEventListener('click', clickFunc);
@@ -1564,6 +1576,7 @@ try { //Start everything
         }
     }
     if (MD) {
+        getId('strangenessPageAll').addEventListener('click', () => MDStrangenessPage(null));
         const button = getId('strangenessCreate');
         const clickFunc = () => {
             const last = global.lastStrangeness;
@@ -1875,6 +1888,7 @@ try { //Start everything
     }
     getId('versionButton').addEventListener('click', openVersionInfo);
     getId('hotkeysButton').addEventListener('click', openHotkeys);
+    getId('globalStatsButton').addEventListener('click', openGlobalStats);
     getId('save').addEventListener('click', () => { saveGame(false, true); });
     {
         const button = getId('file') as HTMLInputElement;
@@ -2005,26 +2019,33 @@ try { //Start everything
         } else if (lower === 'dev_console') {
             console.log(deepClone(player), deepClone(globalSave), deepClone(global));
         } else if (lower.includes('dev_reset')) {
-            if (player.challenges.active !== null) { return Notify('Must be done outside of Challenges'); }
             value = lower[9] === '_' ? value.substring(10) :
-                await Prompt("Which reset tier to simulate, no rewards:\n'Stage', 'Vacuum' (resets Universe age), 'Universe' (removes true Vacuum Inflaton)");
+                await Prompt("Which reset tier to simulate, no rewards:\n'Stage', 'Vacuum' (resets Universe age), 'Universe' (removes true Vacuum Inflaton), 'End' (keeps Multiverses)");
             if (value === null) { return; }
+            if (player.challenges.active !== null) { return Notify('Must be done outside of Challenges'); }
             value = value.trim().toLowerCase();
             if (value === 'stage') {
                 stageFullReset(true);
-            } else if (value === 'vacuum' || value === 'universe') {
+            } else if (value === 'vacuum' || value === 'universe' || value === 'end') {
                 if (player.stage.active < 6) { setActiveStage(1); }
                 player.time.export[1] = 0;
                 player.time.export[2] = 0;
-                if (value === 'universe' && player.inflation.vacuum) {
-                    if (player.cosmon[0].total > 0) {
-                        player.cosmon[0].current--;
-                        player.cosmon[0].total--;
-                    }
+                if (value === 'end') {
+                    player.verses[0].current -= global.versesInfo.true[0] + global.versesInfo.true[1];
                     player.inflation.vacuum = false;
                     prepareVacuum(false);
+                    resetVacuum(2);
+                } else {
+                    if (value === 'universe' && player.inflation.vacuum) {
+                        if (player.cosmon[0].total > 0) {
+                            player.cosmon[0].current--;
+                            player.cosmon[0].total--;
+                        }
+                        player.inflation.vacuum = false;
+                        prepareVacuum(false);
+                    }
+                    resetVacuum(1);
                 }
-                resetVacuum(1);
             }
         } else if (lower.includes('dev_refund')) {
             value = lower[10] === '_' ? value.substring(11) :
@@ -2193,7 +2214,7 @@ try { //Start everything
     }
 
     /* Footer */
-    {
+    if (!globalSave.toggles[10]) {
         const startEvent = (event: MouseEvent | TouchEvent) => {
             const mouse = event instanceof MouseEvent;
             const body = document.documentElement;

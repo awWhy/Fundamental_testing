@@ -224,7 +224,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
 };
 
 export const resetDarkness = (outside = false) => {
-    player.ASR[6] = player.darkness.unlocked[player.inflation.vacuum ? 1 : 0] && player.verses[0].lowest[0] <= 5 ? 1 : 0;
+    player.ASR[6] = player.darkness.unlocked[player.inflation.vacuum ? 0 : 1] && player.verses[0].lowest[0] <= 5 ? 1 : 0;
     if (outside) { player.clone.ASR[6] = player.ASR[6]; }
 };
 
@@ -232,9 +232,8 @@ export const resetDarkness = (outside = false) => {
 export const resetVacuum = (level = 0) => {
     const vacuum = player.inflation.vacuum;
     if (level >= 2) {
-        player.verses[0].true = 0;
-        player.verses[0].other = [0, 0, 0];
-        global.versesInfo.true = 0;
+        player.verses[0].true = cloneArray(playerStart.verses[0].true);
+        global.versesInfo.true = [0, 0];
         global.versesInfo.types = 0;
         if (level >= 3) {
             player.verses[0].current = player.inflation.ends[0] >= 1 ? player.verses[0].highest : 0;
@@ -246,7 +245,7 @@ export const resetVacuum = (level = 0) => {
             assignMaxLevel(i, 0, 'inflation');
         }
         const supervoid = player.challenges.supervoid;
-        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + (1 + player.verses[1].true) * player.tree[2][3];
+        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + (1 + player.verses[1].true) * player.tree[2][2];
         if (player.inflation.vacuum) { total++; }
         player.cosmon[0].current = total;
         player.cosmon[0].total = total;
@@ -280,7 +279,7 @@ export const resetVacuum = (level = 0) => {
         }
         if (s < 6) {
             player.milestones[s] = cloneArray(playerStart.milestones[s]);
-            global.milestonesInfo[s].recent = cloneArray(playerStart.milestones[s]);
+            global.milestonesInfo[s].recent = cloneArray(player.milestones[s]);
             for (let i = 0; i < playerStart.milestones[s].length; i++) { assignMilestoneInformation(i, s); }
         }
         player.upgrades[s] = cloneArray(playerStart.upgrades[s]);
@@ -295,7 +294,7 @@ export const resetVacuum = (level = 0) => {
     player.researchesAuto[0] = universes >= 3 ? 3 : 0;
     player.researchesAuto[1] = universes >= 3 ? 2 : 0;
     player.researchesAuto[2] = universes >= 5 ? (vacuum ? 4 : 1) : 0;
-    if (player.darkness.unlocked[vacuum ? 1 : 0]) { player.strangeness[6][3] = 1; }
+    if (player.darkness.unlocked[vacuum ? 0 : 1]) { player.strangeness[6][3] = 1; }
     player.stage.current = 1;
     player.stage.resets = 0;
     player.stage.peak = [0, 0];
@@ -307,10 +306,7 @@ export const resetVacuum = (level = 0) => {
     global.historyStorage.stage = [];
     player.history.stage.best = cloneArray(playerStart.history.stage.best);
 
-    for (let i = 1; i < playerStart.strange.length; i++) {
-        player.strange[i].current = 0;
-        player.strange[i].total = 0;
-    }
+    for (let i = 0; i < playerStart.strange.length; i++) { player.strange[i].current = 0; }
     player.discharge.energy = 0;
     player.discharge.current = 0;
     player.vaporization.clouds = 0;
@@ -345,13 +341,12 @@ export const resetVacuum = (level = 0) => {
         const superP = player.challenges.supervoid;
         player.challenges.void = cloneArray(superP);
         const total = superP[1] + superP[2] + superP[3] + superP[4] + superP[5];
-        player.strange[0].current = total * (1 + total) / 2;
-    } else {
-        player.challenges.void = cloneArray(playerStart.challenges.void);
-        player.strange[0].current = 0;
-    }
+        player.strange[0].current += total * (1 + total) / 2;
+    } else { player.challenges.void = cloneArray(playerStart.challenges.void); }
     if (universes >= 1) {
-        player.strange[0].current += Math.ceil(Math.max(global.versesInfo.true, player.verses[0].highest) ** 1.5);
+        const add = Math.ceil(Math.max(global.versesInfo.true[0] + global.versesInfo.true[1], player.verses[0].highest) ** 1.5);
+        player.strange[0].current += add;
+        if (universes >= 13) { player.strange[1].current += add; }
         if (vacuum) { player.strangeness[1][8] = 2; }
     }
     if (universes >= 3) {
@@ -360,7 +355,7 @@ export const resetVacuum = (level = 0) => {
     }
     if (universes >= 21 || (universes >= 5 && vacuum)) { player.strangeness[5][9] = 1; }
     if (universes >= 8) { player.strangeness[5][6] = vacuum ? 1 : 2; }
-    player.strange[0].total = player.strange[0].current;
+    for (let i = 0; i < playerStart.strange.length; i++) { player.strange[i].total = player.strange[i].current; }
     resetDarkness();
 
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { assignMaxLevel(i, 0, 'researchesAuto'); }
@@ -425,7 +420,7 @@ export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {
         if (depth !== 'stage') {
             clone.strangeness[s] = cloneArray(player.strangeness[s]);
             if (s < 6) { clone.milestones[s] = cloneArray(player.milestones[s]); }
-        } else if (s < 6) { global.milestonesInfo[s].recent = cloneArray(playerStart.milestones[s]); }
+        } else if (s < 6) { global.milestonesInfo[s].recent = cloneArray(player.milestones[s]); }
     }
     clone.stage = {
         current: player.stage.current,

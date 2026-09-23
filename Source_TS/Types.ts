@@ -94,7 +94,7 @@ export interface playerType {
         since: number
     }
     darkness: {
-        /** [False, true] Vacuum */
+        /** [True, false] Vacuum */
         unlocked: [boolean, boolean]
         tier: number
         energy: number
@@ -129,9 +129,9 @@ export interface playerType {
         stage: number
     }
     buildings: Array<[Omit<building, 'true'>, ...building[]]>
-    verses: [verse & {
-        /** [void, supervoid, false] */
-        other: [number, number, number]
+    verses: [Omit<verse, 'true'> & {
+        /** [True, false, void, supervoid] */
+        true: [number, number, number, number]
         /** After Big Crunch */
         highest: number
         /** After Big Rip [Darkness tier] */
@@ -200,14 +200,14 @@ export interface playerType {
     }
     progress: {
         main: number
-        /** Highest reached Element for visuals [false, true Vacuum] */
+        /** Highest reached Element for visuals [true, false] Vacuum */
         element: [number, number]
         /** Used for showing Merge results related Void rewards */
         results: number
         /** Highest reached Void rewards */
         void: number[]
-        /** Highest reached basic self-made [false, true] Universes for visuals */
-        universes: number[]
+        /** Highest reached basic self-made Universes of [true, false] types */
+        universes: [number, number]
         quantum?: number
     }
     clone: {
@@ -248,7 +248,7 @@ export interface globalType {
             upgrade: boolean
         }
         /** (Phones only) What page for Strangeness is selected */
-        MDStrangePage: number
+        MDStrangePage: number | null
     }
     trueActive: number
     /** In milliseconds */
@@ -397,8 +397,10 @@ export interface globalType {
         ]
     }
     versesInfo: {
-        /** Universes */
-        true: number
+        /** Universes types names */
+        names: string[]
+        /** Total self-made [true, false] types Universes */
+        true: [number, number]
         /** Universes */
         types: number
     }
@@ -544,7 +546,7 @@ export interface globalSaveType {
     numbers: Record<numbersList, string>
     /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4],
      * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7], Swap alert buttons[8],
-     * Auto accept Offline[9] */
+     * Auto accept Offline[9], Alternative global stats[10] */
     toggles: boolean[]
     /** Point[0], Separator[1] */
     format: [string, string]
@@ -666,10 +668,10 @@ export interface calculateEffectsType {
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
     S2Strange9: (unlocked?: boolean) => number
-    /** Self-made Universes, trueOnly will count all true Vacuum based Universes */
-    trueVersesAll: (trueOnly?: boolean) => number
-    /** Self-made Universes for current Challenge or all related to current Vacuum state */
-    trueVerses: (statesOnly?: boolean) => number
+    /** All self-made Universes of provided state (true default) */
+    trueVersesAll: (state?: boolean) => number
+    /** Self-made Universes for current Challenge */
+    trueVerses: () => number
     /** Self-made Universes */
     versesTypes: () => number
     T0Inflation0: () => number

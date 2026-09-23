@@ -1,6 +1,6 @@
 import { checkTheme } from './Check';
 import { assignHotkeys, detectShift, hotkeys } from './Hotkeys';
-import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, pauseGame, playerStart } from './Main';
+import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, pauseGame, playerStart, showHoverTitle } from './Main';
 import { global, player, prepareVacuum, updatePlayer } from './Player';
 import { assignResetInformation, setActiveStage, toggleChallengeType } from './Stage';
 import type { Quantum, globalSaveType, hotkeysList, numbersList } from './Types';
@@ -42,7 +42,7 @@ export const globalSave: globalSaveType = {
         toggleStructure: 'Numpad',
         enterChallenge: 'Shift Numbers'
     } as globalSaveType['numbers'],
-    toggles: [false, false, false, false, false, false, true, false, false, false],
+    toggles: [false, false, false, false, false, false, true, false, false, false, false],
     format: ['.', ''],
     theme: null,
     fontSize: 16,
@@ -347,7 +347,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
     alert: [null, null] as [number | null, (() => void) | null],
     /** Function to update current hover text */
     hoverText: null as null | (() => void),
-    bigWindow: null as 'version' | 'hotkeys' | null,
+    bigWindow: null as 'version' | 'hotkeys' | 'globalStats' | null,
     styleSheet: document.createElement('style') //Secondary
 };
 
@@ -1526,8 +1526,17 @@ export const enterQuantum = () => {
     }, continuation ? 0 : 6_000); //Adds exit button
 };
 
-export const MDStrangenessPage = (stageIndex: number) => {
-    getId(`strangenessSection${global.debug.MDStrangePage}`).style.display = 'none';
+export const MDStrangenessPage = (stageIndex: number | null) => {
+    if (stageIndex === null) {
+        for (let s = 1; s < 6; s++) {
+            if (s === 5 || player.progress.main >= s + 10) { getId(`strangenessSection${s}`).style.display = ''; }
+        }
+        global.debug.MDStrangePage = stageIndex;
+        visualUpdate(); //Shows/hides 5th and 6th
+        return;
+    } else if (global.debug.MDStrangePage === null) {
+        for (let s = 1; s <= 6; s++) { getId(`strangenessSection${s}`).style.display = 'none'; }
+    } else { getId(`strangenessSection${global.debug.MDStrangePage}`).style.display = 'none'; }
     getId(`strangenessSection${stageIndex}`).style.display = '';
     global.debug.MDStrangePage = stageIndex;
 };
@@ -1535,9 +1544,9 @@ export const MDStrangenessPage = (stageIndex: number) => {
 export const checkProgress = () => {
     progressMain();
 
-    if (player.verses[0].true > player.progress.universes[1]) { player.progress.universes[1] = player.verses[0].true; }
-    if (player.verses[0].other[2] > player.progress.universes[0]) { player.progress.universes[0] = player.verses[0].other[2]; }
-    const index = player.inflation.vacuum ? 1 : 0;
+    const index = player.inflation.vacuum ? 0 : 1;
+    const universes = global.versesInfo.true[index];
+    if (universes > player.progress.universes[index]) { player.progress.universes[index] = universes; }
     for (let i = player.progress.element[index] + 1; i < global.elementsInfo.cost.length; i++) {
         if (player.elements[i] === 0) { break; }
         player.progress.element[index] = i;
@@ -1550,13 +1559,13 @@ export const checkProgress = () => {
 const progressMain = () => {
     const progress = player.progress.main;
     if (progress === 25 || global.offline.active) { return; }
-    if (player.verses[0].other[2] >= 1 || player.verses[0].other[0] >= 1) { return progressUp(25, 13); }
+    if (global.versesInfo.true[0] + global.versesInfo.true[1] !== player.verses[0].true[0]) { return progressUp(25, 13); }
     if (progress === 24 || global.offline.active) { return; }
     if (player.inflation.ends[1] >= 1) { return progressUp(24); }
     if (progress === 23) { return; }
     if (player.darkness.energy >= 1000) { return progressUp(23, 12); }
     if (progress === 22) { return; }
-    if (player.verses[0].true >= 5) { return progressUp(22, 11); }
+    if (player.verses[0].true[0] >= 5) { return progressUp(22, 11); }
     if (progress === 21) { return; }
     if (player.cosmon[1].total > 0) { return progressUp(21); }
     if (progress === 20) { return; }
@@ -1717,13 +1726,12 @@ const buildBigWindow = (subWindow: string): null | HTMLElement => {
     mainHTML.id = subWindow;
     return mainHTML;
 };
-const addCloseEvents = (sectionHTML: HTMLElement, firstTargetHTML = null as HTMLElement | null) => {
+const addCloseEvents = (sectionHTML: HTMLElement, firstTargetHTML = getId('closeBigWindow')) => {
     const body = document.documentElement;
     const closeButton = getId('closeBigWindow');
     const windowHMTL = getId('bigWindow');
     const control = new AbortController();
     const oldFocus = document.activeElement as HTMLElement | null;
-    if (firstTargetHTML === null) { firstTargetHTML = closeButton; }
     const close = () => {
         control.abort();
         specialHTML.bigWindow = null;
@@ -1853,10 +1861,12 @@ export const openHotkeys = () => {
         <p>Holding Enter on last selected button will repeatedly press it, also works with Mouse and Touch events on some buttons</p>
         <p>Shift clicking the hotkey will set it to the default value or remove it</p>
         <p>Numlock being ON can break Numpad hotkeys</p>
-        <label id="hotkeysToggleLabel" title="Turn ON, if using non-QWERTY layout keyboard">Language dependant hotkeys </label>
-        <button type="button" id="restoreHotkeys" class="selectBtn">Restore default hotkeys values</button>`; //Spacebar at the end of label is required
+        <label id="hotkeysToggleLabel" class="hasTitle" data-title="Turn ON, if using non-QWERTY layout keyboard">Language dependant hotkeys </label>
+        <button type="button" id="restoreHotkeys" class="selectBtn">Restore default hotkeys values</button>`;
         const toggle = getId('globalToggle0');
-        getId('hotkeysToggleLabel').append(toggle);
+        const toggleLabel = getId('hotkeysToggleLabel');
+        toggleLabel.addEventListener('mouseenter', showHoverTitle);
+        toggleLabel.append(toggle);
         toggle.style.display = '';
         specialHTML.styleSheet.textContent += ` #hotkeysHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
             #hotkeysHTML > div { display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; gap: 0.3em; }
@@ -2010,4 +2020,45 @@ export const openHotkeys = () => {
     getQuery('#bigWindow > article').ariaLabel = 'Hotkeys menu';
     visualProgressUnlocks();
     visualUpdate();
+};
+
+export const openGlobalStats = () => {
+    if (specialHTML.bigWindow !== null) { return; }
+    const mainHTML = buildBigWindow('globalStatsHTML');
+    if (mainHTML !== null) {
+        mainHTML.innerHTML = `<h3><span class="biggerWord">Edit global resources window</span> (Click to remove or add)</h3>
+        <section class="cyanText stage1borderImage">
+            <h4 class="bigWord">Ignore, work in progress</h4>
+            <div>
+                <label class="cyanText"><span>Molecules</span> <input type="number" step="1"></label>
+                <label class="orangeText"><span>Energy</span> <input type="number" step="1"></label>
+                <label class="blueText"><span>Drops</span> <input type="number" step="1"></label>
+                <label class="grayText"><span>Clouds</span> <input type="number" step="1"></label>
+                <label class="grayText"><span>Accretion mass</span> <input type="number" step="1"></label>
+                <label class="orangeText"><span>Stardust</span> <input type="number" step="1"></label>
+                <label class="cyanText"><span>Solar mass</span> <input type="number" step="1"></label>
+                <label class="grayText"><span>Dark matter</span> <input type="number" step="1"></label>
+                <label class="grayText"><span>Dark energy</span> <input type="number" step="1"></label>
+                <label class="greenText"><span>Strange quarks</span> <input type="number" step="1"></label>
+                <label class="darkvioletText"><span>Tachyons</span> <input type="number" step="1"></label>
+                <label class="blueText"><span>Time limit</span> <input type="number" step="1"></label>
+            </div>
+        </section>
+        <p id="globalStatsToggles"><label>Move into the footer </label> | <label>Hide window </label></p>`;
+        specialHTML.styleSheet.textContent += ` #globalStatsHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
+            #globalStatsHTML section { border-bottom: 2px solid; width: 90%; padding-bottom: 0.4em; margin-bottom: 0.4em; }
+            #globalStatsHTML section > div { display: flex; justify-content: space-evenly; flex-wrap: wrap; column-gap: 0.4em; margin-top: 0.2em; }
+            #globalStatsHTML label > span { text-decoration: underline; cursor: pointer !important; }
+            #globalStatsHTML input { width: 1.8em; height: 1.5em; padding: 0; }`;
+        const toggle1 = getId('globalToggle10');
+        const toggle2 = getId('globalToggle4');
+        getQuery('#globalStatsToggles label').append(toggle1);
+        getQuery('#globalStatsToggles label:last-of-type').append(toggle2);
+        toggle1.style.display = '';
+        toggle2.style.display = '';
+    }
+
+    specialHTML.bigWindow = 'globalStats';
+    addCloseEvents(getId('globalStatsHTML'));
+    getQuery('#bigWindow > article').ariaLabel = 'Global resources edit window';
 };
