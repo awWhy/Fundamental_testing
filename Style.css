@@ -1217,12 +1217,12 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
 #logoLinks img {
     background-color: #0000;
     object-fit: scale-down;
-    height: 25px;
+    height: 26px;
     width: initial;
 }
 
 #hotkeysButton img {
-    height: 19px;
+    height: 20px;
     margin: 3px 0;
 }
 
@@ -1500,31 +1500,9 @@ li .hollowButton {
     transition-property: none;
 }
 
-#globalStats {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
+#globalStats { /* Rest of rules pushed through Main.ts */
     bottom: calc(32px + min(3.9vh, 2.4em) + 3.7672em + 0.8vw);
     right: 3vw;
-    background-color: var(--window-color);
-    border: 2px solid var(--window-border);
-    border-radius: 8px;
-    padding: 0.4em;
-    row-gap: 0.4em;
-    cursor: move;
-    z-index: 7;
-}
-
-#globalStats:hover { opacity: 0.2; }
-
-#globalStats p {
-    border-radius: 0 4px 4px 0;
-    width: 100%;
-}
-
-#globalStats span {
-    margin-left: auto;
-    width: 4.4em;
 }
 
 #fakeFooter { visibility: hidden; }
@@ -1548,10 +1526,9 @@ li .hollowButton {
     pointer-events: auto;
 }
 
-#footerStats,
-#footerMain > nav {
+#footerMain > article, #footerMain > nav {
     display: flex;
-    column-gap: 1em;
+    gap: 1em;
     margin: 0 auto;
 }
 
@@ -1569,12 +1546,12 @@ li .hollowButton {
 #strangenessTabBtn.tabActive { border-color: var(--tab-strangeness) !important; }
 #inflationTabBtn.tabActive { border-color: var(--tab-inflation) !important; }
 
-#footerStats p {
+#footerMain > article p {
     border-radius: 0 6px 6px 0;
     z-index: 1; /* Text color issue */
 }
 
-#footerStats span:last-of-type { width: 4.4em; }
+#footerMain > article span:last-of-type { width: 4.4em; }
 
 #footer > div:first-child {
     display: flex;
