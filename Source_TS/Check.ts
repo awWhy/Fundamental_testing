@@ -281,7 +281,7 @@ export const allowedToBeReset = (check: number, stageIndex: number, type: 'struc
             if (stageIndex === 6) { return false; }
             break;
         case 'elements':
-            return ![26, 29, 30].includes(check);
+            return ![26, 29, 30, 36].includes(check);
     }
 
     return true;

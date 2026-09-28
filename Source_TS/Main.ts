@@ -1,7 +1,7 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
 import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageFullReset, stageResetUser, switchStage, timeUpdate, toggleChallengeType, vaporizationResetUser } from './Stage';
-import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness, openGlobalStats } from './Special';
+import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness, openGlobalStats, createGlobalStatsWindow } from './Special';
 import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, hotkeys, offlineWarp, strangenessAll, toggleAll, toggleShift } from './Hotkeys';
 import { checkUpgrade, stageResetType } from './Check';
 import type { hotkeysList } from './Types';
@@ -519,13 +519,11 @@ export const loadoutsFinal = (load: number[]) => {
         appeared[current] ??= 0;
         const unlocked = checkUpgrade(current, 0, 'inflation');
         do {
-            if (appeared[current] >= 20) {
+            if (appeared[current] >= max[current]) {
                 load.splice(i + dupes, 1);
                 continue;
             }
-            if (unlocked && appeared[current] < max[current]) {
-                cost += calculateTreeCost(current, 0, appeared[current]);
-            }
+            if (unlocked) { cost += calculateTreeCost(current, 0, appeared[current]); }
             appeared[current] += 1;
             dupes++;
         } while (load[i + dupes] === current);
@@ -765,6 +763,7 @@ try { //Start everything
             Object.assign(globalSave, deepClone(globalSaveStart));
         }
     }
+    createGlobalStatsWindow(true);
     (getId('decimalPoint') as HTMLInputElement).value = globalSave.format[0];
     (getId('thousandSeparator') as HTMLInputElement).value = globalSave.format[1];
     (getId('numbersInterval') as HTMLInputElement).value = `${globalSave.intervals.numbers}`;
@@ -1691,18 +1690,20 @@ try { //Start everything
         if (globalSave.SRSettings[0]) { getId('inflationLoadouts').ariaExpanded = `${global.loadouts.open}`; }
     });
     getId('loadoutsEdit').addEventListener('change', () => {
-        const first = (getId('loadoutsEdit') as HTMLInputElement).value.split(/[,\\/_ |]+/);
+        const first = (getId('loadoutsEdit') as HTMLInputElement).value.split(/[., ]+/);
         const final = [];
+        const max = global.treeInfo[0].max;
         for (let i = 0; i < first.length; i++) {
             const index = first[i].indexOf('x');
             let repeat = 1;
             if (index !== -1) {
-                repeat = Math.min(Math.max(Number(first[i].slice(index + 1)), 0), 20);
+                repeat = Math.max(Number(first[i].slice(index + 1)), 0);
                 if (isNaN(repeat)) { repeat = 1; }
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
             if (number < 0 || !isFinite(number)) { continue; }
+            if (repeat > max[number]) { repeat = max[number]; }
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
         loadoutsFinal(final);
@@ -2020,17 +2021,17 @@ try { //Start everything
             console.log(deepClone(player), deepClone(globalSave), deepClone(global));
         } else if (lower.includes('dev_reset')) {
             value = lower[9] === '_' ? value.substring(10) :
-                await Prompt("Which reset tier to simulate, no rewards:\n'Stage', 'Vacuum' (resets Universe age), 'Universe' (removes true Vacuum Inflaton), 'End' (keeps Multiverses)");
+                await Prompt("Which reset tier to simulate, no rewards:\n'Stage', 'Vacuum' (resets Universe age), 'Universe' (removes true Vacuum Inflaton), 'Multiverse'");
             if (value === null) { return; }
             if (player.challenges.active !== null) { return Notify('Must be done outside of Challenges'); }
             value = value.trim().toLowerCase();
             if (value === 'stage') {
                 stageFullReset(true);
-            } else if (value === 'vacuum' || value === 'universe' || value === 'end') {
+            } else if (value === 'vacuum' || value === 'universe' || value === 'Mutliverse') {
                 if (player.stage.active < 6) { setActiveStage(1); }
                 player.time.export[1] = 0;
                 player.time.export[2] = 0;
-                if (value === 'end') {
+                if (value === 'Mutliverse') {
                     player.verses[0].current -= global.versesInfo.true[0] + global.versesInfo.true[1];
                     player.inflation.vacuum = false;
                     prepareVacuum(false);
@@ -2081,7 +2082,7 @@ try { //Start everything
             enableLightness();
             Notify(`${global.april.light ? 'Lightness' : 'Darkness'} has returned`);
         } else {
-            if (value.length < 20) { return void Alert(`Input '${value}' doesn't match anything`); }
+            if (value.length < 40) { return void Alert(`Input '${value}' doesn't match anything`); }
             if (lower.includes('global_')) {
                 if (!await Confirm("Press 'Confirm' to load input as a new global settings, this will reload the page\n(Input is too long to be displayed)")) { return; }
                 localStorage.setItem(specialHTML.localStorage.settings, value.substring(7));

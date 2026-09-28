@@ -1,7 +1,7 @@
 import { allowedToBeReset } from './Check';
 import { cloneArray, playerStart } from './Main';
 import { global, player } from './Player';
-import { assignMaxLevel, assignUpgradeCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation } from './Stage';
+import { assignMaxLevel, assignUpgradeCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, calculateEffects } from './Stage';
 import { stageUpdate, switchTab } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
@@ -189,6 +189,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
             global.lastElement = null;
         } else if (s === 5) {
             global.mergeInfo.galaxies = 0;
+            global.mergeInfo.score = 0;
             player.merge.rewards = [0, 0, 0, 0];
             player.merge.resets = 0;
             player.merge.since = 0;
@@ -245,7 +246,7 @@ export const resetVacuum = (level = 0) => {
             assignMaxLevel(i, 0, 'inflation');
         }
         const supervoid = player.challenges.supervoid;
-        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + (1 + player.verses[1].true) * player.tree[2][2];
+        let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + (1 + player.verses[1].true) * player.tree[2][3];
         if (player.inflation.vacuum) { total++; }
         player.cosmon[0].current = total;
         player.cosmon[0].total = total;
@@ -327,6 +328,7 @@ export const resetVacuum = (level = 0) => {
     global.automatization.element = 1;
     global.lastElement = null;
     global.mergeInfo.galaxies = 0;
+    global.mergeInfo.score = 0;
     player.merge.since = 0;
     player.merge.resets = 0;
     player.merge.rewards = [0, 0, 0, 0];
@@ -563,6 +565,7 @@ export const loadFromClone = () => {
         global.lastMilestone = [null, 0];
     }
 
+    global.mergeInfo.score = calculateEffects.mergeScore();
     for (let i = 0; i < playerStart.researchesAuto.length; i++) { assignMaxLevel(i, 0, 'researchesAuto'); }
     for (let s = 1; s <= 6; s++) {
         for (let i = 0; i < global.researchesInfo[s].maxActive; i++) { assignMaxLevel(i, s, 'researches'); }

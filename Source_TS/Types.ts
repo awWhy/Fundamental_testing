@@ -206,8 +206,6 @@ export interface playerType {
         results: number
         /** Highest reached Void rewards */
         void: number[]
-        /** Highest reached basic self-made Universes of [true, false] types */
-        universes: [number, number]
         quantum?: number
     }
     clone: {
@@ -362,6 +360,7 @@ export interface globalType {
         S5Extra2: number
         checkReward: [number, number, number, number]
         galaxies: number
+        score: number
     }
     inflationInfo: {
         globalSpeed: number
@@ -544,6 +543,7 @@ export interface globalSaveType {
     /** hotkeyFunction: [key, code] */
     hotkeys: Array<Record<hotkeysList, string>>
     numbers: Record<numbersList, string>
+    resources: string[]
     /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4],
      * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7], Swap alert buttons[8],
      * Auto accept Offline[9], Alternative global stats[10] */
@@ -647,7 +647,7 @@ export interface calculateEffectsType {
     S4Research4: (post?: boolean, level?: number) => number
     S4Extra1: () => number
     mergeRequirement: () => number
-    mergeMaxResets: (safe?: boolean) => number
+    mergeMaxResets: (unsafe?: boolean) => number
     /** Other is only for index 0 and its Clusters effect */
     reward: Array<(post?: boolean, other?: number) => number>
     groupsCost: () => number

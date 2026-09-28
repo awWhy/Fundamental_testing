@@ -4,7 +4,7 @@ import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, paus
 import { global, player, prepareVacuum, updatePlayer } from './Player';
 import { assignResetInformation, setActiveStage, toggleChallengeType } from './Stage';
 import type { Quantum, globalSaveType, hotkeysList, numbersList } from './Types';
-import { format, stageUpdate, switchTab, visualProgressUnlocks, visualUpdate } from './Update';
+import { format, numbersUpdate, stageUpdate, switchTab, visualProgressUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
     intervals: {
@@ -42,6 +42,7 @@ export const globalSave: globalSaveType = {
         toggleStructure: 'Numpad',
         enterChallenge: 'Shift Numbers'
     } as globalSaveType['numbers'],
+    resources: ['energy', 'drops', 'accretion_mass', 'stardust'],
     toggles: [false, false, false, false, false, false, true, false, false, false, false],
     format: ['.', ''],
     theme: null,
@@ -322,6 +323,104 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             ['Dark%20fluid.png', 'stage6borderImage darkvioletText', 'Fluid']
         ]
     ],
+    globalResources: {
+        molecules: {
+            info: ['Molecule.png', 'stage1borderImage cyanText', 'Molecules'],
+            unlock: () => !player.inflation.vacuum && global.stageInfo.activeAll.includes(1) && player.buildings[1][2].trueTotal.moreOrEqual(2),
+            resource: () => player.buildings[1][3].current
+        },
+        energy: {
+            info: ['Energy.png', 'stage4borderImage orangeText', 'Energy'],
+            unlock: () => global.stageInfo.activeAll.includes(1),
+            resource: () => player.discharge.energy
+        },
+        drops: {
+            info: ['Drop.png', 'stage2borderImage blueText', 'Drops'],
+            unlock: () => global.stageInfo.activeAll.includes(2),
+            resource: () => player.buildings[2][1].current
+        },
+        clouds: {
+            info: ['Clouds.png', 'stage3borderImage grayText', 'Clouds'],
+            unlock: () => global.stageInfo.activeAll.includes(2) && player.upgrades[2][2] === 1,
+            resource: () => player.vaporization.clouds
+        },
+        accretion_mass: {
+            info: ['Mass.png', 'stage3borderImage grayText', 'A. Mass'],
+            unlock: () => global.stageInfo.activeAll.includes(3),
+            resource: () => player.buildings[3][0].current
+        },
+        stardust: {
+            info: ['Elements.png', 'stage4borderImage orangeText', 'Stardust'],
+            unlock: () => global.stageInfo.activeAll.includes(4),
+            resource: () => player.buildings[4][0].current
+        },
+        solar_mass: {
+            info: ['Main_sequence%20mass.png', 'stage1borderImage cyanText', 'S. Mass'],
+            unlock: () => global.stageInfo.activeAll.includes(4),
+            resource: () => player.collapse.mass
+        },
+        dark_matter: {
+            info: ['Dark%20matter.png', 'stage3borderImage grayText', 'D. Matter'],
+            unlock: () => global.stageInfo.activeAll.includes(6),
+            resource: () => player.buildings[6][0].current
+        },
+        dark_energy: {
+            info: ['Dark%20energy.png', 'stage3borderImage grayText', 'D. Energy'],
+            unlock: () => global.stageInfo.activeAll.includes(6) && player.upgrades[6][0] === 1,
+            resource: () => player.darkness.energy
+        },
+        strange_quarks: {
+            info: ['Strange%20Quarks.png', 'greenBorderImage greenText', 'S. Quarks'],
+            unlock: () => true,
+            resource: () => player.strange[0].current
+        },
+        tachyons: {
+            info: ['Tachyon.png', 'stage6borderImage darkvioletText', 'Tachyons'],
+            unlock: () => player.verses[1].current > 0,
+            resource: () => player.cosmon[2].current
+        },
+        time_left: {
+            info: ['Time%20limit.png', 'stage6borderImage darkvioletText', 'T. Left'],
+            unlock: () => {
+                if (player.challenges.active !== null) { return true; }
+                if (!player.inflation.vacuum && player.tree[0][4] < 1) {
+                    const s = Math.min(player.stage.current, 4);
+                    const info = global.milestonesInfo;
+                    for (let i = 0; i < info[s].need.length; i++) {
+                        if (player.milestones[s][i] >= info[s].scaling[i].length) {
+                            if (s === 4 && player.milestones[5][i] < info[5].scaling[i].length) {
+                                return true;
+                            }
+                        } else { return true; }
+                    }
+                }
+                return false;
+            },
+            resource: () => {
+                const list = [];
+                const challenge = player.challenges.active;
+                if (challenge !== null) {
+                    list.push(global.challengesInfo[challenge].time - player.time[global.challengesInfo[challenge].resetType]);
+                    if (challenge === 1 && list[0] > 0) { list.push(600 - player.time.stage); }
+                } else if (!player.inflation.vacuum && player.tree[0][4] < 1) {
+                    const s = Math.min(player.stage.current, 4);
+                    const info = global.milestonesInfo;
+                    for (let i = 0; i < info[s].need.length; i++) {
+                        if (player.milestones[s][i] >= info[s].scaling[i].length) {
+                            if (s === 4 && player.milestones[5][i] < info[5].scaling[i].length) {
+                                list.push(info[5].reward[i] - player.time.stage);
+                            }
+                        } else { list.push(info[s].reward[i] - player.time.stage); }
+                    }
+                }
+                let relevant = list[0];
+                for (let i = 1; i < list.length; i++) {
+                    relevant = Math[list[i - 1] < 0 || list[i] < 0 ? 'max' : 'min'](list[i - 1], list[i]);
+                }
+                return relevant;
+            }
+        }
+    },
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
         /** [X, Y] */
         start: [0, 0]
@@ -945,7 +1044,6 @@ export const enableApril = (firstLoad = false) => {
             global.april.quantum = false;
             global.challengesInfo[1].name = 'Vacuum stability';
         }
-        if (global.april.light) { enableLightness(); }
     }
     stageUpdate();
     global.offline.cacheUpdate = false;
@@ -970,6 +1068,7 @@ export const enableLightness = () => {
     global.buildingsInfo.hoverText[6][0] = `${nameS6[0]} softcap`;
     global.stageInfo.costName[6] = nameS6[0];
 
+    const extra = active ? 'Lightness/' : '';
     specialHTML.researchExtraDivHTML[6][2] = `${Light} energy`;
     getQuery('#verse0 > div > p:last-of-type').dataset.title = nameS6[0];
     getId('energyGainStage6').ariaLabel = `${Light} energy gain`;
@@ -979,21 +1078,25 @@ export const enableLightness = () => {
         darknessInfo.rewardText[i] = darknessInfo.rewardText[i].replace(Dark, Light);
     }
     const challengeHTML = getId('challenge3') as HTMLInputElement;
-    challengeHTML.src = `Used_art/${active ? 'Light' : 'Dark'}ness.png`;
+    challengeHTML.src = `Used_art/${extra}Darkness.png`;
     challengeHTML.alt = darknessInfo.name;
     global.strangenessInfo[6].name[3] = darknessInfo.name;
     (getId('strange4Stage6') as HTMLInputElement).alt = darknessInfo.name;
-    specialHTML.buildingHTML[6][0] = `${Light}%20planet.png`;
-    specialHTML.footerStatsHTML[6][0][0] = `${Light}%20matter.png`;
-    (getQuery('#globalStat5 img') as HTMLImageElement).src = `Used_art/${specialHTML.footerStatsHTML[6][0][0]}`;
-    specialHTML.upgradeHTML[6][0] = `UpgradeD1${active ? '_L' : ''}.png`;
-    specialHTML.researchHTML[6][0][0] = `ResearchD1${active ? '_L' : ''}.png`;
-    specialHTML.researchHTML[6][2][0] = `ResearchD3${active ? '_L' : ''}.png`;
-    specialHTML.researchExtraHTML[6][0][0] = `ResearchDark1${active ? '_L' : ''}.png`;
-    specialHTML.researchExtraHTML[6][3][0] = `ResearchDark4${active ? '_L' : ''}.png`;
+    specialHTML.buildingHTML[6][0] = `${extra}${Dark}%20planet.png`;
+    specialHTML.footerStatsHTML[6][0][0] = `${extra}${Dark}%20matter.png`;
+    specialHTML.upgradeHTML[6][0] = `${extra}UpgradeD1.png`;
+    specialHTML.researchHTML[6][0][0] = `${extra}ResearchD1.png`;
+    specialHTML.researchHTML[6][2][0] = `${extra}ResearchD3.png`;
+    specialHTML.researchExtraHTML[6][0][0] = `${extra}ResearchDark1.png`;
+    specialHTML.researchExtraHTML[6][3][0] = `${extra}ResearchDark4.png`;
+    specialHTML.globalResources.dark_matter.info[0] = specialHTML.footerStatsHTML[6][0][0];
+    specialHTML.globalResources.dark_matter.info[2] = `${active ? 'L' : 'D'}. Matter`;
+    specialHTML.globalResources.dark_energy.info[2] = `${active ? 'L' : 'D'}. Energy`;
+    (getQuery('#nucleationToggleReset img') as HTMLImageElement).src = `Used_art/${extra}Nucleation%20toggle.png`;
 
     stageUpdate();
     global.offline.cacheUpdate = false;
+    createGlobalStatsWindow();
     preventImageUnload();
 };
 export const enterUltravoid = () => {
@@ -1545,8 +1648,6 @@ export const checkProgress = () => {
     progressMain();
 
     const index = player.inflation.vacuum ? 0 : 1;
-    const universes = global.versesInfo.true[index];
-    if (universes > player.progress.universes[index]) { player.progress.universes[index] = universes; }
     for (let i = player.progress.element[index] + 1; i < global.elementsInfo.cost.length; i++) {
         if (player.elements[i] === 0) { break; }
         player.progress.element[index] = i;
@@ -1559,8 +1660,8 @@ export const checkProgress = () => {
 const progressMain = () => {
     const progress = player.progress.main;
     if (progress === 25 || global.offline.active) { return; }
-    if (global.versesInfo.true[0] + global.versesInfo.true[1] !== player.verses[0].true[0]) { return progressUp(25, 13); }
-    if (progress === 24 || global.offline.active) { return; }
+    if (player.verses[0].true[1] >= 1 || player.verses[1].total >= 1) { return progressUp(25, 13); }
+    if (progress === 24) { return; }
     if (player.inflation.ends[1] >= 1) { return progressUp(24); }
     if (progress === 23) { return; }
     if (player.darkness.energy >= 1000) { return progressUp(23, 12); }
@@ -1695,7 +1796,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 8) {
         text = "As Galaxies began to Merge, their combined Gravity started forming an even bigger Structure ‒ 'Universe'. Will need to maximize Galaxies before every Merge to get enough Score to create it.\n(Merge reset can only be done a limited amount of times per Stage reset)";
     } else if (event === 9) {
-        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the Inflation tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' unlocks more Elements based on self-made Universes)";
+        text = "Now that current Universe is finished, it's time to Inflate a new one and so to unlock the Inflation tab.\n(Universes only use specialized hotkeys. Also 'Nucleosynthesis' now unlocks more Elements based on self-made Universes)";
     } else if (event === 10) {
         text = "Unlocked ability to End current Universes through basic End reset ‒ 'Big Crunch', also unlocked harder version of Void ‒ 'Supervoid' which is immune to End resets.\n(Base for End resets reward is increased by +1 while inside true Vacuum)";
     } else if (event === 11) {
@@ -2026,39 +2127,112 @@ export const openGlobalStats = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('globalStatsHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `<h3><span class="biggerWord">Edit global resources window</span> (Click to remove or add)</h3>
-        <section class="cyanText stage1borderImage">
-            <h4 class="bigWord">Ignore, work in progress</h4>
+        mainHTML.innerHTML = `<h3 class="bigWord">Edit global resources window</h3>
+        <p>Resources only shown when unlocked, order is kept</p>
+        <section class="cyanText">
+            <h4 class="bigWord">Microworld:</h4>
             <div>
-                <label class="cyanText"><span>Molecules</span> <input type="number" step="1"></label>
-                <label class="orangeText"><span>Energy</span> <input type="number" step="1"></label>
-                <label class="blueText"><span>Drops</span> <input type="number" step="1"></label>
-                <label class="grayText"><span>Clouds</span> <input type="number" step="1"></label>
-                <label class="grayText"><span>Accretion mass</span> <input type="number" step="1"></label>
-                <label class="orangeText"><span>Stardust</span> <input type="number" step="1"></label>
-                <label class="cyanText"><span>Solar mass</span> <input type="number" step="1"></label>
-                <label class="grayText"><span>Dark matter</span> <input type="number" step="1"></label>
-                <label class="grayText"><span>Dark energy</span> <input type="number" step="1"></label>
-                <label class="greenText"><span>Strange quarks</span> <input type="number" step="1"></label>
-                <label class="darkvioletText"><span>Tachyons</span> <input type="number" step="1"></label>
-                <label class="blueText"><span>Time limit</span> <input type="number" step="1"></label>
+                <button type="button" id="molecules" class="selectBtn hasTitle" data-title="False Vacuum only">Molecules</button>
+                <button type="button" id="energy" class="selectBtn orangeText">Energy</button>
             </div>
         </section>
+        <section class="blueText">
+            <h4 class="bigWord">Submerged:</h4>
+            <div>
+                <button type="button" id="drops" class="selectBtn">Drops</button>
+                <button type="button" id="clouds" class="selectBtn grayText">Clouds</button>
+            </div>
+        </section>
+        <section class="grayText">
+            <h4 class="bigWord">Accretion:</h4>
+            <div>
+                <button type="button" id="accretion_mass" class="selectBtn">Mass</button>
+            </div>
+        </section>
+        <section class="orangeText">
+            <h4 class="bigWord">Interstellar:</h4>
+            <div>
+                <button type="button" id="stardust" class="selectBtn">Stardust</button>
+                <button type="button" id="solar_mass" class="selectBtn cyanText">Mass</button>
+            </div>
+        </section>
+        <section id="globalStatsAbyssSection" class="darkvioletText">
+            <h4 class="bigWord">Abyss:</h4>
+            <div>
+                <button type="button" id="dark_matter" class="selectBtn grayText">Matter</button>
+                <button type="button" id="dark_energy" class="selectBtn grayText">Energy</button>
+            </div>
+        </section>
+        <section class="greenText">
+            <h4 class="bigWord">Miscellaneous:</h4>
+            <div>
+                <button type="button" id="strange_quarks" class="selectBtn">Strange quarks</button>
+                <button type="button" id="tachyons" class="selectBtn darkvioletText">Tachyons</button>
+                <button type="button" id="time_left" class="selectBtn blueText hasTitle" data-title="Measured in seconds, shows the lowest positive time">Time left</button>
+            </div>
+        </section>
+        <input type="text" id="globalStatsInput" autocomplete="off">
         <p id="globalStatsToggles"><label>Move into the footer </label> | <label>Hide window </label></p>`;
         specialHTML.styleSheet.textContent += ` #globalStatsHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
-            #globalStatsHTML section { border-bottom: 2px solid; width: 90%; padding-bottom: 0.4em; margin-bottom: 0.4em; }
-            #globalStatsHTML section > div { display: flex; justify-content: space-evenly; flex-wrap: wrap; column-gap: 0.4em; margin-top: 0.2em; }
-            #globalStatsHTML label > span { text-decoration: underline; cursor: pointer !important; }
-            #globalStatsHTML input { width: 1.8em; height: 1.5em; padding: 0; }`;
+            #globalStatsHTML > p:first-of-type { margin-top: -0.2em; }
+            #globalStatsHTML > section > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3em 0.6em; margin-bottom: 0.2em; }
+            #globalStatsInput { width: 90%; margin: 0.3em; }`;
         const toggle1 = getId('globalToggle10');
         const toggle2 = getId('globalToggle4');
         getQuery('#globalStatsToggles label').append(toggle1);
         getQuery('#globalStatsToggles label:last-of-type').append(toggle2);
         toggle1.style.display = '';
         toggle2.style.display = '';
+        getId('molecules').addEventListener('mouseenter', showHoverTitle);
+        getId('time_left').addEventListener('mouseenter', showHoverTitle);
+        const inputID = getId('globalStatsInput') as HTMLInputElement;
+        for (const key in specialHTML.globalResources) {
+            getId(key).addEventListener('click', () => {
+                const index = globalSave.resources.indexOf(key);
+                if (index !== -1) {
+                    globalSave.resources.splice(index, 1);
+                } else { globalSave.resources.push(key); }
+                createGlobalStatsWindow();
+                saveGlobalSettings();
+                inputID.value = globalSave.resources.join(', ');
+            });
+        }
+        inputID.addEventListener('change', () => {
+            const array = inputID.value.toLowerCase().split(/[., ]+/);
+            globalSave.resources = array;
+            createGlobalStatsWindow();
+            saveGlobalSettings();
+            inputID.value = array.join(', ');
+        });
+        inputID.value = globalSave.resources.join(', ');
     }
 
     specialHTML.bigWindow = 'globalStats';
-    addCloseEvents(getId('globalStatsHTML'));
+    addCloseEvents(getId('globalStatsHTML'), getId('molecules'));
     getQuery('#bigWindow > article').ariaLabel = 'Global resources edit window';
+    visualProgressUnlocks();
+    visualUpdate();
+};
+
+export const createGlobalStatsWindow = (firstLoad = false) => {
+    let innerHTML = '';
+    for (let i = 0; i < globalSave.resources.length; i++) {
+        const pointer = specialHTML.globalResources[globalSave.resources[i] as keyof typeof specialHTML.globalResources];
+        if (pointer === undefined) {
+            globalSave.resources.splice(i, 1);
+            i--;
+            continue;
+        }
+        innerHTML += `<div id="globalStat${i + 1}">
+            <img src="Used_art/${pointer.info[0]}" alt="" loading="lazy" draggable="false">
+            <p class="${pointer.info[1]}">${pointer.info[2]}: <span>0</span></p>
+        </div>`;
+    }
+    getId('globalStats').innerHTML = innerHTML;
+    if (!firstLoad) {
+        specialHTML.cache.idMap.clear();
+        specialHTML.cache.queryMap.clear();
+        visualUpdate();
+        numbersUpdate();
+    }
 };
