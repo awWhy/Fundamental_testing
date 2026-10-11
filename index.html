@@ -495,6 +495,7 @@
                         <input type="image" src="Used_art/Element34.png" alt="" draggable="false" id="element34" class="elementType2" aria-controls="elementCost elementEffect">
                         <input type="image" src="Used_art/Element35.png" alt="" draggable="false" id="element35" class="elementType2" aria-controls="elementCost elementEffect">
                         <input type="image" src="Used_art/Element36.png" alt="" draggable="false" id="element36" class="elementType2" aria-controls="elementCost elementEffect">
+                        <input type="image" src="Used_art/Element37.png" alt="" draggable="false" id="element37" class="elementType1" aria-controls="elementCost elementEffect">
                     </article>
                     <div class="descriptionText">
                         <h3>Element: <span id="elementText">Hover to see.</span></h3>
@@ -869,7 +870,7 @@
                             <div id="cosmon2InfoMain" class="popUpMenu mainText" style="display: none;" role="dialog">
                                 <h4 class="bigWord">Tachyon softcap information:</h4>
                                 <ul class="whiteText">
-                                    <li>Softcap ^<span id="cosmon2InfoSoft">0.25</span> starts at max(600 seconds of pre-softcap production, 1)</li>
+                                    <li>Softcap ^<span id="cosmon2InfoSoft">0.5</span> starts at 600 seconds of pre-softcap production</li>
                                     <li>Which is equal to <span id="cosmon2InfoStart">1</span> | Pre-softcap production is <span id="cosmon2InfoPre">1</span></li>
                                     <li>Post softcap production is <span id="cosmon2InfoPost">1</span></li>
                                 </ul>
@@ -989,7 +990,7 @@
                                 <button type="button" id="loadoutsDelete" class="hollowButton">Delete</button>
                             </div>
                             <label id="loadoutsEditLabel"><span class="hasTitle" data-title="Inflatons required">0</span><input type="text" id="loadoutsEdit" autocomplete="off"></label>
-                            <p id="loadoutsList">Saved: <span></span><button type="button" id="loadoutsLoadAuto" class="selectBtn greenText">Current</button></p>
+                            <p id="loadoutsList">Saved: <span></span><button type="button" id="loadoutsLoadAuto" class="selectBtn greenText">Current</button>, <button type="button" id="loadoutsLoadDefault" class="selectBtn greenText hasTitle" data-title="Saved by shift clicking 'Save'">Default</button></p>
                             <p class="center">(Can click shift to quick load and refund)</p>
                         </article>
                         <div class="descriptionText darkvioletText">
@@ -1017,8 +1018,8 @@
                         <section id="inflationMilestone4"><h4>Requires 5 Universes:</h4><span>Start Vacuum resets with Strangeness for auto Discharge, Vaporization, Rank, Collapse, Galaxy and Merge at level 1</span><br>'Automatic Merge' Strangeness is not included for false Vacuum</section>
                         <section id="inflationMilestone5"><h4>Requires 8 Universes:</h4><span>Start Vacuum resets with 'Automatic Stage' Strangeness at level 1 for true Vacuum and level 2 for false Vacuum<br>Unlock new mode for auto Stage that uses seconds since peak</span></section>
                         <section id="inflationMilestone6"><h4>Requires 13 Universes:</h4><span>Unlock auto Strangeness and improve first Inflation Milestone to affect Strangelets<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
-                        <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Unlock auto Universes and start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Improve auto Merge to reset when can afford new Universe (WIP)</span></section>
-                        <section id="inflationMilestone8"><h4>Requires 34 Universes: (WIP)</h4><span>Unlock auto End resets and auto load choosen loadout after any End reset</span></section>
+                        <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Unlock auto Universes and start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Improve auto Merge to reset early when can afford new Universe</span></section>
+                        <section id="inflationMilestone8"><h4>Requires 34 Universes:</h4><span>Unlock auto End resets (WIP) and auto load default loadout after any End reset</span></section>
                     </article>
                 </section>
             </section>
@@ -1164,7 +1165,7 @@
                             </li>
                             <li><label>Visual numbers update interval <input type="number" id="numbersInterval" min="40" max="200" step="1"> ms</label><button type="button" id="pauseButton" class="hollowButton hasTitle" data-title="Pauses game ticks and resets autosave interval">Pause</button></li>
                             <li><label>Visual update and events interval <input type="number" id="visualInterval" min="200" max="2000" step="1"> ms</label><button type="button" id="reviewEvents" class="hollowButton">Events</button></li>
-                            <li class="hasTitle" data-title="Setting to negative value will disable it"><label>Game autosave interval <input type="number" id="autoSaveInterval" min="4" max="3600" step="1"> s</label></li>
+                            <li class="hasTitle" data-title="Setting to negative value will disable it"><label>Game autosave interval <input type="number" id="autoSaveInterval" max="3600" step="1"> s</label></li>
                             <li><label class="hasTitle" data-title="Game must be not paused for this to work">Autosave on tab out or page refresh<button type="button" id="globalToggle7" class="specialToggle">OFF</button></label></li>
                             <li><label>Auto accept Offline time<button type="button" id="globalToggle9" class="specialToggle">OFF</button></label><button type="button" id="warpButton" class="hollowButton">0 Warps</button></li>
                             <li id="autoStageSwitch"><label class="hasTitle" data-title="Automatically clicks new Stages in the footer">Automatically change active Stage<button type="button" id="toggleNormal0" class="toggleNormal">OFF</button></label></li>
@@ -1432,7 +1433,7 @@
                         <div class="stats stage5Only">
                             <article id="mergeBoost">
                                 <h3 class="cyanText">Boost after Merge</h3>
-                                <p id="mergeBaseStat" class="grayText">Galaxies: <span class="greenText">1</span></p>
+                                <p id="mergeBaseStat" class="darkorchidText">Structures: <span class="greenText">1</span></p>
                                 <p id="merge1Stat" class="grayText">Groups: <span class="greenText">1</span></p>
                                 <p id="merge2Stat" class="grayText">Clusters: <span class="greenText">1</span></p>
                                 <h4 class="darkvioletText">Total: <span id="mergeTotal" class="greenText">1</span> ^2</h4>
