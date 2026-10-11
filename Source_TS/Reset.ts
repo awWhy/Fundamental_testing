@@ -1,7 +1,7 @@
-import { allowedToBeReset } from './Check';
-import { cloneArray, playerStart } from './Main';
+import { allowedToBeReset, checkUpgrade } from './Check';
+import { cloneArray, loadoutsFinal, playerStart } from './Main';
 import { global, player } from './Player';
-import { assignMaxLevel, assignUpgradeCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, calculateEffects } from './Stage';
+import { assignMaxLevel, assignUpgradeCost, assignMilestoneInformation, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, calculateEffects, buyStrangeness } from './Stage';
 import { stageUpdate, switchTab } from './Update';
 
 export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' | 'galaxy', stageIndex: number[]) => {
@@ -231,6 +231,7 @@ export const resetDarkness = (outside = false) => {
 
 /** Level 0 is Vacuum reset, level 1 is Universe reset, level 2 is Multiverse reset, level 3 is End reset */
 export const resetVacuum = (level = 0) => {
+    const oldUniverses = player.verses[0].current;
     const vacuum = player.inflation.vacuum;
     if (level >= 2) {
         player.verses[0].true = cloneArray(playerStart.verses[0].true);
@@ -385,6 +386,16 @@ export const resetVacuum = (level = 0) => {
 
     switchTab();
     stageUpdate();
+
+    /** No idea if that should be here */
+    if (level >= 2 && oldUniverses >= 10) {
+        const loadout = player.inflation.default;
+        loadoutsFinal(loadout);
+        for (let i = 0; i < loadout.length; i++) {
+            if (!checkUpgrade(loadout[i], 0, 'inflation')) { continue; }
+            buyStrangeness(loadout[i], 0, 'inflation', true);
+        }
+    }
 };
 
 export const cloneBeforeReset = (depth: 'stage' | 'vacuum') => {

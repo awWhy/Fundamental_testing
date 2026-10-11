@@ -1075,7 +1075,7 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     border: 2px solid #6500e0;
     border-radius: 7px;
     min-width: min-content;
-    max-width: 30em;
+    max-width: 44em;
 }
 
 #loadoutsMain > div {
@@ -1083,7 +1083,6 @@ input.elementType3.created, .elementType3.awaiting:hover { background: #0000c1; 
     column-gap: 0.3em;
     align-items: center;
     justify-content: center;
-    align-self: end;
     flex-wrap: wrap;
 }
 

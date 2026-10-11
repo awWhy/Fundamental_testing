@@ -2,7 +2,7 @@ import { global, player } from './Player';
 import { checkTab } from './Check';
 import { numbersUpdate, switchTab, visualUpdate } from './Update';
 import { buyBuilding, buyStrangenessMax, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleChallengeType, vaporizationResetUser } from './Stage';
-import { getId, pauseGameUser, simulateOffline, toggleSwap } from './Main';
+import { getId, loadoutsLoad, pauseGameUser, simulateOffline, toggleSwap } from './Main';
 import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
 
@@ -35,6 +35,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         global.hotkeys.last = 'toggle11';
         toggleSwap(11, 'auto', true);
     },
+    loadoutI: () => void loadoutsLoad(player.inflation.default),
     discharge: () => void dischargeResetUser(),
     toggleDischarge: () => {
         if (global.hotkeys.last === 'toggle1') { return; }

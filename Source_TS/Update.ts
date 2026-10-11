@@ -293,7 +293,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                         if (vacuum) { getQuery('#mainCapHardS5 > span').textContent = format(collapseInfo.solarCap, { padding: true }); }
                         if (player.strangeness[5][9] < 2) {
                             const after = calculateEffects.reward[0](true);
-                            getQuery('#mergeBoostTotal > span').textContent = format((buildings[3].true / (mergeInfo.galaxies + 1) + 1) * (after / mergeEffects[0]) * (calculateEffects.reward[0](true, calculateEffects.reward[1](true)) / after), { padding: true });
+                            getQuery('#mergeBoostTotal > span').textContent = format(((buildings[3].true / buildings[1].current.toNumber() + 1) * (buildings[3].true / buildings[2].current.toNumber() + 1)) ** 0.5 * (buildings[3].true / (mergeInfo.galaxies + 1) + 1) * (after / mergeEffects[0]) * (calculateEffects.reward[0](true, calculateEffects.reward[1](true)) / after), { padding: true });
                         }
 
                         const groupsCost = calculateEffects.groupsCost();
@@ -303,7 +303,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                         const clustersTotal = player.researchesExtra[5][4] >= 2;
                         getQuery('#merge2Effect > span:nth-of-type(2)').textContent = `${Math.max((clustersTotal ? mergeInfo.galaxies : buildings[3].true) - (mergeInfo.checkReward[1] + merge[clustersTotal ? 'rewards' : 'claimed'][1]) * 100, 0)}`;
                     }
-                    if (!vacuum && (!stable || !player.toggles.mergeType)) {
+                    if (!vacuum && (!stable || !global.sessionToggles[2])) {
                         const requirement = calculateEffects.mergeRequirement();
                         getId('reset0Button').textContent = player.buildings[5][3].true >= requirement && player.progress.main >= 15 ? 'Change Vacuum state to true' : `Requires ${format(requirement)} Galaxies`;
                     }
@@ -363,7 +363,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     } else { //i === 1
                         const softcap = Math.max(production * 600, 1);
                         const resource = player.cosmon[2].current;
-                        if (resource >= softcap) { production = ((resource / softcap) ** 4 + production / softcap) ** 0.25 * softcap - resource; }
+                        if (resource >= softcap) { production = ((resource / softcap) ** 2 + production / softcap) ** 0.5 * softcap - resource; }
                     }
                     getId(`verse${i}Prod`).textContent = format(production, { padding: true });
                     if (lockText !== undefined) {
@@ -373,9 +373,9 @@ export const numbersUpdate = (ignoreOffline = false) => {
                         continue;
                     }
 
-                    const cost = Math.ceil(calculateVerseCost(i));
+                    const cost = calculateVerseCost(i);
                     getId(`verse${i}`).classList[cost <= (i === 0 ? mergeInfo.score : global.versesInfo.types) ? 'add' : 'remove']('availableB');
-                    getId(`verse${i}Btn`).textContent = `Need: ${format(cost, { padding: i !== 1 })} ${i === 0 ? 'Merge score' : 'Universe types'}`;
+                    getId(`verse${i}Btn`).textContent = `Need: ${format(cost, { padding: 'exponent' })} ${i === 0 ? 'Merge score' : 'Universe types'}`;
                     getId(`verse${i}BuyX`).textContent = '1';
                 }
 
@@ -392,17 +392,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     getId('mergeScore2Cur').textContent = format(merge.rewards[1] * 4, { padding: 'exponent' });
                     getId('mergeScoreTotal').textContent = format(mergeInfo.score, { padding: 'exponent' });
                     const maxSafe = calculateEffects.mergeMaxResets(false);
-                    const safe = maxSafe - merge.resets;
-                    let post = mergeInfo.score;
-                    if (safe > 0 && player.upgrades[5][3] === 1) {
-                        const allowed = player.buildings[5][3].true * (safe - 1);
-                        const plusTrue = player.buildings[5][3].true + allowed;
-                        const allGalaxies = mergeInfo.galaxies + (player.strangeness[5][9] >= 2 ? plusTrue : allowed);
-                        post += plusTrue + //Galaxies
-                            Math.floor(player.researchesExtra[5][1] >= 2 ? allGalaxies / calculateEffects.groupsCost() - merge.rewards[0] : (mergeInfo.checkReward[0] + merge.claimed[0]) * safe) * 2 + //Groups
-                            Math.floor(player.researchesExtra[5][4] >= 2 ? allGalaxies / 100 - merge.rewards[1] : (mergeInfo.checkReward[1] + merge.claimed[1]) * safe) * 4; //Clusters
-                    }
-                    getId('mergeScoreAfter').textContent = format(post, { padding: 'exponent' });
+                    getId('mergeScoreAfter').textContent = format(calculateEffects.mergeScorePost(maxSafe), { padding: 'exponent' });
 
                     getQuery('#mergeResetsS6 > span').textContent = format(merge.resets, { padding: 'exponent' });
                     getQuery('#mergeResetsS6 > span:nth-of-type(2)').textContent = format(calculateEffects.mergeMaxResets(), { padding: 'exponent' });
@@ -499,10 +489,10 @@ export const numbersUpdate = (ignoreOffline = false) => {
                 let production = assignBuildingsProduction.verse1() * global.inflationInfo.globalSpeed;
                 const softcap = Math.max(production * 600, 1);
                 const current = player.cosmon[2].current;
-                getId('cosmon2InfoSoft').textContent = format(0.25);
+                getId('cosmon2InfoSoft').textContent = format(0.5);
                 getId('cosmon2InfoStart').textContent = format(softcap, { padding: true });
                 getId('cosmon2InfoPre').textContent = format(production, { padding: true });
-                if (current >= softcap) { production = ((current / softcap) ** 4 + production / softcap) ** 0.25 * softcap - current; }
+                if (current >= softcap) { production = ((current / softcap) ** 2 + production / softcap) ** 0.5 * softcap - current; }
                 getId('cosmon2InfoPost').textContent = format(production, { padding: true });
             }
             getQuery('#cosmon0 p').textContent = format(player.cosmon[0].current, { padding: 'exponent' });
@@ -618,7 +608,7 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     if (vacuum || (player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && challenge !== 1)) {
                         getQuery('#mergeResets > span').textContent = format(player.merge.resets, { padding: 'exponent' });
                         getQuery('#mergeResets > span:last-of-type').textContent = format(calculateEffects.mergeMaxResets(), { padding: 'exponent' });
-                        let base = buildings[3].true / (global.mergeInfo.galaxies + 1) + 1;
+                        let base = ((buildings[3].true / buildings[1].current.toNumber() + 1) * (buildings[3].true / buildings[2].current.toNumber() + 1)) ** 0.5 * (buildings[3].true / (global.mergeInfo.galaxies + 1) + 1);
                         getQuery('#mergeBaseStat > span').textContent = format(base, { padding: true });
                         if (player.strangeness[5][9] < 2) {
                             const after = calculateEffects.reward[0](true);
@@ -677,7 +667,7 @@ export const visualUpdate = (ignoreOffline = false) => {
     const vacuum = player.inflation.vacuum;
     const highest = player.progress.main;
 
-    if (!globalSave.toggles[4] && (highest >= 17 || (vacuum && player.stage.current >= 2))) {
+    if (!globalSave.toggles[4]) {
         let anyUnlocked = false;
         for (let i = 0; i < globalSave.resources.length; i++) {
             const unlocked = specialHTML.globalResources[globalSave.resources[i] as keyof typeof specialHTML.globalResources].unlock();
@@ -712,6 +702,7 @@ export const visualUpdate = (ignoreOffline = false) => {
         if (highest < 20) {
             if (highest < 1) { getId('footerStat2').style.display = 'none'; }
             if (highest < 16 && (vacuum || highest < 2)) { getId('reset1Footer').style.display = 'none'; }
+            if (highest < 17 && (!vacuum || player.stage.current < 2)) { getId('globalStats').style.display = 'none'; }
             getId('reset2Footer').style.display = 'none';
         }
         if (highest >= 15 && player.challenges.supervoid[1] < 1 && global.debug.supervoid !== player.cosmon[0].total) {
@@ -847,7 +838,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                     getId('merge2Effect').style.display = player.researchesExtra[5][4] >= 1 ? '' : 'none';
                 }
                 if (!vacuum) {
-                    const showTrue = stable && player.toggles.mergeType;
+                    const showTrue = stable && global.sessionToggles[2];
                     getId('mergeTrue').style.display = showTrue ? '' : 'none';
                     getId('mergeFalse').style.display = !showTrue ? '' : 'none';
                     getId('mergeSwap').style.display = stable ? '' : 'none';
@@ -1152,6 +1143,9 @@ export const visualUpdate = (ignoreOffline = false) => {
                     getId('research2').style.display = darkEnergy || player.researches[6][0] >= 10 ? '' : 'none';
                     getId('research3').style.display = darkEnergy || player.researches[6][0] >= 12 ? '' : 'none';
                     getId('research4').style.display = darkEnergy ? '' : 'none';
+                    if (vacuum) {
+                        getId('upgrade2').style.display = darkEnergy ? '' : 'none';
+                    }
                 }
             }
         } else if (subtab === 'Elements') {
@@ -1222,7 +1216,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('strange6Stage5').style.display = show1 && bound ? '' : 'none';
                 getId('strange8Stage5').style.display = bound ? '' : 'none';
                 getId('strange9Stage5').style.display = voidProgress[3] >= 5 ? '' : 'none';
-                getId('strange10Stage5').style.display = (universes >= 5 ? show3 : voidProgress[3] >= 6) && bound ? '' : 'none';
+                getId('strange10Stage5').style.display = (voidProgress[5] >= 2 || (universes >= 5 ? show3 : voidProgress[3] >= 6)) && bound ? '' : 'none';
                 getId('strange11Stage5').style.display = voidProgress[2] >= 3 && bound ? '' : 'none';
                 getId('strange4Stage6').style.display = player.strangeness[6][3] < 1 || showX ? '' : 'none';
                 if (global.debug.MDStrangePage === null) {
@@ -1591,7 +1585,6 @@ export const visualProgressUnlocks = () => {
         getId('rankToggleReset').style.display = '';
         getId('collapseToggleReset').style.display = '';
         getId('globalStatsButton').style.display = '';
-        if (!globalSave.toggles[4]) { getId('globalStats').style.display = ''; }
     }
     if (highest >= 18) {
         getId('stageSelect').style.display = '';
@@ -1607,6 +1600,7 @@ export const visualProgressUnlocks = () => {
         getId('enterChallengeHotkey').style.display = highest >= 17 ? '' : 'none';
         getId('exitChallengeHotkey').style.display = highest >= 17 ? '' : 'none';
         getId('universeHotkey').style.display = highest >= 18 ? '' : 'none';
+        getId('loadoutIHotkey').style.display = highest >= 19 ? '' : 'none';
         getId('multiverseHotkey').style.display = highest >= 25 ? '' : 'none';
         getId('toggleUniverseHotkey').style.display = highest >= 25 ? '' : 'none';
         getId('createAllHotkey').style.display = highest >= 1 ? '' : 'none';
@@ -1663,7 +1657,7 @@ export const getUpgradeDescription = (type: 'upgrades' | 'researches' | 'researc
         const pointer = global.treeInfo[stageIndex];
         const level = player.tree[stageIndex][index];
 
-        getId('inflationText').textContent = `${stageIndex === 0 && global.loadouts.open ? `#${index + 1}. ` : ''}${pointer.name[index]}. (Level ${format(level)} out of ${format(pointer.max[index])})`;
+        getId('inflationText').textContent = `${stageIndex === 0 && global.loadoutsInfo.open ? `#${index + 1}. ` : ''}${pointer.name[index]}. (Level ${format(level)} out of ${format(pointer.max[index])})`;
         getId('inflationEffect').textContent = pointer.effectText[index]();
         if (level >= pointer.max[index]) {
             getId('inflationCost').textContent = 'Fully activated.';
@@ -1798,7 +1792,7 @@ export const getUpgradeDescription = (type: 'upgrades' | 'researches' | 'researc
                 let cost = pointer.cost[index];
                 const tillMax = pointer.max[index] - level;
                 if (tillMax > 1 && (player.toggles.max[0] !== global.hotkeys.shift)) {
-                    const scaling = pointer.scaling[index];
+                    const scaling = pointer.scaling[index] as number;
                     if (typeof cost === 'number') {
                         const currency = player[stageIndex === 1 ? 'discharge' : 'darkness'].energy;
                         if (stageIndex === 1 && (player.challenges.supervoid[3] >= 5 || player.accretion.rank >= 6) && player.strangeness[1][9] >= 1) {
@@ -1810,9 +1804,10 @@ export const getUpgradeDescription = (type: 'upgrades' | 'researches' | 'researc
                             if (newLevels > 1) { cost = newLevels * (newLevels * scaling / 2 + simplify); }
                         }
                     } else {
+                        const scalingMinus = typeof scaling === 'number' ? scaling - 1 : scaling;
                         const currency = player.buildings[stageIndex === 5 ? 4 : stageIndex][stageIndex === 2 ? 1 : 0].current;
-                        newLevels = Math.min(Math.max(Math.floor(new Overlimit(currency).multiply(scaling - 1).divide(cost).plus(1).log(scaling).toNumber()), 1), tillMax);
-                        if (newLevels > 1) { cost = new Overlimit(scaling).power(newLevels).minus(1).divide(scaling - 1).multiply(cost); }
+                        newLevels = Math.min(Math.max(Math.floor(new Overlimit(currency).multiply(scalingMinus).divide(cost).plus(1).log(scaling).toNumber()), 1), tillMax);
+                        if (newLevels > 1) { cost = new Overlimit(scaling).power(newLevels).minus(1).divide(scalingMinus).multiply(cost); }
                     }
                 }
 

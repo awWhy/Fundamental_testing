@@ -508,8 +508,7 @@ const handleAutoResearchCreation = (index: number) => {
 
 /** Sets selected loadout to provided */
 export const loadoutsFinal = (load: number[]) => {
-    if (!global.loadouts.open) { return; }
-    const max = global.treeInfo[0].max;
+    if (!global.loadoutsInfo.open) { return; }
     const appeared = {} as Record<number, number>;
 
     let cost = 0;
@@ -517,20 +516,15 @@ export const loadoutsFinal = (load: number[]) => {
     for (let i = 0, dupes = 0; i < load.length; i += dupes, dupes = 0) {
         const current = load[i];
         appeared[current] ??= 0;
-        const unlocked = checkUpgrade(current, 0, 'inflation');
         do {
-            if (appeared[current] >= max[current]) {
-                load.splice(i + dupes, 1);
-                continue;
-            }
-            if (unlocked) { cost += calculateTreeCost(current, 0, appeared[current]); }
+            cost += calculateTreeCost(current, 0, appeared[current]);
             appeared[current] += 1;
             dupes++;
         } while (load[i + dupes] === current);
         if (dupes < 1) { continue; }
         string += `${i > 0 ? ', ' : ''}${current + 1}${dupes !== 1 ? `x${dupes}` : ''}`;
     }
-    global.loadouts.input = load;
+    global.loadoutsInfo.input = load;
     getQuery('#loadoutsEditLabel > span').textContent = format(cost, { padding: 'exponent' });
     (getId('loadoutsEdit') as HTMLInputElement).value = string;
 };
@@ -551,7 +545,11 @@ const loadoutsRecreate = () => {
         });
     }
 };
-const loadoutsSave = () => {
+const loadoutsSave = (saveDefault = false) => {
+    if (saveDefault) {
+        player.inflation.default = cloneArray(global.loadoutsInfo.input);
+        return Notify('Set selected loadout as default');
+    }
     const name = (getId('loadoutsName') as HTMLInputElement).value;
     if (name.length === 0) { return; }
     const loadouts = player.inflation.loadouts;
@@ -562,14 +560,13 @@ const loadoutsSave = () => {
             break;
         }
     }
-    loadouts[index] = [name, cloneArray(global.loadouts.input)];
+    loadouts[index] = [name, cloneArray(global.loadoutsInfo.input)];
     loadoutsRecreate();
     Notify(`Saved loadout as '${name}'`);
 };
-const loadoutsLoad = async(loadout = null as null | number[]) => {
-    if (!await inflationRefund(global.hotkeys.shift, true)) { return; }
+export const loadoutsLoad = async(loadout: number[], noConfirmation = true) => {
+    if (!await inflationRefund(noConfirmation, true)) { return; }
 
-    if (loadout === null) { loadout = global.loadouts.input; }
     for (let i = 0; i < loadout.length; i++) {
         if (!checkUpgrade(loadout[i], 0, 'inflation')) { continue; }
         buyStrangeness(loadout[i], 0, 'inflation', true);
@@ -639,7 +636,6 @@ const loadoutsLoadAuto = () => {
         upgradesInfo[s].firstCost = newArray;
     }
     upgradesInfo[5].maxActive = upgradesInfo[5].firstCost.length;
-    upgradesInfo[6].maxActive = upgradesInfo[6].firstCost.length;
     for (const upgradeType of ['researches', 'researchesExtra'] as const) {
         const pointer = global[`${upgradeType}Info`];
         for (let s = 1; s < pointer.length; s++) {
@@ -779,6 +775,9 @@ try { //Start everything
             #globalStats:hover { opacity: 0.2; }
             #globalStats p { border-radius: 0 4px 4px 0; width: 100%; }
             #globalStats span { margin-left: auto; width: 4.4em; }`;
+        const window = getId('globalStats');
+        window.style.right = globalSave.resourcesXY[0];
+        window.style.bottom = globalSave.resourcesXY[1];
     }
     if (globalSave.toggles[8]) { getId('alertCancel').after(getId('alertConfirm')); }
     if (globalSave.toggles[7]) {
@@ -1151,7 +1150,7 @@ try { //Start everything
         if (MD) { button.addEventListener('touchstart', repeatFunc); }
     }
     getId('mergeSwap').addEventListener('click', () => {
-        player.toggles.mergeType = !player.toggles.mergeType;
+        global.sessionToggles[2] = !global.sessionToggles[2];
         visualUpdate();
         numbersUpdate();
     });
@@ -1673,7 +1672,7 @@ try { //Start everything
         const input = getId('loadoutsName') as HTMLInputElement;
         input.addEventListener('change', () => { input.value = input.value.trim(); });
         input.addEventListener('keydown', (event) => {
-            if (event.code === 'Enter' && detectShift(event) !== null) {
+            if (event.code === 'Enter' && detectShift(event) === false) {
                 event.preventDefault();
                 loadoutsSave();
             }
@@ -1681,13 +1680,13 @@ try { //Start everything
     }
     getId('inflationRefund').addEventListener('click', () => void inflationRefund(global.hotkeys.shift));
     getId('inflationLoadouts').addEventListener('click', () => {
-        if ((global.loadouts.open = !global.loadouts.open)) {
+        if ((global.loadoutsInfo.open = !global.loadoutsInfo.open)) {
             getId('loadoutsMain').style.display = '';
             (getId('loadoutsName') as HTMLInputElement).value = 'Current';
             loadoutsLoadAuto();
             loadoutsRecreate();
         } else { getId('loadoutsMain').style.display = 'none'; }
-        if (globalSave.SRSettings[0]) { getId('inflationLoadouts').ariaExpanded = `${global.loadouts.open}`; }
+        if (globalSave.SRSettings[0]) { getId('inflationLoadouts').ariaExpanded = `${global.loadoutsInfo.open}`; }
     });
     getId('loadoutsEdit').addEventListener('change', () => {
         const first = (getId('loadoutsEdit') as HTMLInputElement).value.split(/[., ]+/);
@@ -1702,15 +1701,14 @@ try { //Start everything
                 first[i] = first[i].slice(0, index);
             }
             const number = Math.trunc(Number(first[i]) - 1);
-            if (number < 0 || !isFinite(number)) { continue; }
+            if (!checkUpgrade(number, 0, 'inflation')) { continue; }
             if (repeat > max[number]) { repeat = max[number]; }
             for (let r = 0; r < repeat; r++) { final.push(number); }
         }
         loadoutsFinal(final);
     });
-    getId('loadoutsLoadAuto').addEventListener('click', loadoutsLoadAuto);
-    getId('loadoutsSave').addEventListener('click', loadoutsSave);
-    getId('loadoutsLoad').addEventListener('click', () => void loadoutsLoad());
+    getId('loadoutsSave').addEventListener('click', () => loadoutsSave(global.hotkeys.shift));
+    getId('loadoutsLoad').addEventListener('click', () => void loadoutsLoad(global.loadoutsInfo.input, global.hotkeys.shift));
     getId('loadoutsMove').addEventListener('click', () => {
         const name = (getId('loadoutsName') as HTMLInputElement).value;
         let index;
@@ -1749,6 +1747,11 @@ try { //Start everything
             loadouts.splice(index, 1);
         }
         loadoutsRecreate();
+    });
+    getId('loadoutsLoadAuto').addEventListener('click', loadoutsLoadAuto);
+    getId('loadoutsLoadDefault').addEventListener('click', () => {
+        loadoutsFinal(player.inflation.default);
+        if (global.hotkeys.shift) { void loadoutsLoad(player.inflation.default); }
     });
     if (MD) {
         const button = getId('inflationActivate');
@@ -2027,11 +2030,11 @@ try { //Start everything
             value = value.trim().toLowerCase();
             if (value === 'stage') {
                 stageFullReset(true);
-            } else if (value === 'vacuum' || value === 'universe' || value === 'Mutliverse') {
+            } else if (value === 'vacuum' || value === 'universe' || value === 'multiverse') {
                 if (player.stage.active < 6) { setActiveStage(1); }
                 player.time.export[1] = 0;
                 player.time.export[2] = 0;
-                if (value === 'Mutliverse') {
+                if (value === 'multiverse') {
                     player.verses[0].current -= global.versesInfo.true[0] + global.versesInfo.true[1];
                     player.inflation.vacuum = false;
                     prepareVacuum(false);
@@ -2047,7 +2050,7 @@ try { //Start everything
                     }
                     resetVacuum(1);
                 }
-            }
+            } else { return void Alert(`Input '${value}' doesn't match anything`); }
         } else if (lower.includes('dev_refund')) {
             value = lower[10] === '_' ? value.substring(11) :
                 await Prompt("Which reset tier Upgrades to refund:\n(Free Upgrades are not re_rewarded, doesn't adjust any extra values, forces save file reload)\n'Strangeness', 'Inflations'");
@@ -2061,7 +2064,7 @@ try { //Start everything
                 player.cosmon[0].current = player.cosmon[0].total;
                 player.cosmon[1].current = player.cosmon[1].total;
                 player.cosmon[2].current = player.cosmon[2].total;
-            } else { return; }
+            } else { return void Alert(`Input '${value}' doesn't match anything`); }
             updatePlayer(player, false);
         } else if (value === 'dev_export') {
             exportReward(true);

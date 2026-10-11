@@ -21,7 +21,7 @@ type upgrade = {
     firstCost: Overlimit[]
     maxActive: number
 };
-/** Upgrades that do not use numbers */
+/** Upgrades that use numbers */
 type upgrageAlt = {
     cost: number[]
     firstCost: number[]
@@ -31,15 +31,17 @@ type research = {
     effectText: Array<() => string>
     cost: Overlimit[]
     firstCost: Overlimit[]
-    scaling: number[]
+    /** String only allowed for numbers bigger than 1e16, but preferably 1e308 */
+    scaling: Array<number | string>
     max: number[]
     maxActive: number
 };
-/** Researches that do not use numbers */
+/** Researches that use numbers */
 type researchAlt = {
     cost: number[]
+    scaling: number[]
     firstCost: number[]
-} & Omit<research, 'cost' | 'firstCost'>;
+} & Omit<research, 'cost' | 'firstCost' | 'scaling'>;
 type challengeBase = {
     name: string
     description: () => string
@@ -103,6 +105,8 @@ export interface playerType {
     }
     inflation: {
         loadouts: Array<[string, number[]]>
+        /** Loadout that is loaded by hotkeys/auto's */
+        default: number[]
         vacuum: boolean
         resets: number
         age: number
@@ -179,7 +183,6 @@ export interface playerType {
         /** [0] is not used */
         buildings: boolean[][]
         verses: boolean[]
-        mergeType: boolean
         supervoid: boolean
         shop: {
             input: number
@@ -202,8 +205,6 @@ export interface playerType {
         main: number
         /** Highest reached Element for visuals [true, false] Vacuum */
         element: [number, number]
-        /** Used for showing Merge results related Void rewards */
-        results: number
         /** Highest reached Void rewards */
         void: number[]
         quantum?: number
@@ -281,7 +282,7 @@ export interface globalType {
     lastInflation: [number | null, number]
     lastMilestone: [number | null, number]
     lastChallenge: [number, number]
-    /** Void reward type[0], Strangeness shown[1] */
+    /** Void reward type[0], Strangeness shown[1], False Merge type[2] */
     sessionToggles: boolean[]
     /** Sorted cheapest first, -1 inserted to the start if auto is done */
     automatization: {
@@ -485,7 +486,7 @@ export interface globalType {
         /** [time, cosmon, type, peak, peaked at] */
         end: playerType['history']['end']['list']
     }
-    loadouts: {
+    loadoutsInfo: {
         input: number[]
         open: boolean
     }
@@ -544,6 +545,8 @@ export interface globalSaveType {
     hotkeys: Array<Record<hotkeysList, string>>
     numbers: Record<numbersList, string>
     resources: string[]
+    /** [Right, bottom] */
+    resourcesXY: [string, string]
     /** Hotkeys type[0], Elements as tab[1], Allow text selection[2], Footer on top[3], Hide global stats[4],
      * Hide main scrollbar[5], Milestone notifications[6], Autosave on blur[7], Swap alert buttons[8],
      * Auto accept Offline[9], Alternative global stats[10] */
@@ -586,7 +589,7 @@ export interface Quantum {
     auto: boolean[]
 }
 
-export type hotkeysList = 'makeAll' | 'galaxy' | 'universe' | 'multiverse' | 'createAll' | 'strangeness' |
+export type hotkeysList = 'makeAll' | 'galaxy' | 'universe' | 'multiverse' | 'createAll' | 'strangeness' | 'loadoutI' |
     'toggleAll' | 'toggleUpgrades' | 'toggleStrangeness' | 'toggleUniverse' |
     'discharge' | 'vaporization' | 'rank' | 'collapse' | 'nucleation' | 'merge' | 'stage' | 'end' |
     'toggleDischarge' | 'toggleVaporization' | 'toggleRank' | 'toggleCollapse' | 'toggleMerge' | 'toggleNucleation' | 'toggleStage' |
@@ -652,6 +655,7 @@ export interface calculateEffectsType {
     reward: Array<(post?: boolean, other?: number) => number>
     groupsCost: () => number
     mergeScore: () => number
+    mergeScorePost: (maxSafe?: number) => number
     S5Upgrade0: () => number
     S5Upgrade1: () => number
     S5Upgrade2: (post?: boolean, level?: number) => number

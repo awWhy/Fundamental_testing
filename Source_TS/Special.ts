@@ -43,6 +43,7 @@ export const globalSave: globalSaveType = {
         enterChallenge: 'Shift Numbers'
     } as globalSaveType['numbers'],
     resources: ['energy', 'drops', 'accretion_mass', 'stardust'],
+    resourcesXY: ['', ''],
     toggles: [false, false, false, false, false, false, true, false, false, false, false],
     format: ['.', ''],
     theme: null,
@@ -193,7 +194,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
             'UpgradeG6.png',
             'UpgradeG7.png'
         ], [
-            'UpgradeD1.png'
+            'UpgradeD1.png',
+            'Missing.png'
         ]
     ],
     lastResearch: 9, //Starting value has to be biggest length
@@ -1063,8 +1065,6 @@ export const enableLightness = () => {
             names[i] = names[i].replace(Dark, Light);
         }
     }
-    global.upgradesInfo[6].name[0] = global.upgradesInfo[6].name[0].replace(Dark, Light);
-    global.researchesInfo[6].name[0] = global.researchesInfo[6].name[0].replace(Dark, Light);
     global.buildingsInfo.hoverText[6][0] = `${nameS6[0]} softcap`;
     global.stageInfo.costName[6] = nameS6[0];
 
@@ -1082,8 +1082,8 @@ export const enableLightness = () => {
     challengeHTML.alt = darknessInfo.name;
     global.strangenessInfo[6].name[3] = darknessInfo.name;
     (getId('strange4Stage6') as HTMLInputElement).alt = darknessInfo.name;
-    specialHTML.buildingHTML[6][0] = `${extra}${Dark}%20planet.png`;
-    specialHTML.footerStatsHTML[6][0][0] = `${extra}${Dark}%20matter.png`;
+    specialHTML.buildingHTML[6][0] = `${extra}Dark%20planet.png`;
+    specialHTML.footerStatsHTML[6][0][0] = `${extra}Dark%20matter.png`;
     specialHTML.upgradeHTML[6][0] = `${extra}UpgradeD1.png`;
     specialHTML.researchHTML[6][0][0] = `${extra}ResearchD1.png`;
     specialHTML.researchHTML[6][2][0] = `${extra}ResearchD3.png`;
@@ -1652,10 +1652,6 @@ export const checkProgress = () => {
         if (player.elements[i] === 0) { break; }
         player.progress.element[index] = i;
     }
-    for (let i = player.progress.results; i < 2; i++) {
-        if (player.merge.rewards[i] < 1) { break; }
-        player.progress.results = i + 1;
-    }
 };
 const progressMain = () => {
     const progress = player.progress.main;
@@ -1926,6 +1922,7 @@ export const openHotkeys = () => {
         <div>
             <label id="createAllHotkey"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Upgrades</span></label>
             <label id="strangenessHotkey" class="greenText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Strangeness</span></label>
+            <label id="loadoutIHotkey" class="greenText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Loadout</span></label>
             <label id="dischargeHotkey" class="orangeText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Discharge</span></label>
             <label id="vaporizationHotkey" class="blueText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Vaporization</span></label>
             <label id="rankHotkey" class="darkorchidText"><button type="button" class="selectBtn"></button> ‒ <span class="whiteText">Rank</span></label>
@@ -2172,7 +2169,8 @@ export const openGlobalStats = () => {
             </div>
         </section>
         <input type="text" id="globalStatsInput" autocomplete="off">
-        <p id="globalStatsToggles"><label>Move into the footer </label> | <label>Hide window </label></p>`;
+        <p id="globalStatsToggles"><label>Move into the footer </label> | <label>Hide window </label></p>
+        ${globalSave.toggles[10] ? '' : '<p><button type="button" id="saveCords" class="selectBtn">Save coordinates</button> | <button type="button" id="resetCords" class="selectBtn">Reset</button></p>'}`;
         specialHTML.styleSheet.textContent += ` #globalStatsHTML { display: flex; flex-direction: column; align-items: center; row-gap: 0.2em; }
             #globalStatsHTML > p:first-of-type { margin-top: -0.2em; }
             #globalStatsHTML > section > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3em 0.6em; margin-bottom: 0.2em; }
@@ -2205,6 +2203,18 @@ export const openGlobalStats = () => {
             inputID.value = array.join(', ');
         });
         inputID.value = globalSave.resources.join(', ');
+        if (!globalSave.toggles[10]) {
+            getId('saveCords').addEventListener('click', () => {
+                const window = getId('globalStats');
+                globalSave.resourcesXY = [window.style.right, window.style.bottom];
+                saveGlobalSettings();
+            });
+            getId('resetCords').addEventListener('click', () => {
+                const window = getId('globalStats');
+                window.style.right = '';
+                window.style.bottom = '';
+            });
+        }
     }
 
     specialHTML.bigWindow = 'globalStats';
