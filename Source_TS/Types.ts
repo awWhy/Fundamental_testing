@@ -96,8 +96,6 @@ export interface playerType {
         since: number
     }
     darkness: {
-        /** [True, false] Vacuum */
-        unlocked: [boolean, boolean]
         tier: number
         energy: number
         fluid: number
@@ -169,7 +167,7 @@ export interface playerType {
     }
     toggles: {
         /** Auto change active Stage[0], Auto disable Vaporization[1], No auto Stage if not maxed Milestones[2], Automatic Challenge exit[3],
-         * No auto Stage if not at max Merges[4], Allow Vacuum change[5], Auto reset Abyss[6] */
+         * No auto Stage if not at max Merges[4], Allow Vacuum change[5], Auto reset Abyss[6], Exit Challenge confirmation[7] */
         normal: boolean[]
         /** Stage[0], Discharge[1], Vaporization[2], Rank[3], Collapse[4], Merge[5], End[6], Nucleation[7] */
         confirm: Array<'All' | 'Safe' | 'None'>
@@ -364,6 +362,8 @@ export interface globalType {
         score: number
     }
     inflationInfo: {
+        /** End reset currency */
+        name: string[]
         globalSpeed: number
         /** In the current Universe */
         totalSuper: number
@@ -397,11 +397,11 @@ export interface globalType {
         ]
     }
     versesInfo: {
-        /** Universes types names */
-        names: string[]
-        /** Total self-made [true, false] types Universes */
-        true: [number, number]
-        /** Universes */
+        /** Self-made Universes types names */
+        name: string[]
+        /** Self-made Universes */
+        true: number
+        /** Different types of self-made Universes */
         types: number
     }
     strangeInfo: {
@@ -672,8 +672,8 @@ export interface calculateEffectsType {
     darkFluid: (post?: boolean) => number
     S6Upgrade0: () => number
     S2Strange9: (unlocked?: boolean) => number
-    /** All self-made Universes of provided state (true default) */
-    trueVersesAll: (state?: boolean) => number
+    /** All self-made Universes */
+    trueVersesAll: () => number
     /** Self-made Universes for current Challenge */
     trueVerses: () => number
     /** Self-made Universes */
@@ -681,6 +681,7 @@ export interface calculateEffectsType {
     T0Inflation0: () => number
     TOInflation1_softcap: () => number
     T0Inflation1: () => number
+    T0Inflation3_base: () => number
     T0Inflation3: () => number
     strangeGain: (interstellar: boolean, quarks?: boolean) => number
     cosmonGain: (bigRip?: boolean) => number

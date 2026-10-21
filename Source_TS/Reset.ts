@@ -225,7 +225,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
 };
 
 export const resetDarkness = (outside = false) => {
-    player.ASR[6] = player.darkness.unlocked[player.inflation.vacuum ? 0 : 1] && player.verses[0].lowest[0] <= 5 ? 1 : 0;
+    player.ASR[6] = player.strangeness[6][3] >= 1 && player.verses[0].lowest[0] <= 5 ? 1 : 0;
     if (outside) { player.clone.ASR[6] = player.ASR[6]; }
 };
 
@@ -235,7 +235,7 @@ export const resetVacuum = (level = 0) => {
     const vacuum = player.inflation.vacuum;
     if (level >= 2) {
         player.verses[0].true = cloneArray(playerStart.verses[0].true);
-        global.versesInfo.true = [0, 0];
+        global.versesInfo.true = 0;
         global.versesInfo.types = 0;
         if (level >= 3) {
             player.verses[0].current = player.inflation.ends[0] >= 1 ? player.verses[0].highest : 0;
@@ -254,7 +254,6 @@ export const resetVacuum = (level = 0) => {
         player.inflation.resets = 0;
         player.inflation.peak = [0, 0];
         player.time.end = 0;
-        player.darkness.unlocked = [false, false];
         if (player.challenges.stability < 2) {
             player.challenges.supervoidMax = cloneArray(playerStart.challenges.supervoidMax);
             global.inflationInfo.totalSuper = 0;
@@ -296,7 +295,6 @@ export const resetVacuum = (level = 0) => {
     player.researchesAuto[0] = universes >= 3 ? 3 : 0;
     player.researchesAuto[1] = universes >= 3 ? 2 : 0;
     player.researchesAuto[2] = universes >= 5 ? (vacuum ? 4 : 1) : 0;
-    if (player.darkness.unlocked[vacuum ? 0 : 1]) { player.strangeness[6][3] = 1; }
     player.stage.current = 1;
     player.stage.resets = 0;
     player.stage.peak = [0, 0];
@@ -347,7 +345,7 @@ export const resetVacuum = (level = 0) => {
         player.strange[0].current += total * (1 + total) / 2;
     } else { player.challenges.void = cloneArray(playerStart.challenges.void); }
     if (universes >= 1) {
-        const add = Math.ceil(Math.max(global.versesInfo.true[0] + global.versesInfo.true[1], player.verses[0].highest) ** 1.5);
+        const add = Math.ceil(Math.max(global.versesInfo.true, player.verses[0].highest) ** 1.5);
         player.strange[0].current += add;
         if (universes >= 13) { player.strange[1].current += add; }
         if (vacuum) { player.strangeness[1][8] = 2; }

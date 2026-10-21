@@ -51,7 +51,7 @@ export const checkBuilding = (index: number, stageIndex: number): boolean => {
         if (index === 2) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
         if (index === 3) { return player.researchesExtra[5][0] >= 1; }
     } else if (stageIndex === 6) {
-        if (index === 1) { return player.darkness.unlocked[player.inflation.vacuum ? 0 : 1] && (player.upgrades[6][0] === 1 || player.researches[6][0] >= 6); }
+        if (index === 1) { return player.strangeness[6][3] >= 1 && (player.upgrades[6][0] === 1 || player.researches[6][0] >= 6); }
     }
 
     return false;
@@ -94,14 +94,14 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 5) { return player.strangeness[5][10] >= 4 && player.tree[1][7] >= 3 && player.upgrades[4][4] === 1; }
                 return true;
             } else if (stageIndex === 5) {
-                if (global.versesInfo.true[player.inflation.vacuum ? 0 : 1] < global.mergeInfo.unlockU[upgrade]) { return false; }
+                if (player.verses[0].true[player.inflation.vacuum ? 0 : 1] < global.mergeInfo.unlockU[upgrade]) { return false; }
                 if (upgrade === 0) { return player.inflation.vacuum || player.milestones[2][0] >= 7; }
                 if (upgrade === 1) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
                 if (upgrade === 2) { return player.buildings[5][3].true >= 1; }
                 if (upgrade === 3) { return player.inflation.vacuum ? player.accretion.rank >= 7 : player.milestones[5][1] >= 8; }
                 return player.accretion.rank >= 7 || !player.inflation.vacuum;
             } else if (stageIndex === 6) {
-                return player.darkness.unlocked[player.inflation.vacuum ? 0 : 1];
+                return player.strangeness[6][3] >= 1;
             }
             break;
         case 'researches':
@@ -121,12 +121,12 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 5) { return (galaxy || player.collapse.stars[2] > 0) && player.strangeness[4][9] >= 3; }
                 return true;
             } else if (stageIndex === 5) {
-                if (global.versesInfo.true[player.inflation.vacuum ? 0 : 1] < global.mergeInfo.unlockR[upgrade]) { return false; }
+                if (player.verses[0].true[player.inflation.vacuum ? 0 : 1] < global.mergeInfo.unlockR[upgrade]) { return false; }
                 if (upgrade === 0) { return player.inflation.vacuum || player.milestones[2][0] >= 7; }
                 if (upgrade === 1) { return player.inflation.vacuum || player.milestones[3][0] >= 7; }
                 return player.accretion.rank >= 7 || !player.inflation.vacuum;
             } else if (stageIndex === 6) {
-                return player.darkness.unlocked[player.inflation.vacuum ? 0 : 1];
+                return player.strangeness[6][3] >= 1;
             }
             break;
         case 'researchesExtra':
@@ -153,11 +153,11 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 4) { return (player.collapse.stars[2] > 0 || player.researchesExtra[5][0] >= 1) && player.strangeness[5][10] >= 4 && player.tree[1][7] >= 3; }
                 return true;
             } else if (stageIndex === 5) {
-                if (global.versesInfo.true[player.inflation.vacuum ? 0 : 1] < global.mergeInfo.unlockE[upgrade]) { return false; }
+                if (player.verses[0].true[player.inflation.vacuum ? 0 : 1] < global.mergeInfo.unlockE[upgrade]) { return false; }
                 if (upgrade === 0) { return (player.inflation.vacuum || player.milestones[4][1] >= 8) && player.strangeness[5][3] >= 1; }
                 return player.inflation.vacuum ? player.accretion.rank >= 7 : (player.tree[0][4] >= 1 && player.challenges.active !== 1);
             } else if (stageIndex === 6) {
-                return player.darkness.unlocked[player.inflation.vacuum ? 0 : 1];
+                return player.strangeness[6][3] >= 1;
             }
             break;
         case 'researchesAuto': {
@@ -174,7 +174,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
         case 'elements':
             if (upgrade >= 29) {
                 if (player.upgrades[4][4] !== 1) { return false; }
-                const verses = 1 + global.versesInfo.true[player.inflation.vacuum ? 0 : 1];
+                const verses = 1 + player.verses[0].true[player.inflation.vacuum ? 0 : 1];
                 //if (player.upgrades[4][5] === 1) { verses += 1 + player.verses[1].true; }
                 return verses >= upgrade - 28;
             }
@@ -227,11 +227,11 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                     if (upgrade === 2) { return player.milestones[5][0] >= 8; }
                     if (upgrade === 4) { return player.milestones[4][1] >= 8; }
                     if ([0, 1, 3, 5].includes(upgrade)) { return player.milestones[2][0] >= 7 || player.milestones[3][0] >= 7; }
-                    if (upgrade === 8) { return false; }
+                    if (upgrade === 8) { return player.strangeness[6][3] >= 1; }
                     if (upgrade === 9) { return player.tree[1][9] >= 1; }
                 } else if (stageIndex === 6) {
-                    if (upgrade === 3) { return player.verses[0].true[1] >= 1; }
-                    return false;
+                    if (upgrade === 3) { return player.tree[1][9] >= 1; }
+                    return player.strangeness[6][3] >= 1;
                 }
             }
             return true;

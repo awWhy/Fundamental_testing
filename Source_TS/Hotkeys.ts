@@ -1,7 +1,7 @@
 import { global, player } from './Player';
 import { checkTab } from './Check';
 import { numbersUpdate, switchTab, visualUpdate } from './Update';
-import { buyBuilding, buyStrangenessMax, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleChallengeType, vaporizationResetUser } from './Stage';
+import { buyBuilding, buyStrangeness, buyUpgrades, buyVerse, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, mergeResetUser, nucleationResetUser, rankResetUser, stageResetUser, switchStage, toggleChallengeTypeUser, vaporizationResetUser } from './Stage';
 import { getId, loadoutsLoad, pauseGameUser, simulateOffline, toggleSwap } from './Main';
 import { Notify, globalSave, specialHTML } from './Special';
 import type { hotkeysList, numbersList } from './Types';
@@ -117,7 +117,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
     supervoid: () => {
         if (global.hotkeys.last === 'super') { return; }
         global.hotkeys.last = 'super';
-        if (toggleChallengeType(true)) { Notify(`Toggled into the ${global.challengesInfo[0].name}`); }
+        toggleChallengeTypeUser(true);
     },
     warp: () => offlineWarp(),
     pause: () => {
@@ -291,6 +291,10 @@ export const strangenessAll = () => {
             for (let i = 0; i < global.strangenessInfo[s].maxActive; i++) { buyStrangenessMax(i, s, 'strangeness'); }
         }
     }
+};
+export const buyStrangenessMax = (upgrade: number, stageIndex: number, type: 'strangeness' | 'inflation') => {
+    const max = player.toggles.max[type === 'strangeness' ? 1 : 2] !== global.hotkeys.shift;
+    while (buyStrangeness(upgrade, stageIndex, type) && max) { continue; }
 };
 export const toggleAll = () => {
     const active = player.stage.active;

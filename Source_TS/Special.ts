@@ -2,7 +2,7 @@ import { checkTheme } from './Check';
 import { assignHotkeys, detectShift, hotkeys } from './Hotkeys';
 import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, pauseGame, playerStart, showHoverTitle } from './Main';
 import { global, player, prepareVacuum, updatePlayer } from './Player';
-import { assignResetInformation, setActiveStage, toggleChallengeType } from './Stage';
+import { assignChallengeInformation, assignResetInformation, setActiveStage } from './Stage';
 import type { Quantum, globalSaveType, hotkeysList, numbersList } from './Types';
 import { format, numbersUpdate, stageUpdate, switchTab, visualProgressUnlocks, visualUpdate } from './Update';
 
@@ -510,7 +510,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
         getId('currentTheme').textContent = theme === null ? 'Default' : typeof theme === 'number' ? global.stageInfo.word[theme] : theme;
     } else { theme = globalSave.theme; }
 
-    const upgradeTypes = ['upgrade', 'element'];
+    const upgradeTypes = ['upgrades', 'elements'];
     const properties = {
         '--transition-all': '500ms',
         '--background-color': '#030012',
@@ -549,7 +549,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
     switch (theme ?? player.stage.active) {
         case 1:
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--darkorchid-text)';
+                getId(`${text}Name`).style.color = 'var(--darkorchid-text)';
                 getId(`${text}Effect`).style.color = 'var(--blue-text)';
                 getId(`${text}Cost`).style.color = 'var(--orange-text)';
             }
@@ -557,7 +557,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             break;
         case 2:
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--white-text)';
+                getId(`${text}Name`).style.color = 'var(--white-text)';
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--cyan-text)';
             }
@@ -582,7 +582,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             break;
         case 3:
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--orange-text)';
+                getId(`${text}Name`).style.color = 'var(--orange-text)';
                 getId(`${text}Effect`).style.color = 'var(--blue-text)';
                 getId(`${text}Cost`).style.color = 'var(--green-text)';
             }
@@ -607,7 +607,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             break;
         case 4:
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--blue-text)';
+                getId(`${text}Name`).style.color = 'var(--blue-text)';
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--cyan-text)';
             }
@@ -639,7 +639,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             break;
         case 5:
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--orange-text)';
+                getId(`${text}Name`).style.color = 'var(--orange-text)';
                 getId(`${text}Effect`).style.color = 'var(--green-text)';
                 getId(`${text}Cost`).style.color = 'var(--red-text)';
             }
@@ -667,7 +667,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             break;
         case 6:
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--orchid-text)';
+                getId(`${text}Name`).style.color = 'var(--orchid-text)';
                 getId(`${text}Effect`).style.color = 'var(--orange-text)';
                 getId(`${text}Cost`).style.color = 'var(--red-text)';
             }
@@ -694,7 +694,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             break;
         case 'Quantum':
             for (const text of upgradeTypes) {
-                getId(`${text}Text`).style.color = 'var(--cyan-text)';
+                getId(`${text}Name`).style.color = 'var(--cyan-text)';
                 getId(`${text}Effect`).style.color = 'var(--blue-text)';
                 getId(`${text}Cost`).style.color = 'var(--brown-text)';
             }
@@ -1041,7 +1041,10 @@ export const enableApril = (firstLoad = false) => {
 
     if (firstLoad) { return; }
     if (!active) {
-        if (global.april.ultravoid === false) { toggleChallengeType(true); }
+        if (global.april.ultravoid === false) {
+            global.april.ultravoid = null;
+            assignChallengeInformation(0);
+        }
         if (global.april.quantum) {
             global.april.quantum = false;
             global.challengesInfo[1].name = 'Vacuum stability';
@@ -1652,11 +1655,14 @@ export const checkProgress = () => {
         if (player.elements[i] === 0) { break; }
         player.progress.element[index] = i;
     }
+    for (let i = 1; i < 6; i++) { //Just in case something goes wrong with permanent rewards
+        if (player.progress.void[i] < player.challenges.void[i]) { player.progress.void[i] = player.challenges.void[i]; }
+    }
 };
 const progressMain = () => {
     const progress = player.progress.main;
     if (progress === 25 || global.offline.active) { return; }
-    if (player.verses[0].true[1] >= 1 || player.verses[1].total >= 1) { return progressUp(25, 13); }
+    if (global.versesInfo.types > 1 || player.verses[1].total >= 1) { return progressUp(25, 13); }
     if (progress === 24) { return; }
     if (player.inflation.ends[1] >= 1) { return progressUp(24); }
     if (progress === 23) { return; }

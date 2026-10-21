@@ -1,8 +1,8 @@
 import { player, global, updatePlayer, prepareVacuum, fillMissingValues, vacuumStart } from './Player';
 import { getUpgradeDescription, switchTab, numbersUpdate, visualUpdate, format, getChallengeDescription, stageUpdate, updateCollapsePoints, getChallengeRewards } from './Update';
-import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyStrangenessMax, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageFullReset, stageResetUser, switchStage, timeUpdate, toggleChallengeType, vaporizationResetUser } from './Stage';
+import { assignBuildingsProduction, buyBuilding, buyStrangeness, buyUpgrades, buyVerse, calculateTreeCost, collapseResetUser, dischargeResetUser, endResetUser, enterExitChallengeUser, inflationRefund, mergeResetUser, nucleationResetUser, rankResetUser, setActiveStage, stageFullReset, stageResetUser, switchStage, timeUpdate, toggleChallengeTypeUser, vaporizationResetUser } from './Stage';
 import { Alert, Prompt, setTheme, changeFontSize, changeFormat, specialHTML, replayEvent, Confirm, preventImageUnload, Notify, MDStrangenessPage, globalSave, toggleSpecial, saveGlobalSettings, openHotkeys, openVersionInfo, errorNotify, enableApril, enableLightness, openGlobalStats, createGlobalStatsWindow } from './Special';
-import { assignHotkeys, buyAll, createAll, detectHotkey, detectShift, handleTouchHotkeys, hotkeys, offlineWarp, strangenessAll, toggleAll, toggleShift } from './Hotkeys';
+import { assignHotkeys, buyAll, buyStrangenessMax, createAll, detectHotkey, detectShift, handleTouchHotkeys, hotkeys, offlineWarp, strangenessAll, toggleAll, toggleShift } from './Hotkeys';
 import { checkUpgrade, stageResetType } from './Check';
 import type { hotkeysList } from './Types';
 import Overlimit from './Limit';
@@ -308,7 +308,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
     if (dateIndex >= 0) {
         const endIndex = name.indexOf(']', dateIndex + 5);
         if (endIndex >= 0) {
-            let replaced = name.substring(dateIndex + 5, endIndex);
+            let replaced = name.slice(dateIndex + 5, endIndex);
             const special = [
                 'Y',
                 'M',
@@ -322,14 +322,14 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
             for (let i = 0; i < special.length; i++) {
                 replaced = replaced.replace(special[i], replaceWith[i]);
             }
-            name = name.replace(name.substring(dateIndex, endIndex + 1), replaced);
+            name = name.replace(name.slice(dateIndex, endIndex + 1), replaced);
         }
     }
     const timeIndex = name.indexOf('[time');
     if (timeIndex >= 0) {
         const endIndex = name.indexOf(']', timeIndex + 5);
         if (endIndex >= 0) {
-            let replaced = name.substring(timeIndex + 5, endIndex);
+            let replaced = name.slice(timeIndex + 5, endIndex);
             const special = [
                 'H',
                 'M',
@@ -343,7 +343,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
             for (let i = 0; i < special.length; i++) {
                 replaced = replaced.replace(special[i], replaceWith[i]);
             }
-            name = name.replace(name.substring(timeIndex, endIndex + 1), replaced);
+            name = name.replace(name.slice(timeIndex, endIndex + 1), replaced);
         }
     }
 
@@ -365,7 +365,7 @@ const replaceSaveFileSpecials = (name = player.fileName): string => {
         format(player.cosmon[1].total, { type: 'input', padding: true }),
         `${player.inflation.vacuum}`,
         `${format(player.buildings[5][3].current, { type: 'input', padding: 'exponent' })} [${format(player.buildings[5][3].true, { type: 'input', padding: 'exponent' })}]`,
-        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${format(global.versesInfo.true[0] + global.versesInfo.true[1], { type: 'input', padding: 'exponent' })}]`
+        `${format(player.verses[0].current, { type: 'input', padding: 'exponent' })} [${format(global.versesInfo.true, { type: 'input', padding: 'exponent' })}]`
     ];
     for (let i = 0; i < special.length; i++) {
         name = name.replace(special[i], replaceWith[i]);
@@ -476,6 +476,7 @@ const hoverUpgrades = (index: number, type: 'upgrades' | 'researches' | 'researc
         global.lastUpgrade[player.stage.active] = [index, type];
     }
     getUpgradeDescription(type);
+    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = getId(`${type === 'elements' ? type : 'upgrades'}Text`).innerText.replace('Type: ', '').replaceAll('\n\n', ' '); }
 };
 const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness' | 'milestones' | 'inflation') => {
     if (type === 'inflation') {
@@ -484,6 +485,7 @@ const hoverStrangeness = (index: number, stageIndex: number, type: 'strangeness'
         global.lastStrangeness = [index, stageIndex];
     } else { global.lastMilestone = [index, stageIndex]; }
     getUpgradeDescription(type);
+    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = getId(`${type}Text`).innerText.replace('Type: ', '').replaceAll('\n\n', ' '); }
 };
 const hoverChallenge = (index: number) => {
     global.lastChallenge[0] = index;
@@ -1228,7 +1230,7 @@ try { //Start everything
     }
     getId('challengeName').addEventListener('click', () => {
         if (global.lastChallenge[0] === 0) {
-            toggleChallengeType(true);
+            toggleChallengeTypeUser();
         } else if (global.lastChallenge[0] === 1) {
             if (player.challenges.active === 1) { return Notify(`Can't be toggled while inside ${global.challengesInfo[1].name}`); }
             global.april.quantum = !global.april.quantum;
@@ -1245,11 +1247,10 @@ try { //Start everything
             global.april.ultravoid = false;
             global.challengesInfo[0].name = 'Ultravoid';
             global.challengesInfo[0].time = 30;
-            numbersUpdate();
             visualUpdate();
             return;
         }
-        toggleChallengeType(true);
+        toggleChallengeTypeUser();
     });
     getId('voidRewardsHead').addEventListener('click', () => {
         global.sessionToggles[0] = !global.sessionToggles[0];
@@ -1455,10 +1456,7 @@ try { //Start everything
     {
         const button = getId('element0') as HTMLInputElement;
         button.alt = global.elementsInfo.name[0];
-        const dblclickFunc = () => {
-            global.lastElement = 0;
-            getUpgradeDescription('elements');
-        };
+        const dblclickFunc = () => hoverUpgrades(0, 'elements');
         if (SR) {
             getId('element1').addEventListener('keydown', (event) => {
                 if (event.code !== 'Tab' || detectShift(event) !== true) { return; }
@@ -1998,7 +1996,7 @@ try { //Start everything
             Notify(`Developer mode is ${((globalSave.developerMode = !globalSave.developerMode)) ? 'now' : 'no longer'} active`);
             saveGlobalSettings();
         } else if (lower.includes('dev_edit') && globalSave.developerMode) {
-            value = lower[8] === '_' ? value.substring(9) :
+            value = lower[8] === '_' ? value.slice(9) :
                 await Prompt("Format for save file edit [property 'value' reloadSave?], example to create first Microworld Upgrade [upgrades.1.0 1]\nProperties are always separated by dots, final one must be primitive\nValue has to be of correct primitive type, there is no safety\nAny value for save reload that isn't 'false' interpreted as 'true'\nEverything is case sensitive, no brackets");
             if (value === null || value === '') { return; }
             const check = value.split(' ');
@@ -2023,7 +2021,7 @@ try { //Start everything
         } else if (lower === 'dev_console') {
             console.log(deepClone(player), deepClone(globalSave), deepClone(global));
         } else if (lower.includes('dev_reset')) {
-            value = lower[9] === '_' ? value.substring(10) :
+            value = lower[9] === '_' ? value.slice(10) :
                 await Prompt("Which reset tier to simulate, no rewards:\n'Stage', 'Vacuum' (resets Universe age), 'Universe' (removes true Vacuum Inflaton), 'Multiverse'");
             if (value === null) { return; }
             if (player.challenges.active !== null) { return Notify('Must be done outside of Challenges'); }
@@ -2035,7 +2033,7 @@ try { //Start everything
                 player.time.export[1] = 0;
                 player.time.export[2] = 0;
                 if (value === 'multiverse') {
-                    player.verses[0].current -= global.versesInfo.true[0] + global.versesInfo.true[1];
+                    player.verses[0].current -= global.versesInfo.true;
                     player.inflation.vacuum = false;
                     prepareVacuum(false);
                     resetVacuum(2);
@@ -2052,18 +2050,19 @@ try { //Start everything
                 }
             } else { return void Alert(`Input '${value}' doesn't match anything`); }
         } else if (lower.includes('dev_refund')) {
-            value = lower[10] === '_' ? value.substring(11) :
-                await Prompt("Which reset tier Upgrades to refund:\n(Free Upgrades are not re_rewarded, doesn't adjust any extra values, forces save file reload)\n'Strangeness', 'Inflations'");
+            value = lower[10] === '_' ? value.slice(11) :
+                await Prompt("Which reset tier Upgrades to refund:\n(Free Upgrades are not re_rewarded, doesn't adjust any extra values, forces save file reload)\n'Strange quarks', 'Cosmons'");
             if (value === null) { return; }
             value = value.trim().toLowerCase();
-            if (value === 'strangeness') {
-                player.strangeness = deepClone(playerStart.strangeness);
+            if (value === 'strange quarks' || value === 'quarks') {
+                for (let i = 1; i < (player.inflation.vacuum ? 6 : 5); i++) {
+                    player.strangeness[i] = cloneArray(playerStart.strangeness[i]);
+                }
+                if (!player.inflation.vacuum) { player.strangeness[6][3] = 0; }
                 player.strange[0].current = player.strange[0].total;
-            } else if (value === 'inflations') {
-                player.tree = deepClone(playerStart.tree);
-                player.cosmon[0].current = player.cosmon[0].total;
+            } else if (value === 'cosmons') {
+                player.tree[1] = cloneArray(playerStart.tree[1]);
                 player.cosmon[1].current = player.cosmon[1].total;
-                player.cosmon[2].current = player.cosmon[2].total;
             } else { return void Alert(`Input '${value}' doesn't match anything`); }
             updatePlayer(player, false);
         } else if (value === 'dev_export') {
@@ -2088,7 +2087,7 @@ try { //Start everything
             if (value.length < 40) { return void Alert(`Input '${value}' doesn't match anything`); }
             if (lower.includes('global_')) {
                 if (!await Confirm("Press 'Confirm' to load input as a new global settings, this will reload the page\n(Input is too long to be displayed)")) { return; }
-                localStorage.setItem(specialHTML.localStorage.settings, value.substring(7));
+                localStorage.setItem(specialHTML.localStorage.settings, value.slice(7));
                 window.location.reload();
                 void Alert('Awaiting game reload');
             } else {
