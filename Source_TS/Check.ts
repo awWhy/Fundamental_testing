@@ -169,7 +169,6 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
         }
         case 'ASR':
             if (stageIndex === 1) { return player.upgrades[1][5] >= 1; }
-            if (stageIndex === 3) { return player.accretion.rank !== 0; }
             return true;
         case 'elements':
             if (upgrade >= 29) {
@@ -239,7 +238,8 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
             if (stageIndex === 0) {
                 if (player.progress.main < 19) { return false; }
                 if (upgrade === 5) { return player.challenges.supervoid[3] >= 4; }
-                if (upgrade === 6) { return player.challenges.supervoid[2] >= 2; }
+                if (upgrade === 6) { return player.challenges.supervoid[4] >= 3; }
+                if (upgrade === 7) { return player.challenges.supervoid[2] >= 2; }
                 return upgrade >= 0 || upgrade <= 4;
             } else if (stageIndex === 1) {
                 if (upgrade === 2) { return player.challenges.supervoid[4] >= 2; }
@@ -303,7 +303,7 @@ export const milestoneCheck = (index: number, stageIndex: number): boolean => {
             global.challengesInfo[0].time < player.time[player.toggles.supervoid ? 'vacuum' : 'stage']) { return false; }
     } else if (pointer.scaling[index].length <= player.milestones[stageIndex][index] ||
         player.progress.main < 11 || (stageIndex === 5 && player.milestones[4][index] < 8) ||
-        (player.tree[0][4] < 1 && pointer.reward[index] < player.time.stage)
+        ((index === 2 || stageIndex === 6) ? player.strangeness[6][4] < 1 || player.tree[0][4] < 1 : player.tree[0][4] < 1 && pointer.reward[index] < player.time.stage)
     ) { return false; }
     return pointer.need[index].lessOrEqual(pointer.progress[index]());
 };
@@ -315,5 +315,5 @@ export const checkTheme = (theme: any): boolean => {
     if (theme === 5) { return player.progress.main >= 10; }
     if (theme === 6) { return player.progress.main >= 18; }
     if (theme === 'Quantum') { return player.progress.quantum === -1; }
-    return theme === null || theme === 1;
+    return theme === null || theme === 1 || theme === 'Light';
 };

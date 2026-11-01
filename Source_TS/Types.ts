@@ -107,9 +107,11 @@ export interface playerType {
         default: number[]
         vacuum: boolean
         resets: number
+        /** Universe total time */
         age: number
         /** [Big Crunches, Big Rips, Big Freezes] */
         ends: [number, number, number]
+        /** Vacuum total */
         time: number
         /** [Cosmons peak, peaked at] */
         peak: [number, number]
@@ -134,9 +136,9 @@ export interface playerType {
     verses: [Omit<verse, 'true'> & {
         /** [True, false, void, supervoid] */
         true: [number, number, number, number]
-        /** After Big Crunch */
+        /** After any End reset */
         highest: number
-        /** After Big Rip [Darkness tier] */
+        /** Lowest Darkness completion on Big Rip/Abyss stage reset, tier[] */
         lowest: number[]
     }, ...verse[]]
     strange: Array<{
@@ -244,7 +246,7 @@ export interface globalType {
         visited: {
             upgrade: boolean
         }
-        /** (Phones only) What page for Strangeness is selected */
+        /** (Phones only) What page for Strangeness is selected, null means all selected */
         MDStrangePage: number | null
     }
     trueActive: number
@@ -261,9 +263,12 @@ export interface globalType {
     }
     april: {
         active: boolean
-        light: boolean
+        lightness: boolean
+        /** Current status, null means not active, false toggled into and true currently inside */
         ultravoid: boolean | null
-        quantum: boolean
+        /** Toggle status, null means that it wasn't toggled or hinted */
+        quantum: boolean | null
+        dark: 'Dark' | 'Light'
     }
     paused: boolean
     hotkeys: {
@@ -280,7 +285,7 @@ export interface globalType {
     lastInflation: [number | null, number]
     lastMilestone: [number | null, number]
     lastChallenge: [number, number]
-    /** Void reward type[0], Strangeness shown[1], False Merge type[2] */
+    /** Void reward type[0], Strangeness shown[1], Stable Merge type[2] */
     sessionToggles: boolean[]
     /** Sorted cheapest first, -1 inserted to the start if auto is done */
     automatization: {
@@ -465,9 +470,10 @@ export interface globalType {
         need: Overlimit[]
         /** In the false Vacuum used as time */
         reward: number[]
-        /** False Vacuum only */
+        /** False Vacuum only, requirements for every tier. For newer Milestones its [startRequirement, scaling] */
         scaling: number[][]
         recent: number[]
+        maxActive: number
     }>
     challengesInfo: [challengeBase & {
         needText: Array<Array<() => string | null>>
@@ -535,6 +541,60 @@ interface vacuumTemplate {
     rest: [Overlimit, ...number[]]
 }
 
+export interface specialHTMLType {
+    /** [textContent] */
+    resetHTML: string[]
+    lastBuilding: number
+    /** [src] */
+    buildingHTML: string[][]
+    lastUpgrade: number
+    /** [src] */
+    upgradeHTML: string[][]
+    lastResearch: number
+    /** [src, className] */
+    researchHTML: Array<Array<[string, string]>>
+    lastResearchExtra: number
+    /** [src, className, hoverText] */
+    researchExtraDivHTML: Array<[string, string, string]>
+    /** [src, className] */
+    researchExtraHTML: Array<Array<[string, string]>>
+    lastFooterStat: number
+    /** [src, className, textcontent] */
+    footerStatsHTML: Array<Array<[string, string, string]>>
+    globalResources: Record<trackedResources, {
+        info: [string, string, string]
+        unlock: () => boolean
+        resource: () => string
+    }>
+    mobileDevice: {
+        /** [X, Y] */
+        start: [number, number]
+    }
+    localStorage: {
+        /** Index for game's primary save slot */
+        main: string
+        /** Index for global game settings */
+        settings: string
+    }
+    cache: {
+        imagesDiv: HTMLDivElement
+        /** Lazy way to optimize HTML, without it can't properly detect changes */
+        innerHTML: Map<string | HTMLElement, any>
+        idMap: Map<string, HTMLElement>
+        classMap: Map<string, HTMLCollectionOf<HTMLElement>>
+        queryMap: Map<string, HTMLElement>
+    }
+    errorCooldowns: Set<string>
+    /** [text, true ? incrementFunc : closeFunc] */
+    notifications: Map<string, (close?: boolean) => void>
+    /** [priority, closeFunc] */
+    alert: [number | null, (() => void) | null]
+    /** Function to update current hover text */
+    hoverText: null | (() => void)
+    bigWindow: 'version' | 'hotkeys' | 'globalStats' | null
+    styleSheet: HTMLStyleElement
+}
+
 export interface globalSaveType {
     intervals: {
         numbers: number
@@ -597,6 +657,8 @@ export type hotkeysList = 'makeAll' | 'galaxy' | 'universe' | 'multiverse' | 'cr
     'tabRight' | 'tabLeft' | 'subtabUp' | 'subtabDown' | 'stageRight' | 'stageLeft';
 
 export type numbersList = 'makeStructure' | 'toggleStructure' | 'enterChallenge';
+
+type trackedResources = 'molecules' | 'energy' | 'drops' | 'clouds' | 'accretion_mass' | 'stardust' | 'solar_mass' | 'merge_score' | 'dark_matter' | 'dark_energy' | 'strange_quarks' | 'tachyons' | 'time_left';
 
 export interface calculateEffectsType {
     effectiveEnergy: () => number
@@ -674,13 +736,15 @@ export interface calculateEffectsType {
     S2Strange9: (unlocked?: boolean) => number
     /** All self-made Universes */
     trueVersesAll: () => number
-    /** Self-made Universes for current Challenge */
+    /** Self-made Universes for the current Challenge */
     trueVerses: () => number
     /** Self-made Universes */
     versesTypes: () => number
     T0Inflation0: () => number
     TOInflation1_softcap: () => number
     T0Inflation1: () => number
+    /** Stranger gain is tree[0][6] */
+    T0Inflation2: (strangerGain?: number) => number
     T0Inflation3_base: () => number
     T0Inflation3: () => number
     strangeGain: (interstellar: boolean, quarks?: boolean) => number

@@ -550,7 +550,7 @@ const loadoutsRecreate = () => {
 const loadoutsSave = (saveDefault = false) => {
     if (saveDefault) {
         player.inflation.default = cloneArray(global.loadoutsInfo.input);
-        return Notify('Set selected loadout as default');
+        return Notify('Setting selected loadout as default');
     }
     const name = (getId('loadoutsName') as HTMLInputElement).value;
     if (name.length === 0) { return; }
@@ -1191,7 +1191,7 @@ try { //Start everything
             const window = getQuery('#buyAnyMain > label');
             showAndFix(window);
             const change = () => {
-                let value = input.value === '' ? playerStart.toggles.shop.input : Math.max(Math.trunc(Number(input.value)), 0);
+                let value = input.value === '' ? playerStart.toggles.shop.input : Math.trunc(Number(input.value));
                 if (!isFinite(value)) { value = playerStart.toggles.shop.input; }
                 player.toggles.shop.input = value;
                 input.value = format(value, { type: 'input' });
@@ -2080,9 +2080,6 @@ try { //Start everything
                 enableApril();
                 Notify('April mode is now disabled');
             } else { Notify('April mode is already disabled'); }
-        } else if (lower === (global.april.light ? 'dark' : 'light')) {
-            enableLightness();
-            Notify(`${global.april.light ? 'Lightness' : 'Darkness'} has returned`);
         } else {
             if (value.length < 40) { return void Alert(`Input '${value}' doesn't match anything`); }
             if (lower.includes('global_')) {
@@ -2099,7 +2096,12 @@ try { //Start everything
     getId('switchTheme0').addEventListener('click', () => setTheme(null));
     getId('switchThemeQuantum').addEventListener('click', () => {
         setTheme('Quantum');
-        if (globalSave.theme !== 'Quantum') { Notify('Secret theme, hint to unlock:\n"Enter through alternative means and look for it"'); }
+        if (global.april.quantum === null) { global.april.quantum = false; }
+        if (globalSave.theme !== 'Quantum') { Notify('Secret theme, hint to unlock:\nYou can access it now'); }
+    });
+    getId('switchThemeLight').addEventListener('click', () => {
+        //setTheme('Light');
+        Notify('Not yet implemented');
     });
     for (let i = 1; i < global.stageInfo.word.length; i++) {
         getId(`switchTheme${i}`).addEventListener('click', () => setTheme(i));

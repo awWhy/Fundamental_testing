@@ -3,7 +3,7 @@ import { assignHotkeys, detectShift, hotkeys } from './Hotkeys';
 import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, pauseGame, playerStart, showHoverTitle } from './Main';
 import { global, player, prepareVacuum, updatePlayer } from './Player';
 import { assignChallengeInformation, assignResetInformation, setActiveStage } from './Stage';
-import type { Quantum, globalSaveType, hotkeysList, numbersList } from './Types';
+import type { Quantum, globalSaveType, hotkeysList, numbersList, specialHTMLType } from './Types';
 import { format, numbersUpdate, stageUpdate, switchTab, visualProgressUnlocks, visualUpdate } from './Update';
 
 export const globalSave: globalSaveType = {
@@ -124,11 +124,9 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
     }
 };
 
-export const specialHTML = { //Images here are from true vacuum for easier cache
-    /** [textContent] */
+export const specialHTML: specialHTMLType = { //Images here are from true vacuum for easier cache
     resetHTML: ['', 'Discharge', 'Vaporization', 'Rank', 'Collapse', 'Merge', 'Nucleation'],
     lastBuilding: 7, //+1, starting value has to be biggest length
-    /** [src] */
     buildingHTML: [
         [],
         ['Preon.png', 'Quarks.png', 'Particle.png', 'Atom.png', 'Molecule.png'],
@@ -139,7 +137,6 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Dark%20planet.png']
     ],
     lastUpgrade: 14, //Starting value has to be biggest length
-    /** [src] */
     upgradeHTML: [
         [], [
             'UpgradeQ1.png',
@@ -199,7 +196,6 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ]
     ],
     lastResearch: 9, //Starting value has to be biggest length
-    /** [src, className] */
     researchHTML: [
         [], [
             ['ResearchQ1.png', 'stage1borderImage'],
@@ -247,9 +243,8 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ]
     ],
     lastResearchExtra: 6, //Starting value has to be biggest length
-    /** [src, className, hoverText] */
     researchExtraDivHTML: [
-        [],
+        [] as unknown as specialHTMLType['researchExtraDivHTML'][0],
         ['Energy%20Researches.png', 'stage4borderImage', 'Energy'],
         ['Cloud%20Researches.png', 'stage2borderImage', 'Clouds'],
         ['Rank%20Researches.png', 'stage6borderImage', 'Rank'],
@@ -257,7 +252,6 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ['Galaxy%20Researches.png', 'stage3borderImage', 'Galaxy'],
         ['Dark%20energy%20Researches.png', 'stage3borderImage', 'Dark energy']
     ],
-    /** [src, className] */
     researchExtraHTML: [
         [], [
             ['ResearchEnergy1.png', 'stage1borderImage'],
@@ -301,7 +295,6 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         ]
     ],
     lastFooterStat: 3, //Starting value has to be biggest length
-    /** [src, className, textcontent] */
     footerStatsHTML: [
         [], [
             ['Energy%20mass.png', 'stage1borderImage cyanText', 'Mass'],
@@ -329,57 +322,62 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
         molecules: {
             info: ['Molecule.png', 'stage1borderImage cyanText', 'Molecules'],
             unlock: () => !player.inflation.vacuum && global.stageInfo.activeAll.includes(1) && player.buildings[1][2].trueTotal.moreOrEqual(2),
-            resource: () => player.buildings[1][3].current
+            resource: () => format(player.buildings[1][3].current, { padding: true })
         },
         energy: {
             info: ['Energy.png', 'stage4borderImage orangeText', 'Energy'],
             unlock: () => global.stageInfo.activeAll.includes(1),
-            resource: () => player.discharge.energy
+            resource: () => format(player.discharge.energy, { padding: 'exponent' })
         },
         drops: {
             info: ['Drop.png', 'stage2borderImage blueText', 'Drops'],
             unlock: () => global.stageInfo.activeAll.includes(2),
-            resource: () => player.buildings[2][1].current
+            resource: () => format(player.buildings[2][1].current, { padding: true })
         },
         clouds: {
             info: ['Clouds.png', 'stage3borderImage grayText', 'Clouds'],
             unlock: () => global.stageInfo.activeAll.includes(2) && player.upgrades[2][2] === 1,
-            resource: () => player.vaporization.clouds
+            resource: () => format(player.vaporization.clouds, { padding: true })
         },
         accretion_mass: {
             info: ['Mass.png', 'stage3borderImage grayText', 'A. Mass'],
             unlock: () => global.stageInfo.activeAll.includes(3),
-            resource: () => player.buildings[3][0].current
+            resource: () => format(player.accretion.rank !== 0 ? player.buildings[3][0].current : global.accretionInfo.rankCost[0], { padding: true })
         },
         stardust: {
             info: ['Elements.png', 'stage4borderImage orangeText', 'Stardust'],
             unlock: () => global.stageInfo.activeAll.includes(4),
-            resource: () => player.buildings[4][0].current
+            resource: () => format(player.buildings[4][0].current, { padding: true })
         },
         solar_mass: {
             info: ['Main_sequence%20mass.png', 'stage1borderImage cyanText', 'S. Mass'],
             unlock: () => global.stageInfo.activeAll.includes(4),
-            resource: () => player.collapse.mass
+            resource: () => format(player.collapse.mass, { padding: true })
+        },
+        merge_score: {
+            info: ['Missing.png', 'stage6borderImage darkvioletText', 'M. Score'],
+            unlock: () => global.stageInfo.activeAll.includes(5) && player.researchesExtra[5][0] >= 1 && (player.inflation.vacuum || (player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && player.challenges.active !== 1)),
+            resource: () => format(global.mergeInfo.score, { padding: 'exponent' })
         },
         dark_matter: {
             info: ['Dark%20matter.png', 'stage3borderImage grayText', 'D. Matter'],
             unlock: () => global.stageInfo.activeAll.includes(6),
-            resource: () => player.buildings[6][0].current
+            resource: () => format(player.buildings[6][0].current, { padding: true })
         },
         dark_energy: {
             info: ['Dark%20energy.png', 'stage3borderImage grayText', 'D. Energy'],
             unlock: () => global.stageInfo.activeAll.includes(6) && player.upgrades[6][0] === 1,
-            resource: () => player.darkness.energy
+            resource: () => format(player.darkness.energy, { padding: 'exponent' })
         },
         strange_quarks: {
             info: ['Strange%20Quarks.png', 'greenBorderImage greenText', 'S. Quarks'],
             unlock: () => true,
-            resource: () => player.strange[0].current
+            resource: () => format(player.strange[0].current, { padding: true })
         },
         tachyons: {
             info: ['Tachyon.png', 'stage6borderImage darkvioletText', 'Tachyons'],
             unlock: () => player.verses[1].current > 0,
-            resource: () => player.cosmon[2].current
+            resource: () => format(player.cosmon[2].current, { padding: true })
         },
         time_left: {
             info: ['Time%20limit.png', 'stage6borderImage darkvioletText', 'T. Left'],
@@ -387,12 +385,9 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
                 if (player.challenges.active !== null) { return true; }
                 if (!player.inflation.vacuum && player.tree[0][4] < 1) {
                     const s = Math.min(player.stage.current, 4);
-                    const info = global.milestonesInfo;
-                    for (let i = 0; i < info[s].need.length; i++) {
-                        if (player.milestones[s][i] >= info[s].scaling[i].length) {
-                            if (s === 4 && player.milestones[5][i] < info[5].scaling[i].length) {
-                                return true;
-                            }
+                    for (let i = 0; i < 2; i++) {
+                        if (player.milestones[s][i] >= global.milestonesInfo[s].scaling[i].length) {
+                            if (s === 4 && player.milestones[5][i] < global.milestonesInfo[5].scaling[i].length) { return true; }
                         } else { return true; }
                     }
                 }
@@ -407,7 +402,7 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
                 } else if (!player.inflation.vacuum && player.tree[0][4] < 1) {
                     const s = Math.min(player.stage.current, 4);
                     const info = global.milestonesInfo;
-                    for (let i = 0; i < info[s].need.length; i++) {
+                    for (let i = 0; i < 2; i++) {
                         if (player.milestones[s][i] >= info[s].scaling[i].length) {
                             if (s === 4 && player.milestones[5][i] < info[5].scaling[i].length) {
                                 list.push(info[5].reward[i] - player.time.stage);
@@ -419,36 +414,29 @@ export const specialHTML = { //Images here are from true vacuum for easier cache
                 for (let i = 1; i < list.length; i++) {
                     relevant = Math[list[i - 1] < 0 || list[i] < 0 ? 'max' : 'min'](list[i - 1], list[i]);
                 }
-                return relevant;
+                return format(relevant, { padding: true });
             }
         }
     },
     mobileDevice: { //All browsers that I tested didn't properly detected more than 1 touch
-        /** [X, Y] */
         start: [0, 0]
     },
     localStorage: {
-        /** Index for game's primary save slot */
-        main: 'testing_save',
-        /** Index for global game settings */
-        settings: 'fundamentalSettings'
+        main: 'fundamentalSave', //'testing_save',
+        settings: 'fundamentalSettings' //'testing_fundamentalSettings'
     },
     cache: {
         imagesDiv: document.createElement('div'), //Saved just in case
-        /** Lazy way to optimize HTML, without it can't properly detect changes */
-        innerHTML: new Map<string | HTMLElement, any>(),
-        idMap: new Map<string, HTMLElement>(),
-        classMap: new Map<string, HTMLCollectionOf<HTMLElement>>(),
-        queryMap: new Map<string, HTMLElement>()
+        innerHTML: new Map(),
+        idMap: new Map(),
+        classMap: new Map(),
+        queryMap: new Map()
     },
-    errorCooldowns: new Set<string>(),
-    /** [text, true ? incrementFunc : closeFunc] */
-    notifications: new Map<string, (close?: boolean) => void>(),
-    /** [priority, closeFunc] */
-    alert: [null, null] as [number | null, (() => void) | null],
-    /** Function to update current hover text */
-    hoverText: null as null | (() => void),
-    bigWindow: null as 'version' | 'hotkeys' | 'globalStats' | null,
+    errorCooldowns: new Set(),
+    notifications: new Map(),
+    alert: [null, null],
+    hoverText: null,
+    bigWindow: null,
     styleSheet: document.createElement('style') //Secondary
 };
 
@@ -1005,39 +993,15 @@ export const changeFormat = (point: boolean) => {
 export const enableApril = (firstLoad = false) => {
     const active = !global.april.active;
     global.april.active = active;
-    const names1U = global.upgradesInfo[1].name;
-    names1U[2] = active ? 'Positrons' : 'Electrons';
-    for (let i = 3; i < 9; i++) {
-        if (i === 5) { continue; }
-        names1U[i] = active ? `Anti${names1U[i][0].toLowerCase()}${names1U[i].slice(1)}` :
-            `${names1U[i][4].toUpperCase()}${names1U[i].slice(5)}`;
-    }
-    specialHTML.upgradeHTML[1][2] = `UpgradeQ3${active ? '_A' : ''}.png`;
-    specialHTML.upgradeHTML[1][3] = `UpgradeQ4${active ? '_A' : ''}.png`;
-    specialHTML.upgradeHTML[1][4] = `UpgradeQ5${active ? '_A' : ''}.png`;
-    for (const ID of getClass('newAntiName')) {
-        const current = ID.textContent as string;
-        ID.textContent = active ? `Anti${current[0].toLowerCase()}${current.slice(1)}` :
-            `${current[4].toUpperCase()}${current.slice(5)}`;
-    }
-    const names4U = global.upgradesInfo[4].name;
-    names4U[1] = `${active ? 'Antiproton-Antiproton' : 'Proton-Proton'} chain`;
-    names4U[2] = `${active ? 'Anticarbon-Antinitrogen-Antioxygen' : 'Carbon-Nitrogen-Oxygen'} cycle`;
-    names4U[3] = `${active ? 'Antihelium' : 'Helium'} fusion`;
-    names4U[5] = `${active ? 'Antiproton' : 'Proton'} capture`;
-    global.researchesInfo[1].name[0] = `Stronger ${names1U[6]}`;
-    global.researchesInfo[1].name[1] = `Better ${names1U[7]}`;
-    global.researchesInfo[1].name[2] = `Improved ${names1U[8]}`;
-    const namesE = global.elementsInfo.name;
-    for (let i = 0; i < namesE.length; i++) {
-        const index = namesE[i].indexOf(' ') + 1;
-        namesE[i] = active ? `${namesE[i].slice(0, index)}Anti${namesE[i][index].toLowerCase()}${namesE[i].slice(index + 1)}` :
-            `${namesE[i].slice(0, index)}${namesE[i][index + 4].toUpperCase()}${namesE[i].slice(index + 5)}`;
-        (getId(`element${i}`) as HTMLInputElement).alt = namesE[i];
-    }
-    global.strangenessInfo[4].name[8] = active ? 'Antineutronium' : 'Neutronium';
-    global.challengesInfo[0].rewardText[0][4][2] = `'${global.strangenessInfo[4].name[8]}' (Interstellar)`;
-    (getQuery('#strange9Stage4 > input') as HTMLInputElement).alt = global.strangenessInfo[4].name[8];
+    const folder = active ? 'April/' : '';
+    global.upgradesInfo[1].name[2] = `${active ? 'Posi' : 'Elec'}trons`;
+    global.upgradesInfo[1].name[3] = `${active ? 'Nega' : 'Pro'}tons`;
+    specialHTML.upgradeHTML[1][2] = `${folder}UpgradeQ3.png`;
+    specialHTML.upgradeHTML[1][3] = `${folder}UpgradeQ4.png`;
+    specialHTML.upgradeHTML[1][4] = `${folder}UpgradeQ5.png`;
+    global.upgradesInfo[4].name[1] = `${active ? 'Negaton-Negaton' : 'Proton-Proton'} chain`;
+    global.upgradesInfo[4].name[5] = `${active ? 'Nega' : 'Pro'}ton capture`;
+    for (let i = 0; i < global.elementsInfo.name.length; i++) { (getId(`element${i}`) as HTMLInputElement).src = `Used_art/${folder}Element${i}.png`; }
 
     if (firstLoad) { return; }
     if (!active) {
@@ -1045,8 +1009,8 @@ export const enableApril = (firstLoad = false) => {
             global.april.ultravoid = null;
             assignChallengeInformation(0);
         }
-        if (global.april.quantum) {
-            global.april.quantum = false;
+        if (global.april.quantum !== null) {
+            global.april.quantum = null;
             global.challengesInfo[1].name = 'Vacuum stability';
         }
     }
@@ -1055,11 +1019,15 @@ export const enableApril = (firstLoad = false) => {
     preventImageUnload();
 };
 export const enableLightness = () => {
-    const active = !global.april.light;
-    global.april.light = active;
+    const active = !global.april.lightness;
+    global.april.lightness = active;
+    const Dark = global.april.dark;
     const Light = active ? 'Light' : 'Dark';
-    const Dark = active ? 'Dark' : 'Light';
-    for (const ID of getClass('newLightName')) { ID.textContent = Light; }
+    global.april.dark = Light;
+    const darknessInfo = global.challengesInfo[2];
+    darknessInfo.name = `${Light}ness`;
+    for (const ID of getClass('aprilLight')) { ID.textContent = Light; }
+    for (const ID of getClass('aprilLightness')) { ID.textContent = darknessInfo.name; }
     const nameS6 = global.buildingsInfo.name[6];
     for (let i = 0; i < nameS6.length; i++) { nameS6[i] = nameS6[i].replace(Dark, Light); }
     for (const type of ['upgradesInfo', 'researchesInfo', 'researchesExtraInfo'] as const) {
@@ -1071,31 +1039,30 @@ export const enableLightness = () => {
     global.buildingsInfo.hoverText[6][0] = `${nameS6[0]} softcap`;
     global.stageInfo.costName[6] = nameS6[0];
 
-    const extra = active ? 'Lightness/' : '';
+    const folder = active ? 'April/' : '';
     specialHTML.researchExtraDivHTML[6][2] = `${Light} energy`;
     getQuery('#verse0 > div > p:last-of-type').dataset.title = nameS6[0];
     getId('energyGainStage6').ariaLabel = `${Light} energy gain`;
-    const darknessInfo = global.challengesInfo[2];
-    darknessInfo.name = active ? 'Lightness' : 'Darkness';
     for (let i = 0; i < darknessInfo.rewardText.length; i++) {
         darknessInfo.rewardText[i] = darknessInfo.rewardText[i].replace(Dark, Light);
     }
-    const challengeHTML = getId('challenge3') as HTMLInputElement;
-    challengeHTML.src = `Used_art/${extra}Darkness.png`;
-    challengeHTML.alt = darknessInfo.name;
+    (getId('challenge3') as HTMLInputElement).alt = darknessInfo.name;
+    getQuery('#darknessTier > span').textContent = darknessInfo.name;
     global.strangenessInfo[6].name[3] = darknessInfo.name;
     (getId('strange4Stage6') as HTMLInputElement).alt = darknessInfo.name;
-    specialHTML.buildingHTML[6][0] = `${extra}Dark%20planet.png`;
-    specialHTML.footerStatsHTML[6][0][0] = `${extra}Dark%20matter.png`;
-    specialHTML.upgradeHTML[6][0] = `${extra}UpgradeD1.png`;
-    specialHTML.researchHTML[6][0][0] = `${extra}ResearchD1.png`;
-    specialHTML.researchHTML[6][2][0] = `${extra}ResearchD3.png`;
-    specialHTML.researchExtraHTML[6][0][0] = `${extra}ResearchDark1.png`;
-    specialHTML.researchExtraHTML[6][3][0] = `${extra}ResearchDark4.png`;
+    specialHTML.buildingHTML[6][0] = `${folder}Dark%20planet.png`;
+    specialHTML.footerStatsHTML[6][0][0] = `${folder}Dark%20matter.png`;
+    specialHTML.upgradeHTML[6][0] = `${folder}UpgradeD1.png`;
+    specialHTML.researchHTML[6][0][0] = `${folder}ResearchD1.png`;
+    specialHTML.researchHTML[6][2][0] = `${folder}ResearchD3.png`;
+    specialHTML.researchExtraHTML[6][0][0] = `${folder}ResearchDark1.png`;
+    specialHTML.researchExtraHTML[6][3][0] = `${folder}ResearchDark4.png`;
     specialHTML.globalResources.dark_matter.info[0] = specialHTML.footerStatsHTML[6][0][0];
     specialHTML.globalResources.dark_matter.info[2] = `${active ? 'L' : 'D'}. Matter`;
     specialHTML.globalResources.dark_energy.info[2] = `${active ? 'L' : 'D'}. Energy`;
-    (getQuery('#nucleationToggleReset img') as HTMLImageElement).src = `Used_art/${extra}Nucleation%20toggle.png`;
+    global.milestonesInfo[6].name[0] = `${Light}est flow`;
+    getQuery('#milestonesStage6Main span').textContent = global.milestonesInfo[6].name[0];
+    (getQuery('#nucleationToggleReset img') as HTMLImageElement).src = `Used_art/${folder}Nucleation%20toggle.png`;
 
     stageUpdate();
     global.offline.cacheUpdate = false;
@@ -1113,6 +1080,7 @@ export const enterUltravoid = () => {
     const time = Date.now();
     player.time.started = time;
     player.time.updated = time;
+    for (const notification of specialHTML.notifications.values()) { notification(true); }
     setTimeout(() => {
         if (specialHTML.alert[0] !== null) { (specialHTML.alert[1] as () => undefined)(); }
         global.april.ultravoid = false;
@@ -1648,18 +1616,12 @@ export const MDStrangenessPage = (stageIndex: number | null) => {
 };
 
 export const checkProgress = () => {
-    progressMain();
-
     const index = player.inflation.vacuum ? 0 : 1;
     for (let i = player.progress.element[index] + 1; i < global.elementsInfo.cost.length; i++) {
         if (player.elements[i] === 0) { break; }
         player.progress.element[index] = i;
     }
-    for (let i = 1; i < 6; i++) { //Just in case something goes wrong with permanent rewards
-        if (player.progress.void[i] < player.challenges.void[i]) { player.progress.void[i] = player.challenges.void[i]; }
-    }
-};
-const progressMain = () => {
+
     const progress = player.progress.main;
     if (progress === 25 || global.offline.active) { return; }
     if (global.versesInfo.types > 1 || player.verses[1].total >= 1) { return progressUp(25, 13); }
@@ -1790,7 +1752,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 4) {
         text = 'That last explosion not only created the first Neutron stars, but also unlocked new Elements through Supernova nucleosynthesis.';
     } else if (event === 5) {
-        text = `There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '${global.elementsInfo.name[26]}' will improve Stage reset reward based on total produced Stardust.\n(Intergalactic Stars are combined Interstellar Stars. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)`;
+        text = "There are no Structures in Intergalactic yet, but knowledge for their creation can be found within the previous Stages. Stage resets and exports will now award Strange quarks, and '[26] Iron' will improve Stage reset reward based on total produced Stardust.\n(Intergalactic Stars are combined Interstellar Stars. Export rewards are based on highest reset value, that stored value will decrease by claimed amount)";
     } else if (event === 6) {
         text = 'As Galaxies began to Merge, their combined Gravity pushed Vacuum out of its local minimum into a more stable global minimum. New forces and Structures are expected within this new and true Vacuum state.';
     } else if (event === 7) {
@@ -1804,7 +1766,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 11) {
         text = "After so many Universe resets, false Vacuum had became at the same time more and less stable, this had unlocked a new Challenge ‒ 'Vacuum stability'.\n(Also improved 'Strange gain' Inflation)";
     } else if (event === 12) {
-        text = `${format(1000)} ${global.april.light ? 'Light' : 'Dark'} energy allows to do a more advanced End reset ‒ 'Big Rip', this one increases rewards base by +1 per bonus Universe.\n(Doing it for the first time will also unlock new Inflation that helps with creation of new types of self-made Universes)`;
+        text = `${format(1000)} ${global.april.dark} energy allows to do a more advanced End reset ‒ 'Big Rip', this one increases rewards base by +1 per bonus Universe.\n(Doing it for the first time will also unlock new Inflation that helps with creation of new types of self-made Universes)`;
     } else if (event === 13) {
         text = "Unlocked a new Verse ‒ 'Multiverse' and also another row of Inflations ‒ Tachyon. Creating Multiverse forces Big Crunch, but keeps bonus Universes.\n(Multiverses are not immune to End resets)";
     }
@@ -1867,20 +1829,17 @@ export const openVersionInfo = () => {
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
-        <h6>v0.2.9</h6><p>- Minor balancing and new content for Abyss\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
-        <h6>v0.2.8</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewards is now 12 hours\n- Removed log</p>
+        <h6>v0.3.0</h6><p>-New content (Multiverse)\n- Rebalances in later parts of game\n- Improved global resources tracker\n- Added default loadout\n<a href="https://docs.google.com/document/d/1gCskWPNxLX08npSHQW8u86VvXNhXzNchCdJ9Pec8Rvk/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.8 | v0.2.9</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewards is now 12 hours\n\n- Minor balancing and new content for Abyss\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
-        <h6>v0.2.6</h6><p>- New content (End)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos</p>
-        <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones</p>
-        <h6>v0.2.4</h6><p>- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Added the log\n- Minor Strangeness rebalance</p>
-        <h6>v0.2.3</h6><p>- Supervoid rework\n- Abyss small rebalance</p>
-        <h6>v0.2.2</h6><p>- New content (Supervoid)\n- Entering Void now saves the game to load it after exiting</p>
-        <h6>v0.2.1</h6><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n- Many small changes and additions</p>
-        <h6>v0.2.0</h6><p>- Reworked balance for all Stages past first reset cycle\n- Many quality of life additions\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support</p>
-        <h6>v0.1.9</h6><p>- More true Vacuum balance\n- Reworked time related formats\n- Offline time reworked</p>
-        <h6>v0.1.8</h6><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Copy to the clipboard, load from string save file options</p>
-        <h6>v0.1.7</h6><p>- New content (Void)\n- Further balance changes</p>
-        <h6>v0.1.6</h6><p>- Massive rebalance and reworks for all Stages</p>
+        <h6>v0.2.6</h6><p>- New content (End)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.5</h6><p>- Abyss rework\n- New (second) Challenge\n- Global footer stats\n- Small visual improvements\n- Improved swiping hotkeys for Phones\n<a href="https://docs.google.com/document/d/1O8Zz1f7Ez2HsfTVAxG_V2t9-yC77-mJuEru15HeDy0U/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.3 | v0.2.4</h6><p>- Supervoid rework\n- Abyss small rebalance\n\n- Offline ticks are now as effective as Online\n- Inflation loadouts\n\n- Minor Strangeness rebalance\n<a href="https://docs.google.com/document/d/1oFlo82k9H11nQ9R7YvcTSZaz9c-Nj-N5b38gNmIvDO0/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.2</h6><p>- New content (Supervoid)\n- Challenges now reload save file on exit\n<a href="https://docs.google.com/document/d/1x8zHjxB6mPQGwpZT3DV_bAyatFIB3SOlxp9TvzbrUds/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.1</h6><p>- New content (Abyss)\n- Full game rebalance\n- Custom hotkeys\n- Updated supports\n<a href="https://docs.google.com/document/d/1o6rk6mG-fCG7Xi1BpA4w4g_5_h9A87wrCv7bODweBWA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.2.0</h6><p>- Reworked balance for all Stages past first reset cycle\n- Most of settings are now saved separate from save file\n- Some more work on Mobile device support\n<a href="https://docs.google.com/document/d/1Kwy-NhKUx3cnfv04I5wwbr-WKyg3yZAZ4t-GA2AAm0k/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.1.8 | v0.1.9</h6><p>- True Vacuum small balance changes\n- Upgrades and Researches merged\n- Copy to the clipboard, load from string save file options\n\n- More true Vacuum balance\n- Reworked time related formats\n- Offline time reworked\n<a href="https://docs.google.com/document/d/1_xylzRuG3Dzrbe5ojYWH8uNwhOimqtFoiDPUsAz6drM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.1.6 | v0.1.7</h6><p>- Massive rebalance and reworks for all Stages\n\n- New content (Void)\n- Further balance changes\n<a href="https://docs.google.com/document/d/1f0M6vn0xhnf62MOnAcJaZLNr39IS0tsaGE4p0aI16ho/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.1.5</h6><p>- True Vacuum minor balance\n- Images no longer unload\n- Screen reader support reworked</p>
         <h6>v0.1.4</h6><p>- Custom scrolls\n- Notifications</p>
         <h6>v0.1.3</h6><p>- True Vacuum balance changes\n- Submerged Stage minor balance\n- Replay event button\n\n- History for Stage resets</p>
@@ -2162,6 +2121,7 @@ export const openGlobalStats = () => {
         <section id="globalStatsAbyssSection" class="darkvioletText">
             <h4 class="bigWord">Abyss:</h4>
             <div>
+                <button type="button" id="merge_score" class="selectBtn">Merge score</button>
                 <button type="button" id="dark_matter" class="selectBtn grayText">Matter</button>
                 <button type="button" id="dark_energy" class="selectBtn grayText">Energy</button>
             </div>
