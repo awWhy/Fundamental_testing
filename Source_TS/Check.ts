@@ -240,7 +240,7 @@ export const checkUpgrade = (upgrade: number, stageIndex: number, type: 'upgrade
                 if (upgrade === 5) { return player.challenges.supervoid[3] >= 4; }
                 if (upgrade === 6) { return player.challenges.supervoid[4] >= 3; }
                 if (upgrade === 7) { return player.challenges.supervoid[2] >= 2; }
-                return upgrade >= 0 || upgrade <= 4;
+                return upgrade >= 0 && upgrade <= 4;
             } else if (stageIndex === 1) {
                 if (upgrade === 2) { return player.challenges.supervoid[4] >= 2; }
                 if (upgrade === 3) { return player.challenges.supervoid[3] >= 3; }

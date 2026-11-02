@@ -1768,7 +1768,7 @@ const playEvent = (event: number, replay = true) => {
     } else if (event === 12) {
         text = `${format(1000)} ${global.april.dark} energy allows to do a more advanced End reset ‒ 'Big Rip', this one increases rewards base by +1 per bonus Universe.\n(Doing it for the first time will also unlock new Inflation that helps with creation of new types of self-made Universes)`;
     } else if (event === 13) {
-        text = "Unlocked a new Verse ‒ 'Multiverse' and also another row of Inflations ‒ Tachyon. Creating Multiverse forces Big Crunch, but keeps bonus Universes.\n(Multiverses are not immune to End resets)";
+        text = "Unlocked a new Verse ‒ 'Multiverse' and also another row of Inflations ‒ Tachyon. Creating Multiverse forces Big Crunch, but keeps bonus Universes.\n(Multiverses are not immune to End resets and do not produce anything inside Challenges)";
     }
     if (!replay) {
         text += "\n\n(Can be viewed again with 'Events' button in Settings tab)";

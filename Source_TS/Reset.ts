@@ -126,6 +126,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
                 assignBuildingsProduction.S2FreeBuilds();
             } else if (s === 5) {
                 assignBuildingsProduction.S4Levels(true);
+                assignBuildingsProduction.S5FreeBuilds();
             }
         }
 
@@ -135,6 +136,7 @@ export const reset = (type: 'discharge' | 'vaporization' | 'rank' | 'collapse' |
 
     assignBuildingsProduction.globalCache();
     if (player.inflation.vacuum) { assignResetInformation.solarHardcap(); }
+    if (stageIndex.includes(5)) { assignBuildingsProduction.S5FreeBuilds(); }
 };
 
 /** Default value for update is true; Default value for full is true (and null value for update), should be set to false only if Stage is permanent from false Vacuum */
@@ -197,7 +199,7 @@ export const resetStage = (stageIndex: number[], update = true as null | boolean
     if (full) {
         player.time.stage = 0;
         player.stage.time = 0;
-        player.stage.peak = [0, 0];
+        player.stage.peak = [0, 0, 0];
         player.researchesAuto[0] = strangeness[3][6];
         player.researchesAuto[1] = strangeness[4][6];
         player.researchesAuto[2] = player.inflation.vacuum ? (strangeness[1][4] < 1 ? 0 : strangeness[3][4] < 1 ? 1 : strangeness[2][4] < 1 ? 2 : strangeness[4][4] < 1 ? 3 : 4) :
@@ -242,7 +244,7 @@ export const resetVacuum = (level = 0) => {
         }
         const supervoid = player.challenges.supervoid;
         let total = player.challenges.stability + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + (1 + player.verses[1].true) * player.tree[2][3];
-        if (vacuum) { total++; }
+        if (player.inflation.falseDone) { total++; }
         player.cosmon[0].current = total;
         player.cosmon[0].total = total;
         player.inflation.resets = 0;
@@ -273,7 +275,7 @@ export const resetVacuum = (level = 0) => {
             buildings[i].total.setValue(0);
             buildings[i].trueTotal.setValue(0);
         }
-        if (s === 6 || player.challenges.stability < s + 3 || player.challenges.active === 1) {
+        if (s === 6 || player.challenges.stability < s + 4 || player.challenges.active === 1) {
             player.milestones[s] = cloneArray(playerStart.milestones[s]);
         } else {
             player.milestones[s][2] = 0;
@@ -296,7 +298,7 @@ export const resetVacuum = (level = 0) => {
     player.researchesAuto[2] = universes >= 5 ? (vacuum ? 4 : 1) : 0;
     player.stage.current = 1;
     player.stage.resets = 0;
-    player.stage.peak = [0, 0];
+    player.stage.peak = [0, 0, 0];
     player.stage.time = 0;
     player.time.stage = 0;
     player.time.vacuum = 0;

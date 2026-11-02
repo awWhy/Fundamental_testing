@@ -13,7 +13,7 @@ export const player: playerType = {
         active: 1,
         resets: 0,
         time: 0,
-        peak: [0, 0],
+        peak: [0, 0, 0],
         input: [1, 0, 0, 0]
     },
     discharge: {
@@ -51,6 +51,7 @@ export const player: playerType = {
         loadouts: [],
         default: [],
         vacuum: false,
+        falseDone: false,
         resets: 0,
         age: 0,
         ends: [0, 0, 0],
@@ -943,7 +944,7 @@ export const global: globalType = {
                     (stageIndex === 5 && (player.tree[1][8] >= 4 || i === 3))
                 ) { unlocks += '!'; }
             }
-            return `Automatically make ${unlocked ? names[index] : '(Unknown)'} (counts as self-made) if cost is ${format(player.toggles.shop.wait[stageIndex])} times of the available resources.\n(Unlocked auto Structures: ${unlocks !== '' ? `${unlocks}${unlocks.includes('!') ? ". '!' means that it ignores wait value" : ''}` : 'none'})`;
+            return `Automatically make ${unlocked ? names[index] : '(Unknown)'} (counts as self-made) if cost is X times of the available resource.\n(Current auto wait value is ${format(player.toggles.shop.wait[stageIndex])}, unlocked auto Structures: ${unlocks !== '' ? `${unlocks}${unlocks.includes('!') ? ". '!' means that it ignores wait value" : ''}` : 'none'})`;
         },
         costRange: [
             [],
@@ -1185,7 +1186,7 @@ export const global: globalType = {
                 () => `Automatically Collapse once reached enough boost or Solar mass. (Needs to be enabled in Settings)${global.strangenessInfo[4].max[4] > 1 ? `\nSecond level will auto claim Star remnants without needing to reset ${global.strangenessInfo[4].max[4] > 2 ? ', includes Solar mass at third level' : ''}.` : ''}`,
                 () => 'Make auto for all Interstellar Structures permanent.',
                 () => `Elements will no longer require Collapse for activation${player.inflation.vacuum ? ' and reduce cost for related automatization Research by 1 level' : ''}.\nSecond level will unlock auto creation of Elements. (${global.strangenessInfo[4].max[6] > 1 ? 'Needs to be enabled in settings' : 'Not yet unlocked for Interstellar space'})`,
-                () => `${player.verses[0].current >= 13 ? 'Total' : 'Unspent'} Strange quarks will boost Interstellar by improving its Structures${global.strangenessInfo[4].max[7] > 1 ? ' at level 1 and by reducing cost of Brown dwarfs at level 2' : ''}.\n(Formula: Strange quarks ^${format(player.elements[26] >= 1 ? 0.32 : 0.16)}, exponent is 2 times stronger with '[26] Iron' | Effect: ${format(global.strangeInfo.stageBoost[4], { padding: true })})${player.strangeness[4][7] < 2 && global.strangenessInfo[4].max[7] > 1 ? '\n(Level 2 of this Strangeness will increase cost scaling for every other Strange boost)' : ''}`,
+                () => `${player.verses[0].current >= 13 ? 'Total' : 'Unspent'} Strange quarks will boost Interstellar by improving its Structures${global.strangenessInfo[4].max[7] > 1 ? ' at level 1 and by reducing cost of Brown dwarfs at level 2' : ''}.\n(Formula: Strange quarks ^${format(0.16)} ⟶ ^${format(0.32)} with '[26] Iron' | Effect: ${format(global.strangeInfo.stageBoost[4], { padding: true })})${player.strangeness[4][7] < 2 && global.strangenessInfo[4].max[7] > 1 ? '\n(Level 2 of this Strangeness will increase cost scaling for every other Strange boost)' : ''}`,
                 () => `Increase effective amount of Neutron stars (doesn't include ones from '[22] Titanium') by 1 + level and improve Neutron stars strength by +^${format(0.125)}.`,
                 () => { //[9]
                     let unlocks = `Upgrade ‒ ${player.strangeness[4][9] >= 1 || player.progress.main >= 18 ? "'Nucleosynthesis'" : '(Unknown)'}`;
@@ -1266,7 +1267,7 @@ export const global: globalType = {
                 () => `Gain ${format(1.4)} times more Strangelets from ${player.inflation.vacuum ? '' : 'Abyss '}Stage resets.`,
                 () => "Increase max levels for a lot of Strangeness, these include:\n'Fundamental boost', 'Better improvement', 'Free Discharge', 'More Moles', 'Bigger Puddles', 'Improved flow', 'Faster Accretion', 'Intense weathering', 'Hotter Stars', 'Cheaper Stars' and 'Bigger Structures'.",
                 () => `Unlock a new mini Stage '${global.challengesInfo[2].name}' and activate all of its effects.\n${global.challengesInfo[2].name} can be found at the 'Advanced' subtab.`,
-                () => /*player.inflation.vacuum ? 'Add bonus Milestone tiers from +8 to +1 per level based on order starting from first Microworld Milestone to last Intergalactic Milestone.' :*/ 'Add 1 more Milestone for every Stage, new tiers award Strangelets instead and have 0 seconds time limit.'
+                () => player.inflation.vacuum ? 'Add bonus Milestone tiers from +8 to +1 per level based on order starting from first Microworld Milestone to last Intergalactic Milestone.' : 'Add 1 more Milestone for every Stage, new tiers award Strangelets instead and have 0 seconds time limit.'
             ],
             cost: [],
             firstCost: [1e15, 3e15, 2e16, 4e14, Infinity],
@@ -1605,20 +1606,21 @@ export const global: globalType = {
             if (global.april.quantum === true) { return '<p class="cyanText">‒ Global speed is set to 0\n‒ Stage resets are disabled\n‒ All Stages are removed from reset cycle</p>'; }
             const completions = player.challenges.stability;
             return `<p class="orchidText">‒ Global speed is decreased by ${format(4 * 8 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
-            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset\n‒ If can't reset after 10 minutes then Vacuum reset is forced instead${player.challenges.stability >= 4 ? '\n‒ Milestones always reset on Challenge entrance' : ''}\n‒ Passive Strange quarks gain is disabled</p>
+            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset\n‒ If can't reset after 10 minutes then Vacuum reset is forced instead${completions >= 5 ? '\n‒ Milestones always reset on Challenge entrance' : ''}\n‒ Passive Strange quarks gain is disabled</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Intergalactic Upgrade 'Galactic Merger' cost ${format(1e10)} times more\n‒ Merge requirement is set to ${22 + completions}${player.progress.main >= 24 ? ' (swapping Merge type is disabled)\n‒ Creation of Universes is disabled' : ''}</p>`;
         },
-        needText: ['1 Completion', '2 Completions', '3 Completions', '4 Completions', '5 Completions', '6 Completions', '7 Completions', '8 Completions', '9 Completions'],
+        needText: ['1 Completion', '2 Completions', '3 Completions', '4 Completions', '5 Completions', '6 Completions', '7 Completions', '8 Completions', '9 Completions', '10 Completions'],
         rewardText: [
             "Improve level 2 of 'Overboost' Inflation\n(Remove boost decay and make it always work in false Vacuum)", //1
             "Make 'Instability' Inflation immune to resets", //2
             'Start true Vacuum with Void equal to Supervoid', //3
-            'First two Microworld Milestones no longer reset', //4
-            'First two Submerged Milestones no longer reset', //5
-            'First two Accretion Milestones no longer reset', //6
-            'First two Interstellar Milestones no longer reset', //7
-            'First two Intergalactic Milestones no longer reset', //8
-            'Start Universe resets or above with true Vacuum\n(Swap Merge type to enter false Vacuum)' //9
+            'Merge type to return back into false Vacuum state', //4
+            'First two Microworld Milestones no longer reset', //5
+            'First two Submerged Milestones no longer reset', //6
+            'First two Accretion Milestones no longer reset', //7
+            'First two Interstellar Milestones no longer reset', //8
+            'First two Intergalactic Milestones no longer reset', //9
+            'Start Universe resets or above with true Vacuum' //10
         ],
         resetType: 'vacuum',
         time: 5400,
@@ -1817,7 +1819,7 @@ export const prepareVacuum = (state: boolean) => { //Must not use direct player 
         milestonesInfo[3].name[0] = 'Center of gravity';
         getQuery('#milestone1Stage3Main > span').textContent = 'Center of gravity';
         milestone2S4.src = 'Used_art/Black%20hole.png';
-        assignInnerHTML('#mergeFalse', 'Attempt to <span class="darkvioletText">Merge</span> <span class="grayText">Galaxies</span> together, which will result in <span class="orchidText">Vacuum</span> decaying into its <span class="redText">false</span> state');
+        assignInnerHTML('#mergeFalse', 'Return back to <span class="redText">false</span> Vacuum state by <span class="darkvioletText">Merging</span> <span class="grayText">Galaxies</span> together, there are no direct rewards');
         getQuery('#stageHistory > h3').textContent = 'Stage resets:';
 
         getQuery('#stageRewardNew > span:last-of-type').textContent = 'Strange quarks';
@@ -2021,6 +2023,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             }
 
             /* Can be shortened */
+            load.stage.peak[2] = 0;
             if (load.accretion.rank === 0) { load.buildings[3][0].current = '1e-19' as unknown as Overlimit; }
             if (load.verses[0].highest > 9) { load.verses[0].highest = 9; }
             for (let l = 0; l < load.inflation.loadouts.length; l++) {
@@ -2045,7 +2048,8 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.challenges.supervoidMax[5] = 0;
             supervoid[5] = 0;
             load.cosmon[0].total = (2 + (load.verses[0].true[0] - 1) / 2) * load.verses[0].true[0] + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + load.challenges.stability;
-            if (load.inflation.vacuum && load.inflation.ends[0] > 0) { load.cosmon[0].total++; }
+            load.inflation.falseDone = load.clone.inflation?.vacuum as boolean ?? load.inflation.vacuum;
+            if (load.inflation.ends[0] > 0 && load.inflation.falseDone) { load.cosmon[0].total++; }
             load.cosmon[0].current = load.cosmon[0].total;
             delete load.darkness['active' as keyof unknown];
             delete load.verses[0]['other' as keyof unknown];
@@ -2055,6 +2059,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             throw new ReferenceError(`Save file version ${load.version} is not allowed`);
         }
     }
+    load.inflation.falseDone ??= load.clone.inflation?.vacuum as boolean ?? load.inflation.vacuum; //Remove
     for (let s = 1; s <= 6; s++) {
         if (!(load.toggles.shop.wait[s] >= 1)) { load.toggles.shop.wait[s] = 2; }
         fillMissingValues(load.upgrades[s], playerStart.upgrades[s]);
@@ -2066,6 +2071,9 @@ export const updatePlayer = (load: playerType, decode = true): string => {
         if (load.progress.void[s] < max) { load.progress.void[s] = max; }
     }
 
+    if (load.strangeness[4][6] >= 1) {
+        for (let i = load.elements.indexOf(0.5, 1); i !== -1; i = load.elements.indexOf(0.5, i + 1)) { load.elements[i] = 0; }
+    }
     fillMissingValues(load.elements, playerStart.elements);
     for (let s = 0; s < playerStart.tree.length; s++) { fillMissingValues(load.tree[s], playerStart.tree[s]); }
 

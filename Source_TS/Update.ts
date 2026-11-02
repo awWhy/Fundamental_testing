@@ -291,10 +291,8 @@ export const numbersUpdate = (ignoreOffline = false) => {
                             getQuery(`#merge${i + 1}Effect > span`).textContent = format(mergeEffects[i], { padding: true });
                         }
                         if (vacuum) { getQuery('#mainCapHardS5 > span').textContent = format(collapseInfo.solarCap, { padding: true }); }
-                        if (player.strangeness[5][9] < 2) {
-                            const after = calculateEffects.reward[0](true);
-                            getQuery('#mergeBoostTotal > span').textContent = format(((buildings[3].true / buildings[1].current.toNumber() + 1) * (buildings[3].true / buildings[2].current.toNumber() + 1)) ** 0.5 * (buildings[3].true / (mergeInfo.galaxies + 1) + 1) * (after / mergeEffects[0]) * (calculateEffects.reward[0](true, calculateEffects.reward[1](true)) / after), { padding: true });
-                        }
+                        const after = calculateEffects.reward[0](true);
+                        getQuery('#mergeBoostTotal > span').textContent = format(((buildings[3].true / Math.max(buildings[1].current.toNumber(), 1) + 1) * (buildings[3].true / Math.max(buildings[2].current.toNumber(), 1) + 1)) ** 0.5 * (buildings[3].true / (mergeInfo.galaxies + 1) + 1) * (after / mergeEffects[0]) * (calculateEffects.reward[0](true, calculateEffects.reward[1](true)) / after), { padding: true });
 
                         const groupsCost = calculateEffects.groupsCost();
                         const groupsTotal = player.researchesExtra[5][1] >= 2;
@@ -303,13 +301,9 @@ export const numbersUpdate = (ignoreOffline = false) => {
                         const clustersTotal = player.researchesExtra[5][4] >= 2;
                         getQuery('#merge2Effect > span:nth-of-type(2)').textContent = `${Math.max((clustersTotal ? mergeInfo.galaxies : buildings[3].true) - (mergeInfo.checkReward[1] + merge[clustersTotal ? 'rewards' : 'claimed'][1]) * 100, 0)}`;
                     }
-                    if (vacuum) {
-                        if (!global.sessionToggles[2] && player.challenges.stability >= 9 && player.challenges.active === null) {
-                            getId('reset0Button').textContent = 'Change Vacuum state to false';
-                        }
-                    } else if (!stable || !global.sessionToggles[2]) {
-                        const requirement = calculateEffects.mergeRequirement();
-                        getId('reset0Button').textContent = player.buildings[5][3].true >= requirement && player.progress.main >= 15 ? 'Change Vacuum state to true' : `Requires ${format(requirement)} Galaxies`;
+                    if (vacuum ? (!global.sessionToggles[2] && player.challenges.stability >= 4 && player.challenges.active === null) : (!global.sessionToggles[2] || !stable)) {
+                        const requirement = vacuum ? 0 : calculateEffects.mergeRequirement();
+                        getId('reset0Button').textContent = player.buildings[5][3].true >= requirement && player.progress.main >= 15 ? `Change Vacuum state to ${!vacuum}` : `Requires ${format(requirement)} Galaxies`;
                     }
                     const names = global.buildingsInfo.name[4];
                     let hoverBase1 = `${global.buildingsInfo.hoverText[5][0]}:\n${names[1]}`;
@@ -450,8 +444,10 @@ export const numbersUpdate = (ignoreOffline = false) => {
             getId('stageTimeStrangeness').textContent = format(player.time.stage, { type: 'time' });
             if (vacuum) { getId('strange1Gain').textContent = format(global.strangeInfo.strange1Gain, { padding: true }); }
             if (interstellar || active === Math.min(player.stage.current, 5)) {
-                getQuery('#strangePeak > span').textContent = format(player.stage.peak[0], { type: 'income' });
-                getId('strangePeakAt').textContent = format(player.stage.peak[1], { type: 'time' });
+                const peak = player.stage.peak;
+                getId('strangePeak').dataset.title = `Time since peak: ${format(peak[1] === 0 ? 0 : player.time.stage - peak[1], { type: 'time' })}\n(Max time since peak: ${format(peak[1] === 0 ? 0 : Math.max(peak[2], player.time.stage - peak[1]), { type: 'time' })})`;
+                getQuery('#strangePeak > span').textContent = format(interstellar ? peak[0] : mainGain / peak[1], { type: 'income' });
+                getId('strangePeakAt').textContent = format(peak[1], { type: 'time' });
             }
             if (getId('strange1EffectsMain').style.display !== 'none') {
                 const information = global.strangeInfo.strangeletsInfo;
@@ -612,16 +608,14 @@ export const numbersUpdate = (ignoreOffline = false) => {
                     if (vacuum || (player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && challenge !== 1)) {
                         getQuery('#mergeResets > span').textContent = format(player.merge.resets, { padding: 'exponent' });
                         getQuery('#mergeResets > span:last-of-type').textContent = format(calculateEffects.mergeMaxResets(), { padding: 'exponent' });
-                        let base = ((buildings[3].true / buildings[1].current.toNumber() + 1) * (buildings[3].true / buildings[2].current.toNumber() + 1)) ** 0.5 * (buildings[3].true / (global.mergeInfo.galaxies + 1) + 1);
+                        let base = ((buildings[3].true / Math.max(buildings[1].current.toNumber(), 1) + 1) * (buildings[3].true / Math.max(buildings[2].current.toNumber(), 1) + 1)) ** 0.5 * (buildings[3].true / (global.mergeInfo.galaxies + 1) + 1);
                         getQuery('#mergeBaseStat > span').textContent = format(base, { padding: true });
-                        if (player.strangeness[5][9] < 2) {
-                            const after = calculateEffects.reward[0](true);
-                            const reward1 = after / calculateEffects.reward[0]();
-                            const reward2 = calculateEffects.reward[0](true, calculateEffects.reward[1](true)) / after;
-                            getQuery('#merge1Stat > span').textContent = format(reward1, { padding: true });
-                            getQuery('#merge2Stat > span').textContent = format(reward2, { padding: true });
-                            base *= reward1 * reward2;
-                        }
+                        const after = calculateEffects.reward[0](true);
+                        const reward1 = after / calculateEffects.reward[0]();
+                        const reward2 = calculateEffects.reward[0](true, calculateEffects.reward[1](true)) / after;
+                        getQuery('#merge1Stat > span').textContent = format(reward1, { padding: true });
+                        getQuery('#merge2Stat > span').textContent = format(reward2, { padding: true });
+                        base *= reward1 * reward2;
                         getId('mergeTotal').textContent = format(base, { padding: true });
                     }
                 }
@@ -836,13 +830,13 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('reset0Main').style.display = player.upgrades[5][3] === 1 ? '' : 'none';
                 getId('specials').style.display = stable && player.researchesExtra[5][1] >= 1 ? '' : 'none';
                 getId('mergeEffects').style.display = stable && player.researchesExtra[5][1] >= 1 ? '' : 'none';
-                getId('mergeBoostTotal').style.display = player.strangeness[5][9] < 2 && stable && player.upgrades[5][3] === 1 ? '' : 'none';
+                getId('mergeBoostTotal').style.display = stable && player.upgrades[5][3] === 1 ? '' : 'none';
                 if (stable) {
                     getId('special2').style.display = player.researchesExtra[5][4] >= 1 ? '' : 'none';
                     getId('merge2Effect').style.display = player.researchesExtra[5][4] >= 1 ? '' : 'none';
                 }
                 if (vacuum) {
-                    const unlocked = player.challenges.stability >= 9 && player.challenges.active === null;
+                    const unlocked = player.challenges.stability >= 4 && player.challenges.active === null;
                     getId('mergeSwap').style.display = unlocked ? '' : 'none';
                     getId('mergeTrue').style.display = !unlocked || global.sessionToggles[2] ? '' : 'none';
                     getId('mergeFalse').style.display = unlocked && !global.sessionToggles[2] ? '' : 'none';
@@ -1328,7 +1322,7 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId(`endMilestone${i + 1}`).classList[ends[i] >= 1 ? 'add' : 'remove']('completed');
             }
             const current = player.verses[0].current;
-            for (let i = 1, f1 = 1, f2 = 1, old = f1; i < 9; i++, f1 = f2, f2 += old, old = f1) {
+            for (let i = 1, f1 = 1, f2 = 1, old = f1; i <= 9; i++, f1 = f2, f2 += old, old = f1) {
                 getId(`inflationMilestone${i}`).classList[current >= f2 ? 'add' : 'remove']('completed');
             }
         }
@@ -1491,9 +1485,8 @@ export const visualUpdate = (ignoreOffline = false) => {
                 getId('mergeBoost').style.display = stable && player.upgrades[5][3] === 1 ? '' : 'none';
                 if (stable) {
                     getQuery('#mergeResets > span').style.color = `var(--${player.merge.resets >= calculateEffects.mergeMaxResets() ? 'green' : 'red'}-text)`;
-                    const auto2 = player.strangeness[5][9] >= 2;
-                    getId('merge1Stat').style.display = !auto2 && player.researchesExtra[5][1] >= 1 ? '' : 'none';
-                    getId('merge2Stat').style.display = !auto2 && player.researchesExtra[5][4] >= 1 ? '' : 'none';
+                    getId('merge1Stat').style.display = player.researchesExtra[5][1] >= 1 ? '' : 'none';
+                    getId('merge2Stat').style.display = player.researchesExtra[5][4] >= 1 ? '' : 'none';
                 }
             } else if (active === 6) {
                 const stable = player.strangeness[6][3] >= 1;
@@ -1565,7 +1558,7 @@ export const visualProgressUnlocks = () => {
     getQuery('#resetToggles span').style.display = highest >= 17 || (!vacuum && highest >= 11) ? '' : 'none';
     getId('stageToggleReset').style.display = highest >= 16 || (!vacuum && highest >= 2) ? '' : 'none';
     getId('endToggleReset').style.display = highest >= 20 ? '' : 'none';
-    getId('mergeVacuumChange').style.display = highest >= 24 ? '' : 'none';
+    getId('mergeVacuumClear').style.display = highest >= 24 ? '' : 'none';
     getId('switchTheme1').style.display = highest >= 3 ? '' : 'none';
     getId('switchTheme2').style.display = highest >= 3 ? '' : 'none';
     getId('switchTheme3').style.display = highest >= 5 ? '' : 'none';
@@ -1888,8 +1881,8 @@ export const getChallengeDescription = () => {
     } else { getId('challengeTimeLimit').style.display = 'none'; }
 
     if (index === 1) {
-        const extra = player.inflation.vacuum && player.challenges.stability >= 9 && player.challenges.active === null;
-        const gain = player.inflation.vacuum ? calculateEffects.trueVerses() + 1 : player.challenges.stability < 9 ? 1 : 0;
+        const extra = player.inflation.vacuum && player.challenges.stability >= 10 && player.challenges.active === null;
+        const gain = player.inflation.vacuum ? calculateEffects.trueVerses() + 1 : player.inflation.falseDone ? 0 : 1;
         getId('vacuumInfo').style.display = '';
         getId('vacuumInfoResets').textContent = format(player.inflation.resets);
         getQuery('#vacuumInfoGain > span').textContent = format(gain, { padding: 'exponent' });

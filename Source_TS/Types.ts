@@ -59,8 +59,8 @@ export interface playerType {
         active: number
         resets: number
         time: number
-        /** Interstellar only, [Strange quarks peak, peaked at] */
-        peak: [number, number]
+        /** Interstellar only, [Strange quarks peak, peaked at, previous max time since peak] */
+        peak: [number, number, number]
         /** [type, quarks, time, peak] */
         input: [number, number, number, number]
     }
@@ -106,6 +106,7 @@ export interface playerType {
         /** Loadout that is loaded by hotkeys/auto's */
         default: number[]
         vacuum: boolean
+        falseDone: boolean
         resets: number
         /** Universe total time */
         age: number
