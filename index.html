@@ -509,7 +509,7 @@
                     <div class="center greenText">
                         <h2 class="biggerWord">Strange matter</h2>
                         <p>Stage reset reward: <span class="whiteText"><span id="strange0Gain">1</span> <span id="strange0Type">Strange quarks</span></span><span id="strange1Unlocked">, <span class="whiteText"><span id="strange1Gain">1</span> Strangelets</span></span> | Time: <span id="stageTimeStrangeness" class="whiteText">0 seconds</span></p>
-                        <p><span id="strangeRateType">Strange quarks</span> rate: <span id="strangeRate" class="whiteText">0 per eon</span><span id="strangePeak"> (Peak: <span class="whiteText">0 per eon</span> | At: <span id="strangePeakAt" class="whiteText">0 seconds</span>)</span></p>
+                        <p><span id="strangeRateType">Strange quarks</span> rate: <span id="strangeRate" class="whiteText">0 per eon</span><span id="strangePeak" class="hasTitle" data-title="Time since peak: 0 seconds"> (Peak: <span class="whiteText">0 per eon</span> | At: <span id="strangePeakAt" class="whiteText">0 seconds</span>)</span></p>
                     </div>
                     <article id="strangeStructures" class="greenText" aria-label="Strange Structures">
                         <section id="strange0" aria-haspopup="dialog" aria-controls="strange0EffectsMain">
@@ -1042,6 +1042,7 @@
                         <section id="inflationMilestone6"><h4>Requires 13 Universes:</h4><span>Unlock auto Strangeness and improve first Inflation Milestone to affect Strangelets<br>Strange boosts are now based on total Strange quarks instead of current</span></section>
                         <section id="inflationMilestone7"><h4>Requires 21 Universes:</h4><span>Unlock auto Universes and start false Vacuum resets with 'Automatic Merge' Strangeness at level 1<br>Improve auto Merge to reset early when can afford new Universe</span></section>
                         <section id="inflationMilestone8"><h4>Requires 34 Universes:</h4><span>Unlock auto End resets (WIP) and auto load default loadout after any End reset</span></section>
+                        <section id="inflationMilestone9"><h4>Requires 55 Universes:</h4><span>Tachyons production is enabled while inside Challenges (WIP)</span></section>
                     </article>
                 </section>
             </section>
@@ -1117,7 +1118,7 @@
                                     <div id="toggleAuto9Menu" class="popUpMenu" style="display: none;" role="menu" aria-label="Settings menu">
                                         <div id="mergeMain"><p><label>Merge if current self-made Galaxies are at least <input type="number" id="mergeInput" step="1"></label> and <label><input type="number" id="mergeInputSince" step="any"> seconds passed since last Galaxy<span id="mergeSolarWait">, will wait for Solar mass hardcap instead if set to 0</span></label></p>
                                         <p>(Requires for auto Collapse to fail to reset)</p></div>
-                                        <label id="mergeVacuumChange">Change Vacuum state to true <button type="button" id="toggleNormal5" class="toggleNormal">ON</button></label>
+                                        <label id="mergeVacuumClear">Change current Vacuum state to true <button type="button" id="toggleNormal5" class="toggleNormal">ON</button>, if false Vacuum wasn't cleared yet</label>
                                     </div>
                                 </div>
                                 <button type="button" id="toggleAuto9" class="toggleAuto">Auto OFF</button>
