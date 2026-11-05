@@ -1828,7 +1828,7 @@ export const openVersionInfo = () => {
     if (specialHTML.bigWindow !== null) { return; }
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
-        mainHTML.innerHTML = `${global.lastUpdate !== null ? `<h5><span class="bigWord">Last update:</span> <span class="whiteText">${new Date(global.lastUpdate).toLocaleString()}</span></h5><br>` : ''}
+        mainHTML.innerHTML = `<h5><span class="bigWord">Last update:</span> <span id="versionLast" class="whiteText">${global.lastUpdate === 0 ? 'failed to fetch' : new Date(global.lastUpdate).toLocaleString()}</span> <button type="button" id="versionCheck" class="hollowButton">Check</button></h5>
         <h6>v0.3.0</h6><p>-New content (Multiverse)\n- Rebalances in later parts of game\n- Improved global resources tracker\n- Added default loadout\n<a href="https://docs.google.com/document/d/1gCskWPNxLX08npSHQW8u86VvXNhXzNchCdJ9Pec8Rvk/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.8 | v0.2.9</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewards is now 12 hours\n\n- Minor balancing and new content for Abyss\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
@@ -1857,12 +1857,36 @@ export const openVersionInfo = () => {
         <h6>v0.0.1</h6><p>- Submerged Stage rework\n\n- Mobile device support</p>
         <h6>v0.0.0</h6><p>- First published version\n\n- Submerged Stage placeholder</p>`;
         specialHTML.styleSheet.textContent += ` #versionHTML h6 { font-size: 1.18em; }
+            #versionHTML h5 { margin-bottom: 1.2em; }
+            #versionCheck { height: 1.85em; border-radius: 4px; padding: 0 0.4em; }
             #versionHTML p { line-height: 1.3em; white-space: pre-line; color: var(--white-text); margin-top: 0.2em; margin-bottom: 1.4em; }
             #versionHTML p:last-of-type { margin-bottom: 0; }`;
+        const checkBtn = getId('versionCheck');
+        const checkFunc = async() => {
+            checkBtn.textContent = 'Checking...';
+            const result = await fetch('./last_build.txt', { cache: 'no-store' });
+            let newValue = 0;
+            if (result.ok) { newValue = Number(await result.text()); }
+            if (newValue !== 0 && !isNaN(newValue)) {
+                if (global.lastUpdate === 0) {
+                    global.lastUpdate = newValue;
+                    getId('versionLast').textContent = new Date(newValue).toLocaleString();
+                } else if (global.lastUpdate !== newValue) {
+                    getId('versionLast').textContent = `${new Date(global.lastUpdate).toLocaleString()} (outdated)`;
+                    Notify(`More recent version (${new Date(newValue).toLocaleString()}) is available`);
+                }
+                checkBtn.textContent = 'Finished';
+            } else { checkBtn.textContent = 'Failed'; }
+            setTimeout(() => {
+                checkBtn.addEventListener('click', checkFunc, { once: true });
+                checkBtn.textContent = 'Check';
+            }, 3000);
+        };
+        checkBtn.addEventListener('click', checkFunc, { once: true });
     }
 
     specialHTML.bigWindow = 'version';
-    addCloseEvents(getId('versionHTML'), getQuery('#versionHTML a'));
+    addCloseEvents(getId('versionHTML'), getId('versionCheck'));
     getQuery('#bigWindow > article').ariaLabel = 'Versions menu';
 };
 

@@ -253,8 +253,8 @@ export interface globalType {
     trueActive: number
     /** In milliseconds */
     lastSave: number
-    /** Game update, in milliseconds */
-    lastUpdate: number | null
+    /** This game 'version' last update in milliseconds */
+    lastUpdate: number
     offline: {
         active: boolean
         /** [Change into, update type] */

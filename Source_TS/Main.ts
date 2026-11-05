@@ -2287,12 +2287,12 @@ try { //Start everything
         void simulateOffline(global.lastSave);
 
         void (async() => {
-            const result = await fetch('./last_build.txt');
+            const result = await fetch('./last_build.txt', { cache: 'no-store' });
             if (result.ok) {
-                global.lastUpdate = Number((await result.text()).replace('\n', ''));
-                if (global.lastUpdate === 0 || isNaN(global.lastUpdate)) { global.lastUpdate = null; }
+                global.lastUpdate = Number(await result.text());
+                if (isNaN(global.lastUpdate)) { global.lastUpdate = 0; }
             }
-            Notify(`Welcome back, you were away for ${format(offline / 1000, { type: 'time', padding: false })}${oldVersion !== player.version ? `\nGame has been updated from ${oldVersion} to ${player.version}` : ''}${global.lastUpdate !== null ?
+            Notify(`Welcome back, you were away for ${format(offline / 1000, { type: 'time', padding: false })}${oldVersion !== player.version ? `\nGame has been updated from ${oldVersion} to ${player.version}` : ''}${global.lastUpdate !== 0 ?
                 `\nLast update was ${format((timeAtLoad - global.lastUpdate) / 1000, { type: 'time', padding: false })} ago` : ''}${globalSave.developerMode ?
                 `\nGame loaded after ${format((timeAtLoad - playerStart.time.started) / 1000, { type: 'time', padding: false })}` : ''}
             `);

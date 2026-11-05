@@ -206,7 +206,7 @@ export const global: globalType = {
     paused: true,
     trueActive: 1,
     lastSave: 0,
-    lastUpdate: null,
+    lastUpdate: 0,
     hotkeys: {
         disabled: true,
         shift: false,
