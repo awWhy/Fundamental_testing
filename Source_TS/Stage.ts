@@ -85,8 +85,8 @@ export const timeUpdate = (tick: number, timeWarp: null | number = null) => {
         for (let i = maxActive[6] - 1; i >= 1; i--) {
             if (autoBuy[6][i] && ASR[6] >= i) { buyBuilding(i, 6, 0, true); }
         }
-        if (auto[10]) { nucleationResetCheck(true); }
         assignBuildingsProduction.stage6Cache();
+        if (auto[10]) { nucleationResetCheck(true); }
         gainBuildings(0, 6, passedSeconds); //Dark matter
     }
     if (activeAll.includes(4)) {
@@ -174,6 +174,7 @@ export const timeUpdate = (tick: number, timeWarp: null | number = null) => {
 };
 
 export const logAny = (number: number, base: number) => Math.log(number) / Math.log(base);
+export const randomValue = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1) + min);
 
 export const calculateEffects: calculateEffectsType = {
     effectiveEnergy: () => {
@@ -517,7 +518,7 @@ export const calculateEffects: calculateEffectsType = {
             base *= (1.4 ** player.strangeness[5][2]) * (calculateEffects.T0Inflation2() ** player.tree[0][2]) * (1.2 ** player.tree[1][1]);
             if (player.challenges.active === 1) {
                 const completions = player.challenges.stability;
-                base /= 2 ** Math.max(player.stage.resets + completions - 7, 0) * 2 ** completions;
+                base /= 2 ** Math.max(player.stage.resets + completions - 8, 0) * 2 ** completions;
                 if (!interstellar) { base /= 2 ** completions * 4; }
             }
         } else {
@@ -1394,8 +1395,8 @@ const gainTachyons = (time: number) => {
     const left = softcap - building.current;
     if (add >= left) {
         add = (left < 0 ?
-            (building.current / softcap) ** 1.25 + add / softcap :
-            (add - left) / softcap + 1) ** 0.8 * softcap - building.current;
+            (building.current / softcap) ** 2 + add / softcap :
+            (add - left) / softcap + 1) ** 0.5 * softcap - building.current;
     }
     if (!isFinite(add)) {
         errorNotify(`Error encountered, couldn't gain ${add} of Tachyons`);
@@ -2431,12 +2432,14 @@ const endResetCheck = (peak = false): boolean => {
     }
     return true;
 };
-export const endResetUser = async() => {
-    if (!endResetCheck() || player.progress.main < 20) { return; }
+export const endResetUser = async(multiverse = false) => {
+    if (multiverse) {
+        if (!checkVerse(1) || calculateVerseCost(1) > global.versesInfo.types) { return false; }
+    } else if (!endResetCheck() || player.progress.main < 20) { return; }
 
     if (player.toggles.confirm[6] !== 'None') {
         const array = [];
-        if (calculateVerseCost(1) <= global.versesInfo.types && player.darkness.energy < 1000) {
+        if (!multiverse && calculateVerseCost(1) <= global.versesInfo.types && player.darkness.energy < 1000) {
             array.push('can do Big Crunch by creating Multiverse instead');
         }
         if (checkVerse(0) && calculateVerseCost(0) <= global.mergeInfo.score) {
@@ -2448,13 +2451,15 @@ export const endResetUser = async() => {
         if (player.toggles.confirm[6] === 'All') { array.push("'All' confirmation is enabled"); }
         if (array.length !== 0) {
             if (!await Confirm(`Prevented End reset because ${array.join(',\nAlso ')}\nReset anyway?`)) { return; }
-            if (!endResetCheck()) { return Notify('End reset canceled, requirements are no longer met'); }
+            if (!multiverse && !endResetCheck()) { return Notify('End reset canceled, requirements are no longer met'); }
         }
     }
 
-    endReset();
-    numbersUpdate();
-    if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Caused End reset'; }
+    if (!multiverse) {
+        endReset();
+        numbersUpdate();
+        if (globalSave.SRSettings[0]) { getId('SRMain').textContent = 'Caused End reset'; }
+    } else { buyVerse(1); } //Does extra checks, but doesn't notify if gets canceled
 };
 
 const endReset = (multiverse = false) => {
@@ -2512,7 +2517,7 @@ export const stageResetCheck = (stageIndex: number, quarks = null as number | nu
             if (player.elements[26] < 1) { return false; }
             if (player.challenges.active !== 1) { gainStrange(0, quarks); }
 
-            if (!player.toggles.auto[0] || player.strangeness[5][6] < (player.inflation.vacuum ? 1 : 2) || player.challenges.active === 0 ||
+            if (!player.toggles.auto[0] || player.strangeness[5][6] < (player.inflation.vacuum ? 1 : 2) || player.challenges.active !== null ||
                 (player.toggles.normal[4] && player.toggles.auto[9] && player.upgrades[5][3] === 1 && player.strangeness[5][9] >= 1 && player.merge.input[0] <= 0 && (player.inflation.vacuum || (player.tree[1][9] >= 1 && player.tree[0][4] >= 1)) && player.merge.resets < calculateEffects.mergeMaxResets())) { return false; }
             const which = stageResetType();
             if (player.stage.input[which] <= 0 || player.stage.input[which] > (which === 3 ? player.time.stage - peak[1] : which === 2 ? player.time.stage : global.strangeInfo.strange0Gain)) { return false; }
@@ -3106,12 +3111,12 @@ const mergeResetCheck = (rewards = false as null | boolean): boolean => {
         if (merge.resets >= calculateEffects.mergeMaxResets() || (merge.input[1] !== 0 ? merge.since < merge.input[1] : assignResetInformation.timeUntil() > 0) || galaxies < Math.max(merge.input[0], 1)) { return false; }
         mergeReset();
     }
-    return (galaxies >= 1 && merge.resets < calculateEffects.mergeMaxResets()) || (!global.sessionToggles[2] && player.inflation.vacuum && player.challenges.stability >= 4 && player.challenges.active === null);
+    return (galaxies >= 1 && merge.resets < calculateEffects.mergeMaxResets()) || (global.sessionToggles[2] && player.inflation.vacuum && player.challenges.stability >= 4 && player.challenges.active === null);
 };
 export const mergeResetUser = async() => {
     if (!mergeResetCheck()) { return; }
 
-    const stable = player.inflation.vacuum ? (player.challenges.stability < 4 || global.sessionToggles[2] || player.challenges.active !== null) : (global.sessionToggles[2] && player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && player.challenges.active !== 1);
+    const stable = player.inflation.vacuum ? (player.challenges.stability < 4 || !global.sessionToggles[2] || player.challenges.active !== null) : (global.sessionToggles[2] && player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && player.challenges.active !== 1);
     if (player.toggles.confirm[5] !== 'None' && player.challenges.active !== 1) {
         const array = [];
         if (stable) {
@@ -3218,7 +3223,8 @@ export const nucleationResetUser = async() => {
 };
 
 const nucleationReset = () => {
-    if (global.inflationInfo.newFluid > 0) { player.darkness.fluid += global.inflationInfo.newFluid; }
+    player.darkness.fluid += global.inflationInfo.newFluid;
+    effectsCache.fluid = calculateEffects.darkFluid();
     reset('rank', [6]); //Has to be 'collapse', but all Energy researches are immune anyway
 };
 
@@ -3249,7 +3255,7 @@ export const assignMilestoneInformation = (index: number, stageIndex: number) =>
             }
         } else if (stageIndex === 3) {
             if (index === 0) {
-                pointer.need[0].setValue(1e-12 * 1e4 ** level);
+                pointer.need[0].setValue(1e4).power(level).multiply(1e-12);
                 pointer.reward[0] = 1.08 ** level;
             } else {
                 pointer.need[1].setValue(8 + 8 * level);
@@ -3329,7 +3335,6 @@ export const assignChallengeInformation = (index: number) => {
     if (index === 2) { return; }
     const info = global.challengesInfo[index];
     if (index === 0) {
-        if (global.april.ultravoid !== null) { return; }
         info.name = player.toggles.supervoid ? 'Supervoid' : 'Void';
         info.resetType = player.toggles.supervoid ? 'vacuum' : 'stage';
     }
@@ -3496,7 +3501,7 @@ export const enterExitChallengeUser = (index: number | null, askForConfirm = pla
         if (index === 0) {
             if (global.april.ultravoid === false) { return enterUltravoid(); }
         } else if (index === 1) {
-            if (global.april.quantum === true) { return enterQuantum(); }
+            if (global.april.quantum) { return enterQuantum(); }
         }
         if (!allowedToEnter(index)) { return; }
         if (old !== null && askForConfirm) {

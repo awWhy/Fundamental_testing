@@ -2,7 +2,7 @@ import { checkTheme } from './Check';
 import { assignHotkeys, detectShift, hotkeys } from './Hotkeys';
 import { cloneArray, deepClone, getClass, getId, getQuery, globalSaveStart, pauseGame, playerStart, showHoverTitle } from './Main';
 import { global, player, prepareVacuum, updatePlayer } from './Player';
-import { assignChallengeInformation, assignResetInformation, setActiveStage } from './Stage';
+import { assignResetInformation, setActiveStage } from './Stage';
 import type { Quantum, globalSaveType, hotkeysList, numbersList, specialHTMLType } from './Types';
 import { format, numbersUpdate, stageUpdate, switchTab, visualProgressUnlocks, visualUpdate } from './Update';
 
@@ -47,6 +47,7 @@ export const globalSave: globalSaveType = {
     toggles: [false, false, false, false, false, false, true, false, false, false, false],
     format: ['.', ''],
     theme: null,
+    slot: 0,
     fontSize: 16,
     MDSettings: [false, false, false, false],
     SRSettings: [false, false],
@@ -115,7 +116,7 @@ export const toggleSpecial = (number: number, type: 'global' | 'mobile' | 'reade
 
     if (!toggles[number]) {
         toggleHTML.style.color = 'var(--green-text)';
-        toggleHTML.style.borderColor = 'forestgreen';
+        toggleHTML.style.borderColor = '#228b22';
         toggleHTML.textContent = 'OFF';
     } else {
         toggleHTML.style.color = '';
@@ -192,7 +193,7 @@ export const specialHTML: specialHTMLType = { //Images here are from true vacuum
             'UpgradeG7.png'
         ], [
             'UpgradeD1.png',
-            'Missing.png'
+            'Merge%20score.png'
         ]
     ],
     lastResearch: 9, //Starting value has to be biggest length
@@ -211,7 +212,7 @@ export const specialHTML: specialHTMLType = { //Images here are from true vacuum
             ['ResearchW4.png', 'stage2borderImage'],
             ['ResearchW5.png', 'stage2borderImage'],
             ['ResearchW6.png', 'stage2borderImage'],
-            ['Missing.png', 'stage2borderImage']
+            ['ResearchW7.png', 'stage2borderImage']
         ], [
             ['ResearchA1.png', 'stage3borderImage'],
             ['ResearchA2.png', 'stage2borderImage'],
@@ -355,7 +356,7 @@ export const specialHTML: specialHTMLType = { //Images here are from true vacuum
             resource: () => format(player.collapse.mass, { padding: true })
         },
         merge_score: {
-            info: ['Missing.png', 'stage6borderImage darkvioletText', 'M. Score'],
+            info: ['Merge%20score.png', 'stage6borderImage darkvioletText', 'M. Score'],
             unlock: () => global.stageInfo.activeAll.includes(5) && player.researchesExtra[5][0] >= 1 && (player.inflation.vacuum || (player.tree[0][4] >= 1 && player.tree[1][9] >= 1 && player.challenges.active !== 1)),
             resource: () => format(global.mergeInfo.score, { padding: 'exponent' })
         },
@@ -422,8 +423,9 @@ export const specialHTML: specialHTMLType = { //Images here are from true vacuum
         start: [0, 0]
     },
     localStorage: {
-        main: 'fundamentalSave', //'testing_save',
-        settings: 'fundamentalSettings' //'testing_fundamentalSettings'
+        main: 'testing_save',
+        selected: 'testing_save', //Starting value has to be same as main
+        settings: 'testing_fundamentalSettings'
     },
     cache: {
         imagesDiv: document.createElement('div'), //Saved just in case
@@ -503,10 +505,10 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
         '--transition-all': '500ms',
         '--background-color': '#030012',
         '--window-color': '#12121c',
-        '--window-border': 'cornflowerblue',
-        '--footer-color': 'darkblue',
-        '--button-color': 'mediumblue',
-        '--button-border': 'darkcyan',
+        '--window-border': '#6495ed',
+        '--footer-color': '#00008b',
+        '--button-color': '#0000cd',
+        '--button-border': '#008b8b',
         '--button-hover': '#2626ff',
         '--building-afford': '#a90000',
         '--tab-active': '#8b00c5',
@@ -519,10 +521,10 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
         '--input-text': '#cf71ff',
         '--button-text': '#e3e3e3',
         '--main-text': 'var(--cyan-text)',
-        '--white-text': 'white',
+        '--white-text': '#ffffff',
         //'--cyan-text': '#00d6d6',
-        '--blue-text': 'dodgerblue',
-        '--orange-text': 'darkorange',
+        '--blue-text': '#1e90ff',
+        '--orange-text': '#ff8c00',
         '--gray-text': '#8f8f8f',
         '--orchid-text': '#e14bdb',
         '--darkorchid-text': '#bd24ef',
@@ -551,7 +553,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             }
             properties['--background-color'] = '#070026';
             properties['--window-color'] = '#000052';
-            properties['--window-border'] = 'blue';
+            properties['--window-border'] = '#0000ff';
             properties['--footer-color'] = '#0000db';
             properties['--button-color'] = '#0000eb';
             properties['--button-border'] = '#386cc7';
@@ -560,7 +562,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             properties['--tab-active'] = '#990000';
             properties['--hollow-hover'] = '#2400d7';
             properties['--input-border'] = '#4747ff';
-            properties['--input-text'] = 'dodgerblue';
+            properties['--input-text'] = '#1e90ff';
             properties['--main-text'] = 'var(--blue-text)';
             properties['--gray-text'] = '#9b9b9b';
             properties['--darkorchid-text'] = '#c71bff';
@@ -621,7 +623,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             properties['--gray-text'] = '#8b8b8b';
             properties['--darkorchid-text'] = '#c71bff';
             properties['--darkviolet-text'] = '#9457ff';
-            properties['--red-text'] = 'red';
+            properties['--red-text'] = '#ff0000';
             properties['--green-text'] = '#00e600';
             properties['--yellow-text'] = 'var(--green-text)';
             break;
@@ -659,7 +661,7 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
                 getId(`${text}Effect`).style.color = 'var(--orange-text)';
                 getId(`${text}Cost`).style.color = 'var(--red-text)';
             }
-            properties['--background-color'] = 'black';
+            properties['--background-color'] = '#000000';
             properties['--window-color'] = '#01003c';
             properties['--window-border'] = '#6500e0';
             properties['--footer-color'] = '#00007a';
@@ -671,13 +673,13 @@ export const setTheme = (theme?: globalSaveType['theme'], firstLoad = false): vo
             properties['--tab-inflation'] = 'var(--tab-active)';
             properties['--hollow-hover'] = '#490070';
             properties['--input-border'] = '#a50000';
-            properties['--input-text'] = 'red';
+            properties['--input-text'] = '#ff0000';
             properties['--button-text'] = '#bfbdff';
             properties['--main-text'] = 'var(--darkviolet-text)';
             properties['--white-text'] = '#aba8ff';
             properties['--gray-text'] = '#95979d';
             properties['--darkviolet-text'] = '#8157ff';
-            properties['--red-text'] = 'red';
+            properties['--red-text'] = '#ff0000';
             properties['--yellow-text'] = 'var(--green-text)';
             break;
         case 'Quantum':
@@ -991,8 +993,8 @@ export const changeFormat = (point: boolean) => {
 };
 
 export const enableApril = (firstLoad = false) => {
-    const active = !global.april.active;
-    global.april.active = active;
+    const active = !global.april.antimatter;
+    global.april.antimatter = active;
     const folder = active ? 'April/' : '';
     global.upgradesInfo[1].name[2] = `${active ? 'Posi' : 'Elec'}trons`;
     global.upgradesInfo[1].name[3] = `${active ? 'Nega' : 'Pro'}tons`;
@@ -1004,21 +1006,12 @@ export const enableApril = (firstLoad = false) => {
     for (let i = 0; i < global.elementsInfo.name.length; i++) { (getId(`element${i}`) as HTMLInputElement).src = `Used_art/${folder}Element${i}.png`; }
 
     if (firstLoad) { return; }
-    if (!active) {
-        if (global.april.ultravoid === false) {
-            global.april.ultravoid = null;
-            assignChallengeInformation(0);
-        }
-        if (global.april.quantum !== null) {
-            global.april.quantum = null;
-            global.challengesInfo[1].name = 'Vacuum stability';
-        }
-    }
+    if (!active && global.april.ultravoid === false) { global.april.ultravoid = null; }
     stageUpdate();
     global.offline.cacheUpdate = false;
     preventImageUnload();
 };
-export const enableLightness = () => {
+export const enableLightness = (firstLoad = false) => {
     const active = !global.april.lightness;
     global.april.lightness = active;
     const Dark = global.april.dark;
@@ -1064,6 +1057,7 @@ export const enableLightness = () => {
     getQuery('#milestonesStage6Main span').textContent = global.milestonesInfo[6].name[0];
     (getQuery('#nucleationToggleReset img') as HTMLImageElement).src = `Used_art/${folder}Nucleation%20toggle.png`;
 
+    if (firstLoad) { return; }
     stageUpdate();
     global.offline.cacheUpdate = false;
     createGlobalStatsWindow();
@@ -1083,7 +1077,7 @@ export const enterUltravoid = () => {
     for (const notification of specialHTML.notifications.values()) { notification(true); }
     setTimeout(() => {
         if (specialHTML.alert[0] !== null) { (specialHTML.alert[1] as () => undefined)(); }
-        global.april.ultravoid = false;
+        global.april.ultravoid = null;
         enableApril();
         updatePlayer(currentSave, false);
         stageUpdate(true, true);
@@ -1094,7 +1088,7 @@ export const enterUltravoid = () => {
 export const enterQuantum = () => {
     pauseGame();
     const html = document.documentElement;
-    html.style.backgroundColor = 'black';
+    html.style.backgroundColor = '#000000';
     getQuery('main').style.display = 'none';
     getId('notifications').style.display = 'none';
     const continuation = player.progress.quantum !== undefined;
@@ -1120,7 +1114,10 @@ export const enterQuantum = () => {
             getQuery('main').style.display = '';
             getId('notifications').style.display = '';
             global.hotkeys.disabled = false;
-            setTheme(finished ? 'Quantum' : undefined);
+            if (finished) {
+                setTheme('Quantum');
+                getId('switchThemeQuantum').style.display = '';
+            } else { setTheme(); }
             pauseGame(false);
             specialHTML.cache.idMap.clear();
             specialHTML.cache.queryMap.clear();
@@ -1829,7 +1826,7 @@ export const openVersionInfo = () => {
     const mainHTML = buildBigWindow('versionHTML');
     if (mainHTML !== null) {
         mainHTML.innerHTML = `<h5><span class="bigWord">Last update:</span> <span id="versionLast" class="whiteText">${global.lastUpdate === 0 ? 'failed to fetch' : new Date(global.lastUpdate).toLocaleString()}</span> <button type="button" id="versionCheck" class="hollowButton">Check</button></h5>
-        <h6>v0.3.0</h6><p>-New content (Multiverse)\n- Rebalances in later parts of game\n- Improved global resources tracker\n- Added default loadout\n<a href="https://docs.google.com/document/d/1gCskWPNxLX08npSHQW8u86VvXNhXzNchCdJ9Pec8Rvk/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
+        <h6>v0.3.0</h6><p>-New content (Multiverse)\n- Rebalances in later parts of game\n- Improved global resources tracker\n- Added default loadout\n- Added save slots\n<a href="https://docs.google.com/document/d/1gCskWPNxLX08npSHQW8u86VvXNhXzNchCdJ9Pec8Rvk/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.8 | v0.2.9</h6><p>- Abyss full rebalance and End reset rework\n- Auto Stage now has different modes\n- Max export rewards is now 12 hours\n\n- Minor balancing and new content for Abyss\n<a href="https://docs.google.com/document/d/1HsAhoa31UsRFGK3BULeXMKHN9exUIIQ_UveKwj2EuMY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
         <h6>v0.2.7</h6><p>- Small speed up to Universes\n- Stage resets now save peak Strange quarks</p>
         <h6>v0.2.6</h6><p>- New content (End)\n- Mobile shorcuts are now available outside of related support\n- Ability to change number hotkeys and use numbers for other hotkeys\n- Create all Upgrades button\n- Improved hover text\n\n- Added hotkeys for toggling autos\n<a href="https://docs.google.com/document/d/1IvO79XV49t_3zm6s4YE-ItU-TahYDbZIWhVAPzqjBUM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Full changelog</a></p>
@@ -2186,7 +2183,7 @@ export const openGlobalStats = () => {
             });
         }
         inputID.addEventListener('change', () => {
-            const array = inputID.value.toLowerCase().split(/[., ]+/);
+            const array = inputID.value.replaceAll('light_', 'dark_').toLowerCase().split(/[., ]+/);
             globalSave.resources = array;
             createGlobalStatsWindow();
             saveGlobalSettings();

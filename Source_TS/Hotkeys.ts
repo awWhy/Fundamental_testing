@@ -102,7 +102,7 @@ const basicFunctions: Record<hotkeysList, () => void> = {
         toggleSwap(0, 'auto', true);
     },
     universe: () => buyVerse(0),
-    multiverse: () => buyVerse(1),
+    multiverse: () => void endResetUser(true),
     toggleUniverse: () => {
         if (global.hotkeys.last === 'toggleV0') { return; }
         global.hotkeys.last = 'toggleV0';
@@ -314,7 +314,7 @@ export const toggleAll = () => {
 
 export const toggleShift = (value: boolean) => {
     const button = getId('shiftFooter');
-    button.style.borderColor = value ? 'forestgreen' : '';
+    button.style.borderColor = value ? '#228b22' : '';
     button.style.color = value ? 'var(--green-text)' : '';
     global.hotkeys.shift = value;
     numbersUpdate();

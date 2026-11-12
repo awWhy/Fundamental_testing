@@ -385,7 +385,7 @@ export const resetVacuum = (level = 0) => {
     stageUpdate();
 
     /** No idea if that should be here */
-    if (level >= 2 && oldUniverses >= 10) {
+    if (level >= 2 && oldUniverses >= 34) {
         const loadout = player.inflation.default;
         loadoutsFinal(loadout);
         for (let i = 0; i < loadout.length; i++) {

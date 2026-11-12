@@ -1,7 +1,7 @@
 import Overlimit from './Limit';
 import { assignInnerHTML, cloneArray, deepClone, getId, getQuery, playerStart, toggleConfirm, toggleSwap } from './Main';
 import { globalSave, specialHTML } from './Special';
-import { assignMaxLevel, assignMilestoneInformation, calculateEffects, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, logAny, assignUpgradeCost, calculateTreeCost } from './Stage';
+import { assignMaxLevel, assignMilestoneInformation, calculateEffects, assignBuildingsProduction, assignResetInformation, assignChallengeInformation, logAny, assignUpgradeCost, calculateTreeCost, randomValue } from './Stage';
 import type { globalType, playerType, vacuumStartType } from './Types';
 import { format, switchTab, updateCollapsePoints, visualProgressUnlocks } from './Update';
 
@@ -197,9 +197,11 @@ export const global: globalType = {
         cacheUpdate: true
     },
     april: {
-        active: false,
+        natural: false,
+        antimatter: false,
         ultravoid: null,
-        quantum: null,
+        quantum: false,
+        clickedQ: false,
         lightness: false,
         dark: 'Dark'
     },
@@ -220,7 +222,7 @@ export const global: globalType = {
     lastInflation: [null, 0],
     lastMilestone: [null, 0],
     lastChallenge: [1, 1],
-    sessionToggles: [false, false, true],
+    sessionToggles: [false, false, false],
     automatization: {
         autoU: [[]],
         autoR: [[]],
@@ -231,7 +233,7 @@ export const global: globalType = {
     stageInfo: {
         word: ['', 'Microworld', 'Submerged', 'Accretion', 'Interstellar', 'Intergalactic', 'Abyss'],
         textColor: ['', 'cyan', 'blue', 'gray', 'orange', 'darkorchid', 'darkviolet'],
-        buttonBorder: ['', 'darkcyan', '#386cc7', '#424242', '#a35700', '#8f004c', '#6c1ad1'],
+        buttonBorder: ['', '#008b8b', '#386cc7', '#424242', '#a35700', '#8f004c', '#6c1ad1'],
         imageBorderColor: ['', '#008b8b', '#1460a8', '#5b5b75', '#e87400', '#b324e2', '#5300c1'],
         costName: ['', 'Energy', 'Drops', 'Mass', 'Stardust', 'Stardust', 'Dark matter'],
         activeAll: []
@@ -1000,11 +1002,8 @@ export const global: globalType = {
         ],
         effectText: [
             () => {
-                const random = Math.random();
-                const base = `Element with no ${global.upgradesInfo[1].name[3]}, true head of this table.\n`;
-                if (!global.april.active) { return `${base}This one is ${random < 0.01 ? 'an illusive Tetraneutron, or maybe even Pentaneutron. Wait where did it go? Was it even there?' : random < 0.1 ? 'a rare Dineutron and its already gone...' : 'just a simple Mononeutron, but it will stay with you for as long as it can.'}`; }
-                const array = ['Ultravoid calls your name', "'Shift' is how you access it", "don't forget it", "it wasn't a dream", 'its truly gone', 'will you realize', 'there are others', 'Wormholes connect them', 'they will consume', "you can't stop it", 'it could all be inside', 'just one', 'Gravastars are bigger', 'Quantum Universes are real', 'if you wait long enough within', 'there is more to it', 'you have done it before', 'All of this is Antimatter', 'you have seen it', 'it has always been this way', 'it wont last long', 'it will be all undone', 'Light grows', 'it escaped', 'it should had stayed in the Dark', 'which one will prevail', 'there is only one way to stop it', 'toggle it', 'its just the beginning', 'there are Layers above', 'you only need six of them', 'create more of them', "don't stop yet", 'bring them closer', 'just for how much longer', "don't share it", 'look closer', 'proof is all you need', 'it hides in plain sight', "don't overthink it", 'how was your day'];
-                return `${base}It has a message just for you: "${array[Math.ceil(random * array.length) - 1]}".`;
+                const random = randomValue(1, 100);
+                return `Element with no ${global.upgradesInfo[1].name[3]}, true head of this table.\nThis one is ${random === 1 ? 'an illusive Tetraneutron, or maybe even Pentaneutron. Wait where did it go? Was it even there?' : random <= 10 ? 'a rare Dineutron and its already gone...' : 'just a simple Mononeutron, but it will stay with you for as long as it can.'}`;
             },
             () => `The most basic Element, increases Brown dwarfs${player.inflation.vacuum ? ' and Puddles' : ''} production by 2.`,
             () => `Fusion reaction byproduct, makes Interstellar Stars cost scale -${format(0.1)} less.`,
@@ -1435,7 +1434,7 @@ export const global: globalType = {
             needText: [
                 () => `Produce at least ${format(global.milestonesInfo[3].need[0])} Mass this reset.`,
                 () => `Have more or equal to ${format(global.milestonesInfo[3].need[1])} Satellites${player.inflation.vacuum ? ' and Subsatellites' : ''}.`,
-                () => `Reach 'SV +${format(new Overlimit(global.milestonesInfo[3].need[2]).minus(6))}' (${format(global.milestonesInfo[3].need[2])}) Rank.`
+                () => `Reach 'SJ +${format(new Overlimit(global.milestonesInfo[3].need[2]).minus(6))}' (${format(global.milestonesInfo[3].need[2])}) Rank.`
             ],
             rewardText: [
                 () => player.inflation.vacuum ? `Cosmic dust strength increased by ${format(global.milestonesInfo[3].reward[0], { padding: true })}.` : "Second Intergalactic Structure. (Star cluster)\n(Half of the requirement to over-extend 'Remnants of past' time limit)",
@@ -1601,12 +1600,12 @@ export const global: globalType = {
         color: 'darkviolet'
     }, { //Challenge [1]
         name: 'Vacuum stability',
-        description: () => global.april.quantum !== true ? 'A more stable, but still the false Vacuum state\n(Entering will force a Vacuum reset, will be reverted after exiting)' : 'Vacuum state with the lowest possible Energy\n(Entering will force a Quantum reset, will be reverted after exiting)',
+        description: () => !global.april.quantum ? 'A more stable, but still the false Vacuum state\n(Entering will force a Vacuum reset, will be reverted after exiting)' : 'Vacuum state with the lowest possible Energy\n(Entering will force a Quantum reset, will be reverted after exiting)',
         effectText: () => {
-            if (global.april.quantum === true) { return '<p class="cyanText">‒ Global speed is set to 0\n‒ Stage resets are disabled\n‒ All Stages are removed from reset cycle</p>'; }
+            if (global.april.quantum) { return '<p class="cyanText">‒ Global speed is set to 0\n‒ Stage resets are disabled\n‒ All Stages are removed from reset cycle</p>'; }
             const completions = player.challenges.stability;
-            return `<p class="orchidText">‒ Global speed is decreased by ${format(4 * 8 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle</p>
-            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${8 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset\n‒ If can't reset after 10 minutes then Vacuum reset is forced instead${completions >= 5 ? '\n‒ Milestones always reset on Challenge entrance' : ''}\n‒ Passive Strange quarks gain is disabled</p>
+            return `<p class="orchidText">‒ Global speed is decreased by ${format(4 * 8 ** completions, { padding: 'exponent' })}\n‒ Milestones time limit is 0 seconds\n‒ Permanent Stages are removed from reset cycle\n‒ Some nerfs get harsher after every Completion</p>
+            <p class="greenText">‒ Strange quarks from Stage resets are decreased by ${format(2 ** completions, { padding: 'exponent' })}\n‒ Strange quarks from non-Interstellar Stage resets are further decreased by ${format(4 * 2 ** completions, { padding: 'exponent' })}\n‒ Stage resets above ${9 - completions} decrease Strange quarks from the Stage resets by 2\n‒ Going above 10 minutes of the Stage time will force Stage reset\n‒ If can't reset after 10 minutes then Vacuum reset is forced instead${completions >= 5 ? '\n‒ Milestones always reset on Challenge entrance' : ''}\n‒ Passive Strange quarks gain is disabled</p>
             <p class="darkvioletText">‒ Galaxies scale in cost faster by +${format(0.01)}\n‒ Intergalactic Upgrade 'Galactic Merger' cost ${format(1e10)} times more\n‒ Merge requirement is set to ${22 + completions}${player.progress.main >= 24 ? ' (swapping Merge type is disabled)\n‒ Creation of Universes is disabled' : ''}</p>`;
         },
         needText: ['1 Completion', '2 Completions', '3 Completions', '4 Completions', '5 Completions', '6 Completions', '7 Completions', '8 Completions', '9 Completions', '10 Completions'],
@@ -2011,7 +2010,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.version = 'v0.3.0';
             const oldUniverse = load.verses[0].true;
             load.verses[0].true = cloneArray(playerStart.verses[0].true);
-            if (typeof oldUniverse === 'number') { load.verses[0].true[0] = oldUniverse; }
+            load.verses[0].true[0] = Array.isArray(oldUniverse) ? oldUniverse[0] : typeof oldUniverse === 'number' ? oldUniverse : 0;
             load.tree = deepClone(playerStart.tree);
             const oldCosmon = load.cosmon?.[1]?.total ?? 0;
             load.cosmon = deepClone(playerStart.cosmon);
@@ -2047,9 +2046,10 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.challenges.supervoidMax[4] = supervoid[4];
             load.challenges.supervoidMax[5] = 0;
             supervoid[5] = 0;
-            load.cosmon[0].total = (2 + (load.verses[0].true[0] - 1) / 2) * load.verses[0].true[0] + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + load.challenges.stability;
             load.inflation.falseDone = load.clone.inflation?.vacuum as boolean ?? load.inflation.vacuum;
-            if (load.inflation.ends[0] > 0 && load.inflation.falseDone) { load.cosmon[0].total++; }
+            load.cosmon[0].total = (2 + (load.verses[0].true[0] - 1) / 2) * load.verses[0].true[0] + supervoid[1] + supervoid[2] + supervoid[3] + supervoid[4] + supervoid[5] + load.challenges.stability;
+            if (load.inflation.ends[0] < 1 && (load.verses[0].true[0] > 0 || load.inflation.falseDone)) { load.cosmon[0].total--; }
+            if (load.inflation.falseDone) { load.cosmon[0].total++; }
             load.cosmon[0].current = load.cosmon[0].total;
             delete load.darkness['active' as keyof unknown];
             delete load.verses[0]['other' as keyof unknown];
@@ -2059,7 +2059,6 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             throw new ReferenceError(`Save file version ${load.version} is not allowed`);
         }
     }
-    load.inflation.falseDone ??= load.clone.inflation?.vacuum as boolean ?? load.inflation.vacuum; //Remove
     for (let s = 1; s <= 6; s++) {
         if (!(load.toggles.shop.wait[s] >= 1)) { load.toggles.shop.wait[s] = 2; }
         fillMissingValues(load.upgrades[s], playerStart.upgrades[s]);
@@ -2093,6 +2092,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
             load.stage.current = load.researchesExtra[1][2] > 1 ? 2 : 3;
         }
     }
+    if (load.strangeness[5][4] >= 1 && load.ASR[5] < 3) { load.ASR[5] = 3; } //Fixes auto Collapse bug without needing any extra checks
     if (load.stage.current < 5 && load.elements[26] >= 1) { load.elements[26] = 0; }
 
     if (load.challenges.active !== null) {
@@ -2167,7 +2167,7 @@ export const updatePlayer = (load: playerType, decode = true): string => {
     global.automatization.element = 1;
     global.automatization.autoS = [];
 
-    global.april.quantum = null;
+    global.april.quantum = false;
     if (global.april.ultravoid === false) { global.april.ultravoid = null; }
     for (let i = 0; i < global.challengesInfo.length; i++) { assignChallengeInformation(i); }
     global.lastElement = null;

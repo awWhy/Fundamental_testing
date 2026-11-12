@@ -263,12 +263,16 @@ export interface globalType {
         cacheUpdate: boolean
     }
     april: {
-        active: boolean
+        natural: boolean
+        /** If its April right now */
+        antimatter: boolean
         lightness: boolean
         /** Current status, null means not active, false toggled into and true currently inside */
         ultravoid: boolean | null
-        /** Toggle status, null means that it wasn't toggled or hinted */
-        quantum: boolean | null
+        /** Toggle status */
+        quantum: boolean
+        /** Keep Quantum theme hidden, but enable related toggle */
+        clickedQ: boolean
         dark: 'Dark' | 'Light'
     }
     paused: boolean
@@ -574,6 +578,8 @@ export interface specialHTMLType {
     localStorage: {
         /** Index for game's primary save slot */
         main: string
+        /** Actual value to use when messing with localStorage save slots */
+        selected: string
         /** Index for global game settings */
         settings: string
     }
@@ -615,6 +621,7 @@ export interface globalSaveType {
     /** Point[0], Separator[1] */
     format: [string, string]
     theme: null | number | string
+    slot: number
     fontSize: number
     /** Status[0], Mouse events[1], Enable zoom[2], Fix inputs[3] */
     MDSettings: boolean[]
